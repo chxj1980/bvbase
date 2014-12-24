@@ -21,6 +21,7 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#include "config.h"
 #include "jansson.h"
 
 struct JsonConfigContext {
@@ -35,7 +36,7 @@ static int open_url(BVConfigContext * cfgctx, const char *url, int flags)
 	struct JsonConfigContext *json_context = cfgctx->priv_data;
 	json_error_t error;
 	if ((json_context->root = json_load_file(url, 0, &error)) == NULL) {
-		av_log(cfgctx, AV_LOG_ERROR, "load json file %s error at line %d column %d\n" url,
+		av_log(cfgctx, AV_LOG_ERROR, "load json file %s error at line %d column %d\n", url,
 			error.line, error.column);
 		return -1;
 	}
@@ -46,9 +47,9 @@ static int close_url(BVConfigContext * cfgctx)
 {
 	struct JsonConfigContext *json_context = cfgctx->priv_data;
 	if (json_context->root) {
-		if (json_dump_file(json_context->root, BVConfigContext->url_name,
+		if (json_dump_file(json_context->root, cfgctx->url,
 				JSON_INDENT(4) | JSON_PRESERVE_ORDER) < 0) {
-			av_log(cfgctx, AV_LOG_ERROR, "dump json file %s error\n", BVConfigContext->url_name);
+			av_log(cfgctx, AV_LOG_ERROR, "dump json file %s error\n", cfgctx->url);
 		}
 		json_decref(json_context->root);
 	}
@@ -56,6 +57,7 @@ static int close_url(BVConfigContext * cfgctx)
 	return 0;
 }
 
+#if 0
 static int get_system_info(BVConfigContext * cfgctx, BVSystemInfo * sys_info)
 {
 	struct JsonConfigContext *json_context = cfgctx->priv_data;
@@ -63,10 +65,12 @@ static int get_system_info(BVConfigContext * cfgctx, BVSystemInfo * sys_info)
 		return -1;
 	}
 }
+#endif
 
-BVConfig bv_json_config {
-	.name = "json",.long_name = NULL_IF_CONFIG_SMALL("Json format file configs"),.priv_data_size =
-		sizeof(struct JsonConfigContext),.open = open_url;
-	.close = close_url;
-	.get_system_info = get_system_info;
+BVConfig bv_json_config = {
+	.name = "json",
+    .priv_data_size = sizeof(struct JsonConfigContext),
+    .open = open_url,
+	.close = close_url,
+//	.get_system_info = get_system_info,
 };

@@ -61,7 +61,7 @@ typedef struct _BVConfigContext {
     const AVClass *av_class;
 	struct _BVConfig *config;
 	void *priv_data;
-	char url_name[128];
+	char url[1024];
 } BVConfigContext;
 
 typedef struct _BVConfig {

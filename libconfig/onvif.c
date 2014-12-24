@@ -21,12 +21,13 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#include "config.h"
 struct OnvifConfigContext {
 	const AVClass *av_class;
 	char devide_info[128];
 };
 
-BVConfig bv_onvif_config {
+BVConfig bv_onvif_config = {
 	.name = "onvif",
 	.priv_data_size = sizeof(struct OnvifConfigContext),
 };
