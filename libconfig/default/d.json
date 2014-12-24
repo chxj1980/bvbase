@@ -1,0 +1,159 @@
+{
+    "network": {
+        "workmode": 4,
+        "network_config": [
+            {
+                "static": {
+                    "comment": "earthnet",
+                    "dhcp": "no",
+                    "address": "192.168.6.147",
+                    "netmask": "255.255.255.0",
+                    "gateway": "192.168.6.254"
+                },
+                "pppoe": {
+                    "name": "127777777777",
+                    "passwd": "123456"
+                }
+            },
+            {
+                "comment": "wifi",
+                "essid": "xxxxxxxxxx",
+                "encrpy": "wpa2",
+                "passwd": "123456"
+            },
+            {
+                "wlan": {}
+            }
+        ]
+    },
+    "server": {
+        "server_mode": 4,
+        "server_config": [
+            {
+                "svrname": "127.0.0.1",
+                "svrport": 8080
+            },
+            {
+                "svrname": "127.0.0.2",
+                "svrport": 8081
+            }
+        ]
+    },
+    "GPS": [
+        {
+            "bitrate": 57600,
+            "sends": 5,
+            "save": 0
+        }
+    ],
+    "seri": [
+        {
+            "comment": "sssss",
+            "name": "/dev/ttys1",
+            "mode": "485",
+            "bitrate": 115200,
+            "check": 8
+        },
+        {
+            "comment": "xxxxx",
+            "name": "/dev/ttys2",
+            "mode": "232"
+        }
+    ],
+    "onlie": [
+        {}
+    ],
+    "alarmIn": [
+        {
+            "comment": "报警输入一",
+            "workmode": "xxxx"
+        },
+        {}
+    ],
+    "alarmout": [
+        {
+            "comment": "报警输出",
+            "alias_name": "巧克力的快乐",
+            "alarmstat": 2,
+            "keeptime": 60
+        },
+        {
+            "comment": "报警输出"
+        },
+        {
+            "comment": "报警输出"
+        }
+    ],
+    "alarm_link": [
+        {
+            "alarm_name": "xxxx",
+            "alram_source": "xxx",
+            "alram_type": "xxx",
+            "action_type": "upload_ftp",
+            "ftp_svr": "xxxx.xxx.com",
+            "ftp_dir": "/snapshot/",
+            "ftp_usr": "xxxx",
+            "ftp_pwd": "xxx",
+            "upload_time": 60,
+            "snapshot_video": "video_name"
+        }
+    ],
+    "storage_type": [
+        {
+            "comment": "定时存储",
+            "schuel": [
+                {
+                    "comment": "星期天",
+                    "time": [
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        }
+                    ]
+                },
+                {
+                    "comment": "星期一",
+                    "time": [
+                        {
+                            "start": 1,
+                            "end": 5
+                        },
+                        {
+                            "start": 1,
+                            "end": 5
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "手动存储"
+        }
+    ],
+    "storage_rule": {
+        "file_tlen": 300,
+        "keep_size": 100,
+        "hold_time": 10,
+        "alarm_": 50
+    }
+}

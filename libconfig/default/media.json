@@ -1,0 +1,314 @@
+{
+	"video_input_unit":[
+		{
+			"index":0,
+			"inputad_chip":"tw2866",
+            "input_mode": "BT656",
+            "work_mode": "4D1"
+		}
+	],
+	"video_out_unit":[
+		{
+			"index":2,
+			"output_mode":"BT656",
+            "resolution": "PAL"
+		}
+	],
+
+	"audio_input_unit":[
+		{
+	
+		}
+	],
+	"audio_out_unit":[
+		{
+		
+		}	
+	],
+
+    "encode_channel": [
+        {
+            "name": "通道一",
+            "status": 0,
+            "url": "onvif://192.168.6.149:8899/onvif/device_service",
+            "remote_channel": 1,
+            "user": "admin",
+            "passwd": "1111111",
+			"video_input_source":0,
+            "config": [
+                {
+					"name": "Profile_000",
+					"token": "000",
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+					"name": "Profile_001",
+					"token": "001",
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+					"name": "Profile_002",
+					"token": "002",
+                    "av_type": 1,
+                    "osd_type": 4
+                }
+            ]
+        },
+		{
+            "name": "通道二",
+            "status": 0,
+            "url": "http://192.168.6.149:8899/onvif/device_service",
+            "remote_channel": 1,
+            "user": "admin",
+            "passwd": "1111111",
+			"video_input_source":1,
+            "config": [
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 1,
+                    "osd_type": 4
+                }
+            ]
+        },
+        {
+            "name": "通道三",
+            "status": 0,
+            "url": "http://192.168.6.149:8899/onvif/device_service",
+            "remote_channel": 1,
+            "user": "admin",
+            "passwd": "1111111",
+			"video_input_source":2,
+            "config": [
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 1,
+                    "osd_type": 4
+                }
+            ]
+        },
+        {
+            "name": "通道四",
+            "status": 0,
+            "url": "http://192.168.6.149:8899/onvif/device_service",
+            "remote_channel": 1,
+            "user": "admin",
+            "passwd": "1111111",
+			"video_input_source":3,
+            "config": [
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 3,
+                    "osd_type": 4
+                },
+                {
+                    "av_type": 1,
+                    "osd_type": 4
+                }
+            ]
+        }
+    ],
+    "video_input_source": [
+        {
+            "name": "VideoS_000",
+            "token": "000",
+            "framerate": 25,
+            "resolution": "HD",
+			"capture_rect":{"left":0, "top":0, "width":1280, "height":720 },
+            "capture": [
+                {
+                    "comment": "white",
+					"luminance":128,
+					"contrast":128,
+					"hue":128,
+					"satuature":128,
+					"start_time":{ "hour":6, "minute":30, "second":0 },
+					"end_time":{ "hour":20, "minute":30, "second":0 }
+                },
+                {
+                    "comment": "black",
+  					"luminance":128,
+					"contrast":128,
+					"hue":128,
+					"satuature":128,
+					"start_time":{"hour":20, "minute":30, "second":0 },
+					"end_time":{"hour":6, "minute":30, "second":0 }
+                }
+            ]
+		},
+		{
+            "name": "VideoS_001",
+            "token": "001",
+            "framerate": 25,
+            "resolution": "HD",
+			"capture_rect":{"left":0, "top":0, "width":1280, "height":720 },
+            "capture": [
+                {
+                    "comment": "white",
+					"luminance":128,
+					"contrast":128,
+					"hue":128,
+					"satuature":128,
+					"start_time":{ "hour":6, "minute":30, "second":0 },
+					"end_time":{ "hour":20, "minute":30, "second":0 }
+                },
+                {
+                    "comment": "black",
+  					"luminance":128,
+					"contrast":128,
+					"hue":128,
+					"satuature":128,
+					"start_time":{"hour":20, "minute":30, "second":0 },
+					"end_time":{"hour":6, "minute":30, "second":0 }
+                }
+            ]
+		}
+    ],
+	"video_live":[
+		{
+			"display_rect":{"left":0, "top":0, "width":352,"height":288}
+		}
+	],
+    "video_encode": [
+        [
+            {
+                "name": "VideoE_000",
+                "token": "000",
+                "encoding": "h264",
+                "video_mode": "VBR",
+                "resolution": "HD",
+                "quality": 6,
+                "framerate": 25,
+                "bitrate": 1024,
+                "video_gop": 100
+            },
+            {
+                "name": "VideoE_001",
+                "token": "001",
+                "video_mode": "CBR",
+                "video_britate": 700,
+                "video_gop": 125,
+                "video_fps": 10
+            },
+            {
+                "name": "VideoE_003",
+                "token": "003",
+                "encoding": "jpg",
+                "pic_level": 4,
+                "pic_size": "D1"
+            }
+        ],
+        [
+            {
+                "video_mode": "CBR",
+                "video_britate": 900,
+                "video_gop": 125
+            },
+            {
+                "video_mode": "CBR",
+                "video_britate": 700,
+                "video_gop": 125,
+                "video_fps": 10
+            },
+            {
+                "save_mode": "jpg",
+                "pic_level": 4,
+                "pic_size": "D1"
+            }
+        ]
+    ],
+    "audio_input_source": [
+        {
+            "name": "AudioS_000",
+            "token": "000",
+            "encode_type": "pcm/adpcm/g711u",
+            "input_type": "min/line",
+            "channel": 1,
+            "volume": 80
+        }
+    ],
+    "audio_encode": [
+        [
+            {
+                "name": "AudioE_000",
+                "token": "000",
+                "encoding": "g711",
+                "bitrate": 44000,
+                "sample_rate": 8000
+            },
+            {
+                "audio_mode": "mono",
+                "sample": 8000,
+                "codec_type": "g726"
+            }
+        ],
+        [
+            {
+                "name": "AudioE_000",
+                "token": "000",
+                "audio_mode": "mono",
+                "sample": 8000,
+                "depth": 16,
+                "codec_type": "g711a"
+            },
+            {
+                "name": "AudioE_001",
+                "token": "001",
+                "audio_mode": "mono",
+                "sample": 8000,
+                "codec_type": "g726"
+            }
+        ]
+    ],
+    "audio_decode": [
+        {
+            "decode_type": "adpcm/g711u",
+            "channel": 1,
+            "sample": 8000,
+            "volume": 70
+        }
+    ],
+    "PTZ": [
+        {
+            "comment": "云台一",
+            "dev_uri": "/dev/ttys2",
+            "protocol": "Pelco D",
+            "reset_addr": 128
+        },
+        {
+            "comment": "云台二",
+            "dev_uri": "http://192.168.6.149:/onvif/ptz_service"
+        }
+    ],
+    "osd": [
+        {
+            "name": "Profile_000",
+            "token": "000",
+            "logo": {
+                "path": "/tmp/logo.gpg",
+                "x": 20,
+                "y": 40
+            },
+            "time": {}
+        },
+        {}
+    ]
+}

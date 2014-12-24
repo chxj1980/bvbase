@@ -1,0 +1,14 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=/home/albert/bvlive/3rdparty/ffmpeg/../../lib/x86
+includedir=/home/albert/bvlive/3rdparty/ffmpeg/../../include/x86
+
+Name: libavutil
+Description: FFmpeg utility library
+Version: 54.7.100
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavutil 
+Libs.private: -lm
+Cflags: -I${includedir}

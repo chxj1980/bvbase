@@ -1,0 +1,1 @@
+./configure --libdir=/home/albert/bvlive/lib/x86/ --shlibdir=/home/albert/bvlive/lib/x86/ --incdir=/home/albert/bvlive/include/x86 --extra-cflags=-I/home/albert/x86/ffmpeg2/include --extra-ldflags='-L/home/albert/x86/ffmpeg2/lib -lavutil'  --enable-shared

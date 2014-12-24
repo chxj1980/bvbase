@@ -1,0 +1,28 @@
+libconfig
+主要用于系统的配置包括以下几个方面的配置
+  1.系统信息的配置(RO)
+    1.1 厂商信息
+	1.2 设备能力
+  2.设备信息的配置(RW)
+    2.1 网络(wlan wifi earthnet)
+	2.2 平台(ip/svrname port protocol_type)
+	2.3 联动
+	2.4 视频输入(采集、编码、移动侦测、抓拍、区域屏蔽、存储)
+	2.5 音频输入(编码、输入模式、声道、采样率、音量)
+	2.6 串口设置(232 485 波特率、校验位、停止位、数据位)
+	2.7 GPS
+	2.8 PTZ
+	2.9 报警输入
+	2.10 报警输出
+
+//////////////////////////////////////////////////////////////////////
+1. 默认规定：
+   配置文件中所有的编码配置按照通道，存储流，传输流，抓拍流顺序排列。
+2. 
+	video_input_unit-------> video_input_source--------> video_encode|video_live
+	video_output_unit------> video_output_source-------> video_decode|gui
+
+	audio_input_unit-------> audio_input_source--------> audio_encode
+	audio_output_unit------> audio_output_source-------> audio_decode
+
+

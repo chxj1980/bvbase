@@ -1,0 +1,61 @@
+主程序的源码
+
+有关主程序设计结构
+
+Mark:
+1. [xx] 表示为目录名称
+
+    
+         | -- [main] -- | *.c: the progress depends on this lib.
+         |              | [sacdil] : for ethernet search tool.
+         |              | [gui] : display...
+         |
+         | -- [include] : the header files exposed to all.
+         |
+         | -- center.c : recv command and send to other module.
+         |
+         | -- [common] : function for all call, header header file puts to [include].
+         |        |
+         |        - bv_print.c : print log format, all print use it.
+         |
+         | -- [store] -- | *.c : save video
+         |            -- | [test] : test module
+         |
+         | -- [stream] -- | *.c : video transfer/get
+         |               -- | [test]
+[src] -- |
+         | -- [timer] -- | *.c : time check
+         |            -- | [test]
+         |
+         | -- [connect] -- | *.c : dial and create connected network
+         |              -- | [test]
+         |
+         | -- [peripherals] -- | *.c : extern device control, ptz, gps, ...
+         |                  -- | [test]
+         |
+         | -- [player] -- | *.c : player video.
+         |             -- | [test]
+         |
+         | -- [config] -- | *.c : Manager all configs
+         | --          -- | [test]
+
+Warn:
+1. [include] : 只存放暴露给外部和各模块都要使用公共头文件。
+2. center.c : 主程序调度，并调用其模块完成对应功能
+3. 各模块信息不得相互访问，不得互相调用
+4. 在需要的情况下创建对应线程。
+5. 每个模块调用上一层目录下所提供的功能接口来实现对应功能。(libconfig, libstream, libserver...)
+6. 每个模块必须有对应的测试目录，和相应测试用例。
+7. [main] : 使用sdk的主程序，内部程序，与源码一同编译（可分离）。
+8. [main] -- [sacdil] : 完成局域网搜索工具的功能(线程).
+9. [main] -- [gui] : 完成gui显示等功能 (线程).
+10. [main] 中的程序只能调用[include]中所提供的接口。
+
+有关单模块测试用例说明：
+1. 保证要有测试用例。
+2. 在完成功能提交之前，必须自测，保证测试用例无误。
+3. 测试用例应有函数接口，可使得外部程序直接调用。(一次调用，即可执行所有测试)
+4. 测试用例应当自行列出相应支持的输入参数，避免交由调用者输入。
+5. 测试用例返回应当与预期值比较，一旦不成立（即出错）立即返回，无需继续执行。
+6. 测试用例在出错时，打印必须明确，易懂，并标注，文件名和行号。
+

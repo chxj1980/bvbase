@@ -1,0 +1,14 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=/home/albert/bvlive/3rdparty/ffmpeg/../../lib/x86
+includedir=/home/albert/bvlive/3rdparty/ffmpeg/../../include/x86
+
+Name: libswscale
+Description: FFmpeg image rescaling library
+Version: 3.0.100
+Requires: 
+Requires.private: libavutil >= 54.7.100
+Conflicts:
+Libs: -L${libdir}  -lswscale 
+Libs.private: -lm
+Cflags: -I${includedir}
