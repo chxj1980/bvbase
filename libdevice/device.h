@@ -32,6 +32,8 @@ extern "C"{
 #include <libavutil/opt.h>
 #include <libavutil/dict.h>
 
+#include <libconfig/common.h>
+
 enum BVDeviceType {
 	BV_DEVICE_TYPE_NONE = -1,
 	BV_DEVICE_TYPE_SERIAL,
@@ -48,13 +50,31 @@ enum BVDeviceType {
 };
 
 enum BVDeviceMessageType {
-	BV_DEV_MESSAGE_TYPE_UNKNOWN = -1,
+	BV_DEV_MESSAGE_TYPE_NONE = -1,
+
+    //PTZ Message Type
+    BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE,
+#if 0
+    BV_DEV_MESSAGE_TYPE_PTZ_LEFT,
+    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_DOWN,
+    BV_DEV_MESSAGE_TYPE_PTZ_DOWN,
+    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_DOWN,
+    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT,
+    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_UP,
+    BV_DEV_MESSAGE_TYPE_PTZ_UP,
+    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_UP,
+    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_IN,
+    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_OUT,
+#endif
+    BV_DEV_MESSAGE_TYPE_PTZ_STOP,
+
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
+
+	BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
 typedef struct _BVDevicePacket {
 	int  size;
-	int  flags;
 	void *data;
 } BVDevicePacket;
 
@@ -78,6 +98,7 @@ typedef struct _BVDevice {
     int     (*dev_open)( BVDeviceContext *h);
     int     (*dev_read)( BVDeviceContext *h, unsigned char *buf, size_t size);
     int     (*dev_write)(BVDeviceContext *h, const unsigned char *buf, size_t size);
+    int     (*dev_probe)(BVDeviceContext *h, const char *args);
     int64_t (*dev_seek)( BVDeviceContext *h, int64_t pos, int whence);
     int     (*dev_control)(BVDeviceContext *h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out);
     int     (*get_fd)(BVDeviceContext *h);
@@ -104,7 +125,7 @@ void bv_device_free_context(BVDeviceContext *devctx);
  * @Param url       device url 
  * @Param options   device private field
  *                  AVDictionary *options = NULL;
- *                  av_dict_set(&options, "baudrate", "51200", 0);
+ *                  av_dict_set(&options, "baud_rate", "51200", 0);
  *                  .....
  *                  after bv_device_open() must free with
  *                  av_dict_free(&options);

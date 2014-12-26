@@ -5,9 +5,9 @@ CFLAGS += -Wall -g
 #CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
 #LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
 
-CFLAGS = -I ../include/ -I /home/albert/x86/ffmpeg2/include
+CFLAGS = -I ../include/x86 -I ../3rdparty/binary/ffmpeg/x86/include 
 
-LDFLAGS = -L ../lib -ldevice -L /home/albert/x86/ffmpeg2/lib -lavutil
+LDFLAGS = -L ../3rdparty/binary/ffmpeg/x86/lib -lavutil -L ../3rdparty/binary/onvif/x86/lib/ -lonvifc -L ../lib/x86 -ldevice 
 
 EXAMPLES=       exDevice
 

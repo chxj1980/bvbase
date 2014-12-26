@@ -85,6 +85,31 @@ BVDevice *bv_device_find_device(enum BVDeviceType type)
  */
 static int init_device(BVDeviceContext *s, const char *url)
 {
+    BVDevice *dev = NULL;
+    BVDevice *dev2 = NULL;
+    int max_score = 0;
+    int score = 0;
+    char args[64] = { 0 };
+    if (sscanf(url, "%[^:]", args) < 0) {
+        av_log(s, AV_LOG_ERROR, "INVAL url %s\n", url);
+        return AVERROR(EINVAL);
+    }
+
+    while ((dev = bv_device_next(dev))) {
+        if (dev->dev_probe) {
+            score = dev->dev_probe(s, args);
+            if (score > max_score) {
+                max_score = score;
+                dev2 = dev;
+            }
+        }
+    }
+
+    s->device = dev2;
+    if (dev2 == NULL) {
+        av_log(s, AV_LOG_WARNING, "Not Find Device\n");
+        return -1;
+    }
     return 0;
 }
 
@@ -118,12 +143,15 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, AVDicti
          s->device = dev;
     else
         ret = init_device(s, url);
-    if (dev->priv_data_size > 0) {
-        s->priv_data = av_mallocz(dev->priv_data_size);
+    if (ret < 0) {
+        return AVERROR(ENOSYS);
+    }
+    if (s->device->priv_data_size > 0) {
+        s->priv_data = av_mallocz(s->device->priv_data_size);
         if (!s->priv_data)
             goto fail;
-        if (dev->priv_class) {
-            *(const AVClass **) s->priv_data = dev->priv_class;
+        if (s->device->priv_class) {
+            *(const AVClass **) s->priv_data = s->device->priv_class;
             av_opt_set_defaults(s->priv_data);
             if ((ret = av_opt_set_dict(s->priv_data, &tmp)) < 0) {
                 av_log(s, AV_LOG_ERROR, "set dict error\n");
@@ -131,11 +159,12 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, AVDicti
             }
         }
     }
+
+    if (url)
+        av_strlcpy(s->url, url, sizeof(s->url));
     if (!s->device->dev_open)
         goto fail;
     *h = s;
-    if (url)
-        av_strlcpy(s->url, url, sizeof(s->url));
 
     av_dict_free(&tmp);
     return s->device->dev_open(s);
@@ -165,7 +194,13 @@ int64_t bv_device_seek(BVDeviceContext * h, int64_t pos, int whence)
 
 int bv_device_control(BVDeviceContext * h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
 {
-    return 0;
+    int ret = 0;
+    if (!h->device || !h->device->dev_control) {
+        av_log(h, AV_LOG_ERROR, "Not Support Control\n");
+        return AVERROR(ENOSYS);
+    }
+    ret = h->device->dev_control(h, type, pkt_in, pkt_out);
+    return ret;
 }
 
 int bv_device_get_fd(BVDeviceContext *h)

@@ -22,6 +22,7 @@
  */
 
 #include <libdevice/device.h>
+#include <libconfig/common.h>
 
 int main(int argc, const char *argv[])
 {
@@ -40,12 +41,115 @@ int main(int argc, const char *argv[])
     }
     av_dict_set(&opn, "fd", "1", 0);
     av_dict_set(&opn, "size", "800x600", 0);
-    if ((ret = bv_dev_open(&device_context, device, "onvifptz://xxxx", &opn)) < 0) {
+    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:8899/onvif/ptz_service", &opn)) < 0) {
         av_log(NULL, AV_LOG_ERROR, "open device error %d\n", ret);
         av_dict_free(&opn);
         return AVERROR(EIO);
     }
+    BVDevicePacket pkt_in;
+    BVPTZContinuousMove continuous_move;
+    BVPTZVector vector;
+    BVPTZStop stop;
+    stop.pan_tilt = true;
+    stop.zoom = true;
+
+    //Left
+    continuous_move.velocity.pan_tilt.x = -0.5f;
+    continuous_move.velocity.pan_tilt.y = 0.0f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
+    //Left Down
+    continuous_move.velocity.pan_tilt.x = -0.5f;
+    continuous_move.velocity.pan_tilt.y = -0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
+    //Down
+    continuous_move.velocity.pan_tilt.x = 0.0f;
+    continuous_move.velocity.pan_tilt.y = -0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+    
+    //RightDown
+    continuous_move.velocity.pan_tilt.x = 0.5f;
+    continuous_move.velocity.pan_tilt.y = -0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
+    //Right
+    continuous_move.velocity.pan_tilt.x = 0.5f;
+    continuous_move.velocity.pan_tilt.y = 0.0f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
+    //Right Up
+    continuous_move.velocity.pan_tilt.x = 0.5f;
+    continuous_move.velocity.pan_tilt.y = 0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+    
+    //up
+    continuous_move.velocity.pan_tilt.x = 0.0f;
+    continuous_move.velocity.pan_tilt.y = 0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
+    //Left Up
+    continuous_move.velocity.pan_tilt.x = -0.5f;
+    continuous_move.velocity.pan_tilt.y = 0.5f;
+    continuous_move.velocity.zoom.x = 0.0f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
     av_dict_free(&opn);
-    bv_dev_close(&device_context);
+    bv_device_close(&device_context);
     return 0;
 }
