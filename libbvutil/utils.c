@@ -27,8 +27,8 @@
  * various utility functions
  */
 
-#include "libbvutil/ffversion.h"
-const char bv_util_ffversion[] = "BVbase version " FFMPEG_VERSION;
+#include "libbvutil/bvversion.h"
+const char bv_util_ffversion[] = "BVbase version " BVBASE_VERSION;
 
 unsigned bvutil_version(void)
 {
@@ -63,13 +63,13 @@ unsigned bvutil_version(void)
 
 const char *bvutil_configuration(void)
 {
-    return FFMPEG_CONFIGURATION;
+    return BVBASE_CONFIGURATION;
 }
 
 const char *bvutil_license(void)
 {
 #define LICENSE_PREFIX "libbvutil license: "
-    return LICENSE_PREFIX FFMPEG_LICENSE + sizeof(LICENSE_PREFIX) - 1;
+    return LICENSE_PREFIX BVBASE_LICENSE + sizeof(LICENSE_PREFIX) - 1;
 }
 
 const char *bv_get_media_type_string(enum BVMediaType media_type)

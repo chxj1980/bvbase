@@ -175,7 +175,7 @@ distclean::
 	$(RM) config.* .config libavutil/avconfig.h .version version.h libavutil/ffversion.h libavcodec/codec_names.h
 
 config:
-	$(SRC_PATH)/configure $(value FFMPEG_CONFIGURATION)
+	$(SRC_PATH)/configure $(value BVBASE_CONFIGURATION)
 
 check: all alltools examples testprogs fate
 
