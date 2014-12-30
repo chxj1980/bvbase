@@ -1,20 +1,20 @@
 /*
  * copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
  *
- * This file is part of BVbase.
+ * This file is part of BVBase.
  *
- * BVbase is free software; you can redistribute it and/or
+ * BVBase is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * BVbase is distributed in the hope that it will be useful,
+ * BVBase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with BVbase; if not, write to the Free Software
+ * License along with BVBase; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -188,7 +188,7 @@ enum BVPixelFormat {
 
     /**
      * duplicated pixel formats for compatibility with libav.
-     * BVbase supports these formats since May 8 2012 and Jan 28 2012 (commits f9ca1ac7 and 143a5c55)
+     * BVBase supports these formats since May 8 2012 and Jan 28 2012 (commits f9ca1ac7 and 143a5c55)
      * Libav added them Oct 12 2012 with incompatible values (commit 6d5600e85)
      */
     BV_PIX_FMT_YUVA422P_LIBAV,  ///< planar YUV 4:2:2 24bpp, (1 Cr & Cb sample per 2x1 Y & A samples)
@@ -223,7 +223,7 @@ enum BVPixelFormat {
 
     /**
      * duplicated pixel formats for compatibility with libav.
-     * BVbase supports these formats since Sat Sep 24 06:01:45 2011 +0200 (commits 9569a3c9f41387a8c7d1ce97d8693520477a66c3)
+     * BVBase supports these formats since Sat Sep 24 06:01:45 2011 +0200 (commits 9569a3c9f41387a8c7d1ce97d8693520477a66c3)
      * also see Fri Nov 25 01:38:21 2011 +0100 92afb431621c79155fcb7171d26f137eb1bee028
      * Libav added them Sun Mar 16 23:05:47 2014 +0100 with incompatible values (commit 1481d24c3a0abf81e1d7a514547bd5305232be30)
      */

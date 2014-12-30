@@ -845,7 +845,7 @@ opt.h: *      BVOptions-enabled struct as a member (e.g. BVCodecContext in
 opt.h: *      iterates over all possible child classes. E.g. if an BVCodecContext
 opt.h: *      child_next() will return BVCodecContext.priv_data and finish
 opt.h: *      iterating. OTOH child_class_next() on BVCodecContext.bv_class will
-opt.h: * Such structs in BVbase are e.g. BVCodecContext in libavcodec or
+opt.h: * Such structs in BVBase are e.g. BVCodecContext in libavcodec or
 opt.h: * BVFormatContext in libavformat.
 opt.h:#if FF_API_OLD_BVOPTIONS
 opt.h:#if FF_API_OLD_BVOPTIONS

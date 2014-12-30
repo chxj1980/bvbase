@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: server.h
+	> File Name: bvserver.h
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
 	> Created Time: 2014年09月25日 星期四 09时48分36秒

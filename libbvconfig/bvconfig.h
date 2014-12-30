@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: config.h
+	> File Name: bvconfig.h
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
 	> Created Time: 2014年10月23日 星期四 11时48分59秒

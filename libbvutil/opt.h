@@ -2,20 +2,20 @@
  * BVOptions
  * copyright (c) 2005 Michael Niedermayer <michaelni@gmx.at>
  *
- * This file is part of BVbase.
+ * This file is part of BVBase.
  *
- * BVbase is free software; you can redistribute it and/or
+ * BVBase is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * BVbase is distributed in the hope that it will be useful,
+ * BVBase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with BVbase; if not, write to the Free Software
+ * License along with BVBase; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -179,7 +179,7 @@
  *
  * @section avoptions_use Using BVOptions
  * This section deals with accessing options in an BVOptions-enabled struct.
- * Such structs in BVbase are e.g. BVCodecContext in libavcodec or
+ * Such structs in BVBase are e.g. BVCodecContext in libavcodec or
  * BVFormatContext in libavformat.
  *
  * @subsection avoptions_use_examine Examining BVOptions
