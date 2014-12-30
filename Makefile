@@ -1,5 +1,5 @@
 MAIN_MAKEFILE=1
-include bvconfig.mak
+include config.mak
 
 vpath %.c    $(SRC_PATH)
 vpath %.cpp  $(SRC_PATH)
@@ -40,10 +40,11 @@ TOOLS       = qt-faststart trasher uncoded_frame
 TOOLS-$(CONFIG_ZLIB) += cws2fws
 
 # $(BVLIBS-yes) needs to be in linking order
-BVLIBS-$(CONFIG_DEVICE)   += device
-BVLIBS-$(CONFIG_SERVER)   += server
-BVLIBS-$(CONFIG_CONFIG)   += config
-BVLIBS-$(CONFIG_SYSTEM)   += system
+#BVLIBS-$(CONFIG_BVUTIL)		+= bvutil
+BVLIBS-$(CONFIG_BVDEVICE)   += bvdevice
+BVLIBS-$(CONFIG_BVSERVER)   += bvserver
+BVLIBS-$(CONFIG_BVCONFIG)   += bvconfig
+BVLIBS-$(CONFIG_BVSYSTEM)   += bvsystem
 
 #BVLIBS := system
 

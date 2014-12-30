@@ -52,7 +52,7 @@ int main(int argc, const char *argv[])
     BVPTZStop stop;
     stop.pan_tilt = true;
     stop.zoom = true;
-
+#if 1
     //Left
     continuous_move.velocity.pan_tilt.x = -0.5f;
     continuous_move.velocity.pan_tilt.y = 0.0f;
@@ -148,7 +148,31 @@ int main(int argc, const char *argv[])
     pkt_in.data = &stop;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
     sleep(1);
+#else
+    BVPTZPreset preset;
+    strcpy(preset.name, "PTZPreset_0000");
+    strcpy(preset.token, "Preset_0000");
+    pkt_in.data = &preset;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET, &pkt_in, NULL);
+    av_log(device_context, AV_LOG_ERROR, "set preset ok\n");
 
+    sleep(5);
+
+    BVPTZGotoPreset goto_preset;
+    strcpy(goto_preset.token, "Preset_0000");
+    goto_preset.speed.pan_tilt.x = 0.0f;
+    goto_preset.speed.pan_tilt.y = 0.0f;
+    goto_preset.speed.zoom.x = 0.2f;
+    pkt_in.data = &goto_preset;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET, &pkt_in, NULL);
+    av_log(device_context, AV_LOG_ERROR, "goto preset ok\n");
+
+    sleep(5);
+
+    pkt_in.data = &preset;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET, &pkt_in, NULL);
+    av_log(device_context, AV_LOG_ERROR, "remove preset ok\n");
+#endif
     av_dict_free(&opn);
     bv_device_close(&device_context);
     return 0;
