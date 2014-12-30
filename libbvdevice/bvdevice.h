@@ -15,7 +15,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
@@ -28,9 +28,9 @@
 extern "C"{
 #endif
 
-#include <libavutil/avutil.h>
-#include <libavutil/opt.h>
-#include <libavutil/dict.h>
+#include <libbvutil/bvutil.h>
+#include <libbvutil/opt.h>
+#include <libbvutil/dict.h>
 
 #include <libbvconfig/common.h>
 
@@ -101,7 +101,7 @@ typedef struct _BVMobileDevice {
 } BVMobileDevice;
 
 typedef struct _BVDeviceContext {
-	const AVClass *av_class;
+	const BVClass *bv_class;
 	struct _BVDevice *device;
 	void *priv_data;
     size_t buffer_size;
@@ -114,7 +114,7 @@ typedef struct _BVDeviceContext {
 typedef struct _BVDevice {
     const char *name;
     enum BVDeviceType type;
-    const AVClass *priv_class;
+    const BVClass *priv_class;
     int priv_data_size;
     struct _BVDevice *next;
     int     (*dev_scan)( BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
@@ -147,15 +147,15 @@ void bv_device_free_context(BVDeviceContext *devctx);
  * @Param dev       device handle can be NULL ,But Not Support Now FIXME
  * @Param url       device url 
  * @Param options   device private field
- *                  AVDictionary *options = NULL;
- *                  av_dict_set(&options, "baud_rate", "51200", 0);
+ *                  BVDictionary *options = NULL;
+ *                  bv_dict_set(&options, "baud_rate", "51200", 0);
  *                  .....
  *                  after bv_device_open() must free with
- *                  av_dict_free(&options);
+ *                  bv_dict_free(&options);
  *
  * @Returns         <0 fail ==0 success
  */
-int bv_device_open(BVDeviceContext **h, BVDevice *dev, const char *url, AVDictionary **options);
+int bv_device_open(BVDeviceContext **h, BVDevice *dev, const char *url, BVDictionary **options);
 
 int bv_device_read(BVDeviceContext *h, void *buf, size_t size);
 

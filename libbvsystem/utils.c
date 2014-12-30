@@ -21,28 +21,15 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include <libavutil/avstring.h>
-#include <pthread.h>
+#include <libbvutil/bvstring.h>
+#include <libbvutil/atomic.h>
 
 #include "bvsystem.h"
-
-static pthread_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static BVSystem *first_sys = NULL;
 static BVSystem **last_sys = &first_sys;
 
 static const char FILE_NAME[] = "utils.c";
-
-static void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
-{
-    void *ret;
-    pthread_mutex_lock(&atomic_lock);
-    ret = *ptr;
-    if (*ptr == oldval)
-        *ptr = newval;
-    pthread_mutex_unlock(&atomic_lock);
-    return ret;
-}
 
 int bv_system_register(BVSystem * sys)
 {
@@ -66,7 +53,7 @@ BVSystem *bv_system_find_system(enum BVSystemType type)
 {
     BVSystem *sys = NULL;
     if (first_sys == NULL) {
-        av_log(NULL, AV_LOG_ERROR, "BVSystem Not RegisterAll");
+        bv_log(NULL, BV_LOG_ERROR, "BVSystem Not RegisterAll");
         return NULL;
     }
 

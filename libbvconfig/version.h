@@ -28,15 +28,15 @@
 #define LIBBVCONFIG_VERSION_MINOR  0
 #define LIBBVCONFIG_VERSION_MICRO 1
 
-//#define LIBCONFIG_VERSION_INT AV_VERSION_INT(LIBAVCONFIG_VERSION_MAJOR, \
-                                               LIBAVCONFIG_VERSION_MINOR, \
-                                               LIBAVCONFIG_VERSION_MICRO)
-//#define LIBCONFIG_VERSION     AV_VERSION(LIBAVCONFIG_VERSION_MAJOR, \
-                                           LIBAVCONFIG_VERSION_MINOR, \
-                                           LIBAVCONFIG_VERSION_MICRO)
-//#define LIBCONFIG_BUILD       LIBAVCONFIG_VERSION_INT
+//#define LIBCONFIG_VERSION_INT BV_VERSION_INT(LIBBVCONFIG_VERSION_MAJOR, \
+                                               LIBBVCONFIG_VERSION_MINOR, \
+                                               LIBBVCONFIG_VERSION_MICRO)
+//#define LIBCONFIG_VERSION     BV_VERSION(LIBBVCONFIG_VERSION_MAJOR, \
+                                           LIBBVCONFIG_VERSION_MINOR, \
+                                           LIBBVCONFIG_VERSION_MICRO)
+//#define LIBCONFIG_BUILD       LIBBVCONFIG_VERSION_INT
 
-//#define LIBCONFIG_IDENT       "Lavd" AV_STRINGIFY(LIBAVCONFIG_VERSION)
+//#define LIBCONFIG_IDENT       "Lavd" BV_STRINGIFY(LIBBVCONFIG_VERSION)
 
 
 #endif /* end of include guard: BV_CONFIG_VERSION_H */

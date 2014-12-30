@@ -15,7 +15,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
@@ -35,7 +35,7 @@
 #define ONVIF_TMO	(-500000)
 
 typedef struct OnvifDeviceContext {
-    AVClass *av_class;
+    BVClass *bv_class;
     int timeout;
 } OnvifDeviceContext;
 
@@ -184,18 +184,18 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 }
 
 #define OFFSET(x) offsetof(OnvifDeviceContext, x)
-#define DEC AV_OPT_FLAG_DECODING_PARAM
-static const AVOption options[] = {
-	{"timeout", "read write time out", OFFSET(timeout), AV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+#define DEC BV_OPT_FLAG_DECODING_PARAM
+static const BVOption options[] = {
+	{"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
 	{NULL}
 };
 
-static const AVClass onvif_class = {
+static const BVClass onvif_class = {
 	.class_name     = "onvif device",
-	.item_name      = av_default_item_name,
+	.item_name      = bv_default_item_name,
 	.option         = options,
-	.version        = LIBAVUTIL_VERSION_INT,
-	.category       = AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+	.version        = LIBBVUTIL_VERSION_INT,
+	.category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 BVDevice bv_onvif_dev_device = {

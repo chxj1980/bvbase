@@ -34,9 +34,9 @@ extern "C"{
  *	libconfig external API header
  */
 
-#include <libavutil/avutil.h>
-#include <libavutil/opt.h>
-#include <libavutil/dict.h>
+#include <libbvutil/bvutil.h>
+#include <libbvutil/opt.h>
+#include <libbvutil/dict.h>
 
 //#include "default/common.h"
 
@@ -58,7 +58,7 @@ enum BVConfigType {
 
 
 typedef struct _BVConfigContext {
-    const AVClass *av_class;
+    const BVClass *bv_class;
 	struct _BVConfig *config;
 	void *priv_data;
 	char url[1024];
@@ -67,7 +67,7 @@ typedef struct _BVConfigContext {
 typedef struct _BVConfig {
 	const char *name;
 	enum BVConfigType config_type;
-	const AVClass *priv_class;
+	const BVClass *priv_class;
 	int priv_data_size;
 	struct _BVConfig *next;
 //////////////////////////////////////////////////////////////////////

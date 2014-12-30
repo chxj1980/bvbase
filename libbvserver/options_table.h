@@ -29,10 +29,10 @@
 #include "bvserver.h"
 
 #define OFFSET(X) offsetof(BVServerContext, X)
-#define E   AV_OPT_FLAG_ENCODING_PARAM
+#define E   BV_OPT_FLAG_ENCODING_PARAM
 
-static const AVOption server_options[] = {
-//    {"buffer_size", NULL, OFFSET(buffer_size), AV_OPT_TYPE_INT, {.i64 = 4096}, 0, INT_MAX, E},
+static const BVOption server_options[] = {
+//    {"buffer_size", NULL, OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 4096}, 0, INT_MAX, E},
 
     {NULL}
 };

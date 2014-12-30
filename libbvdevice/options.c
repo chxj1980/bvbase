@@ -15,7 +15,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
@@ -37,25 +37,25 @@ static const char * device_to_name(void *ptr)
         return dc->device->name;
     return "NULL";
 }
-static const AVClass bv_device_context_class = {
+static const BVClass bv_device_context_class = {
     .class_name     = "BVDeviceContext",
     .item_name      = device_to_name,
     .option         = device_options,
-    .version        = LIBAVUTIL_VERSION_INT,
-    .category       =   AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_device_get_context_default(BVDeviceContext *device)
 {
-    device->av_class = &bv_device_context_class;
-    av_opt_set_defaults(device);
+    device->bv_class = &bv_device_context_class;
+    bv_opt_set_defaults(device);
 }
 
 BVDeviceContext *bv_device_alloc_context(void)
 {
-    BVDeviceContext *s = av_mallocz(sizeof(BVDeviceContext));
+    BVDeviceContext *s = bv_mallocz(sizeof(BVDeviceContext));
     if (!s) {
-        av_log(NULL, AV_LOG_ERROR, "malloc BVDeviceContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVDeviceContext error");
         return NULL;
     }
     bv_device_get_context_default(s);
@@ -66,13 +66,13 @@ void bv_device_free_context(BVDeviceContext * devctx)
 {
     if (!devctx) 
         return;
-    av_opt_free(devctx);
+    bv_opt_free(devctx);
     if (devctx->device && devctx->device->priv_class && devctx->priv_data)
-        av_opt_free(devctx->priv_data);
-    av_freep(&devctx->priv_data);
+        bv_opt_free(devctx->priv_data);
+    bv_freep(&devctx->priv_data);
     if (devctx->buffer)
-        av_free(devctx->buffer);
-    av_free(devctx);
+        bv_free(devctx->buffer);
+    bv_free(devctx);
     return; 
 }
 

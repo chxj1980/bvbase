@@ -1,0 +1,4 @@
+#ifndef BVUTIL_FFVERSION_H
+#define BVUTIL_FFVERSION_H
+#define FFMPEG_VERSION "2.4.4"
+#endif /* BVUTIL_FFVERSION_H */

@@ -37,25 +37,25 @@ static const char * system_to_name(void *ptr)
         return sc->system->name;
     return "NULL";
 }
-static const AVClass bv_system_context_class = {
+static const BVClass bv_system_context_class = {
     .class_name     = "BVSystemContext",
     .item_name      = system_to_name,
     .option         = system_options,
-    .version        = LIBAVUTIL_VERSION_INT,
-    .category       =   AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_system_get_context_default(BVSystemContext *system)
 {
-    system->av_class = &bv_system_context_class;
-    av_opt_set_defaults(system);
+    system->bv_class = &bv_system_context_class;
+    bv_opt_set_defaults(system);
 }
 
 BVSystemContext *bv_system_alloc_context(void)
 {
-    BVSystemContext *s = av_mallocz(sizeof(BVSystemContext));
+    BVSystemContext *s = bv_mallocz(sizeof(BVSystemContext));
     if (!s) {
-        av_log(NULL, AV_LOG_ERROR, "malloc BVSystemContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVSystemContext error");
         return NULL;
     }
     bv_system_get_context_default(s);
@@ -66,11 +66,11 @@ void bv_system_free_context(BVSystemContext * sysctx)
 {
     if (!sysctx) 
         return;
-    av_opt_free(sysctx);
+    bv_opt_free(sysctx);
     if (sysctx->system && sysctx->system->priv_class && sysctx->priv_data)
-        av_opt_free(sysctx->priv_data);
-    av_freep(&sysctx->priv_data);
-    av_free(sysctx);
+        bv_opt_free(sysctx->priv_data);
+    bv_freep(&sysctx->priv_data);
+    bv_free(sysctx);
     return; 
 }
 

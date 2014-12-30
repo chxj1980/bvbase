@@ -27,7 +27,7 @@
 
 struct MTCServerContext {
 	char author_num[1024];
-    const AVClass *av_class;
+    const BVClass *bv_class;
 	URLContext *uc;
 	uint32_t pkt_seq;
 	bool init;
@@ -41,9 +41,9 @@ static int mtc_connect(BVServerContext *svrctx)
 	}
 	char url[512] = { 0 };
 	ff_url_join(url, sizeof(url), "mtc", NULL, svrctx->server_ip, svrctx->port, NULL);
-	int flags = URL_PROTOCOL_FLAG_NETWORK |  AVIO_FLAG_READ_WRITE;
+	int flags = URL_PROTOCOL_FLAG_NETWORK |  BVIO_FLAG_READ_WRITE;
 	if (ffurl_open(&mtc->uc, url, flags, NULL, NULL) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "find protocol error");
+		bv_log(NULL, BV_LOG_ERROR, "find protocol error");
 		return -1;
 	}
 	return 0;
@@ -72,7 +72,7 @@ static int write_register(struct MTCServerContext *mtc, const BVServerPacket *pk
 	strncpy(msg_body.car_num, register_info->car_num, sizeof(msg_body.car_num) - 1);
 	msg->
 	if (ffurl_write(mtc->uc, &msg, sizeof(msg_body)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "ffurl_write error\n");
+		bv_log(NULL, BV_LOG_ERROR, "ffurl_write error\n");
 		return -1;
 	}
 	return pkt->data_size;
@@ -87,7 +87,7 @@ static int mtc_write(BVServerContext * svrctx, const BVServerPacket *pkt, size_t
 	struct MTCServerContext *mtc = svrctx->priv_data;
 	int error = 0;
 	if (mtc->init == false) {
-		av_log(NULL, AV_LOG_ERROR, "Not Connect Success");
+		bv_log(NULL, BV_LOG_ERROR, "Not Connect Success");
 		return -1;
 	}
 	if(pkt->packet_type == BV_SERVER_PACKET_TYPE_DATA) {
@@ -103,7 +103,7 @@ static int mtc_write(BVServerContext * svrctx, const BVServerPacket *pkt, size_t
 		break;
 
 	default:
-		av_log(NULL, AV_LOG_WARNING, "Not Support This method");
+		bv_log(NULL, BV_LOG_WARNING, "Not Support This method");
 		break;
 	}
 	return error;

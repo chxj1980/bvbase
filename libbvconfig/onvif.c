@@ -23,7 +23,7 @@
 
 #include "bvconfig.h"
 struct OnvifConfigContext {
-	const AVClass *av_class;
+	const BVClass *bv_class;
 	char devide_info[128];
 };
 

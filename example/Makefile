@@ -1,5 +1,5 @@
 # use pkg-config for getting CFLAGS and LDLIBS
-include $(SUBDIR)../bvconfig.mak
+include $(SUBDIR)../config.mak
 
 CFLAGS += -Wall -g
 #CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
@@ -7,7 +7,7 @@ CFLAGS += -Wall -g
 
 CFLAGS = -I ../include/x86 -I ../3rdparty/binary/ffmpeg/x86/include 
 
-LDFLAGS = -L ../3rdparty/binary/ffmpeg/x86/lib -lavutil -L ../3rdparty/binary/onvif/x86/lib/ -lonvifc -L ../lib/x86 -ldevice -lavformat -lavdevice -lavcodec -lavfilter -lswscale -lstream
+LDFLAGS = -L ../3rdparty/binary/ffmpeg/x86/lib -lavutil -L ../3rdparty/binary/onvif/x86/lib/ -lonvifc -L ../lib/x86 -lbvdevice -lavformat -lavdevice -lavcodec -lavfilter -lswscale -lstream
 
 EXAMPLES=       exDevice exStream
 

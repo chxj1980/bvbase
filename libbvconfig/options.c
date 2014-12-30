@@ -38,25 +38,25 @@ static const char *config_to_name(void *ptr)
 	return "NULL";
 }
 
-static const AVClass bv_config_context_class = {
+static const BVClass bv_config_context_class = {
 	.class_name = "BVConfigContext",
 	.item_name = config_to_name,
 	.option = config_options,
-	.version = LIBAVUTIL_VERSION_INT,
-	.category = AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+	.version = LIBBVUTIL_VERSION_INT,
+	.category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_config_get_context_default(BVConfigContext * config)
 {
-	config->av_class = &bv_config_context_class;
-	av_opt_set_defaults(config);
+	config->bv_class = &bv_config_context_class;
+	bv_opt_set_defaults(config);
 }
 
 BVConfigContext *bv_config_alloc_context(void)
 {
-	BVConfigContext *s = av_mallocz(sizeof(BVConfigContext));
+	BVConfigContext *s = bv_mallocz(sizeof(BVConfigContext));
 	if (!s) {
-		av_log(NULL, AV_LOG_ERROR, "malloc BVConfigContext error");
+		bv_log(NULL, BV_LOG_ERROR, "malloc BVConfigContext error");
 		return NULL;
 	}
 	bv_config_get_context_default(s);
@@ -67,10 +67,10 @@ void bv_config_free_context(BVConfigContext * cfgctx)
 {
 	if (!cfgctx)
 		return;
-	av_opt_free(cfgctx);
+	bv_opt_free(cfgctx);
 	if (cfgctx->config && cfgctx->config->priv_class && cfgctx->priv_data)
-		av_opt_free(cfgctx->priv_data);
-	av_freep(&cfgctx->priv_data);
-	av_free(cfgctx);
+		bv_opt_free(cfgctx->priv_data);
+	bv_freep(&cfgctx->priv_data);
+	bv_free(cfgctx);
 	return;
 }

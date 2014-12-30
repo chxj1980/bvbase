@@ -35,10 +35,9 @@ extern "C"{
 
 #include "version.h"
 
-#include "libavutil/log.h"
-#include "libavutil/opt.h"
-#include "libavutil/dict.h"
-#include "libavformat/avformat.h"
+#include "libbvutil/log.h"
+#include "libbvutil/opt.h"
+#include "libbvutil/dict.h"
 
 #include "server_cmd.h"
 
@@ -55,9 +54,9 @@ enum BVServerType{
 };
 
 typedef struct BVServerContext {
-    const AVClass *av_class;
-	//URLContext *uc;	//not public strunct use AVIOContext instead
-	//AVIOContext *pb;	//pb->opaque ponit to URLContext struct
+    const BVClass *bv_class;
+	//URLContext *uc;	//not public strunct use BVIOContext instead
+	//BVIOContext *pb;	//pb->opaque ponit to URLContext struct
     char url[1024];
 	char server_name[MAX_NAME_LEN + 1];
 	char server_ip[MAX_NAME_LEN + 1];
@@ -72,7 +71,7 @@ typedef struct BVServerContext {
 typedef struct _BVServer {
 	const char *name;
 	enum BVServerType server_type;
-	const AVClass *priv_class;
+	const BVClass *priv_class;
 	int priv_data_size;
 	struct _BVServer *next;
     int (*svr_open) (BVServerContext *svrctx);
@@ -99,7 +98,7 @@ BVServerContext * bv_server_alloc_context(void);
 
 void bv_server_free_context(BVServerContext *svrctx);
 
-int bv_server_open(BVServerContext **svrctx, BVServer *svr, const char *url, AVDictionary **options);
+int bv_server_open(BVServerContext **svrctx, BVServer *svr, const char *url, BVDictionary **options);
 
 int bv_server_connect(BVServerContext *svrctx);
 

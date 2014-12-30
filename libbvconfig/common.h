@@ -30,9 +30,9 @@ extern "C"{
 
 #include <stdbool.h>
 
-#include <libavcodec/avcodec.h>
-#include <libavutil/avutil.h>
-#include <libavutil/log.h>
+//#include <libavcodec/avcodec.h>
+#include <libbvutil/bvutil.h>
+#include <libbvutil/log.h>
 
 #define BV_MAX_NAME_LEN	(64)
 #define BV_MAX_URL_LEN	(512)
@@ -95,8 +95,8 @@ enum BVMediaType {
 #endif
 
 typedef struct _BVCodecContext {
-	enum AVMediaType codec_type;	//BV_MEDIA_TYPE_XXX
-	enum AVCodecID   codec_id;
+	enum BVMediaType codec_type;	//BV_MEDIA_TYPE_XXX
+//	enum BVCodecID   codec_id;
 	enum BVRCModeID  mode_id;
 	int  width, height;
     int coded_width, coded_height;
@@ -104,10 +104,10 @@ typedef struct _BVCodecContext {
 	int quality;
 	int bit_rate;
 	int gop_size;
-    enum AVPixelFormat pix_fmt;
+    enum BVPixelFormat pix_fmt;
 
 	int sample_rate;
-    enum AVSampleFormat sample_fmt;  ///< sample format
+    enum BVSampleFormat sample_fmt;  ///< sample format
 	int channels;
 
     int profile;

@@ -21,27 +21,15 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include <libavutil/avstring.h>
-#include <pthread.h>
+#include <libbvutil/bvstring.h>
+#include <libbvutil/atomic.h>
 
 #include "bvserver.h"
 
 const char FILE_NAME[] = "utils.c";
-static pthread_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static BVServer *first_svr = NULL;
 static BVServer **last_svr = &first_svr;
-
-static void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
-{
-    void *ret;
-    pthread_mutex_lock(&atomic_lock);
-    ret = *ptr;
-    if (*ptr == oldval)
-        *ptr = newval;
-    pthread_mutex_unlock(&atomic_lock);
-    return ret;
-}
 
 int bv_server_register(BVServer * svr)
 {
@@ -65,7 +53,7 @@ BVServer *bv_server_find_server(enum BVServerType server_type)
 {
 	BVServer *svr = NULL;
 	if (first_svr == NULL) {
-		av_log(NULL, AV_LOG_ERROR, "BVServer Not RegisterAll");
+		bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
 		return NULL;
 	}
 
@@ -82,7 +70,7 @@ BVServer *bv_server_find_server_by_name(const char *svr_name)
 	BVServer *svr = NULL;
 
 	if (first_svr == NULL) {
-		av_log(NULL, AV_LOG_ERROR, "BVServer Not RegisterAll");
+		bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
 		return NULL;
 	}
 
@@ -99,22 +87,22 @@ static int init_server(BVServerContext *s, const char *url)
     return 0;
 }
 
-int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, AVDictionary **options)
+int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, BVDictionary **options)
 {
-    AVDictionary *tmp = NULL;
+    BVDictionary *tmp = NULL;
     BVServerContext *s = *h;
     int ret = 0;
     if (!s && !(s = bv_server_alloc_context()))
-        return AVERROR(ENOMEM);
-    if (!s->av_class) {
-        av_log(s, AV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
-        return AVERROR(EINVAL);
+        return BVERROR(ENOMEM);
+    if (!s->bv_class) {
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        return BVERROR(EINVAL);
     }
 
     if (options)
-        av_dict_copy(&tmp, *options, 0);
+        bv_dict_copy(&tmp, *options, 0);
 
-    if (av_opt_set_dict(s, &tmp) < 0)
+    if (bv_opt_set_dict(s, &tmp) < 0)
         goto fail;
 
     if (svr)
@@ -122,14 +110,14 @@ int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, AVDictio
     else
         ret = init_server(s, url);
     if (svr->priv_data_size > 0) {
-        s->priv_data = av_mallocz(svr->priv_data_size);
+        s->priv_data = bv_mallocz(svr->priv_data_size);
         if (!s->priv_data)
             goto fail;
         if (svr->priv_class) {
-            *(const AVClass **) s->priv_data = svr->priv_class;
-            av_opt_set_defaults(s->priv_data);
-            if ((ret = av_opt_set_dict(s->priv_data, &tmp)) < 0) {
-                av_log(s, AV_LOG_ERROR, "set dict error\n");
+            *(const BVClass **) s->priv_data = svr->priv_class;
+            bv_opt_set_defaults(s->priv_data);
+            if ((ret = bv_opt_set_dict(s->priv_data, &tmp)) < 0) {
+                bv_log(s, BV_LOG_ERROR, "set dict error\n");
                 goto fail;
             }
         }
@@ -138,12 +126,12 @@ int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, AVDictio
         goto fail;
     *h = s;
     if (url)
-        av_strlcpy(s->url, url, sizeof(s->url));
+        bv_strlcpy(s->url, url, sizeof(s->url));
 
-    av_dict_free(&tmp);
+    bv_dict_free(&tmp);
     return s->server->svr_open(s);
 fail:
-    av_dict_free(&tmp);
+    bv_dict_free(&tmp);
     bv_server_free_context(s);
     *h = NULL;
     return ret;
@@ -169,11 +157,11 @@ int bv_server_read(BVServerContext *svrctx, BVServerPacket *pkt)
 int bv_server_write(BVServerContext *svrctx, const BVServerPacket *pkt)
 {
 	if (!svrctx || !pkt) {
-		av_log(NULL, AV_LOG_ERROR, "Param Error");
+		bv_log(NULL, BV_LOG_ERROR, "Param Error");
 		return -1;
 	}
 	if (svrctx->server == NULL) {
-		av_log(NULL, AV_LOG_ERROR, "server error");
+		bv_log(NULL, BV_LOG_ERROR, "server error");
 		return -1;
 	}
 	return svrctx->server->svr_write(svrctx, pkt);

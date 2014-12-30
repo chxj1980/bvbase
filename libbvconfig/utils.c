@@ -21,25 +21,13 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include <pthread.h>
+#include <libbvutil/atomic.h>
 #include "bvconfig.h"
 
-static pthread_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
 static BVConfig *first_cfg = NULL;
 static BVConfig **last_cfg = &first_cfg;
 
 static const char FILE_NAME[] = "utils.c";
-
-static void *bvpriv_atomic_ptr_cas(void *volatile *ptr, void *oldval, void *newval)
-{
-	void *ret;
-	pthread_mutex_lock(&atomic_lock);
-	ret = *ptr;
-	if (*ptr == oldval)
-		*ptr = newval;
-	pthread_mutex_unlock(&atomic_lock);
-	return ret;
-}
 
 int bv_config_register(BVConfig * cfg)
 {
@@ -63,7 +51,7 @@ BVConfig *bv_config_find_config(enum BVConfigType config_type)
 {
 	BVConfig *cfg = NULL;
 	if (first_cfg == NULL) {
-		av_log(NULL, AV_LOG_ERROR, "BVConfig Not RegisterAll");
+		bv_log(NULL, BV_LOG_ERROR, "BVConfig Not RegisterAll");
 		return NULL;
 	}
 
@@ -79,7 +67,7 @@ BVConfig *bv_config_find_config_by_name(const char *cfg_name)
 {
 	BVConfig *cfg = NULL;
 	if (first_cfg == NULL) {
-		av_log(NULL, AV_LOG_ERROR, "BVConfig Not RegisterAll");
+		bv_log(NULL, BV_LOG_ERROR, "BVConfig Not RegisterAll");
 		return NULL;
 	}
 

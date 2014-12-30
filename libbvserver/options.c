@@ -37,25 +37,25 @@ static const char * server_to_name(void *ptr)
         return dc->server->name;
     return "NULL";
 }
-static const AVClass bv_server_context_class = {
+static const BVClass bv_server_context_class = {
     .class_name     = "BVServerContext",
     .item_name      = server_to_name,
     .option         = server_options,
-    .version        = LIBAVUTIL_VERSION_INT,
-    .category       =   AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_server_get_context_default(BVServerContext *server)
 {
-    server->av_class = &bv_server_context_class;
-    av_opt_set_defaults(server);
+    server->bv_class = &bv_server_context_class;
+    bv_opt_set_defaults(server);
 }
 
 BVServerContext *bv_server_alloc_context(void)
 {
-    BVServerContext *s = av_mallocz(sizeof(BVServerContext));
+    BVServerContext *s = bv_mallocz(sizeof(BVServerContext));
     if (!s) {
-        av_log(NULL, AV_LOG_ERROR, "malloc BVServerContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVServerContext error");
         return NULL;
     }
     bv_server_get_context_default(s);
@@ -66,11 +66,11 @@ void bv_server_free_context(BVServerContext * svrctx)
 {
     if (!svrctx) 
         return;
-    av_opt_free(svrctx);
+    bv_opt_free(svrctx);
     if (svrctx->server && svrctx->server->priv_class && svrctx->priv_data)
-        av_opt_free(svrctx->priv_data);
-    av_freep(&svrctx->priv_data);
-    av_free(svrctx);
+        bv_opt_free(svrctx->priv_data);
+    bv_freep(&svrctx->priv_data);
+    bv_free(svrctx);
     return; 
 }
 

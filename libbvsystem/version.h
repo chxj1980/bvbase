@@ -28,15 +28,15 @@
 #define LIBBVSYSTEM_VERSION_MINOR  0
 #define LIBBVSYSTEM_VERSION_MICRO 1
 
-//#define LIBSYSTEM_VERSION_INT AV_VERSION_INT(LIBAVSYSTEM_VERSION_MAJOR, \
-                                               LIBAVSYSTEM_VERSION_MINOR, \
-                                               LIBAVSYSTEM_VERSION_MICRO)
-//#define LIBSYSTEM_VERSION     AV_VERSION(LIBAVSYSTEM_VERSION_MAJOR, \
-                                           LIBAVSYSTEM_VERSION_MINOR, \
-                                           LIBAVSYSTEM_VERSION_MICRO)
-//#define LIBSYSTEM_BUILD       LIBAVSYSTEM_VERSION_INT
+//#define LIBSYSTEM_VERSION_INT BV_VERSION_INT(LIBBVSYSTEM_VERSION_MAJOR, \
+                                               LIBBVSYSTEM_VERSION_MINOR, \
+                                               LIBBVSYSTEM_VERSION_MICRO)
+//#define LIBSYSTEM_VERSION     BV_VERSION(LIBBVSYSTEM_VERSION_MAJOR, \
+                                           LIBBVSYSTEM_VERSION_MINOR, \
+                                           LIBBVSYSTEM_VERSION_MICRO)
+//#define LIBSYSTEM_BUILD       LIBBVSYSTEM_VERSION_INT
 
-//#define LIBSYSTEM_IDENT       "Lavd" AV_STRINGIFY(LIBAVSYSTEM_VERSION)
+//#define LIBSYSTEM_IDENT       "Lavd" BV_STRINGIFY(LIBBVSYSTEM_VERSION)
 
 
 #endif /* end of include guard: BV_SYSTEM_VERSION_H */

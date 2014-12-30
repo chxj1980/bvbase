@@ -15,7 +15,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
@@ -28,15 +28,15 @@
 #define LIBBVDEVICE_VERSION_MINOR  0
 #define LIBBVDEVICE_VERSION_MICRO 1
 
-//#define LIBDEVICE_VERSION_INT AV_VERSION_INT(LIBAVDEVICE_VERSION_MAJOR, \
-                                               LIBAVDEVICE_VERSION_MINOR, \
-                                               LIBAVDEVICE_VERSION_MICRO)
-//#define LIBDEVICE_VERSION     AV_VERSION(LIBAVDEVICE_VERSION_MAJOR, \
-                                           LIBAVDEVICE_VERSION_MINOR, \
-                                           LIBAVDEVICE_VERSION_MICRO)
-//#define LIBDEVICE_BUILD       LIBAVDEVICE_VERSION_INT
+//#define LIBDEVICE_VERSION_INT BV_VERSION_INT(LIBBVDEVICE_VERSION_MAJOR, \
+                                               LIBBVDEVICE_VERSION_MINOR, \
+                                               LIBBVDEVICE_VERSION_MICRO)
+//#define LIBDEVICE_VERSION     BV_VERSION(LIBBVDEVICE_VERSION_MAJOR, \
+                                           LIBBVDEVICE_VERSION_MINOR, \
+                                           LIBBVDEVICE_VERSION_MICRO)
+//#define LIBDEVICE_BUILD       LIBBVDEVICE_VERSION_INT
 
-//#define LIBDEVICE_IDENT       "Lavd" AV_STRINGIFY(LIBAVDEVICE_VERSION)
+//#define LIBDEVICE_IDENT       "Lbvd" BV_STRINGIFY(LIBBVDEVICE_VERSION)
 
 
 #endif /* end of include guard: BV_DEVICE_VERSION_H */

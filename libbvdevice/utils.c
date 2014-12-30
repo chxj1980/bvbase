@@ -15,36 +15,23 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include <libavutil/avstring.h>
-#include <pthread.h>
+#include <libbvutil/bvstring.h>
+#include <libbvutil/atomic.h>
 
 #include "bvdevice.h"
 
 const char FILE_NAME[] = "utils.c";
 
-static pthread_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
-
 static BVDevice *first_dev = NULL;
 static BVDevice **last_dev = &first_dev;
 
 #define DEFAULT_BUFFER_SIZE (4096)
-
-static void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
-{
-    void *ret;
-    pthread_mutex_lock(&atomic_lock);
-    ret = *ptr;
-    if (*ptr == oldval)
-        *ptr = newval;
-    pthread_mutex_unlock(&atomic_lock);
-    return ret;
-}
 
 int bv_device_register(BVDevice * dev)
 {
@@ -68,7 +55,7 @@ BVDevice *bv_device_find_device(enum BVDeviceType type)
 {
     BVDevice *dev = NULL;
     if (first_dev == NULL) {
-        av_log(NULL, AV_LOG_ERROR, "BVDevice Not RegisterAll");
+        bv_log(NULL, BV_LOG_ERROR, "BVDevice Not RegisterAll");
         return NULL;
     }
 
@@ -91,12 +78,12 @@ static int init_device(BVDeviceContext *s, const char *url)
     int score = 0;
     char args[64] = { 0 };
     if (!url) {
-        av_log(s, AV_LOG_WARNING, "url is NULL\n");
+        bv_log(s, BV_LOG_WARNING, "url is NULL\n");
         return -1;
     }
     if (sscanf(url, "%[^:]", args) < 0) {
-        av_log(s, AV_LOG_ERROR, "INVAL url %s\n", url);
-        return AVERROR(EINVAL);
+        bv_log(s, BV_LOG_ERROR, "INVAL url %s\n", url);
+        return BVERROR(EINVAL);
     }
 
     while ((dev = bv_device_next(dev))) {
@@ -111,31 +98,31 @@ static int init_device(BVDeviceContext *s, const char *url)
 
     s->device = dev2;
     if (dev2 == NULL) {
-        av_log(s, AV_LOG_WARNING, "Not Find Device\n");
+        bv_log(s, BV_LOG_WARNING, "Not Find Device\n");
         return -1;
     }
     return 0;
 }
 
-int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, AVDictionary **options)
+int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDictionary **options)
 {
-    AVDictionary *tmp = NULL;
+    BVDictionary *tmp = NULL;
     BVDeviceContext *s = *h;
     int ret = 0;
     if (!s && !(s = bv_device_alloc_context()))
-        return AVERROR(ENOMEM);
-    if (!s->av_class) {
-        av_log(s, AV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
-        return AVERROR(EINVAL);
+        return BVERROR(ENOMEM);
+    if (!s->bv_class) {
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        return BVERROR(EINVAL);
     }
 
     if (options)
-        av_dict_copy(&tmp, *options, 0);
+        bv_dict_copy(&tmp, *options, 0);
 
-    if (av_opt_set_dict(s, &tmp) < 0)
+    if (bv_opt_set_dict(s, &tmp) < 0)
         goto fail;
     if (s->buffer_size > 0) {
-        s->buffer = av_malloc(s->buffer_size);
+        s->buffer = bv_malloc(s->buffer_size);
         if (!s->buffer) {
             goto fail;
         }
@@ -148,32 +135,32 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, AVDicti
     else
         ret = init_device(s, url);
     if (ret < 0) {
-        return AVERROR(ENOSYS);
+        return BVERROR(ENOSYS);
     }
     if (s->device->priv_data_size > 0) {
-        s->priv_data = av_mallocz(s->device->priv_data_size);
+        s->priv_data = bv_mallocz(s->device->priv_data_size);
         if (!s->priv_data)
             goto fail;
         if (s->device->priv_class) {
-            *(const AVClass **) s->priv_data = s->device->priv_class;
-            av_opt_set_defaults(s->priv_data);
-            if ((ret = av_opt_set_dict(s->priv_data, &tmp)) < 0) {
-                av_log(s, AV_LOG_ERROR, "set dict error\n");
+            *(const BVClass **) s->priv_data = s->device->priv_class;
+            bv_opt_set_defaults(s->priv_data);
+            if ((ret = bv_opt_set_dict(s->priv_data, &tmp)) < 0) {
+                bv_log(s, BV_LOG_ERROR, "set dict error\n");
                 goto fail;
             }
         }
     }
 
     if (url)
-        av_strlcpy(s->url, url, sizeof(s->url));
+        bv_strlcpy(s->url, url, sizeof(s->url));
     if (!s->device->dev_open)
         goto fail;
     *h = s;
 
-    av_dict_free(&tmp);
+    bv_dict_free(&tmp);
     return s->device->dev_open(s);
 fail:
-    av_dict_free(&tmp);
+    bv_dict_free(&tmp);
     bv_device_free_context(s);
     *h = NULL;
     return ret;
@@ -182,7 +169,7 @@ fail:
 int bv_device_read(BVDeviceContext * h, void *buf, size_t size)
 {
     if (!h->device || !h->device->dev_read)
-        return AVERROR(ENOSYS);
+        return BVERROR(ENOSYS);
     return h->device->dev_read(h, buf, size);
 }
 
@@ -200,8 +187,8 @@ int bv_device_control(BVDeviceContext * h, enum BVDeviceMessageType type, const 
 {
     int ret = 0;
     if (!h->device || !h->device->dev_control) {
-        av_log(h, AV_LOG_ERROR, "Not Support Control\n");
-        return AVERROR(ENOSYS);
+        bv_log(h, BV_LOG_ERROR, "Not Support Control\n");
+        return BVERROR(ENOSYS);
     }
     ret = h->device->dev_control(h, type, pkt_in, pkt_out);
     return ret;
@@ -210,7 +197,7 @@ int bv_device_control(BVDeviceContext * h, enum BVDeviceMessageType type, const 
 int bv_device_get_fd(BVDeviceContext *h)
 {
     if (!h->device || !h->device->get_fd)
-        return AVERROR(ENOSYS);
+        return BVERROR(ENOSYS);
     return h->device->get_fd(h);
 }
 

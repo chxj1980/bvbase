@@ -28,9 +28,9 @@
 extern "C"{
 #endif
 
-#include <libavutil/avutil.h>
-#include <libavutil/opt.h>
-#include <libavutil/dict.h>
+#include <libbvutil/bvutil.h>
+#include <libbvutil/opt.h>
+#include <libbvutil/dict.h>
 
 /**
  * FIXME
@@ -45,7 +45,7 @@ typedef struct _BVSystemVODev {
 } BVSystemVODev;
 
 typedef struct _BVSystemContext {
-    const AVClass *av_class;
+    const BVClass *bv_class;
     struct _BVSystem *system;
     BVSystemVIDev **videv;
     int nb_videv;
@@ -61,7 +61,7 @@ enum BVSystemType {
 typedef struct _BVSystem {
     const char *name;
     enum BVSystemType type;
-    const AVClass *priv_class;
+    const BVClass *priv_class;
     int priv_data_size;
     struct _BVSystem *next;
     int (*sys_init)(BVSystemContext *sysctx);

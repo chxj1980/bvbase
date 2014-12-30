@@ -15,7 +15,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hbve received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright (C) albert@BesoVideo, 2014
@@ -26,7 +26,7 @@
 #include <soapH.h>
 
 typedef struct OnvifPTZContext {
-    const AVClass *av_class;
+    const BVClass *bv_class;
     int timeout;
     char url[1024];
     char token[64];
@@ -67,9 +67,9 @@ static int onvif_ptz_open(BVDeviceContext *h)
 {
     OnvifPTZContext *onvif_ptz = h->priv_data;
     char *p;
-    av_log(onvif_ptz, AV_LOG_ERROR, "onvif ptz open\n");
+    bv_log(onvif_ptz, BV_LOG_ERROR, "onvif ptz open\n");
     if (h->url[0] == '\0') {
-        av_log(onvif_ptz, AV_LOG_ERROR, "url is NULL\n");
+        bv_log(onvif_ptz, BV_LOG_ERROR, "url is NULL\n");
         return -1;
     }
     p = strstr(h->url, ":");
@@ -325,7 +325,7 @@ static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, 
             ret = onvif_ptz_remove_preset(h, pkt_in, pkt_out);
             break;
         default:
-            av_log(h, AV_LOG_ERROR, "Not Support This command \n");
+            bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
             break;
     }
     return ret;
@@ -340,18 +340,18 @@ static int onvif_ptz_close(BVDeviceContext*h)
 }
 
 #define OFFSET(x) offsetof(OnvifPTZContext, x)
-#define DEC AV_OPT_FLAG_DECODING_PARAM
-static const AVOption options[] = {
-	{"timeout", "read write time out", OFFSET(timeout), AV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+#define DEC BV_OPT_FLAG_DECODING_PARAM
+static const BVOption options[] = {
+	{"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
 	{NULL}
 };
 
-static const AVClass onvif_class = {
+static const BVClass onvif_class = {
 	.class_name     = "onvif ptz device",
-	.item_name      = av_default_item_name,
+	.item_name      = bv_default_item_name,
 	.option         = options,
-	.version        = LIBAVUTIL_VERSION_INT,
-	.category       = AV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+	.version        = LIBBVUTIL_VERSION_INT,
+	.category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 BVDevice bv_onvif_ptz_device = {

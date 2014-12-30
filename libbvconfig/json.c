@@ -25,7 +25,7 @@
 #include "jansson.h"
 
 struct JsonConfigContext {
-	const AVClass *av_class;
+	const BVClass *bv_class;
 	json_t *root;
 	json_t *video_dev;
 	int fd;
@@ -36,7 +36,7 @@ static int open_url(BVConfigContext * cfgctx, const char *url, int flags)
 	struct JsonConfigContext *json_context = cfgctx->priv_data;
 	json_error_t error;
 	if ((json_context->root = json_load_file(url, 0, &error)) == NULL) {
-		av_log(cfgctx, AV_LOG_ERROR, "load json file %s error at line %d column %d\n", url,
+		bv_log(cfgctx, BV_LOG_ERROR, "load json file %s error at line %d column %d\n", url,
 			error.line, error.column);
 		return -1;
 	}
@@ -49,7 +49,7 @@ static int close_url(BVConfigContext * cfgctx)
 	if (json_context->root) {
 		if (json_dump_file(json_context->root, cfgctx->url,
 				JSON_INDENT(4) | JSON_PRESERVE_ORDER) < 0) {
-			av_log(cfgctx, AV_LOG_ERROR, "dump json file %s error\n", cfgctx->url);
+			bv_log(cfgctx, BV_LOG_ERROR, "dump json file %s error\n", cfgctx->url);
 		}
 		json_decref(json_context->root);
 	}
