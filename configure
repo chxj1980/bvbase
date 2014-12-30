@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# FFmpeg configure script
+# BVBase configure script
 #
 # Copyright (c) 2000-2002 Fabrice Bellard
 # Copyright (c) 2005-2008 Diego Biurrun
@@ -46,7 +46,7 @@ if test "$E1" != 0 || test "$E2" = 0; then
     echo "such as bash or ksh."
     echo "THIS IS NOT A BUG IN BVBASE, DO NOT REPORT IT AS SUCH."
     echo "Instead, install a working POSIX-compatible shell."
-    echo "Disabling this configure test will create a broken FFmpeg."
+    echo "Disabling this configure test will create a broken BVBase."
     if test "$BASH_VERSION" = '2.04.0(1)-release'; then
         echo "This bash version ($BASH_VERSION) is broken on your platform."
         echo "Upgrade to a later version if available."
@@ -63,17 +63,10 @@ Options: [defaults in brackets after descriptions]
 
 Help options:
   --help                   print this message
-  --list-decoders          show all available decoders
-  --list-encoders          show all available encoders
-  --list-hwaccels          show all available hardware accelerators
-  --list-demuxers          show all available demuxers
-  --list-muxers            show all available muxers
-  --list-parsers           show all available parsers
-  --list-protocols         show all available protocols
-  --list-bsfs              show all available bitstream filters
-  --list-indevs            show all available input devices
-  --list-outdevs           show all available output devices
-  --list-filters           show all available filters
+  --list-devices           show all available devices
+  --list-configs           show all available configs
+  --list-systems           show all available systems
+  --list-servers           show all available servers
 
 Standard options:
   --logfile=FILE           log tests and output to FILE [config.log]
@@ -251,6 +244,7 @@ External library support:
   --enable-libwavpack      enable wavpack encoding via libwavpack [no]
   --enable-libwebp         enable WebP encoding via libwebp [no]
   --enable-libx264         enable H.264 encoding via x264 [no]
+  --enable-libonvifc       enable onvif client
   --enable-libx265         enable HEVC encoding via x265 [no]
   --enable-libxavs         enable AVS encoding via xavs [no]
   --enable-libxcb          enable X11 grabbing using XCB [auto]
@@ -362,7 +356,7 @@ Optimization options (experts only):
   --disable-mipsfpu        disable floating point MIPS optimizations
   --disable-fast-unaligned consider unaligned accesses slow
 
-Developer options (useful when working on FFmpeg itself):
+Developer options (useful when working on BVBase itself):
   --disable-debug          disable debugging symbols
   --enable-debug=LEVEL     set the debug level [$debuglevel]
   --disable-optimizations  disable compiler optimizations
@@ -1304,17 +1298,11 @@ cp_if_changed(){
 # system-dependent things.
 
 COMPONENT_LIST="
-    bsfs
-    decoders
-    demuxers
-    encoders
-    filters
-    hwaccels
-    indevs
-    muxers
-    outdevs
-    parsers
-    protocols
+    bvprotocols
+	bvdevices
+	bvsystems
+	bvconfigs
+	bvservers
 "
 
 EXAMPLE_LIST="
@@ -1391,6 +1379,7 @@ EXTERNAL_LIBRARY_LIST="
     libwavpack
     libwebp
     libx264
+	libonvifc
     libx265
     libxavs
     libxcb
@@ -2397,6 +2386,11 @@ libutvideo_decoder_deps="libutvideo"
 libutvideo_encoder_deps="libutvideo"
 libzvbi_teletext_decoder_deps="libzvbi"
 nvenc_encoder_deps="nvenc"
+
+onvif_ptz_device_deps="libonvifc"
+onvif_dev_device_deps="libonvifc"
+onvif_config_deps="libonvifc"
+json_config_deps="libjansson"
 
 # demuxers / muxers
 ac3_demuxer_select="ac3_parser"
@@ -4965,6 +4959,8 @@ enabled openssl           && { check_lib openssl/ssl.h SSL_library_init -lssl -l
                                die "ERROR: openssl not found"; }
 enabled qtkit_indev      && { check_header_oc QTKit/QTKit.h || disable qtkit_indev; }
 
+enabled libonvifc         && { check_header soapH.h || die "ERROR: soapH.h header not found"; }
+enabled libjansson        && { check_header jansson.h || die "ERROR: jansson,h header not found"; }
 if enabled gnutls; then
     { check_lib nettle/bignum.h nettle_mpz_get_str_256 -lnettle -lhogweed -lgmp && enable nettle; } ||
     { check_lib gcrypt.h gcry_mpi_new -lgcrypt && enable gcrypt; }
@@ -5526,7 +5522,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in decoder encoder hwaccel parser demuxer muxer protocol filter bsf indev outdev; do
+for type in bvdevice bvsystem bvconfig bvserver; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns
@@ -5814,12 +5810,12 @@ Cflags: -I\${includedir}
 EOF
 }
 
-#pkgconfig_generate libavutil     "FFmpeg utility library"               "$LIBAVUTIL_VERSION"     "$LIBRT $LIBM"
-#pkgconfig_generate libavcodec    "FFmpeg codec library"                 "$LIBAVCODEC_VERSION"    "$extralibs"
-#pkgconfig_generate libavformat   "FFmpeg container format library"      "$LIBAVFORMAT_VERSION"   "$extralibs"
-#pkgconfig_generate libavdevice   "FFmpeg device handling library"       "$LIBAVDEVICE_VERSION"   "$extralibs"
-#pkgconfig_generate libavfilter   "FFmpeg audio/video filtering library" "$LIBAVFILTER_VERSION"   "$extralibs"
-#pkgconfig_generate libpostproc   "FFmpeg postprocessing library"        "$LIBPOSTPROC_VERSION"   ""
+#pkgconfig_generate libavutil     "BVBase utility library"               "$LIBAVUTIL_VERSION"     "$LIBRT $LIBM"
+#pkgconfig_generate libavcodec    "BVBase codec library"                 "$LIBAVCODEC_VERSION"    "$extralibs"
+#pkgconfig_generate libavformat   "BVBase container format library"      "$LIBAVFORMAT_VERSION"   "$extralibs"
+#pkgconfig_generate libavdevice   "BVBase device handling library"       "$LIBAVDEVICE_VERSION"   "$extralibs"
+#pkgconfig_generate libavfilter   "BVBase audio/video filtering library" "$LIBAVFILTER_VERSION"   "$extralibs"
+#pkgconfig_generate libpostproc   "BVBase postprocessing library"        "$LIBPOSTPROC_VERSION"   ""
 #pkgconfig_generate libavresample "Libav audio resampling library"       "$LIBAVRESAMPLE_VERSION" "$LIBM"
-#pkgconfig_generate libswscale    "FFmpeg image rescaling library"       "$LIBSWSCALE_VERSION"    "$LIBM"
-#pkgconfig_generate libswresample "FFmpeg audio resampling library"      "$LIBSWRESAMPLE_VERSION" "$LIBM"
+#pkgconfig_generate libswscale    "BVBase image rescaling library"       "$LIBSWSCALE_VERSION"    "$LIBM"
+#pkgconfig_generate libswresample "BVBase audio resampling library"      "$LIBSWRESAMPLE_VERSION" "$LIBM"
