@@ -248,7 +248,7 @@ int main(int argc, char ** argv)
     char in[1024], out[2048];
 
     printf("Encoding/decoding tests\n");
-    for (i = 0; i < FF_ARRAY_ELEMS(tests); i++)
+    for (i = 0; i < BV_ARRAY_ELEMS(tests); i++)
         error_count += test_encode_decode(tests[i].data, strlen(tests[i].data), tests[i].encoded_ref);
 
     if (argc>1 && !strcmp(argv[1], "-t")) {

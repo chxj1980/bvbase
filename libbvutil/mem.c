@@ -135,7 +135,7 @@ void *bv_malloc(size_t size)
     }
 #if CONFIG_MEMORY_POISONING
     if (ptr)
-        memset(ptr, FF_MEMORY_POISON, size);
+        memset(ptr, BV_MEMORY_POISON, size);
 #endif
     return ptr;
 }
@@ -334,7 +334,7 @@ void *bv_dynarray2_add(void **tab_ptr, int *nb_ptr, size_t elem_size,
         if (elem_data)
             memcpy(tab_elem_data, elem_data, elem_size);
         else if (CONFIG_MEMORY_POISONING)
-            memset(tab_elem_data, FF_MEMORY_POISON, elem_size);
+            memset(tab_elem_data, BV_MEMORY_POISON, elem_size);
     }, {
         bv_freep(tab_ptr);
         *nb_ptr = 0;

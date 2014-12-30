@@ -227,7 +227,7 @@ typedef struct BVFrame {
      */
     enum BVPictureType pict_type;
 
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     attribute_deprecated
     uint8_t *base[BV_NUM_DATA_POINTERS];
 #endif
@@ -264,11 +264,11 @@ typedef struct BVFrame {
     int display_picture_number;
 
     /**
-     * quality (between 1 (good) and FF_LAMBDA_MAX (bad))
+     * quality (between 1 (good) and BV_LAMBDA_MAX (bad))
      */
     int quality;
 
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     attribute_deprecated
     int reference;
 
@@ -336,7 +336,7 @@ typedef struct BVFrame {
      */
     uint64_t error[BV_NUM_DATA_POINTERS];
 
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     attribute_deprecated
     int type;
 #endif
@@ -362,7 +362,7 @@ typedef struct BVFrame {
      */
     int palette_has_changed;
 
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     attribute_deprecated
     int buffer_hints;
 
@@ -384,7 +384,7 @@ typedef struct BVFrame {
      */
     int64_t reordered_opaque;
 
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     /**
      * @deprecated this field is unused
      */
@@ -528,7 +528,7 @@ typedef struct BVFrame {
 
     /**
      * decode error flags of the frame, set to a combination of
-     * FF_DECODE_ERROR_xxx flags if the decoder produced a frame, but there
+     * BV_DECODE_ERROR_xxx flags if the decoder produced a frame, but there
      * were errors during the decoding.
      * Code outside libavcodec should access this field using:
      * bv_frame_get_decode_error_flags(frame)
@@ -536,8 +536,8 @@ typedef struct BVFrame {
      * - decoding: set by libavcodec, read by user.
      */
     int decode_error_flags;
-#define FF_DECODE_ERROR_INVALID_BITSTREAM   1
-#define FF_DECODE_ERROR_MISSING_REFERENCE   2
+#define BV_DECODE_ERROR_INVALID_BITSTREAM   1
+#define BV_DECODE_ERROR_MISSING_REFERENCE   2
 
     /**
      * number of audio channels, only used for audio.

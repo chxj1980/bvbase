@@ -41,14 +41,7 @@
 
 #include <float.h>
 
-#if FF_API_OLD_BVOPTIONS
-const BVOption *bv_next_option(FF_CONST_BVUTIL55 void *obj, const BVOption *last)
-{
-    return bv_opt_next(obj, last);
-}
-#endif
-
-const BVOption *bv_opt_next(FF_CONST_BVUTIL55 void *obj, const BVOption *last)
+const BVOption *bv_opt_next(BV_CONST_BVUTIL55 void *obj, const BVOption *last)
 {
     const BVClass *class;
     if (!obj)
@@ -212,7 +205,7 @@ static int set_string_number(void *obj, void *target_obj, const BVOption *o, con
                         if (o_named->type == BV_OPT_TYPE_CONST &&
                             o_named->unit &&
                             !strcmp(o_named->unit, o->unit)) {
-                            if (ci + 6 >= FF_ARRAY_ELEMS(const_values)) {
+                            if (ci + 6 >= BV_ARRAY_ELEMS(const_values)) {
                                 bv_log(obj, BV_LOG_ERROR, "const_values array too small for %s\n", o->unit);
                                 return BVERROR_PATCHWELCOME;
                             }
@@ -353,16 +346,6 @@ static int set_string_sample_fmt(void *obj, const BVOption *o, const char *val, 
                           BV_SAMPLE_FMT_NB, bv_get_sample_fmt, "sample format");
 }
 
-#if FF_API_OLD_BVOPTIONS
-int bv_set_string3(void *obj, const char *name, const char *val, int alloc, const BVOption **o_out)
-{
-    const BVOption *o = bv_opt_find(obj, name, NULL, 0, 0);
-    if (o_out)
-        *o_out = o;
-    return bv_opt_set(obj, name, val, 0);
-}
-#endif
-
 int bv_opt_set(void *obj, const char *name, const char *val, int search_flags)
 {
     int ret = 0;
@@ -409,7 +392,7 @@ int bv_opt_set(void *obj, const char *name, const char *val, int search_flags)
         if (!val || !strcmp(val, "none")) {
             *(int64_t *)dst = 0;
         } else {
-#if FF_API_GET_CHANNEL_LAYOUT_COMPAT
+#if BV_API_GET_CHANNEL_LAYOUT_COMPAT
             int64_t cl = ff_get_channel_layout(val, 0);
 #else
             int64_t cl = bv_get_channel_layout(val);
@@ -458,32 +441,6 @@ static int set_number(void *obj, const char *name, double num, int den, int64_t 
     dst = ((uint8_t*)target_obj) + o->offset;
     return write_number(obj, o, dst, num, den, intnum);
 }
-
-#if FF_API_OLD_BVOPTIONS
-const BVOption *bv_set_double(void *obj, const char *name, double n)
-{
-    const BVOption *o = bv_opt_find(obj, name, NULL, 0, 0);
-    if (set_number(obj, name, n, 1, 1, 0) < 0)
-        return NULL;
-    return o;
-}
-
-const BVOption *bv_set_q(void *obj, const char *name, BVRational n)
-{
-    const BVOption *o = bv_opt_find(obj, name, NULL, 0, 0);
-    if (set_number(obj, name, n.num, n.den, 1, 0) < 0)
-        return NULL;
-    return o;
-}
-
-const BVOption *bv_set_int(void *obj, const char *name, int64_t n)
-{
-    const BVOption *o = bv_opt_find(obj, name, NULL, 0, 0);
-    if (set_number(obj, name, 1, 1, n, 0) < 0)
-        return NULL;
-    return o;
-}
-#endif
 
 int bv_opt_set_int(void *obj, const char *name, int64_t val, int search_flags)
 {
@@ -624,47 +581,6 @@ int bv_opt_set_channel_layout(void *obj, const char *name, int64_t cl, int searc
     return 0;
 }
 
-#if FF_API_OLD_BVOPTIONS
-/**
- *
- * @param buf a buffer which is used for returning non string values as strings, can be NULL
- * @param buf_len allocated length in bytes of buf
- */
-const char *bv_get_string(void *obj, const char *name, const BVOption **o_out, char *buf, int buf_len)
-{
-    const BVOption *o = bv_opt_find(obj, name, NULL, 0, BV_OPT_SEARCH_CHILDREN);
-    void *dst;
-    uint8_t *bin;
-    int len, i;
-    if (!o)
-        return NULL;
-    if (o->type != BV_OPT_TYPE_STRING && (!buf || !buf_len))
-        return NULL;
-
-    dst= ((uint8_t*)obj) + o->offset;
-    if (o_out) *o_out= o;
-
-    switch (o->type) {
-    case BV_OPT_TYPE_FLAGS:     snprintf(buf, buf_len, "0x%08X",*(int    *)dst);break;
-    case BV_OPT_TYPE_INT:       snprintf(buf, buf_len, "%d" , *(int    *)dst);break;
-    case BV_OPT_TYPE_INT64:     snprintf(buf, buf_len, "%"PRId64, *(int64_t*)dst);break;
-    case BV_OPT_TYPE_FLOAT:     snprintf(buf, buf_len, "%f" , *(float  *)dst);break;
-    case BV_OPT_TYPE_DOUBLE:    snprintf(buf, buf_len, "%f" , *(double *)dst);break;
-    case BV_OPT_TYPE_RATIONAL:  snprintf(buf, buf_len, "%d/%d", ((BVRational*)dst)->num, ((BVRational*)dst)->den);break;
-    case BV_OPT_TYPE_CONST:     snprintf(buf, buf_len, "%f" , o->default_val.dbl);break;
-    case BV_OPT_TYPE_STRING:    return *(void**)dst;
-    case BV_OPT_TYPE_BINARY:
-        len = *(int*)(((uint8_t *)dst) + sizeof(uint8_t *));
-        if (len >= (buf_len + 1)/2) return NULL;
-        bin = *(uint8_t**)dst;
-        for (i = 0; i < len; i++) snprintf(buf + i*2, 3, "%02X", bin[i]);
-        break;
-    default: return NULL;
-    }
-    return buf;
-}
-#endif
-
 int bv_opt_set_dict_val(void *obj, const char *name, const BVDictionary *val, int search_flags)
 {
     void *target_obj;
@@ -778,44 +694,6 @@ error:
     *den=*intnum=0;
     return -1;
 }
-
-#if FF_API_OLD_BVOPTIONS
-double bv_get_double(void *obj, const char *name, const BVOption **o_out)
-{
-    int64_t intnum=1;
-    double num=1;
-    int den=1;
-
-    if (get_number(obj, name, o_out, &num, &den, &intnum, 0) < 0)
-        return NAN;
-    return num*intnum/den;
-}
-
-BVRational bv_get_q(void *obj, const char *name, const BVOption **o_out)
-{
-    int64_t intnum=1;
-    double num=1;
-    int den=1;
-
-    if (get_number(obj, name, o_out, &num, &den, &intnum, 0) < 0)
-        return (BVRational){0, 0};
-    if (num == 1.0 && (int)intnum == intnum)
-        return (BVRational){intnum, den};
-    else
-        return bv_d2q(num*intnum/den, 1<<24);
-}
-
-int64_t bv_get_int(void *obj, const char *name, const BVOption **o_out)
-{
-    int64_t intnum=1;
-    double num=1;
-    int den=1;
-
-    if (get_number(obj, name, o_out, &num, &den, &intnum, 0) < 0)
-        return -1;
-    return num*intnum/den;
-}
-#endif
 
 int bv_opt_get_int(void *obj, const char *name, int search_flags, int64_t *out_val)
 {
@@ -1174,20 +1052,9 @@ int bv_opt_show2(void *obj, void *bv_log_obj, int req_flags, int rej_flags)
 
 void bv_opt_set_defaults(void *s)
 {
-#if FF_API_OLD_BVOPTIONS
-    bv_opt_set_defaults2(s, 0, 0);
-}
-
-void bv_opt_set_defaults2(void *s, int mask, int flags)
-{
-#endif
     const BVOption *opt = NULL;
     while ((opt = bv_opt_next(s, opt))) {
         void *dst = ((uint8_t*)s) + opt->offset;
-#if FF_API_OLD_BVOPTIONS
-        if ((opt->flags & mask) != flags)
-            continue;
-#endif
 
         if (opt->flags & BV_OPT_FLAG_READONLY)
             continue;
@@ -1573,7 +1440,7 @@ static int opt_size(enum BVOptionType type)
     return 0;
 }
 
-int bv_opt_copy(void *dst, FF_CONST_BVUTIL55 void *src)
+int bv_opt_copy(void *dst, BV_CONST_BVUTIL55 void *src)
 {
     const BVOption *o = NULL;
     const BVClass *c;
@@ -2109,7 +1976,7 @@ int main(void)
 
         bv_log_set_level(BV_LOG_QUIET);
 
-        for (i=0; i < FF_ARRAY_ELEMS(options); i++) {
+        for (i=0; i < BV_ARRAY_ELEMS(options); i++) {
             bv_log(&test_ctx, BV_LOG_DEBUG, "Setting options string '%s'\n", options[i]);
             if (bv_set_options_string(&test_ctx, options[i], "=", ":") < 0)
                 printf("Error '%s'\n", options[i]);
@@ -2140,7 +2007,7 @@ int main(void)
 
         bv_log_set_level(BV_LOG_QUIET);
 
-        for (i=0; i < FF_ARRAY_ELEMS(options); i++) {
+        for (i=0; i < BV_ARRAY_ELEMS(options); i++) {
             bv_log(&test_ctx, BV_LOG_DEBUG, "Setting options string '%s'\n", options[i]);
             if (bv_opt_set_from_string(&test_ctx, options[i], shorthand, "=", ":") < 0)
                 printf("Error '%s'\n", options[i]);

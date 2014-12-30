@@ -138,7 +138,7 @@ static const VideoRateAbbr video_rate_abbrs[]= {
 int bv_parse_video_size(int *width_ptr, int *height_ptr, const char *str)
 {
     int i;
-    int n = FF_ARRAY_ELEMS(video_size_abbrs);
+    int n = BV_ARRAY_ELEMS(video_size_abbrs);
     const char *p;
     int width = 0, height = 0;
 
@@ -169,7 +169,7 @@ int bv_parse_video_size(int *width_ptr, int *height_ptr, const char *str)
 int bv_parse_video_rate(BVRational *rate, const char *arg)
 {
     int i, ret;
-    int n = FF_ARRAY_ELEMS(video_rate_abbrs);
+    int n = BV_ARRAY_ELEMS(video_rate_abbrs);
 
     /* First, we check our abbreviation table */
     for (i = 0; i < n; ++i)
@@ -387,7 +387,7 @@ int bv_parse_color(uint8_t *rgba_color, const char *color_string, int slen,
     } else {
         entry = bsearch(color_string2,
                         color_table,
-                        FF_ARRAY_ELEMS(color_table),
+                        BV_ARRAY_ELEMS(color_table),
                         sizeof(ColorEntry),
                         color_table_compare);
         if (!entry) {
@@ -425,7 +425,7 @@ const char *bv_get_known_color_name(int color_idx, const uint8_t **rgbp)
 {
     const ColorEntry *color;
 
-    if ((unsigned)color_idx >= FF_ARRAY_ELEMS(color_table))
+    if ((unsigned)color_idx >= BV_ARRAY_ELEMS(color_table))
         return NULL;
 
     color = &color_table[color_idx];
@@ -577,7 +577,7 @@ int bv_parse_time(int64_t *timeval, const char *timestr, int duration)
         }
 
         /* parse the year-month-day part */
-        for (i = 0; i < FF_ARRAY_ELEMS(date_fmt); i++) {
+        for (i = 0; i < BV_ARRAY_ELEMS(date_fmt); i++) {
             q = bv_small_strptime(p, date_fmt[i], &dt);
             if (q)
                 break;
@@ -595,7 +595,7 @@ int bv_parse_time(int64_t *timeval, const char *timestr, int duration)
             p++;
 
         /* parse the hour-minute-second part */
-        for (i = 0; i < FF_ARRAY_ELEMS(time_fmt); i++) {
+        for (i = 0; i < BV_ARRAY_ELEMS(time_fmt); i++) {
             q = bv_small_strptime(p, time_fmt[i], &dt);
             if (q)
                 break;
@@ -748,7 +748,7 @@ int main(void)
             " -21332.2324   ",
         };
 
-        for (i = 0; i < FF_ARRAY_ELEMS(rates); i++) {
+        for (i = 0; i < BV_ARRAY_ELEMS(rates); i++) {
             int ret;
             BVRational q = { 0, 0 };
             ret = bv_parse_video_rate(&q, rates[i]);
@@ -802,7 +802,7 @@ int main(void)
 
         bv_log_set_level(BV_LOG_DEBUG);
 
-        for (i = 0;  i < FF_ARRAY_ELEMS(color_names); i++) {
+        for (i = 0;  i < BV_ARRAY_ELEMS(color_names); i++) {
             if (bv_parse_color(rgba, color_names[i], -1, NULL) >= 0)
                 printf("%s -> R(%d) G(%d) B(%d) A(%d)\n",
                        color_names[i], rgba[0], rgba[1], rgba[2], rgba[3]);
@@ -825,7 +825,7 @@ int main(void)
         };
 
         bv_log_set_level(BV_LOG_DEBUG);
-        for (i = 0;  i < FF_ARRAY_ELEMS(fmt_timespec_entries); i++) {
+        for (i = 0;  i < BV_ARRAY_ELEMS(fmt_timespec_entries); i++) {
             char *p;
             struct fmt_timespec_entry *e = &fmt_timespec_entries[i];
             printf("fmt:'%s' spec:'%s' -> ", e->fmt, e->timespec);
@@ -864,7 +864,7 @@ int main(void)
         bv_log_set_level(BV_LOG_DEBUG);
         putenv(tzstr);
         printf("(now is 2012-03-17 09:14:13 +0100, local time is UTC+1)\n");
-        for (i = 0;  i < FF_ARRAY_ELEMS(time_string); i++) {
+        for (i = 0;  i < BV_ARRAY_ELEMS(time_string); i++) {
             printf("%-24s -> ", time_string[i]);
             if (bv_parse_time(&tv, time_string[i], 0)) {
                 printf("error\n");
@@ -877,7 +877,7 @@ int main(void)
                        tm->tm_hour, tm->tm_min, tm->tm_sec);
             }
         }
-        for (i = 0;  i < FF_ARRAY_ELEMS(duration_string); i++) {
+        for (i = 0;  i < BV_ARRAY_ELEMS(duration_string); i++) {
             printf("%-24s -> ", duration_string[i]);
             if (bv_parse_time(&tv, duration_string[i], 1)) {
                 printf("error\n");

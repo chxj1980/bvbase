@@ -22,7 +22,7 @@
 
 #include "opencl.h"
 
-#define FF_OPENCL_PARAM_INFO(a) ((void*)(&(a))), (sizeof(a))
+#define BV_OPENCL_PARAM_INFO(a) ((void*)(&(a))), (sizeof(a))
 
 typedef struct {
     cl_kernel kernel;

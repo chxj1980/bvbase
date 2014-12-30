@@ -66,22 +66,22 @@
 
 #if HAVE_PRAGMA_DEPRECATED
 #    if defined(__ICL) || defined (__INTEL_COMPILER)
-#        define FF_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
-#        define FF_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#        define BV_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
+#        define BV_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
 #    elif defined(_MSC_VER)
-#        define FF_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
-#        define FF_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#        define BV_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
+#        define BV_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
 #    else
-#        define FF_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#        define FF_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
+#        define BV_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#        define BV_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
 #    endif
 #else
-#    define FF_DISABLE_DEPRECATION_WARNINGS
-#    define FF_ENABLE_DEPRECATION_WARNINGS
+#    define BV_DISABLE_DEPRECATION_WARNINGS
+#    define BV_ENABLE_DEPRECATION_WARNINGS
 #endif
 
 
-#define FF_MEMORY_POISON 0x2a
+#define BV_MEMORY_POISON 0x2a
 
 #define MAKE_ACCESSORS(str, name, type, field) \
     type bv_##name##_get_##field(const str *s) { return s->field; } \
@@ -126,7 +126,7 @@
 #   define LOCAL_ALIGNED_32(t, v, ...) LOCAL_ALIGNED(32, t, v, __VA_ARGS__)
 #endif
 
-#define FF_ALLOC_OR_GOTO(ctx, p, size, label)\
+#define BV_ALLOC_OR_GOTO(ctx, p, size, label)\
 {\
     p = bv_malloc(size);\
     if (!(p) && (size) != 0) {\
@@ -135,7 +135,7 @@
     }\
 }
 
-#define FF_ALLOCZ_OR_GOTO(ctx, p, size, label)\
+#define BV_ALLOCZ_OR_GOTO(ctx, p, size, label)\
 {\
     p = bv_mallocz(size);\
     if (!(p) && (size) != 0) {\
@@ -144,7 +144,7 @@
     }\
 }
 
-#define FF_ALLOC_ARRAY_OR_GOTO(ctx, p, nelem, elsize, label)\
+#define BV_ALLOC_ARRAY_OR_GOTO(ctx, p, nelem, elsize, label)\
 {\
     p = bv_malloc_array(nelem, elsize);\
     if (!p) {\
@@ -153,7 +153,7 @@
     }\
 }
 
-#define FF_ALLOCZ_ARRAY_OR_GOTO(ctx, p, nelem, elsize, label)\
+#define BV_ALLOCZ_ARRAY_OR_GOTO(ctx, p, nelem, elsize, label)\
 {\
     p = bv_mallocz_array(nelem, elsize);\
     if (!p) {\
@@ -198,11 +198,11 @@
  * @param ver  version tag to assign function
  */
 #if HAVE_SYMVER_ASM_LABEL
-#   define FF_SYMVER(type, name, args, ver)                     \
+#   define BV_SYMVER(type, name, args, ver)                     \
     type ff_##name args __asm__ (EXTERN_PREFIX #name "@" ver);  \
     type ff_##name args
 #elif HAVE_SYMVER_GNU_ASM
-#   define FF_SYMVER(type, name, args, ver)                             \
+#   define BV_SYMVER(type, name, args, ver)                             \
     __asm__ (".symver ff_" #name "," EXTERN_PREFIX #name "@" ver);      \
     type ff_##name args;                                                \
     type ff_##name args
@@ -242,10 +242,10 @@ void bvpriv_request_sample(void *avc,
 
 #if HAVE_LIBC_MSVCRT
 #define bvpriv_open ff_open
-#define PTRDIFF_SPECIFIER "Id"
+#define PTRDIBV_SPECIFIER "Id"
 #define SIZE_SPECIFIER "Iu"
 #else
-#define PTRDIFF_SPECIFIER "td"
+#define PTRDIBV_SPECIFIER "td"
 #define SIZE_SPECIFIER "zu"
 #endif
 
@@ -256,7 +256,7 @@ int bvpriv_open(const char *filename, int flags, ...);
 
 int bvpriv_set_systematic_pal2(uint32_t pal[256], enum BVPixelFormat pix_fmt);
 
-#if FF_API_GET_CHANNEL_LAYOUT_COMPAT
+#if BV_API_GET_CHANNEL_LAYOUT_COMPAT
 uint64_t ff_get_channel_layout(const char *name, int compat);
 #endif
 

@@ -457,7 +457,7 @@ int main(void)
     };
 
     printf("Testing bv_get_token()\n");
-    for (i = 0; i < FF_ARRAY_ELEMS(strings); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(strings); i++) {
         const char *p = strings[i];
         char *q;
         printf("|%s|", p);

@@ -236,17 +236,6 @@ enum BVOptionType{
     BV_OPT_TYPE_DURATION   = MKBETAG('D','U','R',' '),
     BV_OPT_TYPE_COLOR      = MKBETAG('C','O','L','R'),
     BV_OPT_TYPE_CHANNEL_LAYOUT = MKBETAG('C','H','L','A'),
-#if FF_API_OLD_BVOPTIONS
-    FF_OPT_TYPE_FLAGS = 0,
-    FF_OPT_TYPE_INT,
-    FF_OPT_TYPE_INT64,
-    FF_OPT_TYPE_DOUBLE,
-    FF_OPT_TYPE_FLOAT,
-    FF_OPT_TYPE_STRING,
-    FF_OPT_TYPE_RATIONAL,
-    FF_OPT_TYPE_BINARY,  ///< offset must point to a pointer immediately followed by an int for the length
-    FF_OPT_TYPE_CONST=128,
-#endif
 };
 
 /**
@@ -284,7 +273,7 @@ typedef struct BVOption {
     int flags;
 #define BV_OPT_FLAG_ENCODING_PARAM  1   ///< a generic parameter which can be set by the user for muxing or encoding
 #define BV_OPT_FLAG_DECODING_PARAM  2   ///< a generic parameter which can be set by the user for demuxing or decoding
-#if FF_API_OPT_TYPE_METADATA
+#if BV_API_OPT_TYPE_METADATA
 #define BV_OPT_FLAG_METADATA        4   ///< some data extracted or inserted into the file like title, comment, ...
 #endif
 #define BV_OPT_FLAG_AUDIO_PARAM     8
@@ -378,48 +367,6 @@ typedef struct BVOptionRanges {
     int nb_components;
 } BVOptionRanges;
 
-
-#if FF_API_OLD_BVOPTIONS
-/**
- * Set the field of obj with the given name to value.
- *
- * @param[in] obj A struct whose first element is a pointer to an
- * BVClass.
- * @param[in] name the name of the field to set
- * @param[in] val The value to set. If the field is not of a string
- * type, then the given string is parsed.
- * SI postfixes and some named scalars are supported.
- * If the field is of a numeric type, it has to be a numeric or named
- * scalar. Behavior with more than one scalar and +- infix operators
- * is undefined.
- * If the field is of a flags type, it has to be a sequence of numeric
- * scalars or named flags separated by '+' or '-'. Prefixing a flag
- * with '+' causes it to be set without affecting the other flags;
- * similarly, '-' unsets a flag.
- * @param[out] o_out if non-NULL put here a pointer to the BVOption
- * found
- * @param alloc this parameter is currently ignored
- * @return 0 if the value has been set, or an BVERROR code in case of
- * error:
- * BVERROR_OPTION_NOT_FOUND if no matching option exists
- * BVERROR(ERANGE) if the value is out of range
- * BVERROR(EINVAL) if the value is not valid
- * @deprecated use bv_opt_set()
- */
-attribute_deprecated
-int bv_set_string3(void *obj, const char *name, const char *val, int alloc, const BVOption **o_out);
-
-attribute_deprecated const BVOption *bv_set_double(void *obj, const char *name, double n);
-attribute_deprecated const BVOption *bv_set_q(void *obj, const char *name, BVRational n);
-attribute_deprecated const BVOption *bv_set_int(void *obj, const char *name, int64_t n);
-
-double bv_get_double(void *obj, const char *name, const BVOption **o_out);
-BVRational bv_get_q(void *obj, const char *name, const BVOption **o_out);
-int64_t bv_get_int(void *obj, const char *name, const BVOption **o_out);
-attribute_deprecated const char *bv_get_string(void *obj, const char *name, const BVOption **o_out, char *buf, int buf_len);
-attribute_deprecated const BVOption *bv_next_option(FF_CONST_BVUTIL55 void *obj, const BVOption *last);
-#endif
-
 /**
  * Show the obj options.
  *
@@ -437,11 +384,6 @@ int bv_opt_show2(void *obj, void *bv_log_obj, int req_flags, int rej_flags);
  * @param s an BVOption-enabled struct (its first member must be a pointer to BVClass)
  */
 void bv_opt_set_defaults(void *s);
-
-#if FF_API_OLD_BVOPTIONS
-attribute_deprecated
-void bv_opt_set_defaults2(void *s, int mask, int flags);
-#endif
 
 /**
  * Parse the key/value pairs list in opts. For each key/value pair
@@ -674,7 +616,7 @@ const BVOption *bv_opt_find2(void *obj, const char *name, const char *unit,
  *             or NULL
  * @return next BVOption or NULL
  */
-const BVOption *bv_opt_next(FF_CONST_BVUTIL55 void *obj, const BVOption *prev);
+const BVOption *bv_opt_next(BV_CONST_BVUTIL55 void *obj, const BVOption *prev);
 
 /**
  * Iterate over BVOptions-enabled children of obj.
@@ -826,7 +768,7 @@ int bv_opt_query_ranges(BVOptionRanges **, void *obj, const char *key, int flags
  * @param src  Object to copy into
  * @return 0 on success, negative on error
  */
-int bv_opt_copy(void *dest, FF_CONST_BVUTIL55 void *src);
+int bv_opt_copy(void *dest, BV_CONST_BVUTIL55 void *src);
 
 /**
  * Get a default list of allowed ranges for the given option.

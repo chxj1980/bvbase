@@ -25,7 +25,7 @@
 
 #if HAVE_INLINE_ASM
 
-#define FF_TIMER_UNITS "decicycles"
+#define BV_TIMER_UNITS "decicycles"
 #define BV_READ_TIME read_time
 
 static inline uint64_t read_time(void)

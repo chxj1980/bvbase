@@ -86,7 +86,7 @@ static const struct {
     { "E",   M_E   },
     { "PI",  M_PI  },
     { "PHI", M_PHI },
-    { "QP2LAMBDA", FF_QP2LAMBDA },
+    { "QP2LAMBDA", BV_QP2LAMBDA },
 };
 
 double bv_strtod(const char *numstr, char **tail)
@@ -348,7 +348,7 @@ static int parse_primary(AVExpr **e, Parser *p)
             return 0;
         }
     }
-    for (i = 0; i < FF_ARRAY_ELEMS(constants); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(constants); i++) {
         if (strmatch(p->s, constants[i].name)) {
             p->s += strlen(constants[i].name);
             d->type = e_value;

@@ -73,58 +73,58 @@
  * @}
  *
  * @defgroup depr_guards Deprecation guards
- * FF_API_* defines may be placed below to indicate public API that will be
+ * BV_API_* defines may be placed below to indicate public API that will be
  * dropped at a future version bump. The defines themselves are not part of
  * the public API and may change, break or disappear at any time.
  *
  * @{
  */
 
-#ifndef FF_API_OLD_BVOPTIONS
-#define FF_API_OLD_BVOPTIONS            (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_OLD_BVOPTIONS
+#define BV_API_OLD_BVOPTIONS            (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_PIX_FMT
-#define FF_API_PIX_FMT                  (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_PIX_FMT
+#define BV_API_PIX_FMT                  (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_CONTEXT_SIZE
-#define FF_API_CONTEXT_SIZE             (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_CONTEXT_SIZE
+#define BV_API_CONTEXT_SIZE             (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_PIX_FMT_DESC
-#define FF_API_PIX_FMT_DESC             (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_PIX_FMT_DESC
+#define BV_API_PIX_FMT_DESC             (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_BV_REVERSE
-#define FF_API_BV_REVERSE               (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_BV_REVERSE
+#define BV_API_BV_REVERSE               (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_AUDIOCONVERT
-#define FF_API_AUDIOCONVERT             (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_AUDIOCONVERT
+#define BV_API_AUDIOCONVERT             (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_CPU_FLAG_MMX2
-#define FF_API_CPU_FLAG_MMX2            (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_CPU_FLAG_MMX2
+#define BV_API_CPU_FLAG_MMX2            (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_LLS_PRIVATE
-#define FF_API_LLS_PRIVATE              (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_LLS_PRIVATE
+#define BV_API_LLS_PRIVATE              (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_BVFRAME_LBVC
-#define FF_API_BVFRAME_LBVC             (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_BVFRAME_LBVC
+#define BV_API_BVFRAME_LBVC             (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_VDPAU
-#define FF_API_VDPAU                    (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_VDPAU
+#define BV_API_VDPAU                    (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_GET_CHANNEL_LAYOUT_COMPAT
-#define FF_API_GET_CHANNEL_LAYOUT_COMPAT (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_GET_CHANNEL_LAYOUT_COMPAT
+#define BV_API_GET_CHANNEL_LAYOUT_COMPAT (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_XVMC
-#define FF_API_XVMC                     (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_XVMC
+#define BV_API_XVMC                     (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
-#ifndef FF_API_OPT_TYPE_METADATA
-#define FF_API_OPT_TYPE_METADATA        (LIBBVUTIL_VERSION_MAJOR < 55)
+#ifndef BV_API_OPT_TYPE_METADATA
+#define BV_API_OPT_TYPE_METADATA        (LIBBVUTIL_VERSION_MAJOR < 55)
 #endif
 
-#ifndef FF_CONST_BVUTIL55
+#ifndef BV_CONST_BVUTIL55
 #if LIBBVUTIL_VERSION_MAJOR >= 55
-#define FF_CONST_BVUTIL55 const
+#define BV_CONST_BVUTIL55 const
 #else
-#define FF_CONST_BVUTIL55
+#define BV_CONST_BVUTIL55
 #endif
 #endif
 

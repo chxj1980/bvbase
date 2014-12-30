@@ -165,7 +165,7 @@ static const OpenclErrorMsg opencl_err_msg[] = {
 const char *bv_opencl_errstr(cl_int status)
 {
     int i;
-    for (i = 0; i < FF_ARRAY_ELEMS(opencl_err_msg); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(opencl_err_msg); i++) {
         if (opencl_err_msg[i].err_code == status)
             return opencl_err_msg[i].err_str;
     }
@@ -219,7 +219,7 @@ static int get_device_list(BVOpenCLDeviceList *device_list)
         ret = BVERROR(ENOMEM);
         goto end;
     }
-    devices_num = bv_mallocz(sizeof(int) * FF_ARRAY_ELEMS(device_type));
+    devices_num = bv_mallocz(sizeof(int) * BV_ARRAY_ELEMS(device_type));
     if (!devices_num) {
         ret = BVERROR(ENOMEM);
         goto end;
@@ -235,7 +235,7 @@ static int get_device_list(BVOpenCLDeviceList *device_list)
                                    sizeof(device_list->platform_node[i]->platform_name),
                                    device_list->platform_node[i]->platform_name, NULL);
         total_devices_num = 0;
-        for (j = 0; j < FF_ARRAY_ELEMS(device_type); j++) {
+        for (j = 0; j < BV_ARRAY_ELEMS(device_type); j++) {
             status = clGetDeviceIDs(device_list->platform_node[i]->platform_id,
                                     device_type[j], 0, NULL, &devices_num[j]);
             total_devices_num += devices_num[j];
@@ -245,7 +245,7 @@ static int get_device_list(BVOpenCLDeviceList *device_list)
             ret = BVERROR(ENOMEM);
             goto end;
         }
-        for (j = 0; j < FF_ARRAY_ELEMS(device_type); j++) {
+        for (j = 0; j < BV_ARRAY_ELEMS(device_type); j++) {
             if (devices_num[j]) {
                 device_ids = bv_mallocz_array(devices_num[j], sizeof(cl_device_id));
                 if (!device_ids) {

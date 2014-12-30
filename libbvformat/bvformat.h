@@ -32,28 +32,39 @@ extern "C"{
 #include <libbvutil/log.h>
 #include <libbvcodec/bvcodec.h>
 
-struct BVFormatContext;
+struct _BVFormatContext;
+
+typedef struct _BVProbeData {
+    const char *filename;
+    void *buf;
+    int buf_size;
+    const char *mime_type;
+} BVProbeData;
 
 typedef struct _BVInputFormat {
     const char *name;
+    const char *extensions;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVInputFormat *next;
-    int (*read_head)(struct BVFormatContext *h);
-    int (*read_packet)(struct BVFormatContext *h, BVPacket *pkt);
-    int (*read_close)(struct BVFormatContext *h);
-    int (*control_message)(struct BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*read_probe)(BVProbeData *);
+    int (*read_head)(struct _BVFormatContext *h);
+    int (*read_packet)(struct _BVFormatContext *h, BVPacket *pkt);
+    int (*read_close)(struct _BVFormatContext *h);
+    int (*control_message)(struct _BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
 } BVInputFormat;
 
 typedef struct _BVOutputFormat {
     const char *name;
+    const char *extensions;
+    const char *mime_type;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVOutputFormat *next;
-    int (*write_head)(struct BVFormatContext *h);
-    int (*write_packet)(struct BVFormatContext *h, BVPacket *pkt);
-    int (*write_trailer)(struct BVFormatContext *h);
-    int (*control_message)(struct BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*write_head)(struct _BVFormatContext *h);
+    int (*write_packet)(struct _BVFormatContext *h, BVPacket *pkt);
+    int (*write_trailer)(struct _BVFormatContext *h);
+    int (*control_message)(struct _BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
 } BVOutputFormat;
 
 typedef struct _BVStream {
@@ -71,11 +82,21 @@ typedef struct _BVFormatContext {
     BVStream **stream;
 } BVFormatContext;
 
+void bv_register_input_format(BVInputFormat *ifmt);
 
-int bv_register_input_format(BVInputFormat *ifmt);
-BVInputFormat * bv_input_format_next(BVInputFormat *ifmt);
+void bv_register_output_format(BVOutputFormat *format);
+
+BVInputFormat * bv_iformat_next(BVInputFormat *ifmt);
+
+BVOutputFormat *bv_oformat_next(const BVOutputFormat *f);
+
+BVInputFormat *bv_find_input_format(const char *short_name);
 
 void bv_format_register_all(void);
+
+int bv_open_input_format(BVFormatContext **fmt, const char *url, BVInputFormat *format, BVDictionary **options);
+
+BVOutputFormat *bv_guess_format(const char *short_name, const char *filename, const char *mime_type);
 #ifdef __cplusplus
 }
 #endif

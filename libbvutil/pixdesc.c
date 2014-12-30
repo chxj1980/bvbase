@@ -127,7 +127,7 @@ void bv_write_image_line(const uint16_t *src,
     }
 }
 
-#if !FF_API_PIX_FMT_DESC
+#if !BV_API_PIX_FMT_DESC
 static
 #endif
 const BVPixFmtDescriptor bv_pix_fmt_descriptors[BV_PIX_FMT_NB] = {
@@ -326,7 +326,7 @@ const BVPixFmtDescriptor bv_pix_fmt_descriptors[BV_PIX_FMT_NB] = {
         },
         .flags = BV_PIX_FMT_FLAG_PLANAR,
     },
-#if FF_API_XVMC
+#if BV_API_XVMC
     [BV_PIX_FMT_XVMC_MPEG2_MC] = {
         .name = "xvmcmc",
         .flags = BV_PIX_FMT_FLAG_HWACCEL,
@@ -335,13 +335,13 @@ const BVPixFmtDescriptor bv_pix_fmt_descriptors[BV_PIX_FMT_NB] = {
         .name = "xvmcidct",
         .flags = BV_PIX_FMT_FLAG_HWACCEL,
     },
-#endif /* FF_API_XVMC */
-#if !FF_API_XVMC
+#endif /* BV_API_XVMC */
+#if !BV_API_XVMC
     [BV_PIX_FMT_XVMC] = {
         .name = "xvmc",
         .flags = BV_PIX_FMT_FLAG_HWACCEL,
     },
-#endif /* !FF_API_XVMC */
+#endif /* !BV_API_XVMC */
     [BV_PIX_FMT_UYVY422] = {
         .name = "uyvy422",
         .nb_components = 3,
@@ -878,7 +878,7 @@ const BVPixFmtDescriptor bv_pix_fmt_descriptors[BV_PIX_FMT_NB] = {
         },
         .flags = BV_PIX_FMT_FLAG_PLANAR | BV_PIX_FMT_FLAG_ALPHA,
     },
-#if FF_API_VDPAU
+#if BV_API_VDPAU
     [BV_PIX_FMT_VDPAU_H264] = {
         .name = "vdpau_h264",
         .log2_chroma_w = 1,
@@ -1929,7 +1929,7 @@ static const char *chroma_location_names[BVCHROMA_LOC_NB] = {
     "top", "bottomleft", "bottom",
 };
 
-FF_DISABLE_DEPRECATION_WARNINGS
+BV_DISABLE_DEPRECATION_WARNINGS
 static enum BVPixelFormat get_pix_fmt_internal(const char *name)
 {
     enum BVPixelFormat pix_fmt;
@@ -2033,7 +2033,7 @@ const BVPixFmtDescriptor *bv_pix_fmt_desc_next(const BVPixFmtDescriptor *prev)
 {
     if (!prev)
         return &bv_pix_fmt_descriptors[0];
-    while (prev - bv_pix_fmt_descriptors < FF_ARRAY_ELEMS(bv_pix_fmt_descriptors) - 1) {
+    while (prev - bv_pix_fmt_descriptors < BV_ARRAY_ELEMS(bv_pix_fmt_descriptors) - 1) {
         prev++;
         if (prev->name)
             return prev;
@@ -2044,12 +2044,12 @@ const BVPixFmtDescriptor *bv_pix_fmt_desc_next(const BVPixFmtDescriptor *prev)
 enum BVPixelFormat bv_pix_fmt_desc_get_id(const BVPixFmtDescriptor *desc)
 {
     if (desc < bv_pix_fmt_descriptors ||
-        desc >= bv_pix_fmt_descriptors + FF_ARRAY_ELEMS(bv_pix_fmt_descriptors))
+        desc >= bv_pix_fmt_descriptors + BV_ARRAY_ELEMS(bv_pix_fmt_descriptors))
         return BV_PIX_FMT_NONE;
 
     return desc - bv_pix_fmt_descriptors;
 }
-FF_ENABLE_DEPRECATION_WARNINGS
+BV_ENABLE_DEPRECATION_WARNINGS
 
 int bv_pix_fmt_get_chroma_sub_sample(enum BVPixelFormat pix_fmt,
                                      int *h_shift, int *v_shift)
@@ -2073,7 +2073,7 @@ int bv_pix_fmt_count_planes(enum BVPixelFormat pix_fmt)
 
     for (i = 0; i < desc->nb_components; i++)
         planes[desc->comp[i].plane] = 1;
-    for (i = 0; i < FF_ARRAY_ELEMS(planes); i++)
+    for (i = 0; i < BV_ARRAY_ELEMS(planes); i++)
         ret += planes[i];
     return ret;
 }
@@ -2081,7 +2081,7 @@ int bv_pix_fmt_count_planes(enum BVPixelFormat pix_fmt)
 void ff_check_pixfmt_descriptors(void){
     int i, j;
 
-    for (i=0; i<FF_ARRAY_ELEMS(bv_pix_fmt_descriptors); i++) {
+    for (i=0; i<BV_ARRAY_ELEMS(bv_pix_fmt_descriptors); i++) {
         const BVPixFmtDescriptor *d = &bv_pix_fmt_descriptors[i];
         uint8_t fill[4][8+6+3] = {{0}};
         uint8_t *data[4] = {fill[0], fill[1], fill[2], fill[3]};
@@ -2098,7 +2098,7 @@ void ff_check_pixfmt_descriptors(void){
         bv_assert0((d->nb_components==4 || d->nb_components==2) == !!(d->flags & BV_PIX_FMT_FLAG_ALPHA));
         bv_assert2(bv_get_pix_fmt(d->name) == i);
 
-        for (j=0; j<FF_ARRAY_ELEMS(d->comp); j++) {
+        for (j=0; j<BV_ARRAY_ELEMS(d->comp); j++) {
             const BVComponentDescriptor *c = &d->comp[j];
             if(j>=d->nb_components) {
                 bv_assert0(!c->plane && !c->step_minus1 && !c->offset_plus1 && !c->shift && !c->depth_minus1);
@@ -2138,11 +2138,11 @@ enum BVPixelFormat bv_pix_fmt_swap_endianness(enum BVPixelFormat pix_fmt)
     return get_pix_fmt_internal(name);
 }
 
-#define FF_COLOR_NA      -1
-#define FF_COLOR_RGB      0 /**< RGB color space */
-#define FF_COLOR_GRAY     1 /**< gray color space */
-#define FF_COLOR_YUV      2 /**< YUV color space. 16 <= Y <= 235, 16 <= U, V <= 240 */
-#define FF_COLOR_YUV_JPEG 3 /**< YUV color space. 0 <= Y <= 255, 0 <= U, V <= 255 */
+#define BV_COLOR_NA      -1
+#define BV_COLOR_RGB      0 /**< RGB color space */
+#define BV_COLOR_GRAY     1 /**< gray color space */
+#define BV_COLOR_YUV      2 /**< YUV color space. 16 <= Y <= 235, 16 <= U, V <= 240 */
+#define BV_COLOR_YUV_JPEG 3 /**< YUV color space. 0 <= Y <= 255, 0 <= U, V <= 255 */
 
 #define pixdesc_has_alpha(pixdesc) \
     ((pixdesc)->nb_components == 2 || (pixdesc)->nb_components == 4 || (pixdesc)->flags & BV_PIX_FMT_FLAG_PAL)
@@ -2150,21 +2150,21 @@ enum BVPixelFormat bv_pix_fmt_swap_endianness(enum BVPixelFormat pix_fmt)
 
 static int get_color_type(const BVPixFmtDescriptor *desc) {
     if (desc->flags & BV_PIX_FMT_FLAG_PAL)
-        return FF_COLOR_RGB;
+        return BV_COLOR_RGB;
 
     if(desc->nb_components == 1 || desc->nb_components == 2)
-        return FF_COLOR_GRAY;
+        return BV_COLOR_GRAY;
 
     if(desc->name && !strncmp(desc->name, "yuvj", 4))
-        return FF_COLOR_YUV_JPEG;
+        return BV_COLOR_YUV_JPEG;
 
     if(desc->flags & BV_PIX_FMT_FLAG_RGB)
-        return  FF_COLOR_RGB;
+        return  BV_COLOR_RGB;
 
     if(desc->nb_components == 0)
-        return FF_COLOR_NA;
+        return BV_COLOR_NA;
 
-    return FF_COLOR_YUV;
+    return BV_COLOR_YUV;
 }
 
 static int get_pix_fmt_depth(int *min, int *max, enum BVPixelFormat pix_fmt)
@@ -2219,19 +2219,19 @@ static int get_pix_fmt_score(enum BVPixelFormat dst_pix_fmt,
 
     for (i = 0; i < nb_components; i++) {
         int depth_minus1 = (dst_pix_fmt == BV_PIX_FMT_PAL8) ? 7/nb_components : dst_desc->comp[i].depth_minus1;
-        if (src_desc->comp[i].depth_minus1 > depth_minus1 && (consider & FF_LOSS_DEPTH)) {
-            loss |= FF_LOSS_DEPTH;
+        if (src_desc->comp[i].depth_minus1 > depth_minus1 && (consider & BV_LOSS_DEPTH)) {
+            loss |= BV_LOSS_DEPTH;
             score -= 65536 >> depth_minus1;
         }
     }
 
-    if (consider & FF_LOSS_RESOLUTION) {
+    if (consider & BV_LOSS_RESOLUTION) {
         if (dst_desc->log2_chroma_w > src_desc->log2_chroma_w) {
-            loss |= FF_LOSS_RESOLUTION;
+            loss |= BV_LOSS_RESOLUTION;
             score -= 256 << dst_desc->log2_chroma_w;
         }
         if (dst_desc->log2_chroma_h > src_desc->log2_chroma_h) {
-            loss |= FF_LOSS_RESOLUTION;
+            loss |= BV_LOSS_RESOLUTION;
             score -= 256 << dst_desc->log2_chroma_h;
         }
         // don't favor 422 over 420 if downsampling is needed, because 420 has much better support on the decoder side
@@ -2241,48 +2241,48 @@ static int get_pix_fmt_score(enum BVPixelFormat dst_pix_fmt,
         }
     }
 
-    if(consider & FF_LOSS_COLORSPACE)
+    if(consider & BV_LOSS_COLORSPACE)
     switch(dst_color) {
-    case FF_COLOR_RGB:
-        if (src_color != FF_COLOR_RGB &&
-            src_color != FF_COLOR_GRAY)
-            loss |= FF_LOSS_COLORSPACE;
+    case BV_COLOR_RGB:
+        if (src_color != BV_COLOR_RGB &&
+            src_color != BV_COLOR_GRAY)
+            loss |= BV_LOSS_COLORSPACE;
         break;
-    case FF_COLOR_GRAY:
-        if (src_color != FF_COLOR_GRAY)
-            loss |= FF_LOSS_COLORSPACE;
+    case BV_COLOR_GRAY:
+        if (src_color != BV_COLOR_GRAY)
+            loss |= BV_LOSS_COLORSPACE;
         break;
-    case FF_COLOR_YUV:
-        if (src_color != FF_COLOR_YUV)
-            loss |= FF_LOSS_COLORSPACE;
+    case BV_COLOR_YUV:
+        if (src_color != BV_COLOR_YUV)
+            loss |= BV_LOSS_COLORSPACE;
         break;
-    case FF_COLOR_YUV_JPEG:
-        if (src_color != FF_COLOR_YUV_JPEG &&
-            src_color != FF_COLOR_YUV &&
-            src_color != FF_COLOR_GRAY)
-            loss |= FF_LOSS_COLORSPACE;
+    case BV_COLOR_YUV_JPEG:
+        if (src_color != BV_COLOR_YUV_JPEG &&
+            src_color != BV_COLOR_YUV &&
+            src_color != BV_COLOR_GRAY)
+            loss |= BV_LOSS_COLORSPACE;
         break;
     default:
         /* fail safe test */
         if (src_color != dst_color)
-            loss |= FF_LOSS_COLORSPACE;
+            loss |= BV_LOSS_COLORSPACE;
         break;
     }
-    if(loss & FF_LOSS_COLORSPACE)
+    if(loss & BV_LOSS_COLORSPACE)
         score -= (nb_components * 65536) >> FFMIN(dst_desc->comp[0].depth_minus1, src_desc->comp[0].depth_minus1);
 
-    if (dst_color == FF_COLOR_GRAY &&
-        src_color != FF_COLOR_GRAY && (consider & FF_LOSS_CHROMA)) {
-        loss |= FF_LOSS_CHROMA;
+    if (dst_color == BV_COLOR_GRAY &&
+        src_color != BV_COLOR_GRAY && (consider & BV_LOSS_CHROMA)) {
+        loss |= BV_LOSS_CHROMA;
         score -= 2 * 65536;
     }
-    if (!pixdesc_has_alpha(dst_desc) && (pixdesc_has_alpha(src_desc) && (consider & FF_LOSS_ALPHA))) {
-        loss |= FF_LOSS_ALPHA;
+    if (!pixdesc_has_alpha(dst_desc) && (pixdesc_has_alpha(src_desc) && (consider & BV_LOSS_ALPHA))) {
+        loss |= BV_LOSS_ALPHA;
         score -= 65536;
     }
-    if (dst_pix_fmt == BV_PIX_FMT_PAL8 && (consider & FF_LOSS_COLORQUANT) &&
-        (src_pix_fmt != BV_PIX_FMT_PAL8 && (src_color != FF_COLOR_GRAY || (pixdesc_has_alpha(src_desc) && (consider & FF_LOSS_ALPHA))))) {
-        loss |= FF_LOSS_COLORQUANT;
+    if (dst_pix_fmt == BV_PIX_FMT_PAL8 && (consider & BV_LOSS_COLORQUANT) &&
+        (src_pix_fmt != BV_PIX_FMT_PAL8 && (src_color != BV_COLOR_GRAY || (pixdesc_has_alpha(src_desc) && (consider & BV_LOSS_ALPHA))))) {
+        loss |= BV_LOSS_COLORQUANT;
         score -= 65536;
     }
 
@@ -2295,7 +2295,7 @@ int bv_get_pix_fmt_loss(enum BVPixelFormat dst_pix_fmt,
                             int has_alpha)
 {
     int loss;
-    int ret = get_pix_fmt_score(dst_pix_fmt, src_pix_fmt, &loss, has_alpha ? ~0 : ~FF_LOSS_ALPHA);
+    int ret = get_pix_fmt_score(dst_pix_fmt, src_pix_fmt, &loss, has_alpha ? ~0 : ~BV_LOSS_ALPHA);
     if (ret < 0)
         return ret;
     return loss;
@@ -2312,7 +2312,7 @@ enum BVPixelFormat bv_find_best_pix_fmt_of_2(enum BVPixelFormat dst_pix_fmt1, en
 
     loss_mask= loss_ptr?~*loss_ptr:~0; /* use loss mask if provided */
     if(!has_alpha)
-        loss_mask &= ~FF_LOSS_ALPHA;
+        loss_mask &= ~BV_LOSS_ALPHA;
 
     score1 = get_pix_fmt_score(dst_pix_fmt1, src_pix_fmt, &loss1, loss_mask);
     score2 = get_pix_fmt_score(dst_pix_fmt2, src_pix_fmt, &loss2, loss_mask);

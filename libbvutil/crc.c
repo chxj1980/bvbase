@@ -342,7 +342,7 @@ int bv_crc_init(BVCRC *ctx, int le, int bits, uint32_t poly, int ctx_size)
 const BVCRC *bv_crc_get_table(BVCRCId crc_id)
 {
 #if !CONFIG_HARDCODED_TABLES
-    if (!bv_crc_table[crc_id][FF_ARRAY_ELEMS(bv_crc_table[crc_id]) - 1])
+    if (!bv_crc_table[crc_id][BV_ARRAY_ELEMS(bv_crc_table[crc_id]) - 1])
         if (bv_crc_init(bv_crc_table[crc_id],
                         bv_crc_table_params[crc_id].le,
                         bv_crc_table_params[crc_id].bits,

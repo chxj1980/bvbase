@@ -4,4 +4,4 @@ NAME = bvformat
 
 HEADERS = bvformat.h
 
-OBJS = utils.o allformats.o
+OBJS = utils.o allformats.o format.o

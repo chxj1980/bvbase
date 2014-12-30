@@ -66,7 +66,7 @@ int bv_strerror(int errnum, char *errbuf, size_t errbuf_size)
     int ret = 0, i;
     const struct error_entry *entry = NULL;
 
-    for (i = 0; i < FF_ARRAY_ELEMS(error_entries); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(error_entries); i++) {
         if (errnum == error_entries[i].num) {
             entry = &error_entries[i];
             break;
@@ -95,7 +95,7 @@ int main(void)
 {
     int i;
 
-    for (i = 0; i < FF_ARRAY_ELEMS(error_entries); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(error_entries); i++) {
         const struct error_entry *entry = &error_entries[i];
         printf("%d: %s [%s]\n", entry->num, bv_err2str(entry->num), entry->tag);
     }

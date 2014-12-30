@@ -140,7 +140,7 @@ typedef struct BVPixFmtDescriptor {
  */
 #define BV_PIX_FMT_FLAG_ALPHA        (1 << 7)
 
-#if FF_API_PIX_FMT
+#if BV_API_PIX_FMT
 /**
  * @deprecated use the BV_PIX_FMT_FLAG_* flags
  */
@@ -154,7 +154,7 @@ typedef struct BVPixFmtDescriptor {
 #define PIX_FMT_ALPHA     BV_PIX_FMT_FLAG_ALPHA
 #endif
 
-#if FF_API_PIX_FMT_DESC
+#if BV_API_PIX_FMT_DESC
 /**
  * The array of all the pixel format descriptors.
  */
@@ -307,12 +307,12 @@ void ff_check_pixfmt_descriptors(void);
  */
 enum BVPixelFormat bv_pix_fmt_swap_endianness(enum BVPixelFormat pix_fmt);
 
-#define FF_LOSS_RESOLUTION  0x0001 /**< loss due to resolution change */
-#define FF_LOSS_DEPTH       0x0002 /**< loss due to color depth change */
-#define FF_LOSS_COLORSPACE  0x0004 /**< loss due to color space conversion */
-#define FF_LOSS_ALPHA       0x0008 /**< loss of alpha bits */
-#define FF_LOSS_COLORQUANT  0x0010 /**< loss due to color quantization */
-#define FF_LOSS_CHROMA      0x0020 /**< loss of chroma (e.g. RGB to gray conversion) */
+#define BV_LOSS_RESOLUTION  0x0001 /**< loss due to resolution change */
+#define BV_LOSS_DEPTH       0x0002 /**< loss due to color depth change */
+#define BV_LOSS_COLORSPACE  0x0004 /**< loss due to color space conversion */
+#define BV_LOSS_ALPHA       0x0008 /**< loss of alpha bits */
+#define BV_LOSS_COLORQUANT  0x0010 /**< loss due to color quantization */
+#define BV_LOSS_CHROMA      0x0020 /**< loss of chroma (e.g. RGB to gray conversion) */
 
 /**
  * Compute what kind of losses will occur when converting from one specific

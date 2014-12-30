@@ -54,8 +54,8 @@
 #   endif
 #endif
 
-#ifndef FF_TIMER_UNITS
-#   define FF_TIMER_UNITS "UNITS"
+#ifndef BV_TIMER_UNITS
+#   define BV_TIMER_UNITS "UNITS"
 #endif
 
 #ifdef BV_READ_TIME
@@ -78,7 +78,7 @@
             tskip_count++;                                                \
         if (((tcount + tskip_count) & (tcount + tskip_count - 1)) == 0) { \
             bv_log(NULL, BV_LOG_ERROR,                                    \
-                   "%"PRIu64" " FF_TIMER_UNITS " in %s, %d runs, %d skips\n",          \
+                   "%"PRIu64" " BV_TIMER_UNITS " in %s, %d runs, %d skips\n",          \
                    tsum * 10 / tcount, id, tcount, tskip_count);          \
         }                                                                 \
     }

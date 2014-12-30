@@ -28,20 +28,41 @@
 static BVInputFormat *first_ifmt = NULL;
 static BVInputFormat **last_ifmt = &first_ifmt;
 
-int bv_register_input_format(BVInputFormat *ifmt)
+static BVOutputFormat *first_ofmt = NULL;
+static BVOutputFormat **last_ofmt = &first_ofmt;
+
+void bv_register_input_format(BVInputFormat *ifmt)
 {
     BVInputFormat **p = last_ifmt;
     ifmt->next = NULL;
     while (*p || bvpriv_atomic_ptr_cas((void *volatile *) p, NULL, ifmt))
         p = &(*p)->next;
     last_ifmt = &ifmt->next;
-    return 0;
 }
 
-BVInputFormat * bv_input_format_next(BVInputFormat *ifmt)
+void bv_register_output_format(BVOutputFormat *format)
+{
+    BVOutputFormat **p = last_ofmt;
+
+    format->next = NULL;
+    while(*p || bvpriv_atomic_ptr_cas((void * volatile *)p, NULL, format))
+        p = &(*p)->next;
+    last_ofmt = &format->next;
+}
+
+BVInputFormat * bv_iformat_next(BVInputFormat *ifmt)
 {
     if (ifmt)
         return ifmt->next;
     else
         return first_ifmt;
 }
+
+BVOutputFormat *bv_oformat_next(const BVOutputFormat *f)
+{
+    if (f)
+        return f->next;
+    else
+        return first_ofmt;
+}
+

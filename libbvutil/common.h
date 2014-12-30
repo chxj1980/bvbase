@@ -54,7 +54,7 @@
 /* assume b>0 */
 #define ROUNDED_DIV(a,b) (((a)>0 ? (a) + ((b)>>1) : (a) - ((b)>>1))/(b))
 /* assume a>0 and b>0 */
-#define FF_CEIL_RSHIFT(a,b) (!bv_builtin_constant_p(b) ? -((-(a)) >> (b)) \
+#define BV_CEIL_RSHIFT(a,b) (!bv_builtin_constant_p(b) ? -((-(a)) >> (b)) \
                                                        : ((a) + (1<<(b)) - 1) >> (b))
 #define FFUDIV(a,b) (((a)>0 ?(a):(a)-(b)+1) / (b))
 #define FFUMOD(a,b) ((a)-(b)*FFUDIV(a,b))
@@ -67,7 +67,7 @@
 #define FFMIN3(a,b,c) FFMIN(FFMIN(a,b),c)
 
 #define FFSWAP(type,a,b) do{type SWAP_tmp= b; b= a; a= SWAP_tmp;}while(0)
-#define FF_ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
+#define BV_ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
 #define FFALIGN(x, a) (((x)+(a)-1)&~((a)-1))
 
 /* misc math functions */
@@ -75,7 +75,7 @@
 /**
  * Reverse the order of the bits of an 8-bits unsigned integer.
  */
-#if FF_API_BV_REVERSE
+#if BV_API_BV_REVERSE
 extern attribute_deprecated const uint8_t bv_reverse[256];
 #endif
 

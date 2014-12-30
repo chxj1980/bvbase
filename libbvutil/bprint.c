@@ -313,7 +313,7 @@ static void bprint_pascal(BVBPrint *b, unsigned size)
     unsigned i, j;
     unsigned p[42];
 
-    bv_assert0(size < FF_ARRAY_ELEMS(p));
+    bv_assert0(size < BV_ARRAY_ELEMS(p));
 
     p[0] = 1;
     bv_bprintf(b, "%8d\n", 1);

@@ -81,7 +81,7 @@ const char *bv_get_colorspace_name(enum BVColorSpace val)
         [BVCOL_SPC_SMPTE240M] = "smpte240m",
         [BVCOL_SPC_YCOCG]     = "YCgCo",
     };
-    if ((unsigned)val >= FF_ARRAY_ELEMS(name))
+    if ((unsigned)val >= BV_ARRAY_ELEMS(name))
         return NULL;
     return name[val];
 }
@@ -182,7 +182,7 @@ static int get_video_buffer(BVFrame *frame, int align)
     for (i = 0; i < 4 && frame->linesize[i]; i++) {
         int h = FFALIGN(frame->height, 32);
         if (i == 1 || i == 2)
-            h = FF_CEIL_RSHIFT(h, desc->log2_chroma_h);
+            h = BV_CEIL_RSHIFT(h, desc->log2_chroma_h);
 
         frame->buf[i] = bv_buffer_alloc(frame->linesize[i] * h + 16 + 16/*STRIDE_ALIGN*/ - 1);
         if (!frame->buf[i])
@@ -304,7 +304,7 @@ int bv_frame_ref(BVFrame *dst, const BVFrame *src)
     }
 
     /* ref the buffers */
-    for (i = 0; i < FF_ARRAY_ELEMS(src->buf); i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(src->buf); i++) {
         if (!src->buf[i])
             continue;
         dst->buf[i] = bv_buffer_ref(src->buf[i]);
@@ -380,7 +380,7 @@ void bv_frame_unref(BVFrame *frame)
 
     wipe_side_data(frame);
 
-    for (i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++)
+    for (i = 0; i < BV_ARRAY_ELEMS(frame->buf); i++)
         bv_buffer_unref(&frame->buf[i]);
     for (i = 0; i < frame->nb_extended_buf; i++)
         bv_buffer_unref(&frame->extended_buf[i]);
@@ -408,7 +408,7 @@ int bv_frame_is_writable(BVFrame *frame)
     if (!frame->buf[0])
         return 0;
 
-    for (i = 0; i < FF_ARRAY_ELEMS(frame->buf); i++)
+    for (i = 0; i < BV_ARRAY_ELEMS(frame->buf); i++)
         if (frame->buf[i])
             ret &= !!bv_buffer_is_writable(frame->buf[i]);
     for (i = 0; i < frame->nb_extended_buf; i++)
@@ -474,7 +474,7 @@ int bv_frame_copy_props(BVFrame *dst, const BVFrame *src)
     dst->palette_has_changed    = src->palette_has_changed;
     dst->sample_rate            = src->sample_rate;
     dst->opaque                 = src->opaque;
-#if FF_API_BVFRAME_LBVC
+#if BV_API_BVFRAME_LBVC
     dst->type                   = src->type;
 #endif
     dst->pkt_pts                = src->pkt_pts;
@@ -548,7 +548,7 @@ BVBufferRef *bv_frame_get_plane_buffer(BVFrame *frame, int plane)
         return NULL;
     data = frame->extended_data[plane];
 
-    for (i = 0; i < FF_ARRAY_ELEMS(frame->buf) && frame->buf[i]; i++) {
+    for (i = 0; i < BV_ARRAY_ELEMS(frame->buf) && frame->buf[i]; i++) {
         BVBufferRef *buf = frame->buf[i];
         if (data >= buf->data && data < buf->data + buf->size)
             return buf;

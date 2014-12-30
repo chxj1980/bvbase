@@ -61,6 +61,8 @@ typedef struct _BVCodec {
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVCodec *next;
+    //FIXME
+    //编解码
 } BVCodec;
 
 typedef struct _BVCodecContext {
@@ -84,9 +86,14 @@ typedef struct _BVCodecContext {
     int profile;
 } BVCodecContext;
 
-
 typedef struct _BVPacket {
-    /* data */
+    int stream_index;
+    void *data;
+    int data_size;
+
+    int flags;
+    int64_t pts;
+    int64_t dps;
 } BVPacket;
 #ifdef __cplusplus
 }

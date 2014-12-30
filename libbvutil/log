@@ -119,7 +119,7 @@ bprint.c:void bv_bprint_escape(BVBPrint *dstbuf, const char *src, const char *sp
 bprint.c:                      enum BVEscapeMode mode, int flags)
 bprint.c:static void bprint_pascal(BVBPrint *b, unsigned size)
 bprint.c:    BVBPrint b;
-bprint.h:FF_PAD_STRUCTURE(BVBPrint, 1024,
+bprint.h:BV_PAD_STRUCTURE(BVBPrint, 1024,
 bprint.h:void bv_bprint_init(BVBPrint *buf, unsigned size_init, unsigned size_max);
 bprint.h:void bv_bprint_init_for_buffer(BVBPrint *buf, char *buffer, unsigned size);
 bprint.h:void bv_bprintf(BVBPrint *buf, const char *fmt, ...) bv_printf_format(2, 3);
@@ -479,7 +479,7 @@ frame.c:MAKE_ACCESSORS(BVFrame, frame, enum BVColorRange, color_range)
 frame.c:int bv_frame_set_qp_table(BVFrame *f, BVBufferRef *buf, int stride, int qp_type)
 frame.c:const char *bv_get_colorspace_name(enum BVColorSpace val)
 frame.c:    const BVPixFmtDescriptor *desc = bv_pix_fmt_desc_get(frame->format);
-frame.c:#if FF_API_BVFRAME_LBVC
+frame.c:#if BV_API_BVFRAME_LBVC
 frame.c:BVBufferRef *bv_frame_get_plane_buffer(BVFrame *frame, int plane)
 frame.c:        BVBufferRef *buf = frame->buf[i];
 frame.c:        BVBufferRef *buf = frame->extended_buf[i];
@@ -495,17 +495,17 @@ frame.h:enum BVActiveFormatDescription {
 frame.h: * BVBuffer API. The underlying buffer references are stored in BVFrame.buf /
 frame.h:     * Values correspond to enum BVPixelFormat for video frames,
 frame.h:    enum BVPictureType pict_type;
-frame.h:#if FF_API_BVFRAME_LBVC
+frame.h:#if BV_API_BVFRAME_LBVC
 frame.h:     * PTS copied from the BVPacket that was decoded to produce this frame.
 frame.h:     * DTS copied from the BVPacket that triggered returning this frame. (if frame threading isn't used)
 frame.h:     * only BVPacket.dts values without pts values.
-frame.h:#if FF_API_BVFRAME_LBVC
-frame.h:#if FF_API_BVFRAME_LBVC
-frame.h:#if FF_API_BVFRAME_LBVC
+frame.h:#if BV_API_BVFRAME_LBVC
+frame.h:#if BV_API_BVFRAME_LBVC
+frame.h:#if BV_API_BVFRAME_LBVC
 frame.h:    struct BVPanScan *pan_scan;
 frame.h:     * The user sets BVCodecContext.reordered_opaque to represent the input at
 frame.h:     * to exactly one of the values provided by the user through BVCodecContext.reordered_opaque
-frame.h:#if FF_API_BVFRAME_LBVC
+frame.h:#if BV_API_BVFRAME_LBVC
 frame.h:    struct BVCodecContext *owner;
 frame.h:     * BVBuffer references backing the data for this frame. If all elements of
 frame.h:     * There may be at most one BVBuffer per data plane, so for video this array
@@ -828,16 +828,16 @@ opencl.h:void bv_opencl_free_external_env(BVOpenCLExternalEnv **ext_opencl_env);
 opencl.h:int bv_opencl_init(BVOpenCLExternalEnv *ext_opencl_env);
 opencl.h:int64_t bv_opencl_benchmark(BVOpenCLDeviceNode *device, cl_platform_id platform,
 opencl.h:                            int64_t (*benchmark)(BVOpenCLExternalEnv *ext_opencl_env));
-opt.c:#if FF_API_OLD_BVOPTIONS
-opt.c:#if FF_API_OLD_BVOPTIONS
-opt.c:#if FF_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
 opt.c:int bv_opt_set_pixel_fmt(void *obj, const char *name, enum BVPixelFormat fmt, int search_flags)
-opt.c:#if FF_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
 opt.c:        ret = snprintf(buf, sizeof(buf), "%s", (char *)bv_x_if_null(bv_get_pix_fmt_name(*(enum BVPixelFormat *)dst), "none"));
-opt.c:#if FF_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
 opt.c:int bv_opt_get_pixel_fmt(void *obj, const char *name, int search_flags, enum BVPixelFormat *out_fmt)
-opt.c:#if FF_API_OLD_BVOPTIONS
-opt.c:#if FF_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
+opt.c:#if BV_API_OLD_BVOPTIONS
 opt.c:    case BV_OPT_TYPE_PIXEL_FMT: return sizeof(enum BVPixelFormat);
 opt.c:    BVBPrint bprint;
 opt.c:    enum BVPixelFormat pix_fmt;
@@ -847,9 +847,9 @@ opt.h: *      child_next() will return BVCodecContext.priv_data and finish
 opt.h: *      iterating. OTOH child_class_next() on BVCodecContext.bv_class will
 opt.h: * Such structs in BVBase are e.g. BVCodecContext in libavcodec or
 opt.h: * BVFormatContext in libavformat.
-opt.h:#if FF_API_OLD_BVOPTIONS
-opt.h:#if FF_API_OLD_BVOPTIONS
-opt.h:#if FF_API_OLD_BVOPTIONS
+opt.h:#if BV_API_OLD_BVOPTIONS
+opt.h:#if BV_API_OLD_BVOPTIONS
+opt.h:#if BV_API_OLD_BVOPTIONS
 opt.h:int bv_opt_set_pixel_fmt (void *obj, const char *name, enum BVPixelFormat fmt, int search_flags);
 opt.h:int bv_opt_get_pixel_fmt (void *obj, const char *name, int search_flags, enum BVPixelFormat *out_fmt);
 匹配到二进制文件 opt.o
@@ -1031,7 +1031,7 @@ utils.c:    bv_assert0(HAVE_MMX2 == HAVE_MMXEXT);
 utils.c:const char *bv_get_media_type_string(enum BVMediaType media_type)
 utils.c:char bv_get_picture_type_char(enum BVPictureType pict_type)
 匹配到二进制文件 utils.o
-version.h:#ifndef FF_API_OLD_BVOPTIONS
-version.h:#define FF_API_OLD_BVOPTIONS            (LIBBVUTIL_VERSION_MAJOR < 55)
-version.h:#ifndef FF_API_BVFRAME_LBVC
-version.h:#define FF_API_BVFRAME_LBVC             (LIBBVUTIL_VERSION_MAJOR < 55)
+version.h:#ifndef BV_API_OLD_BVOPTIONS
+version.h:#define BV_API_OLD_BVOPTIONS            (LIBBVUTIL_VERSION_MAJOR < 55)
+version.h:#ifndef BV_API_BVFRAME_LBVC
+version.h:#define BV_API_BVFRAME_LBVC             (LIBBVUTIL_VERSION_MAJOR < 55)

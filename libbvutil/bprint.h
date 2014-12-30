@@ -31,7 +31,7 @@
  * This helps ensuring binary compatibility with future versions.
  */
 
-#define FF_PAD_STRUCTURE(name, size, ...) \
+#define BV_PAD_STRUCTURE(name, size, ...) \
 struct ff_pad_helper_##name { __VA_ARGS__ }; \
 typedef struct name { \
     __VA_ARGS__ \
@@ -79,7 +79,7 @@ typedef struct name { \
  * such as the current paragraph.
  */
 
-FF_PAD_STRUCTURE(BVBPrint, 1024,
+BV_PAD_STRUCTURE(BVBPrint, 1024,
     char *str;         /**< string so far */
     unsigned len;      /**< length so far */
     unsigned size;     /**< allocated memory */

@@ -67,12 +67,12 @@ bv_pixelutils_sad_fn bv_pixelutils_get_sad_fn(int w_bits, int h_bits, int aligne
            "but libbvutil is not compiled with it\n");
     return NULL;
 #else
-    bv_pixelutils_sad_fn sad[FF_ARRAY_ELEMS(sad_c)];
+    bv_pixelutils_sad_fn sad[BV_ARRAY_ELEMS(sad_c)];
 
     memcpy(sad, sad_c, sizeof(sad));
 
-    if (w_bits < 1 || w_bits > FF_ARRAY_ELEMS(sad) ||
-        h_bits < 1 || h_bits > FF_ARRAY_ELEMS(sad))
+    if (w_bits < 1 || w_bits > BV_ARRAY_ELEMS(sad) ||
+        h_bits < 1 || h_bits > BV_ARRAY_ELEMS(sad))
         return NULL;
     if (w_bits != h_bits) // only squared sad for now
         return NULL;
@@ -129,7 +129,7 @@ static int run_test(const char *test,
         case 1:           block2++; break;
         case 2:                     break;
         }
-        for (i = 1; i <= FF_ARRAY_ELEMS(sad_c); i++) {
+        for (i = 1; i <= BV_ARRAY_ELEMS(sad_c); i++) {
             int r = run_single_test(test, b1, W1, b2, W2, a, i);
             if (r)
                 ret = r;

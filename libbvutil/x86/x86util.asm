@@ -549,7 +549,7 @@
     movhps [%5+%6+56], m%4
 %endmacro
 
-%macro LOAD_DIFF_8x4P 7-10 r0,r2,0 ; 4x dest, 2x temp, 2x pointer, increment?
+%macro LOAD_DIBV_8x4P 7-10 r0,r2,0 ; 4x dest, 2x temp, 2x pointer, increment?
     LOAD_DIFF m%1, m%5, m%7, [%8],      [%9]
     LOAD_DIFF m%2, m%6, m%7, [%8+r1],   [%9+r3]
     LOAD_DIFF m%3, m%5, m%7, [%8+2*r1], [%9+2*r3]
