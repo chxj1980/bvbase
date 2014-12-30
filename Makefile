@@ -40,7 +40,7 @@ TOOLS       = qt-faststart trasher uncoded_frame
 TOOLS-$(CONFIG_ZLIB) += cws2fws
 
 # $(BVLIBS-yes) needs to be in linking order
-#BVLIBS-$(CONFIG_BVUTIL)		+= bvutil
+BVLIBS-$(CONFIG_BVUTIL)		+= bvutil
 BVLIBS-$(CONFIG_BVDEVICE)   += bvdevice
 BVLIBS-$(CONFIG_BVSERVER)   += bvserver
 BVLIBS-$(CONFIG_BVCONFIG)   += bvconfig
