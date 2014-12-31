@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: format.c
+	> File Name: media.c
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
 	> Created Time: 2014年12月30日 星期二 19时18分36秒
@@ -21,13 +21,13 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include "bvformat.h"
+#include "bvmedia.h"
 #include <libbvutil/bvstring.h>
 
-BVInputFormat *bv_input_format_find(const char *short_name)
+BVInputMedia *bv_input_media_find(const char *short_name)
 {
-    BVInputFormat *fmt = NULL;
-    while ((fmt = bv_input_format_next(fmt)))
+    BVInputMedia *fmt = NULL;
+    while ((fmt = bv_input_media_next(fmt)))
         if (bv_match_name(short_name, fmt->name))
             return fmt;
     return NULL;
@@ -60,16 +60,16 @@ static int bv_match_ext(const char *filename, const char *extensions)
     return 0;
 }
 
-BVOutputFormat *bv_output_format_guess(const char *short_name, const char *filename,
+BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename,
                                 const char *mime_type)
 {
-    BVOutputFormat *fmt = NULL, *fmt_found;
+    BVOutputMedia *fmt = NULL, *fmt_found;
     int score_max, score;
 
     /* Find the proper file type. */
     fmt_found = NULL;
     score_max = 0;
-    while ((fmt = bv_output_format_next(fmt))) {
+    while ((fmt = bv_output_media_next(fmt))) {
         score = 0;
         if (fmt->name && short_name && bv_match_name(short_name, fmt->name))
             score += 100;
@@ -87,9 +87,13 @@ BVOutputFormat *bv_output_format_guess(const char *short_name, const char *filen
     return fmt_found;
 }
 
-int bv_input_format_open(BVFormatContext **fmt, const BVChannel *channel, const char *url,
-        BVInputFormat *format, BVDictionary **options)
+static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVInputMedia *media, BVDictionary **options)
 {
-    BVFormatContext *s = *fmt; 
+    return 0;
+}
+
+int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url,
+        BVInputMedia *media, BVDictionary **options)
+{
     return 0;
 }

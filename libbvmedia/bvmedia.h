@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: bvformat.h
+	> File Name: bvmedia.h
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
 	> Created Time: 2014年12月30日 星期二 12时56分43秒
@@ -21,8 +21,8 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#ifndef BV_FORMAT_H
-#define BV_FORMAT_H
+#ifndef BV_MEDIA_H
+#define BV_MEDIA_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -34,7 +34,7 @@ extern "C"{
 #include <libbvcodec/bvcodec.h>
 #include <libbvconfig/common.h>
 
-struct _BVFormatContext;
+struct _BVMediaContext;
 
 typedef struct _BVProbeData {
     const char *filename;
@@ -43,69 +43,70 @@ typedef struct _BVProbeData {
     const char *mime_type;
 } BVProbeData;
 
-typedef struct _BVInputFormat {
+typedef struct _BVInputMedia {
     const char *name;
     const char *extensions;
     const BVClass *priv_class;
     int priv_data_size;
-    struct _BVInputFormat *next;
+    struct _BVInputMedia *next;
     int (*read_probe)(BVProbeData *);
-    int (*read_head)(struct _BVFormatContext *h);
-    int (*read_packet)(struct _BVFormatContext *h, BVPacket *pkt);
-    int (*read_close)(struct _BVFormatContext *h);
-    int (*control_message)(struct _BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
-} BVInputFormat;
+    int (*read_head)(struct _BVMediaContext *h);
+    int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
+    int (*read_close)(struct _BVMediaContext *h);
+    int (*control_message)(struct _BVMediaContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+} BVInputMedia;
 
-typedef struct _BVOutputFormat {
+typedef struct _BVOutputMedia {
     const char *name;
     const char *extensions;
     const char *mime_type;
     const BVClass *priv_class;
     int priv_data_size;
-    struct _BVOutputFormat *next;
-    int (*write_head)(struct _BVFormatContext *h);
-    int (*write_packet)(struct _BVFormatContext *h, BVPacket *pkt);
-    int (*write_trailer)(struct _BVFormatContext *h);
-    int (*control_message)(struct _BVFormatContext *h, int type, BVControlPacket *in, BVControlPacket *out);
-} BVOutputFormat;
+    struct _BVOutputMedia *next;
+    int (*write_head)(struct _BVMediaContext *h);
+    int (*write_packet)(struct _BVMediaContext *h, BVPacket *pkt);
+    int (*write_trailer)(struct _BVMediaContext *h);
+    int (*control_message)(struct _BVMediaContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+} BVOutputMedia;
 
 typedef struct _BVStream {
     int index;
     BVCodecContext *codec;
 } BVStream;
 
-typedef struct _BVFormatContext {
+typedef struct _BVMediaContext {
     BVClass *bv_class;
-    BVInputFormat *iformat;
-    BVOutputFormat *oformat;
+    BVInputMedia *imedia;
+    BVOutputMedia *omedia;
     void *priv_data;
     char file_name[1024];
     int nb_streams;
     BVStream **stream;
     BVChannel *channel;
-} BVFormatContext;
+} BVMediaContext;
 
-void bv_input_format_register(BVInputFormat *ifmt);
+void bv_input_media_register(BVInputMedia *ifmt);
 
-void bv_output_format_register(BVOutputFormat *format);
+void bv_output_media_register(BVOutputMedia *media);
 
-BVInputFormat * bv_input_format_next(BVInputFormat *ifmt);
+BVInputMedia * bv_input_media_next(BVInputMedia *ifmt);
 
-BVOutputFormat *bv_output_format_next(const BVOutputFormat *f);
+BVOutputMedia *bv_output_media_next(const BVOutputMedia *f);
 
-BVInputFormat *bv_input_format_find(const char *short_name);
+BVInputMedia *bv_input_media_find(const char *short_name);
 
-void bv_format_register_all(void);
+void bv_media_register_all(void);
 
-BVFormatContext *bv_format_context_alloc(void);
+BVMediaContext *bv_media_context_alloc(void);
 
-void bv_format_context_free(BVFormatContext * devctx);
+void bv_media_context_free(BVMediaContext * devctx);
 
-int bv_input_format_open(BVFormatContext **fmt, const BVChannel *channel, const char *url, BVInputFormat *format, BVDictionary **options);
+int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
 
-BVOutputFormat *bv_output_format_guess(const char *short_name, const char *filename, const char *mime_type);
+BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename, const char *mime_type);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* end of include guard: BV_FORMAT_H */
+#endif /* end of include guard: BV_MEDIA_H */

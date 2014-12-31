@@ -7,7 +7,7 @@ CFLAGS += -Wall -g
 
 CFLAGS = -I ../../include/x86 -I ../../3rdparty/binary/ffmpeg/x86/include 
 
-LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice
+LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice -lssl
 EXAMPLES=  exDevice 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))

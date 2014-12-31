@@ -23,34 +23,34 @@
 
 #include <libbvutil/atomic.h>
 
-#include "bvformat.h"
+#include "bvmedia.h"
 
-static BVInputFormat *first_ifmt = NULL;
-static BVInputFormat **last_ifmt = &first_ifmt;
+static BVInputMedia *first_ifmt = NULL;
+static BVInputMedia **last_ifmt = &first_ifmt;
 
-static BVOutputFormat *first_ofmt = NULL;
-static BVOutputFormat **last_ofmt = &first_ofmt;
+static BVOutputMedia *first_ofmt = NULL;
+static BVOutputMedia **last_ofmt = &first_ofmt;
 
-void bv_input_format_register(BVInputFormat *ifmt)
+void bv_input_media_register(BVInputMedia *ifmt)
 {
-    BVInputFormat **p = last_ifmt;
+    BVInputMedia **p = last_ifmt;
     ifmt->next = NULL;
     while (*p || bvpriv_atomic_ptr_cas((void *volatile *) p, NULL, ifmt))
         p = &(*p)->next;
     last_ifmt = &ifmt->next;
 }
 
-void bv_output_format_register(BVOutputFormat *format)
+void bv_output_media_register(BVOutputMedia *media)
 {
-    BVOutputFormat **p = last_ofmt;
+    BVOutputMedia **p = last_ofmt;
 
-    format->next = NULL;
-    while(*p || bvpriv_atomic_ptr_cas((void * volatile *)p, NULL, format))
+    media->next = NULL;
+    while(*p || bvpriv_atomic_ptr_cas((void * volatile *)p, NULL, media))
         p = &(*p)->next;
-    last_ofmt = &format->next;
+    last_ofmt = &media->next;
 }
 
-BVInputFormat * bv_input_format_next(BVInputFormat *ifmt)
+BVInputMedia * bv_input_media_next(BVInputMedia *ifmt)
 {
     if (ifmt)
         return ifmt->next;
@@ -58,7 +58,7 @@ BVInputFormat * bv_input_format_next(BVInputFormat *ifmt)
         return first_ifmt;
 }
 
-BVOutputFormat *bv_output_format_next(const BVOutputFormat *f)
+BVOutputMedia *bv_output_media_next(const BVOutputMedia *f)
 {
     if (f)
         return f->next;

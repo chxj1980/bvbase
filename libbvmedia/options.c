@@ -21,57 +21,57 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include "bvformat.h"
+#include "bvmedia.h"
 
 /**
  *  @file
- *  Options definition for BVFormatContext
+ *  Options definition for BVMediaContext
  */
 
 #include "options_table.h"
 
-static const char * format_to_name(void *ptr)
+static const char * media_to_name(void *ptr)
 {
-    BVFormatContext *fc = (BVFormatContext *)ptr;
-    if (fc->iformat)
-        return fc->iformat->name;
-    if (fc->oformat)
-        return fc->oformat->name;
+    BVMediaContext *fc = (BVMediaContext *)ptr;
+    if (fc->imedia)
+        return fc->imedia->name;
+    if (fc->omedia)
+        return fc->omedia->name;
     return "NULL";
 }
-static const BVClass bv_format_context_class = {
-    .class_name     = "BVFormatContext",
-    .item_name      = format_to_name,
-    .option         = format_options,
+static const BVClass bv_media_context_class = {
+    .class_name     = "BVMediaContext",
+    .item_name      = media_to_name,
+    .option         = media_options,
     .version        = LIBBVUTIL_VERSION_INT,
     .category       = BV_CLASS_CATEGORY_MUXER,
 };
 
-static void bv_format_get_context_default(BVFormatContext *format)
+static void bv_media_get_context_default(BVMediaContext *media)
 {
-    format->bv_class = &bv_format_context_class;
-    bv_opt_set_defaults(format);
+    media->bv_class = &bv_media_context_class;
+    bv_opt_set_defaults(media);
 }
 
-BVFormatContext *bv_format_context_alloc(void)
+BVMediaContext *bv_media_context_alloc(void)
 {
-    BVFormatContext *s = bv_mallocz(sizeof(BVFormatContext));
+    BVMediaContext *s = bv_mallocz(sizeof(BVMediaContext));
     if (!s) {
-        bv_log(NULL, BV_LOG_ERROR, "malloc BVFormatContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVMediaContext error");
         return NULL;
     }
-    bv_format_get_context_default(s);
+    bv_media_get_context_default(s);
     return s;
 }
 
-void bv_format_context_free(BVFormatContext * fmtctx)
+void bv_media_context_free(BVMediaContext * fmtctx)
 {
     if (!fmtctx) 
         return;
     bv_opt_free(fmtctx);
-    if (fmtctx->iformat && fmtctx->iformat->priv_class && fmtctx->priv_data)
+    if (fmtctx->imedia && fmtctx->imedia->priv_class && fmtctx->priv_data)
         bv_opt_free(fmtctx->priv_data);
-    if (fmtctx->oformat && fmtctx->oformat->priv_class && fmtctx->priv_data)
+    if (fmtctx->omedia && fmtctx->omedia->priv_class && fmtctx->priv_data)
         bv_opt_free(fmtctx->priv_data);
     bv_freep(&fmtctx->priv_data);
     bv_free(fmtctx);

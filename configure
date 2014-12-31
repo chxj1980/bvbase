@@ -1434,7 +1434,7 @@ HWACCEL_LIST="
 
 LIBRARY_LIST="
 	bvutil
-	bvformat
+	bvmedia
 	bvcodec
 	bvdevice
 	bvconfig
@@ -2823,7 +2823,7 @@ BVDEVICE_LIST=$(find_things   device DEVICE libbvdevice/alldevices.c)
 BVCONFIG_LIST=$(find_things   config CONFIG libbvconfig/allconfigs.c)
 BVSERVER_LIST=$(find_things   server SERVER libbvserver/allservers.c)
 BVSYSTEM_LIST=$(find_things   system SYSTEM libbvsystem/allsystems.c)
-BVINDEV_LIST=$(find_things   indev INDEV libbvformat/allformats.c)
+BVINDEV_LIST=$(find_things   indev INDEV libbvmedia/allmedias.c)
 
 ALL_COMPONENTS="
     $BSF_LIST
@@ -5828,7 +5828,7 @@ EOF
 #pkgconfig_generate libswresample "BVBase audio resampling library"      "$LIBSWRESAMPLE_VERSION" "$LIBM"
 
 pkgconfig_generate libbvutil     "BVBase utility library"               "$LIBBVUTIL_VERSION"     "$LIBRT $LIBM"
-pkgconfig_generate libbvformat   "BVBase container format library"      "$LIBBVFORMAT_VERSION"   "$extralibs"
+pkgconfig_generate libbvmedia    "BVBase media container library"       "$LIBBVFORMAT_VERSION"   "$extralibs"
 pkgconfig_generate libbvcodec    "BVBase codec  library"                "$LIBBVCODEC_VERSION"   "$extralibs"
 pkgconfig_generate libbvdevice   "BVBase device library"				"$LIBBVDEVICE_VERSION"   "$extralibs"
 pkgconfig_generate libbvconfig   "BVBase config library"				"$LIBBVCONFIG_VERSION"   "$extralibs"

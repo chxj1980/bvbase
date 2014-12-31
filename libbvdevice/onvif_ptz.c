@@ -24,10 +24,13 @@
 #include "bvdevice.h"
 
 #include <soapH.h>
+#include <wsseapi.h>
 
 typedef struct OnvifPTZContext {
     const BVClass *bv_class;
     int timeout;
+    char *user;
+    char *passwd;
     char url[1024];
     char token[64];
 } OnvifPTZContext;
@@ -36,8 +39,9 @@ typedef struct OnvifPTZContext {
 #define ONVIF_TMO	(-500000)
 #define MEMSET_STRUCT(X)    memset(&(X), 0, sizeof((X)));
 
-static struct soap *bv_soap_new(int timeout)
+static struct soap *bv_soap_new(OnvifPTZContext *onvif_ptz)
 {
+    int timeout = onvif_ptz->timeout;
 	struct soap *soap = NULL;
 	soap = soap_new();
 	if (soap == NULL) {
@@ -47,6 +51,10 @@ static struct soap *bv_soap_new(int timeout)
 	if (!timeout) {
 		timeout = ONVIF_TMO;
 	}
+
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 	soap->recv_timeout = timeout;
 	soap->send_timeout = timeout;
 	soap->connect_timeout = timeout;
@@ -100,7 +108,7 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVDevicePacket *p
     OnvifPTZContext *onvif_ptz = h->priv_data;
     BVPTZContinuousMove *continuous_move = (BVPTZContinuousMove *) pkt_in->data;
 
-    if(!(soap = bv_soap_new(onvif_ptz->timeout))) {
+    if(!(soap = bv_soap_new(onvif_ptz))) {
         return -1;
     }
 
@@ -110,7 +118,6 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVDevicePacket *p
     MEMSET_STRUCT(Velocity);
     MEMSET_STRUCT(PanTilt);
     MEMSET_STRUCT(Zoom);
-
     tptz__ContinuousMove.ProfileToken = onvif_ptz->token;
     tptz__ContinuousMove.Velocity = &Velocity;
     tptz__ContinuousMove.Timeout = &continuous_move->duration;
@@ -149,7 +156,7 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDe
     MEMSET_STRUCT(tptz__Stop);
     MEMSET_STRUCT(tptz__StopResponse);
 
-    if(!(soap = bv_soap_new(onvif_ptz->timeout))) {
+    if(!(soap = bv_soap_new(onvif_ptz))) {
         return -1;
     }
 	soap_default_SOAP_ENV__Header(soap, &header);
@@ -185,7 +192,7 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVDevicePacket *pkt_in
     MEMSET_STRUCT(tptz__SetPreset);
     MEMSET_STRUCT(tptz__SetPresetResponse);
 
-    if(!(soap = bv_soap_new(onvif_ptz->timeout))) {
+    if(!(soap = bv_soap_new(onvif_ptz))) {
         return -1;
     }
 	soap_default_SOAP_ENV__Header(soap, &header);
@@ -227,7 +234,7 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVDevicePacket *pkt_i
     MEMSET_STRUCT(PanTilt);
     MEMSET_STRUCT(Zoom);
 
-    if(!(soap = bv_soap_new(onvif_ptz->timeout))) {
+    if(!(soap = bv_soap_new(onvif_ptz))) {
         return -1;
     }
 	soap_default_SOAP_ENV__Header(soap, &header);
@@ -269,7 +276,7 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVDevicePacket *pkt
     MEMSET_STRUCT(tptz__RemovePreset);
     MEMSET_STRUCT(tptz__RemovePresetResponse);
 
-    if(!(soap = bv_soap_new(onvif_ptz->timeout))) {
+    if(!(soap = bv_soap_new(onvif_ptz))) {
         return -1;
     }
 	soap_default_SOAP_ENV__Header(soap, &header);
@@ -343,6 +350,8 @@ static int onvif_ptz_close(BVDeviceContext*h)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
 	{"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+    {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
 	{NULL}
 };
 

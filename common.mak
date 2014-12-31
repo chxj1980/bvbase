@@ -21,7 +21,7 @@ $(foreach VAR,$(SILENT),$(eval override $(VAR) = @$($(VAR))))
 $(eval INSTALL = @$(call ECHO,INSTALL,$$(^:$(SRC_DIR)/%=%)); $(INSTALL))
 endif
 
-ALLBVLIBS = bvutil bvdevice bvserver bvconfig bvsystem bvformat bvcodec
+ALLBVLIBS = bvutil bvdevice bvserver bvconfig bvsystem bvmedia bvcodec
 
 # NASM requires -I path terminated with /
 IFLAGS     := -I. -I$(SRC_PATH)/

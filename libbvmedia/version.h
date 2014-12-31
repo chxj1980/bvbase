@@ -21,23 +21,23 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#ifndef BV_FORMAT_VERSION_H
-#define BV_FORMAT_VERSION_H
+#ifndef BV_MEDIA_VERSION_H
+#define BV_MEDIA_VERSION_H
 
-#define LIBBVFORMAT_VERSION_MAJOR 0
-#define LIBBVFORMAT_VERSION_MINOR  0
-#define LIBBVFORMAT_VERSION_MICRO 1
+#define LIBBVMEDIA_VERSION_MAJOR 0
+#define LIBBVMEDIA_VERSION_MINOR  0
+#define LIBBVMEDIA_VERSION_MICRO 1
 
-#define LIBFORMAT_VERSION_INT BV_VERSION_INT(LIBBVFORMAT_VERSION_MAJOR, \
-                                               LIBBVFORMAT_VERSION_MINOR, \
-                                               LIBBVFORMAT_VERSION_MICRO)
-#define LIBFORMAT_VERSION     BV_VERSION(LIBBVFORMAT_VERSION_MAJOR, \
-                                           LIBBVFORMAT_VERSION_MINOR, \
-                                           LIBBVFORMAT_VERSION_MICRO)
-#define LIBFORMAT_BUILD       LIBBVFORMAT_VERSION_INT
+#define LIBMEDIA_VERSION_INT BV_VERSION_INT(LIBBVMEDIA_VERSION_MAJOR, \
+                                               LIBBVMEDIA_VERSION_MINOR, \
+                                               LIBBVMEDIA_VERSION_MICRO)
+#define LIBMEDIA_VERSION     BV_VERSION(LIBBVMEDIA_VERSION_MAJOR, \
+                                           LIBBVMEDIA_VERSION_MINOR, \
+                                           LIBBVMEDIA_VERSION_MICRO)
+#define LIBMEDIA_BUILD       LIBBVMEDIA_VERSION_INT
 
-#define LIBFORMAT_IDENT       "Lbvfmt" BV_STRINGIFY(LIBBVFORMAT_VERSION)
+#define LIBMEDIA_IDENT       "Lbvfmt" BV_STRINGIFY(LIBBVMEDIA_VERSION)
 
 
-#endif /* end of include guard: BV_FORMAT_VERSION_H */
+#endif /* end of include guard: BV_MEDIA_VERSION_H */
 

@@ -4,7 +4,7 @@ libbvconfig	配置文件 初步使用jansson，或者xml 或是自己定义的�
 libbvdevice	设备配置 GPS 串口 WIFI 3G 4G拨号 nand 更新 磁盘
 libbvserver	平台协议
 libbvsystem	平台初始化配置
-libbvformat 参照FFmpeg写的format
+libbvmedia  参照FFmpeg AVFormat
 libbvprotocol 参照FFmpeg AVIO写的协议
 libbvcodec  参照FFmpeg AVCodec
 

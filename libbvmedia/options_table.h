@@ -27,12 +27,12 @@
 #include <limits.h>
 #include <libbvutil/opt.h>
 
-#include "bvformat.h"
+#include "bvmedia.h"
 
 #define OFFSET(X) offsetof(BVDeviceContext, X)
 #define E   BV_OPT_FLAG_ENCODING_PARAM
 
-static const BVOption format_options[] = {
+static const BVOption media_options[] = {
 
     {NULL}
 };
