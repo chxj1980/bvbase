@@ -1435,6 +1435,7 @@ HWACCEL_LIST="
 LIBRARY_LIST="
 	bvutil
 	bvformat
+	bvcodec
 	bvdevice
 	bvconfig
 	bvsystem
@@ -5528,7 +5529,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvserver bvindev; do
+for type in bvdevice bvsystem bvconfig bvserver bvindev bvenc; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns
@@ -5828,4 +5829,8 @@ EOF
 
 pkgconfig_generate libbvutil     "BVBase utility library"               "$LIBBVUTIL_VERSION"     "$LIBRT $LIBM"
 pkgconfig_generate libbvformat   "BVBase container format library"      "$LIBBVFORMAT_VERSION"   "$extralibs"
+pkgconfig_generate libbvcodec    "BVBase codec  library"                "$LIBBVCODEC_VERSION"   "$extralibs"
 pkgconfig_generate libbvdevice   "BVBase device library"				"$LIBBVDEVICE_VERSION"   "$extralibs"
+pkgconfig_generate libbvconfig   "BVBase config library"				"$LIBBVCONFIG_VERSION"   "$extralibs"
+pkgconfig_generate libbvserver   "BVBase server library"		        "$LIBBVSERVER_VERSION"   "$extralibs"
+pkgconfig_generate libbvsystem   "BVBase system library"		        "$LIBBVSYSTEM_VERSION"   "$extralibs"

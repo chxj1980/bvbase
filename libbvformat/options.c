@@ -25,54 +25,56 @@
 
 /**
  *  @file
- *  Options definition for BVDeviceContext
+ *  Options definition for BVFormatContext
  */
 
 #include "options_table.h"
 
-static const char * device_to_name(void *ptr)
+static const char * format_to_name(void *ptr)
 {
-    BVDeviceContext *dc = (BVDeviceContext *)ptr;
-    if (dc->device)
-        return dc->device->name;
+    BVFormatContext *fc = (BVFormatContext *)ptr;
+    if (fc->iformat)
+        return fc->iformat->name;
+    if (fc->oformat)
+        return fc->oformat->name;
     return "NULL";
 }
-static const BVClass bv_device_context_class = {
-    .class_name     = "BVDeviceContext",
-    .item_name      = device_to_name,
-    .option         = device_options,
+static const BVClass bv_format_context_class = {
+    .class_name     = "BVFormatContext",
+    .item_name      = format_to_name,
+    .option         = format_options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_MUXER,
 };
 
-static void bv_device_get_context_default(BVDeviceContext *device)
+static void bv_format_get_context_default(BVFormatContext *format)
 {
-    device->bv_class = &bv_device_context_class;
-    bv_opt_set_defaults(device);
+    format->bv_class = &bv_format_context_class;
+    bv_opt_set_defaults(format);
 }
 
-BVDeviceContext *bv_device_alloc_context(void)
+BVFormatContext *bv_format_context_alloc(void)
 {
-    BVDeviceContext *s = bv_mallocz(sizeof(BVDeviceContext));
+    BVFormatContext *s = bv_mallocz(sizeof(BVFormatContext));
     if (!s) {
-        bv_log(NULL, BV_LOG_ERROR, "malloc BVDeviceContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVFormatContext error");
         return NULL;
     }
-    bv_device_get_context_default(s);
+    bv_format_get_context_default(s);
     return s;
 }
 
-void bv_device_free_context(BVDeviceContext * devctx)
+void bv_format_context_free(BVFormatContext * fmtctx)
 {
-    if (!devctx) 
+    if (!fmtctx) 
         return;
-    bv_opt_free(devctx);
-    if (devctx->device && devctx->device->priv_class && devctx->priv_data)
-        bv_opt_free(devctx->priv_data);
-    bv_freep(&devctx->priv_data);
-    if (devctx->buffer)
-        bv_free(devctx->buffer);
-    bv_free(devctx);
+    bv_opt_free(fmtctx);
+    if (fmtctx->iformat && fmtctx->iformat->priv_class && fmtctx->priv_data)
+        bv_opt_free(fmtctx->priv_data);
+    if (fmtctx->oformat && fmtctx->oformat->priv_class && fmtctx->priv_data)
+        bv_opt_free(fmtctx->priv_data);
+    bv_freep(&fmtctx->priv_data);
+    bv_free(fmtctx);
     return; 
 }
 

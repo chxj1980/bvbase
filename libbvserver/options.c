@@ -51,7 +51,7 @@ static void bv_server_get_context_default(BVServerContext *server)
     bv_opt_set_defaults(server);
 }
 
-BVServerContext *bv_server_alloc_context(void)
+BVServerContext *bv_server_context_alloc(void)
 {
     BVServerContext *s = bv_mallocz(sizeof(BVServerContext));
     if (!s) {
@@ -62,7 +62,7 @@ BVServerContext *bv_server_alloc_context(void)
     return s;
 }
 
-void bv_server_free_context(BVServerContext * svrctx)
+void bv_server_context_free(BVServerContext * svrctx)
 {
     if (!svrctx) 
         return;

@@ -28,14 +28,14 @@
     {                                                                   \
         extern BVOutputFormat bv_##x##_muxer;                           \
         if (CONFIG_##X##_OUTDEV)                                        \
-            bv_register_output_format(&bv_##x##_muxer);                 \
+            bv_output_format_register(&bv_##x##_muxer);                 \
     }
 
 #define REGISTER_INDEV(X, x)                                            \
     {                                                                   \
         extern BVInputFormat bv_##x##_demuxer;                          \
         if (CONFIG_##X##_INDEV)                                         \
-            bv_register_input_format(&bv_##x##_demuxer);                \
+            bv_input_format_register(&bv_##x##_demuxer);                \
     }
 
 #define REGISTER_INOUTDEV(X, x) REGISTER_OUTDEV(X, x); REGISTER_INDEV(X, x)

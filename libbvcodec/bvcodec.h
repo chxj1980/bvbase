@@ -32,23 +32,23 @@ extern "C"{
 #include <libbvutil/samplefmt.h>
 
 enum BVCodecID {
-	BV_CODEC_ID_NONE = 0,
-	//video
-	BV_CODEC_ID_H264,
-	BV_CODEC_ID_MPEG,
-	BV_CODEC_ID_JPG,
-	
-	//Audio
-	BV_CODEC_ID_G711A,
-	BV_CODEC_ID_G711U,
-	BV_CODEC_ID_G726,
-	BV_CODEC_ID_AAC,
+    BV_CODEC_ID_NONE = 0,
+    //video
+    BV_CODEC_ID_H264,
+    BV_CODEC_ID_MPEG,
+    BV_CODEC_ID_JPG,
 
-	BV_CODEC_ID_UNKNOWN
+    //Audio
+    BV_CODEC_ID_G711A,
+    BV_CODEC_ID_G711U,
+    BV_CODEC_ID_G726,
+    BV_CODEC_ID_AAC,
+
+    BV_CODEC_ID_UNKNOWN
 };
 
 enum BVRCModeID {
-	BV_RC_MODE_ID_VBR = 0, /* VBR must be 0 for compatible with 3511 */
+    BV_RC_MODE_ID_VBR = 0, /* VBR must be 0 for compatible with 3511 */
     BV_RC_MODE_ID_CBR,
     BV_RC_MODE_ID_ABR,
     BV_RC_MODE_ID_FIXQP,
@@ -86,15 +86,6 @@ typedef struct _BVCodecContext {
     int profile;
 } BVCodecContext;
 
-typedef struct _BVPacket {
-    int stream_index;
-    void *data;
-    int data_size;
-
-    int flags;
-    int64_t pts;
-    int64_t dps;
-} BVPacket;
 #ifdef __cplusplus
 }
 #endif

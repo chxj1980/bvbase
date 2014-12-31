@@ -33,15 +33,15 @@
 
 void bv_device_register_all(void)
 {
-	static int initialized;
+    static int initialized;
 
-	if (initialized)
-		return;
-	initialized = 1;
+    if (initialized)
+        return;
+    initialized = 1;
 
-	//REGISTER_DEVICE(GPS, gps);
-	//REGISTER_DEVICE(SERIAL, serial);
-	//REGISTER_DEVICE(PTZ, ptz);
-	REGISTER_DEVICE(ONVIF_DEV, onvif_dev);
-	REGISTER_DEVICE(ONVIF_PTZ, onvif_ptz);
+    //REGISTER_DEVICE(GPS, gps);
+    //REGISTER_DEVICE(SERIAL, serial);
+    //REGISTER_DEVICE(PTZ, ptz);
+    REGISTER_DEVICE(ONVIF_DEV, onvif_dev);
+    REGISTER_DEVICE(ONVIF_PTZ, onvif_ptz);
 }

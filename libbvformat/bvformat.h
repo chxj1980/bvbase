@@ -30,7 +30,9 @@ extern "C"{
 
 #include <libbvutil/bvutil.h>
 #include <libbvutil/log.h>
+#include <libbvutil/packet.h>
 #include <libbvcodec/bvcodec.h>
+#include <libbvconfig/common.h>
 
 struct _BVFormatContext;
 
@@ -74,29 +76,34 @@ typedef struct _BVStream {
 
 typedef struct _BVFormatContext {
     BVClass *bv_class;
-    BVInputFormat *ifmt;
-    BVOutputFormat *ofmt;
-    int priv_data_size;
+    BVInputFormat *iformat;
+    BVOutputFormat *oformat;
+    void *priv_data;
     char file_name[1024];
     int nb_streams;
     BVStream **stream;
+    BVChannel *channel;
 } BVFormatContext;
 
-void bv_register_input_format(BVInputFormat *ifmt);
+void bv_input_format_register(BVInputFormat *ifmt);
 
-void bv_register_output_format(BVOutputFormat *format);
+void bv_output_format_register(BVOutputFormat *format);
 
-BVInputFormat * bv_iformat_next(BVInputFormat *ifmt);
+BVInputFormat * bv_input_format_next(BVInputFormat *ifmt);
 
-BVOutputFormat *bv_oformat_next(const BVOutputFormat *f);
+BVOutputFormat *bv_output_format_next(const BVOutputFormat *f);
 
-BVInputFormat *bv_find_input_format(const char *short_name);
+BVInputFormat *bv_input_format_find(const char *short_name);
 
 void bv_format_register_all(void);
 
-int bv_open_input_format(BVFormatContext **fmt, const char *url, BVInputFormat *format, BVDictionary **options);
+BVFormatContext *bv_format_context_alloc(void);
 
-BVOutputFormat *bv_guess_format(const char *short_name, const char *filename, const char *mime_type);
+void bv_format_context_free(BVFormatContext * devctx);
+
+int bv_input_format_open(BVFormatContext **fmt, const BVChannel *channel, const char *url, BVInputFormat *format, BVDictionary **options);
+
+BVOutputFormat *bv_output_format_guess(const char *short_name, const char *filename, const char *mime_type);
 #ifdef __cplusplus
 }
 #endif

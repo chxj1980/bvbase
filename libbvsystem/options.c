@@ -51,7 +51,7 @@ static void bv_system_get_context_default(BVSystemContext *system)
     bv_opt_set_defaults(system);
 }
 
-BVSystemContext *bv_system_alloc_context(void)
+BVSystemContext *bv_system_context_alloc(void)
 {
     BVSystemContext *s = bv_mallocz(sizeof(BVSystemContext));
     if (!s) {
@@ -62,7 +62,7 @@ BVSystemContext *bv_system_alloc_context(void)
     return s;
 }
 
-void bv_system_free_context(BVSystemContext * sysctx)
+void bv_system_context_free(BVSystemContext * sysctx)
 {
     if (!sysctx) 
         return;

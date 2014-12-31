@@ -36,7 +36,7 @@
                                            LIBBVFORMAT_VERSION_MICRO)
 #define LIBFORMAT_BUILD       LIBBVFORMAT_VERSION_INT
 
-#define LIBFORMAT_IDENT       "Lbvd" BV_STRINGIFY(LIBBVFORMAT_VERSION)
+#define LIBFORMAT_IDENT       "Lbvfmt" BV_STRINGIFY(LIBBVFORMAT_VERSION)
 
 
 #endif /* end of include guard: BV_FORMAT_VERSION_H */

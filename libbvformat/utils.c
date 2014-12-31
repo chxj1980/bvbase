@@ -31,7 +31,7 @@ static BVInputFormat **last_ifmt = &first_ifmt;
 static BVOutputFormat *first_ofmt = NULL;
 static BVOutputFormat **last_ofmt = &first_ofmt;
 
-void bv_register_input_format(BVInputFormat *ifmt)
+void bv_input_format_register(BVInputFormat *ifmt)
 {
     BVInputFormat **p = last_ifmt;
     ifmt->next = NULL;
@@ -40,7 +40,7 @@ void bv_register_input_format(BVInputFormat *ifmt)
     last_ifmt = &ifmt->next;
 }
 
-void bv_register_output_format(BVOutputFormat *format)
+void bv_output_format_register(BVOutputFormat *format)
 {
     BVOutputFormat **p = last_ofmt;
 
@@ -50,7 +50,7 @@ void bv_register_output_format(BVOutputFormat *format)
     last_ofmt = &format->next;
 }
 
-BVInputFormat * bv_iformat_next(BVInputFormat *ifmt)
+BVInputFormat * bv_input_format_next(BVInputFormat *ifmt)
 {
     if (ifmt)
         return ifmt->next;
@@ -58,7 +58,7 @@ BVInputFormat * bv_iformat_next(BVInputFormat *ifmt)
         return first_ifmt;
 }
 
-BVOutputFormat *bv_oformat_next(const BVOutputFormat *f)
+BVOutputFormat *bv_output_format_next(const BVOutputFormat *f)
 {
     if (f)
         return f->next;

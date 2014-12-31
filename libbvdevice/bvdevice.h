@@ -136,9 +136,9 @@ BVDevice * bv_device_next(BVDevice *dev);
 
 BVDevice *bv_device_find_device(enum BVDeviceType device_type);
 
-BVDeviceContext *bv_device_alloc_context(void);
+BVDeviceContext *bv_device_context_alloc(void);
 
-void bv_device_free_context(BVDeviceContext *devctx);
+void bv_device_context_free(BVDeviceContext *devctx);
 
 /**
  * @Synopsis        open a device

@@ -273,11 +273,6 @@ enum BVPictureType {
     BV_PICTURE_TYPE_BI,    ///< BI type
 };
 
-typedef struct _BVControlPacket {
-    int size;
-    void *data;
-} BVControlPacket;
-
 /**
  * Return a single letter to describe the given picture type
  * pict_type.

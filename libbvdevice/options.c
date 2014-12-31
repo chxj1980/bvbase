@@ -42,7 +42,7 @@ static const BVClass bv_device_context_class = {
     .item_name      = device_to_name,
     .option         = device_options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_device_get_context_default(BVDeviceContext *device)
@@ -51,7 +51,7 @@ static void bv_device_get_context_default(BVDeviceContext *device)
     bv_opt_set_defaults(device);
 }
 
-BVDeviceContext *bv_device_alloc_context(void)
+BVDeviceContext *bv_device_context_alloc(void)
 {
     BVDeviceContext *s = bv_mallocz(sizeof(BVDeviceContext));
     if (!s) {
@@ -62,7 +62,7 @@ BVDeviceContext *bv_device_alloc_context(void)
     return s;
 }
 
-void bv_device_free_context(BVDeviceContext * devctx)
+void bv_device_context_free(BVDeviceContext * devctx)
 {
     if (!devctx) 
         return;

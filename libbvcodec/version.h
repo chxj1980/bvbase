@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: options_table.h
+	> File Name: version.h
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月16日 星期二 11时00分38秒
+	> Created Time: 2014年12月15日 星期一 10时46分54秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -21,20 +21,23 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#ifndef BV_OPTIONS_TABLE_H
-#define BV_OPTIONS_TABLE_H
+#ifndef BV_CODEC_VERSION_H
+#define BV_CODEC_VERSION_H
 
-#include <limits.h>
-#include <libbvutil/opt.h>
+#define LIBBVCODEC_VERSION_MAJOR 0
+#define LIBBVCODEC_VERSION_MINOR  0
+#define LIBBVCODEC_VERSION_MICRO 1
 
-#include "bvformat.h"
+#define LIBCODEC_VERSION_INT BV_VERSION_INT(LIBBVCODEC_VERSION_MAJOR, \
+                                               LIBBVCODEC_VERSION_MINOR, \
+                                               LIBBVCODEC_VERSION_MICRO)
+#define LIBCODEC_VERSION     BV_VERSION(LIBBVCODEC_VERSION_MAJOR, \
+                                           LIBBVCODEC_VERSION_MINOR, \
+                                           LIBBVCODEC_VERSION_MICRO)
+#define LIBCODEC_BUILD       LIBBVCODEC_VERSION_INT
 
-#define OFFSET(X) offsetof(BVDeviceContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
+#define LIBCODEC_IDENT       "Lbvc" BV_STRINGIFY(LIBBVCODEC_VERSION)
 
-static const BVOption format_options[] = {
 
-    {NULL}
-};
+#endif /* end of include guard: BV_CODEC_VERSION_H */
 
-#endif /* end of include guard: BV_OPTIONS_TABLE_H */

@@ -71,8 +71,8 @@ ARCH_HEADERS = bswap.h                                                  \
                intreadwrite.h                                           \
                timer.h                                                  \
 
-BUILT_HEADERS = avconfig.h                                              \
-                ffversion.h
+BUILT_HEADERS = bvconfig.h                                              \
+                bvversion.h
 
 OBJS = adler32.o                                                        \
        aes.o                                                            \

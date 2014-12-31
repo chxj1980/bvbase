@@ -21,30 +21,33 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include <libdevice/device.h>
-#include <libconfig/common.h>
+#include <libbvdevice/bvdevice.h>
+#include <libbvutil/bvutil.h>
+#include <libbvutil/opt.h>
+#include <libbvutil/log.h>
+#include <libbvconfig/common.h>
 
 int main(int argc, const char *argv[])
 {
     int ret;
     BVDevice *device = NULL;
     BVDeviceContext *device_context = NULL;
-    AVDictionary *opn = NULL;
+    BVDictionary *opn = NULL;
 
 
     bv_device_register_all();
     
     device = bv_device_find_device(BV_DEVICE_TYPE_ONVIF_PTZ);
     if (!device) {
-        av_log(NULL, AV_LOG_ERROR, "Not Find This device\n");
-        return AVERROR(EINVAL);
+        bv_log(NULL, BV_LOG_ERROR, "Not Find This device\n");
+        return BVERROR(EINVAL);
     }
-    av_dict_set(&opn, "fd", "1", 0);
-    av_dict_set(&opn, "size", "800x600", 0);
+    bv_dict_set(&opn, "fd", "1", 0);
+    bv_dict_set(&opn, "size", "800x600", 0);
     if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:8899/onvif/ptz_service", &opn)) < 0) {
-        av_log(NULL, AV_LOG_ERROR, "open device error %d\n", ret);
-        av_dict_free(&opn);
-        return AVERROR(EIO);
+        bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
+        bv_dict_free(&opn);
+        return BVERROR(EIO);
     }
     BVDevicePacket pkt_in;
     BVPTZContinuousMove continuous_move;
@@ -154,7 +157,7 @@ int main(int argc, const char *argv[])
     strcpy(preset.token, "Preset_0000");
     pkt_in.data = &preset;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET, &pkt_in, NULL);
-    av_log(device_context, AV_LOG_ERROR, "set preset ok\n");
+    bv_log(device_context, BV_LOG_ERROR, "set preset ok\n");
 
     sleep(5);
 
@@ -165,15 +168,15 @@ int main(int argc, const char *argv[])
     goto_preset.speed.zoom.x = 0.2f;
     pkt_in.data = &goto_preset;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET, &pkt_in, NULL);
-    av_log(device_context, AV_LOG_ERROR, "goto preset ok\n");
+    bv_log(device_context, BV_LOG_ERROR, "goto preset ok\n");
 
     sleep(5);
 
     pkt_in.data = &preset;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET, &pkt_in, NULL);
-    av_log(device_context, AV_LOG_ERROR, "remove preset ok\n");
+    bv_log(device_context, BV_LOG_ERROR, "remove preset ok\n");
 #endif
-    av_dict_free(&opn);
+    bv_dict_free(&opn);
     bv_device_close(&device_context);
     return 0;
 }

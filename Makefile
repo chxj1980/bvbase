@@ -46,6 +46,7 @@ BVLIBS-$(CONFIG_BVCONFIG)    += bvconfig
 BVLIBS-$(CONFIG_BVSERVER)    += bvserver
 BVLIBS-$(CONFIG_BVSYSTEM)    += bvsystem
 BVLIBS-$(CONFIG_BVFORMAT)    += bvformat
+BVLIBS-$(CONFIG_BVCODEC)     += bvcodec
 
 BVLIBS := bvutil
 

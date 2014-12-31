@@ -109,7 +109,7 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     BVDictionary *tmp = NULL;
     BVDeviceContext *s = *h;
     int ret = 0;
-    if (!s && !(s = bv_device_alloc_context()))
+    if (!s && !(s = bv_device_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
         bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
@@ -161,7 +161,7 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     return s->device->dev_open(s);
 fail:
     bv_dict_free(&tmp);
-    bv_device_free_context(s);
+    bv_device_context_free(s);
     *h = NULL;
     return ret;
 }
@@ -206,7 +206,7 @@ int bv_device_close(BVDeviceContext ** h)
     BVDeviceContext *s = *h;
     if (s->device && s->device->dev_close)
         s->device->dev_close(s);
-    bv_device_free_context(s);
+    bv_device_context_free(s);
     *h = NULL;
     return 0;
 }

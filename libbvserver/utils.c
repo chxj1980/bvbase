@@ -92,7 +92,7 @@ int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, BVDictio
     BVDictionary *tmp = NULL;
     BVServerContext *s = *h;
     int ret = 0;
-    if (!s && !(s = bv_server_alloc_context()))
+    if (!s && !(s = bv_server_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
         bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
@@ -132,7 +132,7 @@ int bv_server_open(BVServerContext **h, BVServer *svr, const char *url, BVDictio
     return s->server->svr_open(s);
 fail:
     bv_dict_free(&tmp);
-    bv_server_free_context(s);
+    bv_server_context_free(s);
     *h = NULL;
     return ret;
 }

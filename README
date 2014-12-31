@@ -1,24 +1,14 @@
 目录结构
 3rdparty    第三方引用文件 ffmpeg hisisdk onvif jansson
-	ffmpeg  ffmpeg2.4.2 源码
-		3rdparty 添加的私有文件信息
-			libavdevice 平台音视频数据编解码 叠加 
-			libavformat	私有的文件格式dav的复用和解复用，私有的文件系统接口bvfs 交通部的协议 私有修改后的SIP协议 Onvif协议
-	hissdk	海思各平台相关的头文件和库
-	jansson 读取jasson配置文件库
-	onvif   gsoap 生成的onvif框架文件
-libconfig	配置文件 初步使用jansson，或者xml 或是自己定义的私有格式
-libdevice	设备配置 GPS 串口 WIFI 3G 4G拨号 nand 更新 磁盘
-libserver	平台协议
-libstream   ffmpeg接口的封装
-libsystem	平台初始化配置
-
+libbvconfig	配置文件 初步使用jansson，或者xml 或是自己定义的私有格式
+libbvdevice	设备配置 GPS 串口 WIFI 3G 4G拨号 nand 更新 磁盘
+libbvserver	平台协议
+libbvsystem	平台初始化配置
+libbvformat 参照FFmpeg写的format
+libbvprotocol 参照FFmpeg AVIO写的协议
+libbvcodec  参照FFmpeg AVCodec
 
 -------------------------------------------------------------------------------
-libserver:
-	1. 凡是我們程序與之通信的皆為server
-	2. server是異步通信協議。是由事件驅動的。所以採用reactor設計模式，當事件產生時，回調註冊的函數
-	3. server內部採用多線程模式分為事件分離，事件處理，事件註冊
 
 代码规范:
 	添加的所有代码均参照此规范
@@ -49,4 +39,4 @@ static int test_function(int arg1, int arg2)
 6. 所有私有文件夹中头文件中的函数名使用以下格式
 	type bv_n_v()  int bv_device_read()
 	结构体 命名如下
-	BVDevContext
+	BVDeviceContext

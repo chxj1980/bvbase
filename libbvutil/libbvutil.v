@@ -1,4 +1,4 @@
 LIBBVUTIL_$MAJOR {
-        global: av*;
+        global: bv*;
         local: *;
 };
