@@ -46,12 +46,12 @@ int main(int argc, const char *argv[])
     bv_dict_set(&opn, "size", "800x600", 0);
     bv_dict_set(&opn, "user", "test", 0);
     bv_dict_set(&opn, "passwd", "test", 0);
-    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:80/onvif/ptz_service", &opn)) < 0) {
+    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:8899/onvif/ptz_service", &opn)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);
     }
-    BVDevicePacket pkt_in;
+    BVControlPacket pkt_in;
     BVPTZContinuousMove continuous_move;
     BVPTZVector vector;
     BVPTZStop stop;
@@ -161,7 +161,7 @@ int main(int argc, const char *argv[])
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET, &pkt_in, NULL);
     bv_log(device_context, BV_LOG_ERROR, "set preset ok\n");
 
-    sleep(5);
+//    sleep(5);
 
     BVPTZGotoPreset goto_preset;
     strcpy(goto_preset.token, "Preset_0000");
@@ -172,7 +172,7 @@ int main(int argc, const char *argv[])
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET, &pkt_in, NULL);
     bv_log(device_context, BV_LOG_ERROR, "goto preset ok\n");
 
-    sleep(5);
+  //  sleep(5);
 
     pkt_in.data = &preset;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET, &pkt_in, NULL);

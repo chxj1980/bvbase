@@ -50,7 +50,7 @@ typedef struct _BVInputMedia {
     int priv_data_size;
     struct _BVInputMedia *next;
     int (*read_probe)(BVProbeData *);
-    int (*read_head)(struct _BVMediaContext *h);
+    int (*read_header)(struct _BVMediaContext *h);
     int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*read_close)(struct _BVMediaContext *h);
     int (*control_message)(struct _BVMediaContext *h, int type, BVControlPacket *in, BVControlPacket *out);
@@ -75,11 +75,11 @@ typedef struct _BVStream {
 } BVStream;
 
 typedef struct _BVMediaContext {
-    BVClass *bv_class;
+    const BVClass *bv_class;
     BVInputMedia *imedia;
     BVOutputMedia *omedia;
     void *priv_data;
-    char file_name[1024];
+    char filename[1024];
     int nb_streams;
     BVStream **stream;
     BVChannel *channel;

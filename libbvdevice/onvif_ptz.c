@@ -33,6 +33,7 @@ typedef struct OnvifPTZContext {
     char *passwd;
     char url[1024];
     char token[64];
+    struct soap *soap;
 } OnvifPTZContext;
 
 //Onvif default timeout	0.5s
@@ -83,10 +84,14 @@ static int onvif_ptz_open(BVDeviceContext *h)
     p = strstr(h->url, ":");
     sprintf(onvif_ptz->url, "http%s",p);
     sprintf(onvif_ptz->token, "00000"); 
+    onvif_ptz->soap = bv_soap_new(onvif_ptz);
+    if (onvif_ptz->soap == NULL) {
+        return -1;
+    }
     return 0;
 }
 
-static int onvif_probe(BVDeviceContext *h, const char *args)
+static int onvif_ptz_probe(BVDeviceContext *h, const char *args)
 {
     if (strcmp("onvif_ptz", args) == 0) {
         return 100;
@@ -94,7 +99,7 @@ static int onvif_probe(BVDeviceContext *h, const char *args)
     return 0;
 }
 
-static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
 	int retval = SOAP_OK;
@@ -103,14 +108,10 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVDevicePacket *p
     struct tt__Vector2D PanTilt;
     struct tt__Vector1D Zoom;
     struct _tptz__ContinuousMoveResponse tptz__ContinuousMoveResponse;
-	struct soap *soap = NULL;
     struct SOAP_ENV__Header header;
     OnvifPTZContext *onvif_ptz = h->priv_data;
     BVPTZContinuousMove *continuous_move = (BVPTZContinuousMove *) pkt_in->data;
-
-    if(!(soap = bv_soap_new(onvif_ptz))) {
-        return -1;
-    }
+	struct soap *soap = onvif_ptz->soap;
 
 	soap_default_SOAP_ENV__Header(soap, &header);
     MEMSET_STRUCT(tptz__ContinuousMove);
@@ -136,29 +137,23 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVDevicePacket *p
         ret = -1;
     }
 
-    bv_soap_free(soap);
-
     return ret;
 }
 
-static int onvif_ptz_stop(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
 	int retval = SOAP_OK;
-	struct soap *soap = NULL;
     struct SOAP_ENV__Header header;
     struct _tptz__Stop tptz__Stop;
     struct _tptz__StopResponse tptz__StopResponse;
     OnvifPTZContext *onvif_ptz = h->priv_data;
     BVPTZStop *stop = (BVPTZStop *)pkt_in->data;
+	struct soap *soap = onvif_ptz->soap;
 
     MEMSET_STRUCT(header);
     MEMSET_STRUCT(tptz__Stop);
     MEMSET_STRUCT(tptz__StopResponse);
-
-    if(!(soap = bv_soap_new(onvif_ptz))) {
-        return -1;
-    }
 	soap_default_SOAP_ENV__Header(soap, &header);
 
     tptz__Stop.ProfileToken = onvif_ptz->token;
@@ -172,29 +167,24 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDe
         ret = -1;
     }
 
-    bv_soap_free(soap);
-
     return ret;
 }
 
-static int onvif_ptz_set_preset(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
 	int retval = SOAP_OK;
-	struct soap *soap = NULL;
     struct SOAP_ENV__Header header;
     struct _tptz__SetPreset tptz__SetPreset;
     struct _tptz__SetPresetResponse tptz__SetPresetResponse;
     OnvifPTZContext *onvif_ptz = h->priv_data;
     BVPTZPreset *preset = (BVPTZPreset *)pkt_in->data;
+	struct soap *soap = onvif_ptz->soap;
 
     MEMSET_STRUCT(header);
     MEMSET_STRUCT(tptz__SetPreset);
     MEMSET_STRUCT(tptz__SetPresetResponse);
 
-    if(!(soap = bv_soap_new(onvif_ptz))) {
-        return -1;
-    }
 	soap_default_SOAP_ENV__Header(soap, &header);
     tptz__SetPreset.ProfileToken = onvif_ptz->token;
     tptz__SetPreset.PresetName = preset->name;
@@ -207,16 +197,13 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVDevicePacket *pkt_in
         ret = -1;
     }
 
-    bv_soap_free(soap);
-
     return ret;
 }
 
-static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
 	int retval = SOAP_OK;
-	struct soap *soap = NULL;
     struct SOAP_ENV__Header header;
     struct _tptz__GotoPreset tptz__GotoPreset;
     struct _tptz__GotoPresetResponse tptz__GotoPresetResponse;
@@ -225,6 +212,7 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVDevicePacket *pkt_i
     struct tt__Vector1D Zoom;
     OnvifPTZContext *onvif_ptz = h->priv_data;
     BVPTZGotoPreset *goto_preset = (BVPTZGotoPreset*)pkt_in->data;
+	struct soap *soap = onvif_ptz->soap;
 
     MEMSET_STRUCT(header);
     MEMSET_STRUCT(tptz__GotoPreset);
@@ -234,9 +222,6 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVDevicePacket *pkt_i
     MEMSET_STRUCT(PanTilt);
     MEMSET_STRUCT(Zoom);
 
-    if(!(soap = bv_soap_new(onvif_ptz))) {
-        return -1;
-    }
 	soap_default_SOAP_ENV__Header(soap, &header);
     tptz__GotoPreset.ProfileToken = onvif_ptz->token;
     tptz__GotoPreset.PresetToken = goto_preset->token;
@@ -256,29 +241,24 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVDevicePacket *pkt_i
         ret = -1;
     }
 
-    bv_soap_free(soap);
-
     return ret;
 }
 
-static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
 	int retval = SOAP_OK;
-	struct soap *soap = NULL;
     struct SOAP_ENV__Header header;
     struct _tptz__RemovePreset tptz__RemovePreset;
     struct _tptz__RemovePresetResponse tptz__RemovePresetResponse;
     OnvifPTZContext *onvif_ptz = h->priv_data;
+	struct soap *soap = onvif_ptz->soap;
     BVPTZPreset *preset = (BVPTZPreset *)pkt_in->data;
 
     MEMSET_STRUCT(header);
     MEMSET_STRUCT(tptz__RemovePreset);
     MEMSET_STRUCT(tptz__RemovePresetResponse);
 
-    if(!(soap = bv_soap_new(onvif_ptz))) {
-        return -1;
-    }
 	soap_default_SOAP_ENV__Header(soap, &header);
     tptz__RemovePreset.ProfileToken = onvif_ptz->token;
     tptz__RemovePreset.PresetToken = preset->token;
@@ -290,8 +270,6 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVDevicePacket *pkt
         ret = -1;
     }
 
-    bv_soap_free(soap);
-
     return ret;
 }
 
@@ -301,7 +279,7 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVDevicePacket *pkt
  *  不知道效率能提高多少
  */
 typedef struct OnvifPTZControl {
-    int (*control)(BVDeviceContext *h, const BVDevicePacket *, BVDevicePacket *);
+    int (*control)(BVDeviceContext *h, const BVControlPacket *, BVControlPacket *);
 } OnvifPTZControl;
 
 
@@ -311,7 +289,7 @@ static OnvifPTZControl onvif_control[] = {
 };
 #endif
 
-static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
   //  OnvifPTZContext *onvif_ptz = h->priv_data;
@@ -343,6 +321,7 @@ static int onvif_ptz_close(BVDeviceContext*h)
     OnvifPTZContext *onvif_ptz = h->priv_data;
     if (!onvif_ptz)
         return -1;
+    bv_soap_free(onvif_ptz->soap);
     return 0;
 }
 
@@ -368,7 +347,7 @@ BVDevice bv_onvif_ptz_device = {
     .type = BV_DEVICE_TYPE_ONVIF_PTZ,
     .priv_data_size = sizeof(OnvifPTZContext),
     .dev_open = onvif_ptz_open,
-    .dev_probe = onvif_probe,
+    .dev_probe = onvif_ptz_probe,
     .dev_control = onvif_ptz_control,
     .dev_close = onvif_ptz_close,
     .priv_class = &onvif_class,

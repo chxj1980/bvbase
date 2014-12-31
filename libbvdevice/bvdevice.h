@@ -31,6 +31,7 @@ extern "C"{
 #include <libbvutil/bvutil.h>
 #include <libbvutil/opt.h>
 #include <libbvutil/dict.h>
+#include <libbvutil/packet.h>
 
 #include <libbvconfig/common.h>
 
@@ -77,11 +78,6 @@ enum BVDeviceMessageType {
 	BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
-typedef struct _BVDevicePacket {
-	int  size;
-	void *data;
-} BVDevicePacket;
-
 enum BVMobileDeviceType {
     BV_MOBILE_DEVICE_TYPE_NONE = 0,
     BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
@@ -105,17 +101,19 @@ typedef struct _BVDeviceContext {
 	struct _BVDevice *device;
 	void *priv_data;
     size_t buffer_size;
-	char url[1024];     //url likes ptz://dev/ttyusb0 get two information DeviceType and DeviceName
+	char url[1024];     //url likes ptz://dev/ttyusb0 get two inmediaion DeviceType and DeviceName
     uint8_t *buffer;
     uint8_t *buffer_ptr;
     uint8_t *buffer_end;
 } BVDeviceContext;
 
+#define BV_DEVICE_FLAG_NOOPEN          0x0001
 typedef struct _BVDevice {
     const char *name;
     enum BVDeviceType type;
     const BVClass *priv_class;
     int priv_data_size;
+    int flags;
     struct _BVDevice *next;
     int     (*dev_scan)( BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
     int     (*dev_open)( BVDeviceContext *h);
@@ -123,7 +121,7 @@ typedef struct _BVDevice {
     int     (*dev_write)(BVDeviceContext *h, const unsigned char *buf, size_t size);
     int     (*dev_probe)(BVDeviceContext *h, const char *args);
     int64_t (*dev_seek)( BVDeviceContext *h, int64_t pos, int whence);
-    int     (*dev_control)(BVDeviceContext *h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out);
+    int     (*dev_control)(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
     int     (*get_fd)(BVDeviceContext *h);
     int     (*dev_close)(BVDeviceContext *h);
 } BVDevice;
@@ -157,13 +155,15 @@ void bv_device_context_free(BVDeviceContext *devctx);
  */
 int bv_device_open(BVDeviceContext **h, BVDevice *dev, const char *url, BVDictionary **options);
 
+int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
+
 int bv_device_read(BVDeviceContext *h, void *buf, size_t size);
 
 int bv_device_write(BVDeviceContext *h, const void *buf, size_t size);
 
 int64_t bv_device_seek(BVDeviceContext *h, int64_t pos, int whence);
 
-int bv_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out);
+int bv_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 
 int bv_device_get_fd(BVDeviceContext *h);
 

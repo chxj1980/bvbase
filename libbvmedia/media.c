@@ -23,6 +23,9 @@
 
 #include "bvmedia.h"
 #include <libbvutil/bvstring.h>
+#include <libbvutil/opt.h>
+
+const char *FILE_NAME = "media.c";
 
 BVInputMedia *bv_input_media_find(const char *short_name)
 {
@@ -87,9 +90,62 @@ BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filenam
     return fmt_found;
 }
 
-static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVInputMedia *media, BVDictionary **options)
+static int init_imedia(BVMediaContext *s, const char *url)
 {
     return 0;
+}
+
+static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVInputMedia *media, BVDictionary **options)
+{
+    BVDictionary *tmp = NULL;
+    BVMediaContext *s = *fmt;
+    int ret = 0;
+    if (!s && !(s = bv_media_context_alloc()))
+        return BVERROR(ENOMEM);
+    if (!s->bv_class) {
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        return BVERROR(EINVAL);
+    }
+
+    if (options)
+        bv_dict_copy(&tmp, *options, 0);
+
+    if (bv_opt_set_dict(s, &tmp) < 0)
+        goto fail;
+
+    if (media)
+         s->imedia = media;
+    else
+        ret = init_imedia(s, url);
+    if (ret < 0) {
+        return BVERROR(ENOSYS);
+    }
+    if (s->imedia->priv_data_size > 0) {
+        s->priv_data = bv_mallocz(s->imedia->priv_data_size);
+        if (!s->priv_data)
+            goto fail;
+        if (s->imedia->priv_class) {
+            *(const BVClass **) s->priv_data = s->imedia->priv_class;
+            bv_opt_set_defaults(s->priv_data);
+            if ((ret = bv_opt_set_dict(s->priv_data, &tmp)) < 0) {
+                bv_log(s, BV_LOG_ERROR, "set dict error\n");
+                goto fail;
+            }
+        }
+    }
+
+    if (url)
+        bv_strlcpy(s->filename, url, sizeof(s->filename));
+    if (!s->imedia->read_header)
+        goto fail;
+    *fmt = s;
+
+    bv_dict_free(&tmp);
+    return s->imedia->read_header(s);
+
+    return 0;
+fail:
+    return -1;
 }
 
 int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url,

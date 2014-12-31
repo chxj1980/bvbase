@@ -61,6 +61,8 @@ HEADERS = adler32.h                                                     \
           timestamp.h                                                   \
           version.h                                                     \
           xtea.h                                                        \
+		  packet.h                                                      \
+
 
 HEADERS-$(CONFIG_LZO)                   += lzo.h
 
@@ -129,6 +131,8 @@ OBJS = adler32.o                                                        \
        utils.o                                                          \
        xga_font_data.o                                                  \
        xtea.o                                                           \
+	   packet.o                                                         \
+
 
 OBJS-$(CONFIG_LZO)                      += lzo.o
 OBJS-$(CONFIG_OPENCL)                   += opencl.o opencl_internal.o
