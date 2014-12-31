@@ -1,0 +1,4 @@
+#ifndef BVUTIL_BVVERSION_H
+#define BVUTIL_BVVERSION_H
+#define BVBASE_VERSION "0.0.1"
+#endif /* BVUTIL_BVVERSION_H */
