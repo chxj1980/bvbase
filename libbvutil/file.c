@@ -23,15 +23,15 @@
 #include "mem.h"
 #include <fcntl.h>
 #include <sys/stat.h>
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
-#if HAVE_MMAP
+#if BV_HAVE_MMAP
 #include <sys/mman.h>
-#elif HAVE_MAPVIEWOFFILE
+#elif BV_HAVE_MAPVIEWOFFILE
 #include <windows.h>
 #endif
 
@@ -81,7 +81,7 @@ int bv_file_map(const char *filename, uint8_t **bufptr, size_t *size,
     }
     *size = off_size;
 
-#if HAVE_MMAP
+#if BV_HAVE_MMAP
     ptr = mmap(NULL, *size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
     if (ptr == MAP_FAILED) {
         err = BVERROR(errno);
@@ -91,7 +91,7 @@ int bv_file_map(const char *filename, uint8_t **bufptr, size_t *size,
         return err;
     }
     *bufptr = ptr;
-#elif HAVE_MAPVIEWOFFILE
+#elif BV_HAVE_MAPVIEWOFFILE
     {
         HANDLE mh, fh = (HANDLE)_get_osfhandle(fd);
 
@@ -128,9 +128,9 @@ int bv_file_map(const char *filename, uint8_t **bufptr, size_t *size,
 
 void bv_file_unmap(uint8_t *bufptr, size_t size)
 {
-#if HAVE_MMAP
+#if BV_HAVE_MMAP
     munmap(bufptr, size);
-#elif HAVE_MAPVIEWOFFILE
+#elif BV_HAVE_MAPVIEWOFFILE
     UnmapViewOfFile(bufptr);
 #else
     bv_free(bufptr);
@@ -141,7 +141,7 @@ int bv_tempfile(const char *prefix, char **filename, int log_offset, void *log_c
 {
     FileLogContext file_log_ctx = { &file_log_ctx_class, log_offset, log_ctx };
     int fd = -1;
-#if !HAVE_MKSTEMP
+#if !BV_HAVE_MKSTEMP
     void *ptr= tempnam(NULL, prefix);
     if(!ptr)
         ptr= tempnam(".", prefix);
@@ -157,7 +157,7 @@ int bv_tempfile(const char *prefix, char **filename, int log_offset, void *log_c
         bv_log(&file_log_ctx, BV_LOG_ERROR, "ff_tempfile: Cannot allocate file name\n");
         return BVERROR(ENOMEM);
     }
-#if !HAVE_MKSTEMP
+#if !BV_HAVE_MKSTEMP
 #   ifndef O_BINARY
 #       define O_BINARY 0
 #   endif

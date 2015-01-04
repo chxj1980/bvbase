@@ -106,12 +106,12 @@ static void body(uint32_t ABCD[4], uint32_t *src, int nblocks)
 
         X = src + n * 16;
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
         for (i = 0; i < 16; i++)
             X[i] = bv_bswap32(X[i]);
 #endif
 
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
         for (i = 0; i < 64; i++) {
             CORE(i, a, b, c, d);
             t = d;
@@ -164,7 +164,7 @@ void bv_md5_update(AVMD5 *ctx, const uint8_t *src, int len)
     }
 
     end = src + (len & ~63);
-    if (HAVE_BIGENDIAN || (!HAVE_FAST_UNALIGNED && ((intptr_t)src & 3))) {
+    if (BV_HAVE_BIGENDIAN || (!BV_HAVE_FAST_UNALIGNED && ((intptr_t)src & 3))) {
        while (src < end) {
            memcpy(ctx->block, src, 64);
            body(ctx->ABCD, (uint32_t *) ctx->block, 1);

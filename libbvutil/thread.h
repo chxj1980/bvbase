@@ -24,13 +24,13 @@
 
 #include "config.h"
 
-#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
+#if BV_HAVE_PTHREADS || BV_HAVE_W32THREADS || BV_HAVE_OS2THREADS
 
 #define USE_ATOMICS 0
 
-#if HAVE_PTHREADS
+#if BV_HAVE_PTHREADS
 #include <pthread.h>
-#elif HAVE_OS2THREADS
+#elif BV_HAVE_OS2THREADS
 #include "compat/os2threads.h"
 #else
 #include "compat/w32pthreads.h"

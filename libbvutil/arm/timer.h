@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include "config.h"
 
-#if HAVE_INLINE_ASM && defined(__ARM_ARCH_7A__)
+#if BV_HAVE_INLINE_ASM && defined(__ARM_BV_ARCH_7A__)
 
 #define BV_READ_TIME read_time
 
@@ -35,6 +35,6 @@ static inline uint64_t read_time(void)
     return cc;
 }
 
-#endif /* HAVE_INLINE_ASM && __ARM_ARCH_7A__ */
+#endif /* BV_HAVE_INLINE_ASM && __ARM_BV_ARCH_7A__ */
 
 #endif /* BVUTIL_ARM_TIMER_H */

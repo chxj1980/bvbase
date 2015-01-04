@@ -75,7 +75,7 @@ int bv_strerror(int errnum, char *errbuf, size_t errbuf_size)
     if (entry) {
         bv_strlcpy(errbuf, entry->str, errbuf_size);
     } else {
-#if HAVE_STRERROR_R
+#if BV_HAVE_STRERROR_R
         ret = BVERROR(strerror_r(AVUNERROR(errnum), errbuf, errbuf_size));
 #else
         ret = -1;

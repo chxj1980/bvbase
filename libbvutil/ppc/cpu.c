@@ -38,7 +38,7 @@
  */
 int ff_get_cpu_flags_ppc(void)
 {
-#if HAVE_ALTIVEC
+#if BV_HAVE_ALTIVEC
 #ifdef __AMIGAOS4__
     ULONG result = 0;
     extern struct ExecIFace *IExec;
@@ -62,7 +62,7 @@ int ff_get_cpu_flags_ppc(void)
     if (err == 0)
         return has_vu ? BV_CPU_FLAG_ALTIVEC : 0;
     return 0;
-#elif CONFIG_RUNTIME_CPUDETECT && defined(__linux__) && !ARCH_PPC64
+#elif BV_CONFIG_RUNTIME_CPUDETECT && defined(__linux__) && !BV_ARCH_PPC64
     int proc_ver;
     // Support of mfspr PVR emulation added in Linux 2.6.17.
     __asm__ volatile("mfspr %0, 287" : "=r" (proc_ver));
@@ -79,6 +79,6 @@ int ff_get_cpu_flags_ppc(void)
     // until someone comes up with a proper way (not involving signal hacks).
     return BV_CPU_FLAG_ALTIVEC;
 #endif /* __AMIGAOS4__ */
-#endif /* HAVE_ALTIVEC */
+#endif /* BV_HAVE_ALTIVEC */
     return 0;
 }

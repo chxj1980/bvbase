@@ -28,18 +28,18 @@
 #define REGISTER_CONFIG(X, x)                                         \
     {                                                                   \
         extern BVConfig bv_##x##_config;                           \
-        if (CONFIG_##X##_CONFIG)                                      \
+        if (BV_CONFIG_##X##_CONFIG)                                      \
             bv_config_register(&bv_##x##_config);                \
     }
 
 void bv_config_register_all(void)
 {
-	static int initialized;
+    static int initialized;
 
-	if (initialized)
-		return;
-	initialized = 1;
+    if (initialized)
+        return;
+    initialized = 1;
 
-	REGISTER_CONFIG(JSON, json);
-	REGISTER_CONFIG(ONVIF, onvif);
+    REGISTER_CONFIG(JSON, json);
+    REGISTER_CONFIG(ONVIF, onvif);
 }

@@ -235,7 +235,7 @@ const char *bv_basename(const char *path)
 {
     char *p = strrchr(path, '/');
 
-#if HAVE_DOS_PATHS
+#if BV_HAVE_DOS_PATHS
     char *q = strrchr(path, '\\');
     char *d = strchr(path, ':');
 
@@ -252,7 +252,7 @@ const char *bv_dirname(char *path)
 {
     char *p = strrchr(path, '/');
 
-#if HAVE_DOS_PATHS
+#if BV_HAVE_DOS_PATHS
     char *q = strrchr(path, '\\');
     char *d = strchr(path, ':');
 

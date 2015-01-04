@@ -36,8 +36,8 @@
  * Linear least squares model.
  */
 typedef struct LLSModel {
-    DECLARE_ALIGNED(32, double, covariance[MAX_VARS_ALIGN][MAX_VARS_ALIGN]);
-    DECLARE_ALIGNED(32, double, coeff[MAX_VARS][MAX_VARS]);
+    BV_DECLARE_ALIGNED(32, double, covariance[MAX_VARS_ALIGN][MAX_VARS_ALIGN]);
+    BV_DECLARE_ALIGNED(32, double, coeff[MAX_VARS][MAX_VARS]);
     double variance[MAX_VARS];
     int indep_count;
     /**

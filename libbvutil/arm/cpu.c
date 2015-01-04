@@ -21,7 +21,7 @@
 #include "config.h"
 
 #define CORE_FLAG(f) \
-    (BV_CPU_FLAG_ ## f * (HAVE_ ## f ## _EXTERNAL || HAVE_ ## f ## _INLINE))
+    (BV_CPU_FLAG_ ## f * (BV_HAVE_ ## f ## _EXTERNAL || BV_HAVE_ ## f ## _INLINE))
 
 #define CORE_CPU_FLAGS                          \
     (CORE_FLAG(ARMV5TE) |                       \
@@ -144,13 +144,13 @@ int ff_get_cpu_flags_arm(void)
 
 int ff_get_cpu_flags_arm(void)
 {
-    return BV_CPU_FLAG_ARMV5TE * HAVE_ARMV5TE |
-           BV_CPU_FLAG_ARMV6   * HAVE_ARMV6   |
-           BV_CPU_FLAG_ARMV6T2 * HAVE_ARMV6T2 |
-           BV_CPU_FLAG_VFP     * HAVE_VFP     |
-           BV_CPU_FLAG_VFPV3   * HAVE_VFPV3   |
-           BV_CPU_FLAG_NEON    * HAVE_NEON    |
-           BV_CPU_FLAG_SETEND  * !(HAVE_NEON | HAVE_VFPV3);
+    return BV_CPU_FLAG_ARMV5TE * BV_HAVE_ARMV5TE |
+           BV_CPU_FLAG_ARMV6   * BV_HAVE_ARMV6   |
+           BV_CPU_FLAG_ARMV6T2 * BV_HAVE_ARMV6T2 |
+           BV_CPU_FLAG_VFP     * BV_HAVE_VFP     |
+           BV_CPU_FLAG_VFPV3   * BV_HAVE_VFPV3   |
+           BV_CPU_FLAG_NEON    * BV_HAVE_NEON    |
+           BV_CPU_FLAG_SETEND  * !(BV_HAVE_NEON | BV_HAVE_VFPV3);
 }
 
 #endif

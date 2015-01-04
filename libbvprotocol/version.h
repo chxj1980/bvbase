@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: options_table.h
+	> File Name: version.h
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月16日 星期二 11时00分38秒
+	> Created Time: 2014年12月15日 星期一 10时46分54秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -21,20 +21,23 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#ifndef BV_OPTIONS_TABLE_H
-#define BV_OPTIONS_TABLE_H
+#ifndef BV_PROTOCOL_VERSION_H
+#define BV_PROTOCOL_VERSION_H
 
-#include <limits.h>
+#define LIBBVPROTOCOL_VERSION_MAJOR 0
+#define LIBBVPROTOCOL_VERSION_MINOR  0
+#define LIBBVPROTOCOL_VERSION_MICRO 1
 
-#include "bvdevice.h"
+#define LIBPROTOCOL_VERSION_INT BV_VERSION_INT(LIBBVPROTOCOL_VERSION_MAJOR, \
+                                               LIBBVPROTOCOL_VERSION_MINOR, \
+                                               LIBBVPROTOCOL_VERSION_MICRO)
+#define LIBPROTOCOL_VERSION     BV_VERSION(LIBBVPROTOCOL_VERSION_MAJOR, \
+                                           LIBBVPROTOCOL_VERSION_MINOR, \
+                                           LIBBVPROTOCOL_VERSION_MICRO)
+#define LIBPROTOCOL_BUILD       LIBBVPROTOCOL_VERSION_INT
 
-#define OFFSET(X) offsetof(BVDeviceContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
+#define LIBPROTOCOL_IDENT       "Lbvprto" BV_STRINGIFY(LIBBVPROTOCOL_VERSION)
 
-static const BVOption device_options[] = {
-    {"buffer_size", NULL, OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 4096}, 0, INT_MAX, E},
 
-    {NULL}
-};
+#endif /* end of include guard: BV_PROTOCOL_VERSION_H */
 
-#endif /* end of include guard: BV_OPTIONS_TABLE_H */

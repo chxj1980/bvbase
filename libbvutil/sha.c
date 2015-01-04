@@ -71,7 +71,7 @@ static void sha1_transform(uint32_t state[5], const uint8_t buffer[64])
     c = state[2];
     d = state[3];
     e = state[4];
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < 80; i++) {
         int t;
         if (i < 16)
@@ -213,7 +213,7 @@ static void sha256_transform(uint32_t *state, const uint8_t buffer[64])
     f = state[5];
     g = state[6];
     h = state[7];
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < 64; i++) {
         uint32_t T2;
         if (i < 16)
@@ -317,7 +317,7 @@ void bv_sha_update(BVSHA* ctx, const uint8_t* data, unsigned int len)
 
     j = ctx->count & 63;
     ctx->count += len;
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < len; i++) {
         ctx->buffer[j++] = data[i];
         if (64 == j) {

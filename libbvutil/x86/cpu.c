@@ -28,7 +28,7 @@
 #include "libbvutil/cpu.h"
 #include "libbvutil/cpu_internal.h"
 
-#if HAVE_YASM
+#if BV_HAVE_YASM
 
 #define cpuid(index, eax, ebx, ecx, edx)        \
     ff_cpu_cpuid(index, &eax, &ebx, &ecx, &edx)
@@ -36,7 +36,7 @@
 #define xgetbv(index, eax, edx)                 \
     ff_cpu_xgetbv(index, &eax, &edx)
 
-#elif HAVE_INLINE_ASM
+#elif BV_HAVE_INLINE_ASM
 
 /* ebx saving is necessary for PIC. gcc seems unable to see it alone */
 #define cpuid(index, eax, ebx, ecx, edx)                        \
@@ -60,17 +60,17 @@
                       "popfl      \n"           \
                       :: "r"(x))
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 
-#if ARCH_X86_64
+#if BV_ARCH_X86_64
 
 #define cpuid_test() 1
 
-#elif HAVE_YASM
+#elif BV_HAVE_YASM
 
 #define cpuid_test ff_cpu_cpuid_test
 
-#elif HAVE_INLINE_ASM
+#elif BV_HAVE_INLINE_ASM
 
 static int cpuid_test(void)
 {
@@ -113,7 +113,7 @@ int ff_get_cpu_flags_x86(void)
             rval |= BV_CPU_FLAG_MMX;
         if (std_caps & (1 << 25))
             rval |= BV_CPU_FLAG_MMXEXT;
-#if HAVE_SSE
+#if BV_HAVE_SSE
         if (std_caps & (1 << 25))
             rval |= BV_CPU_FLAG_SSE;
         if (std_caps & (1 << 26))
@@ -126,7 +126,7 @@ int ff_get_cpu_flags_x86(void)
             rval |= BV_CPU_FLAG_SSE4;
         if (ecx & 0x00100000 )
             rval |= BV_CPU_FLAG_SSE42;
-#if HAVE_AVX
+#if BV_HAVE_AVX
         /* Check OXSAVE and AVX bits */
         if ((ecx & 0x18000000) == 0x18000000) {
             /* Check for OS support */
@@ -137,15 +137,15 @@ int ff_get_cpu_flags_x86(void)
                     rval |= BV_CPU_FLAG_FMA3;
             }
         }
-#endif /* HAVE_AVX */
-#endif /* HAVE_SSE */
+#endif /* BV_HAVE_AVX */
+#endif /* BV_HAVE_SSE */
     }
     if (max_std_level >= 7) {
         cpuid(7, eax, ebx, ecx, edx);
-#if HAVE_AVX2
+#if BV_HAVE_AVX2
         if ((rval & BV_CPU_FLAG_AVX) && (ebx & 0x00000020))
             rval |= BV_CPU_FLAG_AVX2;
-#endif /* HAVE_AVX2 */
+#endif /* BV_HAVE_AVX2 */
         /* BMI1/2 don't need OS support */
         if (ebx & 0x00000008) {
             rval |= BV_CPU_FLAG_BMI1;

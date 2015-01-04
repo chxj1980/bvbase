@@ -32,24 +32,24 @@
 
 #include "config.h"
 
-#if HAVE_MACH_MACH_TIME_H
+#if BV_HAVE_MACH_MACH_TIME_H
 #include <mach/mach_time.h>
 #endif
 
 #include "log.h"
 
-#if   ARCH_ARM
+#if   BV_ARCH_ARM
 #   include "arm/timer.h"
-#elif ARCH_PPC
+#elif BV_ARCH_PPC
 #   include "ppc/timer.h"
-#elif ARCH_X86
+#elif BV_ARCH_X86
 #   include "x86/timer.h"
 #endif
 
 #if !defined(BV_READ_TIME)
-#   if HAVE_GETHRTIME
+#   if BV_HAVE_GETHRTIME
 #       define BV_READ_TIME gethrtime
-#   elif HAVE_MACH_ABSOLUTE_TIME
+#   elif BV_HAVE_MACH_ABSOLUTE_TIME
 #       define BV_READ_TIME mach_absolute_time
 #   endif
 #endif

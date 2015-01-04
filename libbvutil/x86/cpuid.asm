@@ -62,7 +62,7 @@ cglobal cpu_xgetbv, 3,7
     mov [r4], edx
     RET
 
-%if ARCH_X86_64 == 0
+%if BV_ARCH_X86_64 == 0
 ;-----------------------------------------------------------------------------
 ; int ff_cpu_cpuid_test(void)
 ; return 0 if unsupported

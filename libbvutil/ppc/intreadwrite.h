@@ -28,7 +28,7 @@
  * -O0 would compile the packed struct version, which is used by
  * default, in an overly verbose fashion, so we override it here.
  */
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define BV_RB64(p) (*(const uint64_t *)(p))
 #define BV_WB64(p, v) (*(uint64_t *)(p) = (v))
 
@@ -38,9 +38,9 @@
 
 #endif
 
-#if HAVE_XFORM_ASM
+#if BV_HAVE_XFORM_ASM
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define BV_RL16 bv_read_bswap16
 #define BV_WL16 bv_write_bswap16
 #define BV_RL32 bv_read_bswap32
@@ -82,7 +82,7 @@ static bv_always_inline void bv_write_bswap32(void *p, uint32_t v)
     __asm__ ("stwbrx  %1, %y0" : "=Z"(*(uint32_t*)p) : "r"(v));
 }
 
-#if HAVE_LDBRX
+#if BV_HAVE_LDBRX
 
 static bv_always_inline uint64_t bv_read_bswap64(const void *p)
 {
@@ -117,8 +117,8 @@ static bv_always_inline void bv_write_bswap64(void *p, uint64_t v)
              : "r"(vv.hl[1]), "r"(vv.hl[0]));
 }
 
-#endif /* HAVE_LDBRX */
+#endif /* BV_HAVE_LDBRX */
 
-#endif /* HAVE_XFORM_ASM */
+#endif /* BV_HAVE_XFORM_ASM */
 
 #endif /* BVUTIL_PPC_INTREADWRITE_H */

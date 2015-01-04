@@ -36,6 +36,7 @@
 
 typedef struct OnvifDeviceContext {
     BVClass *bv_class;
+    struct soap *soap;
     int timeout;
 } OnvifDeviceContext;
 
@@ -78,10 +79,12 @@ static struct soap *bv_soap_new(int timeout)
 static void bv_soap_free(struct soap *soap)
 {
 	if (soap == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "Soap is NULL\n");
 		return;
 	}
 	soap_destroy(soap);
 	soap_end(soap);
+    soap_done(soap);
 	soap_free(soap);
 }
 
@@ -139,7 +142,7 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 	//这个接口填充一些信息并new返回一个soap对象，本来可以不用额外接口，
 	// 但是后期会作其他操作，此部分剔除出来后面的操作就相对简单了,只是调用接口就好
 	//soap = bv_soap_new(&header, was_To, was_Action, 5);
-	soap = bv_soap_new(timeout);
+	soap = devctx->soap;
 
 	soap_default_SOAP_ENV__Header(soap, &header);
 
@@ -154,7 +157,6 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 	soap_default_wsdd__ProbeType(soap, &req);
 	req.Scopes = &sScope;
 	req.Types = "dn";				//"dn:NetworkVideoTransmitter";
-
 	retval = soap_send___wsdd__Probe(soap, soap_endpoint, NULL, &req);
 	//发送组播消息成功后，开始循环接收各位设备发送过来的消息
 	while (retval == SOAP_OK) {
@@ -178,9 +180,31 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 	}
 
 	*max_ret = device_num;
-
-	bv_soap_free(soap);
 	return device_num > 0 ? device_num : -1;
+}
+
+static int onvif_device_open(BVDeviceContext *h)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    devctx->soap = bv_soap_new(devctx->timeout);
+    if (!devctx->soap) {
+        return BVERROR(ENOMEM);
+    }
+    return 0;
+}
+static int onvif_device_probe(BVDeviceContext *h, const char *args)
+{
+    if (strcmp("onvif_dev", args) == 0) {
+        return 100;
+    }
+    return 0;
+}
+
+static int onvif_device_close(BVDeviceContext *h)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    bv_soap_free(devctx->soap);
+    return 0;
 }
 
 #define OFFSET(x) offsetof(OnvifDeviceContext, x)
@@ -202,6 +226,9 @@ BVDevice bv_onvif_dev_device = {
     .name = "onvif_dev",
     .type = BV_DEVICE_TYPE_ONVIF_DEVICE,
     .priv_data_size = sizeof(OnvifDeviceContext),
+    .dev_open = onvif_device_open,
+    .dev_probe = onvif_device_probe,
+    .dev_close = onvif_device_close,
     .dev_scan = onvif_device_scan,
     .priv_class = &onvif_class,
 };

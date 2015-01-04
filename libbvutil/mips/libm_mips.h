@@ -69,5 +69,5 @@ static bv_always_inline bv_const long int lrintf_mips(float x)
 #undef lrintf
 #define lrintf(x)   lrintf_mips(x)
 
-#define HAVE_LRINTF 1
+#define BV_HAVE_LRINTF 1
 #endif /* BVUTIL_LIBM_MIPS_H */

@@ -54,7 +54,7 @@
 #include "config.h"
 #include "libbvutil/float_dsp.h"
 
-#if HAVE_INLINE_ASM && HAVE_MIPSFPU
+#if BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU
 static void vector_fmul_mips(float *dst, const float *src0, const float *src1,
                              int len)
 {
@@ -370,14 +370,14 @@ static void vector_fmul_reverse_mips(float *dst, const float *src0, const float 
         );
     }
 }
-#endif /* HAVE_INLINE_ASM && HAVE_MIPSFPU */
+#endif /* BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU */
 
 void ff_float_dsp_init_mips(BVFloatDSPContext *fdsp) {
-#if HAVE_INLINE_ASM && HAVE_MIPSFPU
+#if BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU
     fdsp->vector_fmul = vector_fmul_mips;
     fdsp->vector_fmul_scalar  = vector_fmul_scalar_mips;
     fdsp->vector_fmul_window = vector_fmul_window_mips;
     fdsp->butterflies_float = butterflies_float_mips;
     fdsp->vector_fmul_reverse = vector_fmul_reverse_mips;
-#endif /* HAVE_INLINE_ASM && HAVE_MIPSFPU */
+#endif /* BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU */
 }

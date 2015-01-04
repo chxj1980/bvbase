@@ -21,7 +21,7 @@ $(foreach VAR,$(SILENT),$(eval override $(VAR) = @$($(VAR))))
 $(eval INSTALL = @$(call ECHO,INSTALL,$$(^:$(SRC_DIR)/%=%)); $(INSTALL))
 endif
 
-ALLBVLIBS = bvutil bvdevice bvserver bvconfig bvsystem bvstream bvformat
+ALLBVLIBS = bvutil bvdevice bvserver bvconfig bvsystem bvmedia bvcodec
 
 # NASM requires -I path terminated with /
 IFLAGS     := -I. -I$(SRC_PATH)/
@@ -110,7 +110,7 @@ TOOLOBJS  := $(TOOLS:%=tools/%.o)
 TOOLS     := $(TOOLS:%=tools/%$(EXESUF))
 HEADERS   += $(HEADERS-yes)
 
-PATH_LIBNAME = $(foreach NAME,$(1),lib$(NAME)/$($(CONFIG_SHARED:yes=S)LIBNAME))
+PATH_LIBNAME = $(foreach NAME,$(1),lib$(NAME)/$($(BV_CONFIG_SHARED:yes=S)LIBNAME))
 DEP_LIBS := $(foreach lib,$(BVLIBS),$(call PATH_LIBNAME,$(lib)))
 
 SRC_DIR    := $(SRC_PATH)/lib$(NAME)

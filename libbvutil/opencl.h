@@ -33,7 +33,7 @@
 #define LIBBVUTIL_OPENCL_H
 
 #include "config.h"
-#if HAVE_CL_CL_H
+#if BV_HAVE_CL_CL_H
 #include <CL/cl.h>
 #else
 #include <OpenCL/cl.h>

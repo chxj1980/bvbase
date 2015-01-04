@@ -41,7 +41,7 @@ FILETYPE        VFT_DLL
             VALUE "FileDescription",  "BVBase utility library"
             VALUE "FileVersion",      BV_STRINGIFY(LIBBVUTIL_VERSION)
             VALUE "InternalName",     "libbvutil"
-            VALUE "LegalCopyright",   "Copyright (C) 2000-" BV_STRINGIFY(CONFIG_THIS_YEAR) " BVBase Project"
+            VALUE "LegalCopyright",   "Copyright (C) 2000-" BV_STRINGIFY(BV_CONFIG_THIS_YEAR) " BVBase Project"
             VALUE "OriginalFilename", "bvutil" BUILDSUF "-" BV_STRINGIFY(LIBBVUTIL_VERSION_MAJOR) SLIBSUF
             VALUE "ProductName",      "BVBase"
             VALUE "ProductVersion",   FFMPEG_VERSION

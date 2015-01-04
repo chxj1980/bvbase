@@ -25,9 +25,9 @@
 #include "config.h"
 #include "libbvutil/attributes.h"
 
-#if HAVE_MMX
+#if BV_HAVE_MMX
 
-#if !HAVE_FAST_64BIT && defined(__MMX__)
+#if !BV_HAVE_FAST_64BIT && defined(__MMX__)
 
 #define BV_COPY64 BV_COPY64
 static bv_always_inline void BV_COPY64(void *d, const void *s)
@@ -59,7 +59,7 @@ static bv_always_inline void BV_ZERO64(void *d)
             :: "mm0");
 }
 
-#endif /* !HAVE_FAST_64BIT && defined(__MMX__) */
+#endif /* !BV_HAVE_FAST_64BIT && defined(__MMX__) */
 
 #ifdef __SSE__
 
@@ -92,6 +92,6 @@ static bv_always_inline void BV_ZERO128(void *d)
 
 #endif /* __SSE2__ */
 
-#endif /* HAVE_MMX */
+#endif /* BV_HAVE_MMX */
 
 #endif /* BVUTIL_X86_INTREADWRITE_H */

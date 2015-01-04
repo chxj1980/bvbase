@@ -45,7 +45,7 @@ static void xtea_crypt_ecb(BVXTEA *ctx, uint8_t *dst, const uint8_t *src,
                            int decrypt, uint8_t *iv)
 {
     uint32_t v0, v1;
-#if !CONFIG_SMALL
+#if !BV_CONFIG_SMALL
     uint32_t k0 = ctx->key[0];
     uint32_t k1 = ctx->key[1];
     uint32_t k2 = ctx->key[2];
@@ -56,7 +56,7 @@ static void xtea_crypt_ecb(BVXTEA *ctx, uint8_t *dst, const uint8_t *src,
     v1 = BV_RB32(src + 4);
 
     if (decrypt) {
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
         int i;
         uint32_t delta = 0x9E3779B9U, sum = delta * 32;
 
@@ -109,7 +109,7 @@ static void xtea_crypt_ecb(BVXTEA *ctx, uint8_t *dst, const uint8_t *src,
             memcpy(iv, src, 8);
         }
     } else {
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
         int i;
         uint32_t sum = 0, delta = 0x9E3779B9U;
 

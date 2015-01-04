@@ -20,7 +20,11 @@
 *-example
 *-test
 *_g
-/.bvconfig
+/.config
 /.version
-/bvconfig.*
+/config.*
+/include/*
+/lib/*
+/3rdparty/*
+
 

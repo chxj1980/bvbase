@@ -28,5 +28,16 @@
 #define LIBBVSERVER_VERSION_MINOR  0
 #define LIBBVSERVER_VERSION_MICRO 1
 
+#define LIBSERVER_VERSION_INT BV_VERSION_INT(LIBBVSERVER_VERSION_MAJOR, \
+                                               LIBBVSERVER_VERSION_MINOR, \
+                                               LIBBVSERVER_VERSION_MICRO)
+#define LIBSERVER_VERSION     BV_VERSION(LIBBVSERVER_VERSION_MAJOR, \
+                                           LIBBVSERVER_VERSION_MINOR, \
+                                           LIBBVSERVER_VERSION_MICRO)
+#define LIBSERVER_BUILD       LIBBVSERVER_VERSION_INT
+
+#define LIBSERVER_IDENT       "Lbvsvr" BV_STRINGIFY(LIBBVSERVER_VERSION)
+
+
 #endif /* end of include guard: BV_SERVER_VERSION_H */
 

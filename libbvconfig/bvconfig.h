@@ -82,8 +82,8 @@ int bv_config_register(BVConfig * cfg);
 BVConfig *bv_config_next(BVConfig * cfg);
 BVConfig *bv_config_find_config(enum BVConfigType config_type);
 BVConfig *bv_config_find_config_by_name(const char *cfg_name);
-BVConfigContext *bv_config_alloc_context(void);
-void bv_config_free_context(BVConfigContext * cfgctx);
+BVConfigContext *bv_config_context_alloc(void);
+void bv_config_context_free(BVConfigContext * cfgctx);
 
 //////////////////////////////////////////////////////////////////////
 #if 0

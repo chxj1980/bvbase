@@ -50,7 +50,7 @@ ALIGN 16
 
 INIT_XMM sse
 VECTOR_FMUL
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 VECTOR_FMUL
 %endif
@@ -65,7 +65,7 @@ cglobal vector_fmac_scalar, 3,3,5, dst, src, len
 %else
 cglobal vector_fmac_scalar, 4,4,5, dst, src, mul, len
 %endif
-%if ARCH_X86_32
+%if BV_ARCH_X86_32
     VBROADCASTSS m0, mulm
 %else
 %if WIN64
@@ -110,11 +110,11 @@ cglobal vector_fmac_scalar, 4,4,5, dst, src, mul, len
 
 INIT_XMM sse
 VECTOR_FMAC_SCALAR
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 VECTOR_FMAC_SCALAR
 %endif
-%if HAVE_FMA3_EXTERNAL
+%if BV_HAVE_FMA3_EXTERNAL
 INIT_YMM fma3
 VECTOR_FMAC_SCALAR
 %endif
@@ -129,7 +129,7 @@ cglobal vector_fmul_scalar, 3,3,2, dst, src, len
 %else
 cglobal vector_fmul_scalar, 4,4,3, dst, src, mul, len
 %endif
-%if ARCH_X86_32
+%if BV_ARCH_X86_32
     movss    m0, mulm
 %elif WIN64
     SWAP 0, 2
@@ -154,7 +154,7 @@ VECTOR_FMUL_SCALAR
 ;------------------------------------------------------------------------------
 
 %macro VECTOR_DMUL_SCALAR 0
-%if ARCH_X86_32
+%if BV_ARCH_X86_32
 cglobal vector_dmul_scalar, 3,4,3, dst, src, mul, len, lenaddr
     mov          lenq, lenaddrm
 %elif UNIX64
@@ -162,7 +162,7 @@ cglobal vector_dmul_scalar, 3,3,3, dst, src, len
 %else
 cglobal vector_dmul_scalar, 4,4,3, dst, src, mul, len
 %endif
-%if ARCH_X86_32
+%if BV_ARCH_X86_32
     VBROADCASTSD   m0, mulm
 %else
 %if WIN64
@@ -186,7 +186,7 @@ cglobal vector_dmul_scalar, 4,4,3, dst, src, mul, len
 
 INIT_XMM sse2
 VECTOR_DMUL_SCALAR
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 VECTOR_DMUL_SCALAR
 %endif
@@ -281,11 +281,11 @@ ALIGN 16
 
 INIT_XMM sse
 VECTOR_FMUL_ADD
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 VECTOR_FMUL_ADD
 %endif
-%if HAVE_FMA3_EXTERNAL
+%if BV_HAVE_FMA3_EXTERNAL
 INIT_YMM fma3
 VECTOR_FMUL_ADD
 %endif
@@ -324,7 +324,7 @@ ALIGN 16
 
 INIT_XMM sse
 VECTOR_FMUL_REVERSE
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 VECTOR_FMUL_REVERSE
 %endif
@@ -348,7 +348,7 @@ cglobal scalarproduct_float, 3,3,2, v1, v2, offset
     movss    xmm1, xmm0
     shufps   xmm0, xmm0, 1
     addss    xmm0, xmm1
-%if ARCH_X86_64 == 0
+%if BV_ARCH_X86_64 == 0
     movss     r0m,  xmm0
     fld dword r0m
 %endif
@@ -359,7 +359,7 @@ cglobal scalarproduct_float, 3,3,2, v1, v2, offset
 ;-----------------------------------------------------------------------------
 INIT_XMM sse
 cglobal butterflies_float, 3,3,3, src0, src1, len
-%if ARCH_X86_64
+%if BV_ARCH_X86_64
     movsxd    lenq, lend
 %endif
     test      lenq, lenq

@@ -26,7 +26,7 @@
 #   define ELF  #
 #endif
 
-#if HAVE_AS_FUNC
+#if BV_HAVE_AS_FUNC
 #   define FUNC
 #else
 #   define FUNC #
@@ -57,7 +57,7 @@ FUNC    .func   \name
 ELF     .size   \name, . - \name
         .purgem endconst
     .endm
-#if HAVE_SECTION_DATA_REL_RO
+#if BV_HAVE_SECTION_DATA_REL_RO
 .if \relocate
         .section        .data.rel.ro
 .else
@@ -73,10 +73,10 @@ ELF     .size   \name, . - \name
 .endm
 
 .macro  movrel rd, val
-#if CONFIG_PIC && defined(__APPLE__)
+#if BV_CONFIG_PIC && defined(__APPLE__)
         adrp            \rd, \val@PAGE
         add             \rd, \rd, \val@PAGEOFF
-#elif CONFIG_PIC
+#elif BV_CONFIG_PIC
         adrp            \rd, \val
         add             \rd, \rd, :lo12:\val
 #else

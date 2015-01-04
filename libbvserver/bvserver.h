@@ -94,9 +94,9 @@ BVServer * bv_server_find_server_by_name(const char *svr_name);
 
 BVServer * bv_server_next(BVServer *svr);
 
-BVServerContext * bv_server_alloc_context(void);
+BVServerContext * bv_server_context_alloc(void);
 
-void bv_server_free_context(BVServerContext *svrctx);
+void bv_server_context_free(BVServerContext *svrctx);
 
 int bv_server_open(BVServerContext **svrctx, BVServer *svr, const char *url, BVDictionary **options);
 

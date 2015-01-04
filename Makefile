@@ -37,15 +37,17 @@ PROGS      += $(AVPROGS)
 TESTTOOLS   = audiogen videogen rotozoom tiny_psnr tiny_ssim base64
 HOSTPROGS  := $(TESTTOOLS:%=tests/%) doc/print_options
 TOOLS       = qt-faststart trasher uncoded_frame
-TOOLS-$(CONFIG_ZLIB) += cws2fws
+TOOLS-$(BV_CONFIG_ZLIB) += cws2fws
 
 # $(BVLIBS-yes) needs to be in linking order
 
-BVLIBS-$(CONFIG_BVDEVICE)    += bvdevice
-BVLIBS-$(CONFIG_BVCONFIG)    += bvconfig
-BVLIBS-$(CONFIG_BVSERVER)    += bvserver
-BVLIBS-$(CONFIG_BVSYSTEM)    += bvsystem
-BVLIBS-$(CONFIG_BVFORMAT)    += bvformat
+BVLIBS-$(BV_CONFIG_BVDEVICE)    += bvdevice
+BVLIBS-$(BV_CONFIG_BVCONFIG)    += bvconfig
+BVLIBS-$(BV_CONFIG_BVSERVER)    += bvserver
+BVLIBS-$(BV_CONFIG_BVSYSTEM)    += bvsystem
+BVLIBS-$(BV_CONFIG_BVMEDIA)     += bvmedia
+BVLIBS-$(BV_CONFIG_BVCODEC)     += bvcodec
+BVLIBS-$(BV_CONFIG_BVPROTOCOL)     += bvprotocol
 
 BVLIBS := bvutil
 
@@ -145,7 +147,7 @@ install: install-libs install-headers
 install-libs: install-libs-yes
 
 install-progs-yes:
-install-progs-$(CONFIG_SHARED): install-libs
+install-progs-$(BV_CONFIG_SHARED): install-libs
 
 install-progs: install-progs-yes $(AVPROGS)
 	$(Q)mkdir -p "$(BINDIR)"

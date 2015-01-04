@@ -109,7 +109,7 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     BVDictionary *tmp = NULL;
     BVDeviceContext *s = *h;
     int ret = 0;
-    if (!s && !(s = bv_device_alloc_context()))
+    if (!s && !(s = bv_device_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
         bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
@@ -153,17 +153,25 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
 
     if (url)
         bv_strlcpy(s->url, url, sizeof(s->url));
-    if (!s->device->dev_open)
-        goto fail;
+    if (!(s->device->flags & BV_DEVICE_FLAG_NOOPEN)) {
+        if (!s->device->dev_open || s->device->dev_open(s) < 0)
+            goto fail;
+    }
     *h = s;
-
     bv_dict_free(&tmp);
-    return s->device->dev_open(s);
+    return ret;
 fail:
     bv_dict_free(&tmp);
-    bv_device_free_context(s);
+    bv_device_context_free(s);
     *h = NULL;
     return ret;
+}
+
+int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret)
+{
+    if (!h->device || !h->device->dev_scan)
+        return BVERROR(ENOSYS);
+    return h->device->dev_scan(h, device, max_ret);
 }
 
 int bv_device_read(BVDeviceContext * h, void *buf, size_t size)
@@ -183,7 +191,7 @@ int64_t bv_device_seek(BVDeviceContext * h, int64_t pos, int whence)
     return 0;
 }
 
-int bv_device_control(BVDeviceContext * h, enum BVDeviceMessageType type, const BVDevicePacket *pkt_in, BVDevicePacket *pkt_out)
+int bv_device_control(BVDeviceContext * h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = 0;
     if (!h->device || !h->device->dev_control) {
@@ -206,7 +214,7 @@ int bv_device_close(BVDeviceContext ** h)
     BVDeviceContext *s = *h;
     if (s->device && s->device->dev_close)
         s->device->dev_close(s);
-    bv_device_free_context(s);
+    bv_device_context_free(s);
     *h = NULL;
     return 0;
 }

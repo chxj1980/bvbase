@@ -108,7 +108,7 @@
 %endmacro
 
 %macro TRANSPOSE8x8W 9-11
-%if ARCH_X86_64
+%if BV_ARCH_X86_64
     SBUTTERFLY wd,  %1, %2, %9
     SBUTTERFLY wd,  %3, %4, %9
     SBUTTERFLY wd,  %5, %6, %9

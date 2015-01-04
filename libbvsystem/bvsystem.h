@@ -80,9 +80,9 @@ BVSystem *bv_system_next(BVSystem * sys);
 
 BVSystem *bv_system_find_system(enum BVSystemType type);
 
-BVSystemContext *bv_system_alloc_context(void);
+BVSystemContext *bv_system_context_alloc(void);
 
-void bv_system_free_context(BVSystemContext * sysctx);
+void bv_system_context_free(BVSystemContext * sysctx);
 
 int bv_system_new_videv(BVSystemContext *sysctx, BVSystemVIDev *vi);
 #ifdef __cplusplus

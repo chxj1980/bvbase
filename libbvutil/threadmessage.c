@@ -20,12 +20,12 @@
 
 #include "fifo.h"
 #include "threadmessage.h"
-#if HAVE_THREADS
-#if HAVE_PTHREADS
+#if BV_HAVE_THREADS
+#if BV_HAVE_PTHREADS
 #include <pthread.h>
-#elif HAVE_W32THREADS
+#elif BV_HAVE_W32THREADS
 #include "compat/w32pthreads.h"
-#elif HAVE_OS2THREADS
+#elif BV_HAVE_OS2THREADS
 #include "compat/os2threads.h"
 #else
 #error "Unknown threads implementation"
@@ -33,7 +33,7 @@
 #endif
 
 struct AVThreadMessageQueue {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     BVFifoBuffer *fifo;
     pthread_mutex_t lock;
     pthread_cond_t cond;
@@ -49,7 +49,7 @@ int bv_thread_message_queue_alloc(AVThreadMessageQueue **mq,
                                   unsigned nelem,
                                   unsigned elsize)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     AVThreadMessageQueue *rmq;
     int ret = 0;
 
@@ -78,12 +78,12 @@ int bv_thread_message_queue_alloc(AVThreadMessageQueue **mq,
 #else
     *mq = NULL;
     return BVERROR(ENOSYS);
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 }
 
 void bv_thread_message_queue_free(AVThreadMessageQueue **mq)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     if (*mq) {
         bv_fifo_freep(&(*mq)->fifo);
         pthread_cond_destroy(&(*mq)->cond);
@@ -93,7 +93,7 @@ void bv_thread_message_queue_free(AVThreadMessageQueue **mq)
 #endif
 }
 
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
 
 static int bv_thread_message_queue_send_locked(AVThreadMessageQueue *mq,
                                                void *msg,
@@ -127,13 +127,13 @@ static int bv_thread_message_queue_recv_locked(AVThreadMessageQueue *mq,
     return 0;
 }
 
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 
 int bv_thread_message_queue_send(AVThreadMessageQueue *mq,
                                  void *msg,
                                  unsigned flags)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     int ret;
 
     pthread_mutex_lock(&mq->lock);
@@ -142,14 +142,14 @@ int bv_thread_message_queue_send(AVThreadMessageQueue *mq,
     return ret;
 #else
     return BVERROR(ENOSYS);
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 }
 
 int bv_thread_message_queue_recv(AVThreadMessageQueue *mq,
                                  void *msg,
                                  unsigned flags)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     int ret;
 
     pthread_mutex_lock(&mq->lock);
@@ -158,27 +158,27 @@ int bv_thread_message_queue_recv(AVThreadMessageQueue *mq,
     return ret;
 #else
     return BVERROR(ENOSYS);
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 }
 
 void bv_thread_message_queue_set_err_send(AVThreadMessageQueue *mq,
                                           int err)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     pthread_mutex_lock(&mq->lock);
     mq->err_send = err;
     pthread_cond_broadcast(&mq->cond);
     pthread_mutex_unlock(&mq->lock);
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 }
 
 void bv_thread_message_queue_set_err_recv(AVThreadMessageQueue *mq,
                                           int err)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     pthread_mutex_lock(&mq->lock);
     mq->err_recv = err;
     pthread_cond_broadcast(&mq->cond);
     pthread_mutex_unlock(&mq->lock);
-#endif /* HAVE_THREADS */
+#endif /* BV_HAVE_THREADS */
 }

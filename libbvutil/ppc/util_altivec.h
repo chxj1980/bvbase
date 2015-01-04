@@ -28,13 +28,13 @@
 
 #include "config.h"
 
-#if HAVE_ALTIVEC_H
+#if BV_HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
 
 #include "types_altivec.h"
 
-#if HAVE_ALTIVEC
+#if BV_HAVE_ALTIVEC
 
 // used to build registers permutation vectors (vcprm)
 // the 's' are for words in the _s_econd vector
@@ -97,7 +97,7 @@ do { \
 } while (0)
 
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define VEC_LD(offset,b)                                   \
     vec_perm(vec_ld(offset, b), vec_ld((offset)+15, b), vec_lvsl(offset, b))
 #else
@@ -107,7 +107,7 @@ do { \
 
 /** @brief loads unaligned vector @a *src with offset @a offset
     and returns it */
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 static inline vector unsigned char unaligned_load(int offset, const uint8_t *src)
 {
     register vector unsigned char first = vec_ld(offset, src);
@@ -134,7 +134,7 @@ static inline vec_u8 load_with_perm_vec(int offset, const uint8_t *src, vec_u8 p
 
 #define vec_unaligned_load(b)  VEC_LD(0, b)
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define VEC_MERGEH(a, b) vec_mergeh(a, b)
 #define VEC_MERGEL(a, b) vec_mergel(a, b)
 #else
@@ -142,24 +142,24 @@ static inline vec_u8 load_with_perm_vec(int offset, const uint8_t *src, vec_u8 p
 #define VEC_MERGEL(a, b) vec_mergel(b, a)
 #endif
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define VEC_ST(a,b,c) vec_st(a,b,c)
 #else
 #define VEC_ST(a,b,c) vec_vsx_st(a,b,c)
 #endif
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define VEC_SPLAT16(a,b) vec_splat((vec_s16)(a), b)
 #else
 #define VEC_SPLAT16(a,b) vec_splat((vec_s16)(vec_perm(a, a, vcswapi2s(0,1,2,3))), b)
 #endif
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #define VEC_SLD16(a,b,c) vec_sld(a, b, c)
 #else
 #define VEC_SLD16(a,b,c) vec_sld(b, a, c)
 #endif
 
-#endif /* HAVE_ALTIVEC */
+#endif /* BV_HAVE_ALTIVEC */
 
 #endif /* BVUTIL_PPC_UTIL_ALTIVEC_H */

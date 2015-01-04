@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: version.h
+	> File Name: allprotocols.c
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月15日 星期一 10时46分54秒
+	> Created Time: 2014年09月25日 星期四 15时51分48秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -21,23 +21,23 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#ifndef BV_FORMAT_VERSION_H
-#define BV_FORMAT_VERSION_H
+#include "bvprotocol.h"
+#include <config.h>
 
-#define LIBBVFORMAT_VERSION_MAJOR 0
-#define LIBBVFORMAT_VERSION_MINOR  0
-#define LIBBVFORMAT_VERSION_MICRO 1
+#define REGISTER_PROTOCOL(X, x)                                         \
+    {                                                                   \
+        extern BVURLProtocol bv_##x##_protocol;                           \
+        if (CONFIG_##X##_PROTOCOL)                                      \
+            bv_protocol_register(&bv_##x##_protocol);                \
+    }
 
-#define LIBFORMAT_VERSION_INT BV_VERSION_INT(LIBBVFORMAT_VERSION_MAJOR, \
-                                               LIBBVFORMAT_VERSION_MINOR, \
-                                               LIBBVFORMAT_VERSION_MICRO)
-#define LIBFORMAT_VERSION     BV_VERSION(LIBBVFORMAT_VERSION_MAJOR, \
-                                           LIBBVFORMAT_VERSION_MINOR, \
-                                           LIBBVFORMAT_VERSION_MICRO)
-#define LIBFORMAT_BUILD       LIBBVFORMAT_VERSION_INT
+void bv_protocol_register_all(void)
+{
+    static int initialized;
 
-#define LIBFORMAT_IDENT       "Lbvd" BV_STRINGIFY(LIBBVFORMAT_VERSION)
+    if (initialized)
+        return;
+    initialized = 1;
 
-
-#endif /* end of include guard: BV_FORMAT_VERSION_H */
-
+    REGISTER_PROTOCOL(FILE, file);
+}

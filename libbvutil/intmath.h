@@ -26,7 +26,7 @@
 #include "config.h"
 #include "attributes.h"
 
-#if ARCH_ARM
+#if BV_ARCH_ARM
 #   include "arm/intmath.h"
 #endif
 
@@ -35,7 +35,7 @@
  * @{
  */
 
-#if HAVE_FAST_CLZ
+#if BV_HAVE_FAST_CLZ
 #if BV_GCC_VERSION_AT_LEAST(3,4)
 #ifndef ff_log2
 #   define ff_log2(x) (31 - __builtin_clz((x)|1))
@@ -111,7 +111,7 @@ static bv_always_inline bv_const int ff_log2_16bit_c(unsigned int v)
  * @{
  */
 
-#if HAVE_FAST_CLZ
+#if BV_HAVE_FAST_CLZ
 #if BV_GCC_VERSION_AT_LEAST(3,4)
 #ifndef ff_ctz
 #define ff_ctz(v) __builtin_ctz(v)

@@ -30,7 +30,7 @@ extern "C"{
 
 #include <stdbool.h>
 
-//#include <libavcodec/avcodec.h>
+#include <libbvcodec/bvcodec.h>
 #include <libbvutil/bvutil.h>
 #include <libbvutil/log.h>
 
@@ -55,6 +55,7 @@ enum BVFileType {
 	BV_FILE_TYPE_FIRMWARE = (1 << 4),
 };
 
+#if 0
 enum BVRCModeID {
 	BV_RC_MODE_ID_VBR = 0, /* VBR must be 0 for compatible with 3511 */
     BV_RC_MODE_ID_CBR,
@@ -63,7 +64,6 @@ enum BVRCModeID {
     BV_RC_MODE_ID_BUTT,
 };
 
-#if 0
 /**
  *	采用Ffmpeg中的，还是自己定义呢？？？？
  */
@@ -92,7 +92,6 @@ enum BVMediaType {
     BV_MEDIA_TYPE_ATTACHMENT,    ///< Opaque data information usually sparse
     BV_MEDIA_TYPE_NB
 };
-#endif
 
 typedef struct _BVCodecContext {
 	enum BVMediaType codec_type;	//BV_MEDIA_TYPE_XXX
@@ -112,6 +111,7 @@ typedef struct _BVCodecContext {
 
     int profile;
 } BVCodecContext;
+#endif
 
 enum BVConfigType {
     BV_CONFIG_TYPE_NONE,

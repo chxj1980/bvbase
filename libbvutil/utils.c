@@ -38,10 +38,10 @@ unsigned bvutil_version(void)
 
     bv_assert0(BV_PIX_FMT_VDA_VLD == 81); //check if the pix fmt enum has not had anything inserted or removed by mistake
     bv_assert0(BV_SAMPLE_FMT_DBLP == 9);
-    bv_assert0(BVMEDIA_TYPE_ATTACHMENT == 4);
+    bv_assert0(BV_MEDIA_TYPE_ATTACHMENT == 4);
     bv_assert0(BV_PICTURE_TYPE_BI == 7);
     bv_assert0(LIBBVUTIL_VERSION_MICRO >= 100);
-    bv_assert0(HAVE_MMX2 == HAVE_MMXEXT);
+    bv_assert0(BV_HAVE_MMX2 == BV_HAVE_MMXEXT);
 
     bv_assert0(((size_t)-1) > 0); // C guarantees this but if false on a platform we care about revert at least b284e1ffe343d6697fb950d1ee517bafda8a9844
 
@@ -75,11 +75,11 @@ const char *bvutil_license(void)
 const char *bv_get_media_type_string(enum BVMediaType media_type)
 {
     switch (media_type) {
-    case BVMEDIA_TYPE_VIDEO:      return "video";
-    case BVMEDIA_TYPE_AUDIO:      return "audio";
-    case BVMEDIA_TYPE_DATA:       return "data";
-    case BVMEDIA_TYPE_SUBTITLE:   return "subtitle";
-    case BVMEDIA_TYPE_ATTACHMENT: return "attachment";
+    case BV_MEDIA_TYPE_VIDEO:      return "video";
+    case BV_MEDIA_TYPE_AUDIO:      return "audio";
+    case BV_MEDIA_TYPE_DATA:       return "data";
+    case BV_MEDIA_TYPE_SUBTITLE:   return "subtitle";
+    case BV_MEDIA_TYPE_ATTACHMENT: return "attachment";
     default:                      return NULL;
     }
 }

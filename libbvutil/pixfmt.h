@@ -293,7 +293,7 @@ enum BVPixelFormat {
     BV_PIX_FMT_NB,        ///< number of pixel formats, DO NOT USE THIS if you want to link with shared libav* because the number of formats might differ between versions
 
 #if BV_API_PIX_FMT
-#include "old_pix_fmts.h"
+//#include "old_pix_fmts.h"
 #endif
 };
 
@@ -379,7 +379,7 @@ enum BVPixelFormat {
 #define BV_PIX_FMT_NV20       BV_PIX_FMT_NE(NV20BE,  NV20LE)
 
 
-#if BV_API_PIX_FMT
+#if BV_API_PIX_FMT && 0
 #define PixelFormat BVPixelFormat
 
 #define PIX_FMT_Y400A BV_PIX_FMT_Y400A

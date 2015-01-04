@@ -30,23 +30,23 @@
 #include "libbvutil/bvconfig.h"
 #include "attributes.h"
 
-#ifdef HAVE_BV_CONFIG_H
+#ifdef BV_HAVE_BV_CONFIG_H
 
 #include "config.h"
 
-#if   ARCH_AARCH64
+#if   BV_ARCH_AARCH64
 #   include "aarch64/bswap.h"
-#elif ARCH_ARM
+#elif BV_ARCH_ARM
 #   include "arm/bswap.h"
-#elif ARCH_AVR32
+#elif BV_ARCH_AVR32
 #   include "avr32/bswap.h"
-#elif ARCH_SH4
+#elif BV_ARCH_SH4
 #   include "sh4/bswap.h"
-#elif ARCH_X86
+#elif BV_ARCH_X86
 #   include "x86/bswap.h"
 #endif
 
-#endif /* HAVE_BV_CONFIG_H */
+#endif /* BV_HAVE_BV_CONFIG_H */
 
 #define BV_BSWAP16C(x) (((x) << 8 & 0xff00)  | ((x) >> 8 & 0x00ff))
 #define BV_BSWAP32C(x) (BV_BSWAP16C(x) << 16 | BV_BSWAP16C((x) >> 16))

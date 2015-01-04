@@ -27,7 +27,7 @@
 typedef struct xmm_reg { uint64_t a, b; } xmm_reg;
 typedef struct ymm_reg { uint64_t a, b, c, d; } ymm_reg;
 
-#if ARCH_X86_64
+#if BV_ARCH_X86_64
 #    define OPSIZE "q"
 #    define REG_a "rax"
 #    define REG_b "rbx"
@@ -47,7 +47,7 @@ typedef int64_t x86_reg;
 #    define REGd    rdx
 #    define REGSP   rsp
 
-#elif ARCH_X86_32
+#elif BV_ARCH_X86_32
 
 #    define OPSIZE "l"
 #    define REG_a "eax"
@@ -71,10 +71,10 @@ typedef int32_t x86_reg;
 typedef int x86_reg;
 #endif
 
-#define HAVE_7REGS (ARCH_X86_64 || (HAVE_EBX_BVAILABLE && HAVE_EBP_BVAILABLE))
-#define HAVE_6REGS (ARCH_X86_64 || (HAVE_EBX_BVAILABLE || HAVE_EBP_BVAILABLE))
+#define BV_HAVE_7REGS (BV_ARCH_X86_64 || (BV_HAVE_EBX_BVAILABLE && BV_HAVE_EBP_BVAILABLE))
+#define BV_HAVE_6REGS (BV_ARCH_X86_64 || (BV_HAVE_EBX_BVAILABLE || BV_HAVE_EBP_BVAILABLE))
 
-#if ARCH_X86_64 && defined(PIC)
+#if BV_ARCH_X86_64 && defined(PIC)
 #    define BROKEN_RELOCATIONS 1
 #endif
 
@@ -90,7 +90,7 @@ typedef int x86_reg;
  * and a list with only "xmm0" should become:
  * XMM_CLOBBERS_ONLY("xmm0")
  */
-#if HAVE_XMM_CLOBBERS
+#if BV_HAVE_XMM_CLOBBERS
 #    define XMM_CLOBBERS(...)        __VA_ARGS__
 #    define XMM_CLOBBERS_ONLY(...) : __VA_ARGS__
 #else
@@ -102,13 +102,13 @@ typedef int x86_reg;
 #define LABEL_MANGLE(a) EXTERN_PREFIX #a
 
 // Use rip-relative addressing if compiling PIC code on x86-64.
-#if ARCH_X86_64 && defined(PIC)
+#if BV_ARCH_X86_64 && defined(PIC)
 #    define LOCAL_MANGLE(a) #a "(%%rip)"
 #else
 #    define LOCAL_MANGLE(a) #a
 #endif
 
-#if HAVE_INLINE_ASM_DIRECT_SYMBOL_REFS
+#if BV_HAVE_INLINE_ASM_DIRECT_SYMBOL_REFS
 #   define MANGLE(a) EXTERN_PREFIX LOCAL_MANGLE(a)
 #   define NAMED_CONSTRAINTS_ADD(...)
 #   define NAMED_CONSTRAINTS(...)

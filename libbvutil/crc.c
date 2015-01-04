@@ -23,7 +23,7 @@
 #include "bswap.h"
 #include "crc.h"
 
-#if CONFIG_HARDCODED_TABLES
+#if BV_CONFIG_HARDCODED_TABLES
 static const BVCRC bv_crc_table[BV_CRC_MAX][257] = {
     [BV_CRC_8_ATM] = {
         0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B, 0x12, 0x15, 0x38, 0x3F, 0x36, 0x31,
@@ -285,7 +285,7 @@ static const BVCRC bv_crc_table[BV_CRC_MAX][257] = {
     },
 };
 #else
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
 #define CRC_TABLE_SIZE 257
 #else
 #define CRC_TABLE_SIZE 1024
@@ -328,7 +328,7 @@ int bv_crc_init(BVCRC *ctx, int le, int bits, uint32_t poly, int ctx_size)
         }
     }
     ctx[256] = 1;
-#if !CONFIG_SMALL
+#if !BV_CONFIG_SMALL
     if (ctx_size >= sizeof(BVCRC) * 1024)
         for (i = 0; i < 256; i++)
             for (j = 0; j < 3; j++)
@@ -341,7 +341,7 @@ int bv_crc_init(BVCRC *ctx, int le, int bits, uint32_t poly, int ctx_size)
 
 const BVCRC *bv_crc_get_table(BVCRCId crc_id)
 {
-#if !CONFIG_HARDCODED_TABLES
+#if !BV_CONFIG_HARDCODED_TABLES
     if (!bv_crc_table[crc_id][BV_ARRAY_ELEMS(bv_crc_table[crc_id]) - 1])
         if (bv_crc_init(bv_crc_table[crc_id],
                         bv_crc_table_params[crc_id].le,
@@ -358,7 +358,7 @@ uint32_t bv_crc(const BVCRC *ctx, uint32_t crc,
 {
     const uint8_t *end = buffer + length;
 
-#if !CONFIG_SMALL
+#if !BV_CONFIG_SMALL
     if (!ctx[256]) {
         while (((intptr_t) buffer & 3) && buffer < end)
             crc = ctx[((uint8_t) crc) ^ *buffer++] ^ (crc >> 8);

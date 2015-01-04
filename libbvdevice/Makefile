@@ -6,5 +6,5 @@ HEADERS = bvdevice.h
 
 OBJS = utils.o alldevices.o options.o
 
-OBJS-$(CONFIG_ONVIF_DEV_DEVICE)          += onvif_dev.o
-OBJS-$(CONFIG_ONVIF_PTZ_DEVICE)          += onvif_ptz.o
+OBJS-$(BV_CONFIG_ONVIF_DEV_DEVICE)          += onvif_dev.o
+OBJS-$(BV_CONFIG_ONVIF_PTZ_DEVICE)          += onvif_ptz.o

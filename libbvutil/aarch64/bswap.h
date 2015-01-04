@@ -23,7 +23,7 @@
 #include "config.h"
 #include "libbvutil/attributes.h"
 
-#if HAVE_INLINE_ASM
+#if BV_HAVE_INLINE_ASM
 
 #define bv_bswap16 bv_bswap16
 static bv_always_inline bv_const unsigned bv_bswap16(unsigned x)
@@ -46,5 +46,5 @@ static bv_always_inline bv_const uint64_t bv_bswap64(uint64_t x)
     return x;
 }
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 #endif /* BVUTIL_AARCH64_BSWAP_H */

@@ -22,7 +22,7 @@
 #include "cpu.h"
 
 #define CPUEXT_SUFFIX(flags, suffix, cpuext)                            \
-    (HAVE_ ## cpuext ## suffix && ((flags) & BV_CPU_FLAG_ ## cpuext))
+    (BV_HAVE_ ## cpuext ## suffix && ((flags) & BV_CPU_FLAG_ ## cpuext))
 
 #define CPUEXT(flags, cpuext) CPUEXT_SUFFIX(flags, , cpuext)
 

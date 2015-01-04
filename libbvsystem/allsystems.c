@@ -27,7 +27,7 @@
 #define REGISTER_SYSTEM(X, x)                                         \
     {                                                                   \
         extern BVSystem bv_##x##_system;                           \
-        if (CONFIG_##X##_SYSTEM)                                      \
+        if (BV_CONFIG_##X##_SYSTEM)                                      \
             bv_system_register(&bv_##x##_system);                \
     }
 

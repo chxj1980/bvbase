@@ -6,4 +6,4 @@ HEADERS = bvsystem.h
 
 OBJS = utils.o allsystems.o options.o
 
-OBJS-$(CONFIG_HIS3515_SYSTEM) 		+= his3515.o
+OBJS-$(BV_CONFIG_HIS3515_SYSTEM) 		+= his3515.o

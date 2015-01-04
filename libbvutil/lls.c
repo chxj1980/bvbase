@@ -117,7 +117,7 @@ bv_cold void bvpriv_init_lls(LLSModel *m, int indep_count)
     m->indep_count = indep_count;
     m->update_lls = update_lls;
     m->evaluate_lls = evaluate_lls;
-    if (ARCH_X86)
+    if (BV_ARCH_X86)
         ff_init_lls_x86(m);
 }
 

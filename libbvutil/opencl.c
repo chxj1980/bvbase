@@ -27,12 +27,12 @@
 #include "avassert.h"
 #include "opt.h"
 
-#if HAVE_THREADS
-#if HAVE_PTHREADS
+#if BV_HAVE_THREADS
+#if BV_HAVE_PTHREADS
 #include <pthread.h>
-#elif HAVE_W32THREADS
+#elif BV_HAVE_W32THREADS
 #include "compat/w32pthreads.h"
-#elif HAVE_OS2THREADS
+#elif BV_HAVE_OS2THREADS
 #include "compat/os2threads.h"
 #endif
 #include "atomic.h"
@@ -319,7 +319,7 @@ void bv_opencl_free_device_list(BVOpenCLDeviceList **device_list)
 
 static inline int init_opencl_mtx(void)
 {
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
     if (!atomic_opencl_lock) {
         int err;
         pthread_mutex_t *tmp = bv_malloc(sizeof(pthread_mutex_t));

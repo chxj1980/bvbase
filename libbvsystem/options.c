@@ -45,24 +45,24 @@ static const BVClass bv_system_context_class = {
     .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
-static void bv_system_get_context_default(BVSystemContext *system)
+static void bv_system_context_get_default(BVSystemContext *system)
 {
     system->bv_class = &bv_system_context_class;
     bv_opt_set_defaults(system);
 }
 
-BVSystemContext *bv_system_alloc_context(void)
+BVSystemContext *bv_system_context_alloc(void)
 {
     BVSystemContext *s = bv_mallocz(sizeof(BVSystemContext));
     if (!s) {
         bv_log(NULL, BV_LOG_ERROR, "malloc BVSystemContext error");
         return NULL;
     }
-    bv_system_get_context_default(s);
+    bv_system_context_get_default(s);
     return s;
 }
 
-void bv_system_free_context(BVSystemContext * sysctx)
+void bv_system_context_free(BVSystemContext * sysctx)
 {
     if (!sysctx) 
         return;

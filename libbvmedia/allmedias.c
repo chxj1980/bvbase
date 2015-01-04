@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: allformats.c
+	> File Name: allmedias.c
 	> Author: albertfang
 	> Mail: fang.qi@besovideo.com 
 	> Created Time: 2014年12月30日 星期二 16时56分59秒
@@ -21,30 +21,31 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include "bvformat.h"
+#include "bvmedia.h"
 #include <config.h>
 
 #define REGISTER_OUTDEV(X, x)                                           \
     {                                                                   \
-        extern BVOutputFormat bv_##x##_muxer;                           \
-        if (CONFIG_##X##_OUTDEV)                                        \
-            bv_register_output_format(&bv_##x##_muxer);                 \
+        extern BVOutputMedia bv_##x##_muxer;                           \
+        if (BV_CONFIG_##X##_OUTDEV)                                        \
+            bv_output_media_register(&bv_##x##_muxer);                 \
     }
 
 #define REGISTER_INDEV(X, x)                                            \
     {                                                                   \
-        extern BVInputFormat bv_##x##_demuxer;                          \
-        if (CONFIG_##X##_INDEV)                                         \
-            bv_register_input_format(&bv_##x##_demuxer);                \
+        extern BVInputMedia bv_##x##_demuxer;                          \
+        if (BV_CONFIG_##X##_INDEV)                                         \
+            bv_input_media_register(&bv_##x##_demuxer);                \
     }
 
 #define REGISTER_INOUTDEV(X, x) REGISTER_OUTDEV(X, x); REGISTER_INDEV(X, x)
 
-void bv_format_register_all(void)
+void bv_media_register_all(void)
 {
     static int initialized;
     if (initialized)
         return ;
     initialized = 1;
     REGISTER_INDEV(HISAVE, hisave);
+    REGISTER_INDEV(ONVIFAVE, onvifave);
 }
