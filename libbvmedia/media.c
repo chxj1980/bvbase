@@ -164,8 +164,6 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
 
     bv_dict_free(&tmp);
     return s->imedia->read_header(s);
-
-    return 0;
 fail:
     return -1;
 }
