@@ -27,14 +27,14 @@
 #define REGISTER_OUTDEV(X, x)                                           \
     {                                                                   \
         extern BVOutputMedia bv_##x##_muxer;                           \
-        if (CONFIG_##X##_OUTDEV)                                        \
+        if (BV_CONFIG_##X##_OUTDEV)                                        \
             bv_output_media_register(&bv_##x##_muxer);                 \
     }
 
 #define REGISTER_INDEV(X, x)                                            \
     {                                                                   \
         extern BVInputMedia bv_##x##_demuxer;                          \
-        if (CONFIG_##X##_INDEV)                                         \
+        if (BV_CONFIG_##X##_INDEV)                                         \
             bv_input_media_register(&bv_##x##_demuxer);                \
     }
 
@@ -47,4 +47,5 @@ void bv_media_register_all(void)
         return ;
     initialized = 1;
     REGISTER_INDEV(HISAVE, hisave);
+    REGISTER_INDEV(ONVIFAVE, onvifave);
 }

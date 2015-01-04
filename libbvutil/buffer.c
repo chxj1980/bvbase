@@ -293,7 +293,7 @@ static void pool_release_buffer(void *opaque, uint8_t *data)
     BufferPoolEntry *buf = opaque;
     BVBufferPool *pool = buf->pool;
 
-    if(CONFIG_MEMORY_POISONING)
+    if(BV_CONFIG_MEMORY_POISONING)
         memset(buf->data, BV_MEMORY_POISON, pool->size);
 
 #if USE_ATOMICS

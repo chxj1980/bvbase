@@ -125,7 +125,7 @@ cglobal update_lls, 2,5,8, ctx, var, i, j, covar2
 .ret:
     REP_RET
 
-%if HAVE_AVX_EXTERNAL
+%if BV_HAVE_AVX_EXTERNAL
 INIT_YMM avx
 cglobal update_lls, 3,6,8, ctx, var, count, i, j, count2
     %define covarq ctxq
@@ -228,7 +228,7 @@ cglobal evaluate_lls, 3,4,2, ctx, var, order, i
 .skip1:
     movhlps m1, m0
     addsd   m0, m1
-%if ARCH_X86_32
+%if BV_ARCH_X86_32
     movsd  r0m, m0
     fld   qword r0m
 %endif

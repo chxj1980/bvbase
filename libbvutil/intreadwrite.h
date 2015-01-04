@@ -60,25 +60,25 @@ typedef union {
  * The unaligned variants are BV_[RW][BLN][8-64] and BV_COPY*U.
  */
 
-#ifdef HAVE_BV_CONFIG_H
+#ifdef BV_HAVE_BV_CONFIG_H
 
 #include "config.h"
 
-#if   ARCH_ARM
+#if   BV_ARCH_ARM
 #   include "arm/intreadwrite.h"
-#elif ARCH_AVR32
+#elif BV_ARCH_AVR32
 #   include "avr32/intreadwrite.h"
-#elif ARCH_MIPS
+#elif BV_ARCH_MIPS
 #   include "mips/intreadwrite.h"
-#elif ARCH_PPC
+#elif BV_ARCH_PPC
 #   include "ppc/intreadwrite.h"
-#elif ARCH_TOMI
+#elif BV_ARCH_TOMI
 #   include "tomi/intreadwrite.h"
-#elif ARCH_X86
+#elif BV_ARCH_X86
 #   include "x86/intreadwrite.h"
 #endif
 
-#endif /* HAVE_BV_CONFIG_H */
+#endif /* BV_HAVE_BV_CONFIG_H */
 
 /*
  * Map BV_RNXX <-> BV_R[BL]XX for all variants provided by per-arch headers.
@@ -354,7 +354,7 @@ union unaligned_16 { uint16_t l; } __attribute__((packed)) bv_alias;
 #   define BV_WN(s, p, v) BV_WL##s(p, v)
 #endif
 
-#endif /* HAVE_FAST_UNALIGNED */
+#endif /* BV_HAVE_FAST_UNALIGNED */
 
 #ifndef BV_RN16
 #   define BV_RN16(p) BV_RN(16, p)

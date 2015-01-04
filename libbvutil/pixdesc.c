@@ -1949,7 +1949,7 @@ const char *bv_get_pix_fmt_name(enum BVPixelFormat pix_fmt)
         bv_pix_fmt_descriptors[pix_fmt].name : NULL;
 }
 
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
 #   define X_NE(be, le) be
 #else
 #   define X_NE(be, le) le

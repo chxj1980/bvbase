@@ -28,7 +28,7 @@
 #define REGISTER_CONFIG(X, x)                                         \
     {                                                                   \
         extern BVConfig bv_##x##_config;                           \
-        if (CONFIG_##X##_CONFIG)                                      \
+        if (BV_CONFIG_##X##_CONFIG)                                      \
             bv_config_register(&bv_##x##_config);                \
     }
 

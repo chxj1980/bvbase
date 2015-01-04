@@ -28,7 +28,7 @@
 #include "config.h"
 #include "libbvutil/attributes.h"
 
-#if HAVE_INLINE_ASM
+#if BV_HAVE_INLINE_ASM
 
 #if !BV_GCC_VERSION_AT_LEAST(4,1)
 #define bv_bswap16 bv_bswap16
@@ -47,7 +47,7 @@ static bv_always_inline bv_const uint32_t bv_bswap32(uint32_t x)
     return x;
 }
 
-#if ARCH_X86_64
+#if BV_ARCH_X86_64
 #define bv_bswap64 bv_bswap64
 static inline uint64_t bv_const bv_bswap64(uint64_t x)
 {
@@ -57,5 +57,5 @@ static inline uint64_t bv_const bv_bswap64(uint64_t x)
 #endif
 #endif /* !BV_GCC_VERSION_AT_LEAST(4,5) */
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 #endif /* BVUTIL_X86_BSWAP_H */

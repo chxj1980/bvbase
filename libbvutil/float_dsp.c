@@ -128,15 +128,15 @@ bv_cold void bvpriv_float_dsp_init(BVFloatDSPContext *fdsp, int bit_exact)
     fdsp->butterflies_float = butterflies_float_c;
     fdsp->scalarproduct_float = bvpriv_scalarproduct_float_c;
 
-    if (ARCH_AARCH64)
+    if (BV_ARCH_AARCH64)
         ff_float_dsp_init_aarch64(fdsp);
-    if (ARCH_ARM)
+    if (BV_ARCH_ARM)
         ff_float_dsp_init_arm(fdsp);
-    if (ARCH_PPC)
+    if (BV_ARCH_PPC)
         ff_float_dsp_init_ppc(fdsp, bit_exact);
-    if (ARCH_X86)
+    if (BV_ARCH_X86)
         ff_float_dsp_init_x86(fdsp);
-    if (ARCH_MIPS)
+    if (BV_ARCH_MIPS)
         ff_float_dsp_init_mips(fdsp);
 }
 
@@ -156,10 +156,10 @@ bv_cold BVFloatDSPContext *bvpriv_float_dsp_alloc(int bit_exact)
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h> /* for getopt */
 #endif
-#if !HAVE_GETOPT
+#if !BV_HAVE_GETOPT
 #include "compat/getopt.c"
 #endif
 

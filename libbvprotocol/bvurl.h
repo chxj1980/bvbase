@@ -29,26 +29,31 @@ extern "C"{
 #endif
 
 #include <libbvutil/bvutil.h>
+#include <libbvutil/opt.h>
+#include <libbvutil/packet.h>
+#include <libbvutil/log.h>
 
 typedef struct _BVURLContext {
     BVClass *bv_class;
-    struct _BVURL *url;
+    struct _BVURLProtocol *prot;
 	void *priv_data;
+    char *filename;
 } BVURLContext;
 
-typedef struct _BVURL {
+typedef struct _BVURLProtocol {
     const char *name;
     const BVClass *priv_class;
     int priv_data_size;
-    struct _BVURL *next;
-    int (*url_open)(BVURLContext *h, const char *url, int flags, BVDictionary **options);
+    struct _BVURLProtocol *next;
+    int (*url_open)(BVURLContext *h, const char *url, int flags);
     int (*url_read)(BVURLContext *h, void *buf, size_t size);
     int (*url_write)(BVURLContext *h, const void *buf, size_t size);
     int (*url_seek)(BVURLContext *h, int64_t pos, int whence);
     int (*url_control)(BVURLContext *h, int type, BVControlPacket *in, BVControlPacket *out);
     int (*url_fd)(BVURLContext *h);
+    int (*url_check)(BVURLContext *h, int mask);
     int (*url_close)(BVURLContext *h);
-} BVURL;
+} BVURLProtocol;
 
 #ifdef __cplusplus
 }

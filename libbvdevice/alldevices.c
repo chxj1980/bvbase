@@ -27,7 +27,7 @@
 #define REGISTER_DEVICE(X, x)                                         \
     {                                                                   \
         extern BVDevice bv_##x##_device;                           \
-        if (CONFIG_##X##_DEVICE)                                      \
+        if (BV_CONFIG_##X##_DEVICE)                                      \
             bv_device_register(&bv_##x##_device);                \
     }
 

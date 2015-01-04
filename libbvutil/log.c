@@ -26,10 +26,10 @@
 
 #include "config.h"
 
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
 #include <stdarg.h>
@@ -40,7 +40,7 @@
 #include "internal.h"
 #include "log.h"
 
-#if HAVE_PTHREADS
+#if BV_HAVE_PTHREADS
 #include <pthread.h>
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -50,7 +50,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static int bv_log_level = BV_LOG_INFO;
 static int flags;
 
-#if defined(_WIN32) && !defined(__MINGW32CE__) && HAVE_SETCONSOLETEXTATTRIBUTE
+#if defined(_WIN32) && !defined(__MINGW32CE__) && BV_HAVE_SETCONSOLETEXTATTRIBUTE
 #include <windows.h>
 static const uint8_t color[16 + BV_CLASS_CATEGORY_NB] = {
     [BV_LOG_PANIC  /8] = 12,
@@ -115,7 +115,7 @@ static int use_color = -1;
 
 static void check_color_terminal(void)
 {
-#if defined(_WIN32) && !defined(__MINGW32CE__) && HAVE_SETCONSOLETEXTATTRIBUTE
+#if defined(_WIN32) && !defined(__MINGW32CE__) && BV_HAVE_SETCONSOLETEXTATTRIBUTE
     CONSOLE_SCREEN_BUFFER_INFO con_info;
     con = GetStdHandle(STD_ERROR_HANDLE);
     use_color = (con != INVALID_HANDLE_VALUE) && !getenv("NO_COLOR") &&
@@ -125,7 +125,7 @@ static void check_color_terminal(void)
         attr_orig  = con_info.wAttributes;
         background = attr_orig & 0xF0;
     }
-#elif HAVE_ISATTY
+#elif BV_HAVE_ISATTY
     char *term = getenv("TERM");
     use_color = !getenv("NO_COLOR") && !getenv("BV_LOG_FORCE_NOCOLOR") &&
                 (getenv("TERM") && isatty(2) || getenv("BV_LOG_FORCE_COLOR"));
@@ -150,7 +150,7 @@ static void colored_fputs(int level, int tint, const char *str)
     if (level == BV_LOG_INFO/8) local_use_color = 0;
     else                        local_use_color = use_color;
 
-#if defined(_WIN32) && !defined(__MINGW32CE__) && HAVE_SETCONSOLETEXTATTRIBUTE
+#if defined(_WIN32) && !defined(__MINGW32CE__) && BV_HAVE_SETCONSOLETEXTATTRIBUTE
     if (local_use_color)
         SetConsoleTextAttribute(con, background | color[level]);
     fputs(str, stderr);
@@ -299,14 +299,14 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
 
     if (level > bv_log_level)
         return;
-#if HAVE_PTHREADS
+#if BV_HAVE_PTHREADS
     pthread_mutex_lock(&mutex);
 #endif
 
     format_line(ptr, level, fmt, vl, part, &print_prefix, type);
     snprintf(line, sizeof(line), "%s%s%s%s", part[0].str, part[1].str, part[2].str, part[3].str);
 
-#if HAVE_ISATTY
+#if BV_HAVE_ISATTY
     if (!is_atty)
         is_atty = isatty(2) ? 1 : -1;
 #endif
@@ -333,7 +333,7 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
     colored_fputs(bv_clip(level >> 3, 0, 6), tint >> 8, part[3].str);
 end:
     bv_bprint_finalize(part+3, NULL);
-#if HAVE_PTHREADS
+#if BV_HAVE_PTHREADS
     pthread_mutex_unlock(&mutex);
 #endif
 }

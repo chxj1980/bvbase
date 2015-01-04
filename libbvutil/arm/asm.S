@@ -26,7 +26,7 @@
 #   define ELF @
 #endif
 
-#if CONFIG_THUMB
+#if BV_CONFIG_THUMB
 #   define A @
 #   define T
 #else
@@ -34,25 +34,25 @@
 #   define T @
 #endif
 
-#if HAVE_AS_FUNC
+#if BV_HAVE_AS_FUNC
 #   define FUNC
 #else
 #   define FUNC @
 #endif
 
-#if   HAVE_NEON
+#if   BV_HAVE_NEON
         .arch           armv7-a
-#elif HAVE_ARMV6T2
+#elif BV_HAVE_ARMV6T2
         .arch           armv6t2
-#elif HAVE_ARMV6
+#elif BV_HAVE_ARMV6
         .arch           armv6
-#elif HAVE_ARMV5TE
+#elif BV_HAVE_ARMV5TE
         .arch           armv5te
 #endif
 
-#if   HAVE_NEON
+#if   BV_HAVE_NEON
         .fpu            neon
-#elif HAVE_VFP
+#elif BV_HAVE_VFP
         .fpu            vfp
 #endif
 
@@ -94,7 +94,7 @@ FUNC    .func   \name
 ELF     .size   \name, . - \name
         .purgem endconst
     .endm
-.if HAVE_SECTION_DATA_REL_RO && \relocate
+.if BV_HAVE_SECTION_DATA_REL_RO && \relocate
         .section        .data.rel.ro
 .else
         .section        .rodata
@@ -103,7 +103,7 @@ ELF     .size   \name, . - \name
 \name:
 .endm
 
-#if !HAVE_ARMV6T2_EXTERNAL
+#if !BV_HAVE_ARMV6T2_EXTERNAL
 .macro  movw    rd, val
         mov     \rd, \val &  255
         orr     \rd, \val & ~255
@@ -111,7 +111,7 @@ ELF     .size   \name, . - \name
 #endif
 
 .macro  mov32   rd, val
-#if HAVE_ARMV6T2_EXTERNAL
+#if BV_HAVE_ARMV6T2_EXTERNAL
         movw            \rd, #(\val) & 0xffff
     .if (\val) >> 16
         movt            \rd, #(\val) >> 16
@@ -154,13 +154,13 @@ T       ldr             \rd, [\rd]
     .else
         add             \rd, pc
     .endif
-        def_pic         \val - (.Lpic\@ + (8 >> CONFIG_THUMB)), .Lpicoff\@
+        def_pic         \val - (.Lpic\@ + (8 >> BV_CONFIG_THUMB)), .Lpicoff\@
 .endm
 
 .macro  movrel rd, val
-#if CONFIG_PIC
+#if BV_CONFIG_PIC
         ldpic           \rd, \val
-#elif HAVE_ARMV6T2_EXTERNAL && !defined(__APPLE__)
+#elif BV_HAVE_ARMV6T2_EXTERNAL && !defined(__APPLE__)
         movw            \rd, #:lower16:\val
         movt            \rd, #:upper16:\val
 #else
@@ -169,7 +169,7 @@ T       ldr             \rd, [\rd]
 .endm
 
 .macro  movrelx         rd,  val, gp
-#if CONFIG_PIC && defined(__ELF__)
+#if BV_CONFIG_PIC && defined(__ELF__)
     .ifnb \gp
       .if .Lpic_gp
         .unreq          gp
@@ -184,7 +184,7 @@ T       ldr             \rd, [\rd]
         ldr             \rd, .Lpicoff\@
         ldr             \rd, [gp, \rd]
         def_pic         \val(GOT), .Lpicoff\@
-#elif CONFIG_PIC && defined(__APPLE__)
+#elif BV_CONFIG_PIC && defined(__APPLE__)
         ldpic           \rd, .Lpic\@, indir=1
         .non_lazy_symbol_pointer
 .Lpic\@:
@@ -311,7 +311,7 @@ T       strh            \rt, [\rn]
 T       sub             \rn, \rn, \rm
 .endm
 
-#if HAVE_VFP_ARGS
+#if BV_HAVE_VFP_ARGS
 ELF     .eabi_attribute 28, 1
 #   define VFP
 #   define NOVFP @

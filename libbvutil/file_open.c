@@ -22,10 +22,10 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
 
@@ -79,7 +79,7 @@ int bvpriv_open(const char *filename, int flags, ...)
 #endif
 
     fd = open(filename, flags, mode);
-#if HAVE_FCNTL
+#if BV_HAVE_FCNTL
     if (fd != -1) {
         if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
             bv_log(NULL, BV_LOG_DEBUG, "Failed to set close on exec\n");

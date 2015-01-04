@@ -28,7 +28,7 @@
 #define bvpriv_atomic_int_get atomic_int_get_gcc
 static inline int atomic_int_get_gcc(volatile int *ptr)
 {
-#if HAVE_ATOMIC_COMPARE_EXCHANGE
+#if BV_HAVE_ATOMIC_COMPARE_EXCHANGE
     return __atomic_load_n(ptr, __ATOMIC_SEQ_CST);
 #else
     __sync_synchronize();
@@ -39,7 +39,7 @@ static inline int atomic_int_get_gcc(volatile int *ptr)
 #define bvpriv_atomic_int_set atomic_int_set_gcc
 static inline void atomic_int_set_gcc(volatile int *ptr, int val)
 {
-#if HAVE_ATOMIC_COMPARE_EXCHANGE
+#if BV_HAVE_ATOMIC_COMPARE_EXCHANGE
     __atomic_store_n(ptr, val, __ATOMIC_SEQ_CST);
 #else
     *ptr = val;
@@ -50,7 +50,7 @@ static inline void atomic_int_set_gcc(volatile int *ptr, int val)
 #define bvpriv_atomic_int_add_and_fetch atomic_int_add_and_fetch_gcc
 static inline int atomic_int_add_and_fetch_gcc(volatile int *ptr, int inc)
 {
-#if HAVE_ATOMIC_COMPARE_EXCHANGE
+#if BV_HAVE_ATOMIC_COMPARE_EXCHANGE
     return __atomic_add_fetch(ptr, inc, __ATOMIC_SEQ_CST);
 #else
     return __sync_add_and_fetch(ptr, inc);
@@ -61,7 +61,7 @@ static inline int atomic_int_add_and_fetch_gcc(volatile int *ptr, int inc)
 static inline void *atomic_ptr_cas_gcc(void * volatile *ptr,
                                        void *oldval, void *newval)
 {
-#if HAVE_SYNC_VAL_COMPARE_AND_SWAP
+#if BV_HAVE_SYNC_VAL_COMPARE_AND_SWAP
 #ifdef __ARMCC_VERSION
     // armcc will throw an error if ptr is not an integer type
     volatile uintptr_t *tmp = (volatile uintptr_t*)ptr;

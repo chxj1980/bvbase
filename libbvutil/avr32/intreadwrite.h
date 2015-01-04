@@ -89,7 +89,7 @@ static bv_always_inline uint32_t BV_RL24(const void *p)
     return v;
 }
 
-#if ARCH_AVR32_AP
+#if BV_ARCH_AVR32_AP
 
 #define BV_RB32 BV_RB32
 static bv_always_inline uint32_t BV_RB32(const void *p)
@@ -125,7 +125,7 @@ static bv_always_inline void BV_WL64(void *p, uint64_t v)
     BV_WL32((uint32_t*)p+1, vv.hl[0]);
 }
 
-#else /* ARCH_AVR32_AP */
+#else /* BV_ARCH_AVR32_AP */
 
 #define BV_RB32 BV_RB32
 static bv_always_inline uint32_t BV_RB32(const void *p)
@@ -159,7 +159,7 @@ static bv_always_inline uint32_t BV_RL32(const void *p)
     return v;
 }
 
-#endif /* ARCH_AVR32_AP */
+#endif /* BV_ARCH_AVR32_AP */
 
 #define BV_RB64 BV_RB64
 static bv_always_inline uint64_t BV_RB64(const void *p)

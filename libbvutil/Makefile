@@ -64,11 +64,11 @@ HEADERS = adler32.h                                                     \
 		  packet.h                                                      \
 
 
-HEADERS-$(CONFIG_LZO)                   += lzo.h
+HEADERS-$(BV_CONFIG_LZO)                   += lzo.h
 
-HEADERS-$(CONFIG_OPENCL)                += opencl.h
+HEADERS-$(BV_CONFIG_OPENCL)                += opencl.h
 
-ARCH_HEADERS = bswap.h                                                  \
+BV_ARCH_HEADERS = bswap.h                                                  \
                intmath.h                                                \
                intreadwrite.h                                           \
                timer.h                                                  \
@@ -134,20 +134,20 @@ OBJS = adler32.o                                                        \
 	   packet.o                                                         \
 
 
-OBJS-$(CONFIG_LZO)                      += lzo.o
-OBJS-$(CONFIG_OPENCL)                   += opencl.o opencl_internal.o
+OBJS-$(BV_CONFIG_LZO)                      += lzo.o
+OBJS-$(BV_CONFIG_OPENCL)                   += opencl.o opencl_internal.o
 
 OBJS += $(COMPAT_OBJS:%=../compat/%)
 
 # Windows resource file
-SLIBOBJS-$(HAVE_GNU_WINDRES)            += bvutilres.o
+SLIBOBJS-$(BV_HAVE_GNU_WINDRES)            += bvutilres.o
 
 SKIPHEADERS          = old_pix_fmts.h
 
-SKIPHEADERS-$(HAVE_ATOMICS_GCC)        += atomic_gcc.h
-SKIPHEADERS-$(HAVE_ATOMICS_SUNCC)      += atomic_suncc.h
-SKIPHEADERS-$(HAVE_ATOMICS_WIN32)      += atomic_win32.h
-SKIPHEADERS-$(CONFIG_OPENCL)           += opencl.h
+SKIPHEADERS-$(BV_HAVE_ATOMICS_GCC)        += atomic_gcc.h
+SKIPHEADERS-$(BV_HAVE_ATOMICS_SUNCC)      += atomic_suncc.h
+SKIPHEADERS-$(BV_HAVE_ATOMICS_WIN32)      += atomic_win32.h
+SKIPHEADERS-$(BV_CONFIG_OPENCL)           += opencl.h
 
 TESTPROGS = adler32                                                     \
             aes                                                         \
@@ -187,7 +187,7 @@ TESTPROGS = adler32                                                     \
             utf8                                                        \
             xtea                                                        \
 
-TESTPROGS-$(HAVE_LZO1X_999_COMPRESS) += lzo
+TESTPROGS-$(BV_HAVE_LZO1X_999_COMPRESS) += lzo
 
 TOOLS = crypto_bench ffhash ffeval ffescape
 

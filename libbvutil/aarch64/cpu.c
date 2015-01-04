@@ -22,7 +22,7 @@
 
 int ff_get_cpu_flags_aarch64(void)
 {
-    return BV_CPU_FLAG_ARMV8 * HAVE_ARMV8 |
-           BV_CPU_FLAG_NEON  * HAVE_NEON  |
-           BV_CPU_FLAG_VFP   * HAVE_VFP;
+    return BV_CPU_FLAG_ARMV8 * BV_HAVE_ARMV8 |
+           BV_CPU_FLAG_NEON  * BV_HAVE_NEON  |
+           BV_CPU_FLAG_VFP   * BV_HAVE_VFP;
 }

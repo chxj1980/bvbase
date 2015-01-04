@@ -48,7 +48,7 @@ unsigned long bv_adler32_update(unsigned long adler, const uint8_t * buf,
     unsigned long s2 = adler >> 16;
 
     while (len > 0) {
-#if HAVE_FAST_64BIT && HAVE_FAST_UNALIGNED && !CONFIG_SMALL
+#if BV_HAVE_FAST_64BIT && BV_HAVE_FAST_UNALIGNED && !BV_CONFIG_SMALL
         unsigned len2 = FFMIN((len-1) & ~7, 23*8);
         if (len2) {
             uint64_t a1= 0;
@@ -73,7 +73,7 @@ unsigned long bv_adler32_update(unsigned long adler, const uint8_t * buf,
             //of the inner loop
             s1 += ((a1+b1)*0x1000100010001)>>48;
             s2 += ((((a2&0xFFFF0000FFFF)+(b2&0xFFFF0000FFFF)+((a2>>16)&0xFFFF0000FFFF)+((b2>>16)&0xFFFF0000FFFF))*0x800000008)>>32)
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
                  + 2*((b1*0x1000200030004)>>48)
                  +   ((a1*0x1000100010001)>>48)
                  + 2*((a1*0x0000100020003)>>48);

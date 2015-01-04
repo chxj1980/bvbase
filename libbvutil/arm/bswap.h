@@ -25,17 +25,17 @@
 
 #ifdef __ARMCC_VERSION
 
-#if HAVE_ARMV6
+#if BV_HAVE_ARMV6
 #define bv_bswap32 bv_bswap32
 static bv_always_inline bv_const uint32_t bv_bswap32(uint32_t x)
 {
     return __rev(x);
 }
-#endif /* HAVE_ARMV6 */
+#endif /* BV_HAVE_ARMV6 */
 
-#elif HAVE_INLINE_ASM
+#elif BV_HAVE_INLINE_ASM
 
-#if HAVE_ARMV6_INLINE
+#if BV_HAVE_ARMV6_INLINE
 #define bv_bswap16 bv_bswap16
 static bv_always_inline bv_const unsigned bv_bswap16(unsigned x)
 {
@@ -48,7 +48,7 @@ static bv_always_inline bv_const unsigned bv_bswap16(unsigned x)
 #define bv_bswap32 bv_bswap32
 static bv_always_inline bv_const uint32_t bv_bswap32(uint32_t x)
 {
-#if HAVE_ARMV6_INLINE
+#if BV_HAVE_ARMV6_INLINE
     __asm__("rev %0, %0" : "+r"(x));
 #else
     uint32_t t;
@@ -57,7 +57,7 @@ static bv_always_inline bv_const uint32_t bv_bswap32(uint32_t x)
              "mov %0, %0, ror #8      \n\t"
              "eor %0, %0, %1, lsr #8  \n\t"
              : "+r"(x), "=&r"(t));
-#endif /* HAVE_ARMV6_INLINE */
+#endif /* BV_HAVE_ARMV6_INLINE */
     return x;
 }
 #endif /* !BV_GCC_VERSION_AT_LEAST(4,5) */

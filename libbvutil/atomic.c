@@ -21,9 +21,9 @@
 #include "config.h"
 #include "atomic.h"
 
-#if !HAVE_ATOMICS_NATIVE
+#if !BV_HAVE_ATOMICS_NATIVE
 
-#if HAVE_PTHREADS
+#if BV_HAVE_PTHREADS
 
 #include <pthread.h>
 
@@ -70,7 +70,7 @@ void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
     return ret;
 }
 
-#elif !HAVE_THREADS
+#elif !BV_HAVE_THREADS
 
 int bvpriv_atomic_int_get(volatile int *ptr)
 {
@@ -97,16 +97,16 @@ void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
     return *ptr;
 }
 
-#else /* HAVE_THREADS */
+#else /* BV_HAVE_THREADS */
 
 /* This should never trigger, unless a new threading implementation
  * without correct atomics dependencies in configure or a corresponding
  * atomics implementation is added. */
 #error "Threading is enabled, but there is no implementation of atomic operations available"
 
-#endif /* HAVE_PTHREADS */
+#endif /* BV_HAVE_PTHREADS */
 
-#endif /* !HAVE_ATOMICS_NATIVE */
+#endif /* !BV_HAVE_ATOMICS_NATIVE */
 
 #ifdef TEST
 #include "avassert.h"

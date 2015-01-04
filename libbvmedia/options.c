@@ -47,7 +47,7 @@ static const BVClass bv_media_context_class = {
     .category       = BV_CLASS_CATEGORY_MUXER,
 };
 
-static void bv_media_get_context_default(BVMediaContext *media)
+static void bv_media_context_get_default(BVMediaContext *media)
 {
     media->bv_class = &bv_media_context_class;
     bv_opt_set_defaults(media);
@@ -60,21 +60,28 @@ BVMediaContext *bv_media_context_alloc(void)
         bv_log(NULL, BV_LOG_ERROR, "malloc BVMediaContext error");
         return NULL;
     }
-    bv_media_get_context_default(s);
+    bv_media_context_get_default(s);
     return s;
 }
 
-void bv_media_context_free(BVMediaContext * fmtctx)
+void bv_media_context_free(BVMediaContext * s)
 {
-    if (!fmtctx) 
+    int i;
+    if (!s) 
         return;
-    bv_opt_free(fmtctx);
-    if (fmtctx->imedia && fmtctx->imedia->priv_class && fmtctx->priv_data)
-        bv_opt_free(fmtctx->priv_data);
-    if (fmtctx->omedia && fmtctx->omedia->priv_class && fmtctx->priv_data)
-        bv_opt_free(fmtctx->priv_data);
-    bv_freep(&fmtctx->priv_data);
-    bv_free(fmtctx);
+    bv_opt_free(s);
+    if (s->imedia && s->imedia->priv_class && s->priv_data)
+        bv_opt_free(s->priv_data);
+    if (s->omedia && s->omedia->priv_class && s->priv_data)
+        bv_opt_free(s->priv_data);
+
+    for (i = s->nb_streams - 1; i >= 0; i--) {
+        bv_stream_free(s, s->streams[i]);
+    }
+
+    bv_freep(&s->priv_data);
+    bv_freep(&s->streams);
+    bv_free(s);
     return; 
 }
 

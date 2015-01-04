@@ -45,7 +45,7 @@ static const BVClass bv_server_context_class = {
     .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
-static void bv_server_get_context_default(BVServerContext *server)
+static void bv_server_context_get_default(BVServerContext *server)
 {
     server->bv_class = &bv_server_context_class;
     bv_opt_set_defaults(server);
@@ -58,7 +58,7 @@ BVServerContext *bv_server_context_alloc(void)
         bv_log(NULL, BV_LOG_ERROR, "malloc BVServerContext error");
         return NULL;
     }
-    bv_server_get_context_default(s);
+    bv_server_context_get_default(s);
     return s;
 }
 

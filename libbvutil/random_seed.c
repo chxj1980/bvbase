@@ -20,13 +20,13 @@
 
 #include "config.h"
 
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
-#if HAVE_CRYPTGENRANDOM
+#if BV_HAVE_CRYPTGENRANDOM
 #include <windows.h>
 #include <wincrypt.h>
 #endif
@@ -47,7 +47,7 @@
 
 static int read_random(uint32_t *dst, const char *file)
 {
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
     int fd = bvpriv_open(file, O_RDONLY);
     int err = -1;
 
@@ -110,7 +110,7 @@ uint32_t bv_get_random_seed(void)
 {
     uint32_t seed;
 
-#if HAVE_CRYPTGENRANDOM
+#if BV_HAVE_CRYPTGENRANDOM
     HCRYPTPROV provider;
     if (CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL,
                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {

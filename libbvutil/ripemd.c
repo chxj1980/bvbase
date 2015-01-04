@@ -130,7 +130,7 @@ static void ripemd128_transform(uint32_t *state, const uint8_t buffer[64], int e
         block[n] = BV_RL32(buffer + 4 * n);
     n = 0;
 
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (; n < 16;) {
         ROUND128_0_TO_15(a,b,c,d,e,f,g,h);
         t = d; d = c; c = b; b = a; a = t;
@@ -260,7 +260,7 @@ static void ripemd160_transform(uint32_t *state, const uint8_t buffer[64], int e
         block[n] = BV_RL32(buffer + 4 * n);
     n = 0;
 
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (; n < 16;) {
         ROUND160_0_TO_15(a,b,c,d,e,f,g,h,i,j);
         t = e; e = d; d = c; c = b; b = a; a = t;
@@ -426,7 +426,7 @@ void bv_ripemd_update(BVRIPEMD* ctx, const uint8_t* data, unsigned int len)
 
     j = ctx->count & 63;
     ctx->count += len;
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < len; i++) {
         ctx->buffer[j++] = data[i];
         if (64 == j) {

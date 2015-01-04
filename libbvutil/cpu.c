@@ -24,23 +24,23 @@
 #include "opt.h"
 #include "common.h"
 
-#if HAVE_SCHED_GETAFFINITY
+#if BV_HAVE_SCHED_GETAFFINITY
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
 #include <sched.h>
 #endif
-#if HAVE_GETPROCESSAFFINITYMASK
+#if BV_HAVE_GETPROCESSAFFINITYMASK
 #include <windows.h>
 #endif
-#if HAVE_SYSCTL
-#if HAVE_SYS_PARAM_H
+#if BV_HAVE_SYSCTL
+#if BV_HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -76,13 +76,13 @@ int bv_get_cpu_flags(void)
     if (checked)
         return flags;
 
-    if (ARCH_AARCH64)
+    if (BV_ARCH_AARCH64)
         flags = ff_get_cpu_flags_aarch64();
-    if (ARCH_ARM)
+    if (BV_ARCH_ARM)
         flags = ff_get_cpu_flags_arm();
-    if (ARCH_PPC)
+    if (BV_ARCH_PPC)
         flags = ff_get_cpu_flags_ppc();
-    if (ARCH_X86)
+    if (BV_ARCH_X86)
         flags = ff_get_cpu_flags_x86();
 
     checked = 1;
@@ -118,9 +118,9 @@ int bv_parse_cpu_flags(const char *s)
 #define CPUFLAG_BMI2     (BV_CPU_FLAG_BMI2     | CPUFLAG_BMI1)
     static const BVOption cpuflags_opts[] = {
         { "flags"   , NULL, 0, BV_OPT_TYPE_FLAGS, { .i64 = 0 }, INT64_MIN, INT64_MAX, .unit = "flags" },
-#if   ARCH_PPC
+#if   BV_ARCH_PPC
         { "altivec" , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ALTIVEC  },    .unit = "flags" },
-#elif ARCH_X86
+#elif BV_ARCH_X86
         { "mmx"     , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_MMX      },    .unit = "flags" },
         { "mmxext"  , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPUFLAG_MMXEXT       },    .unit = "flags" },
         { "sse"     , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPUFLAG_SSE          },    .unit = "flags" },
@@ -142,14 +142,14 @@ int bv_parse_cpu_flags(const char *s)
         { "3dnow"   , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPUFLAG_3DNOW        },    .unit = "flags" },
         { "3dnowext", NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPUFLAG_3DNOWEXT     },    .unit = "flags" },
         { "cmov",     NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_CMOV     },    .unit = "flags" },
-#elif ARCH_ARM
+#elif BV_ARCH_ARM
         { "armv5te",  NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV5TE  },    .unit = "flags" },
         { "armv6",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV6    },    .unit = "flags" },
         { "armv6t2",  NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV6T2  },    .unit = "flags" },
         { "vfp",      NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_VFP      },    .unit = "flags" },
         { "vfpv3",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_VFPV3    },    .unit = "flags" },
         { "neon",     NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_NEON     },    .unit = "flags" },
-#elif ARCH_AARCH64
+#elif BV_ARCH_AARCH64
         { "armv8",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV8    },    .unit = "flags" },
         { "neon",     NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_NEON     },    .unit = "flags" },
         { "vfp",      NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_VFP      },    .unit = "flags" },
@@ -176,9 +176,9 @@ int bv_parse_cpu_caps(unsigned *flags, const char *s)
 {
         static const BVOption cpuflags_opts[] = {
         { "flags"   , NULL, 0, BV_OPT_TYPE_FLAGS, { .i64 = 0 }, INT64_MIN, INT64_MAX, .unit = "flags" },
-#if   ARCH_PPC
+#if   BV_ARCH_PPC
         { "altivec" , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ALTIVEC  },    .unit = "flags" },
-#elif ARCH_X86
+#elif BV_ARCH_X86
         { "mmx"     , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_MMX      },    .unit = "flags" },
         { "mmx2"    , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_MMX2     },    .unit = "flags" },
         { "mmxext"  , NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_MMX2     },    .unit = "flags" },
@@ -218,7 +218,7 @@ int bv_parse_cpu_caps(unsigned *flags, const char *s)
         { "athlon",   NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPU_FLAG_ATHLON      },    .unit = "flags" },
         { "athlonxp", NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPU_FLAG_ATHLONXP    },    .unit = "flags" },
         { "k8",       NULL, 0, BV_OPT_TYPE_CONST, { .i64 = CPU_FLAG_K8          },    .unit = "flags" },
-#elif ARCH_ARM
+#elif BV_ARCH_ARM
         { "armv5te",  NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV5TE  },    .unit = "flags" },
         { "armv6",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV6    },    .unit = "flags" },
         { "armv6t2",  NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV6T2  },    .unit = "flags" },
@@ -226,7 +226,7 @@ int bv_parse_cpu_caps(unsigned *flags, const char *s)
         { "vfpv3",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_VFPV3    },    .unit = "flags" },
         { "neon",     NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_NEON     },    .unit = "flags" },
         { "setend",   NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_SETEND   },    .unit = "flags" },
-#elif ARCH_AARCH64
+#elif BV_ARCH_AARCH64
         { "armv8",    NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_ARMV8    },    .unit = "flags" },
         { "neon",     NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_NEON     },    .unit = "flags" },
         { "vfp",      NULL, 0, BV_OPT_TYPE_CONST, { .i64 = BV_CPU_FLAG_VFP      },    .unit = "flags" },
@@ -249,26 +249,26 @@ int bv_cpu_count(void)
     static volatile int printed;
 
     int nb_cpus = 1;
-#if HAVE_SCHED_GETAFFINITY && defined(CPU_COUNT)
+#if BV_HAVE_SCHED_GETAFFINITY && defined(CPU_COUNT)
     cpu_set_t cpuset;
 
     CPU_ZERO(&cpuset);
 
     if (!sched_getaffinity(0, sizeof(cpuset), &cpuset))
         nb_cpus = CPU_COUNT(&cpuset);
-#elif HAVE_GETPROCESSAFFINITYMASK
+#elif BV_HAVE_GETPROCESSAFFINITYMASK
     DWORD_PTR proc_aff, sys_aff;
     if (GetProcessAffinityMask(GetCurrentProcess(), &proc_aff, &sys_aff))
         nb_cpus = bv_popcount64(proc_aff);
-#elif HAVE_SYSCTL && defined(HW_NCPU)
+#elif BV_HAVE_SYSCTL && defined(HW_NCPU)
     int mib[2] = { CTL_HW, HW_NCPU };
     size_t len = sizeof(nb_cpus);
 
     if (sysctl(mib, 2, &nb_cpus, &len, NULL, 0) == -1)
         nb_cpus = 0;
-#elif HAVE_SYSCONF && defined(_SC_NPROC_ONLN)
+#elif BV_HAVE_SYSCONF && defined(_SC_NPROC_ONLN)
     nb_cpus = sysconf(_SC_NPROC_ONLN);
-#elif HAVE_SYSCONF && defined(_SC_NPROCESSORS_ONLN)
+#elif BV_HAVE_SYSCONF && defined(_SC_NPROCESSORS_ONLN)
     nb_cpus = sysconf(_SC_NPROCESSORS_ONLN);
 #endif
 
@@ -285,7 +285,7 @@ int bv_cpu_count(void)
 #include <stdio.h>
 #include "bvstring.h"
 
-#if !HAVE_GETOPT
+#if !BV_HAVE_GETOPT
 #include "compat/getopt.c"
 #endif
 
@@ -293,11 +293,11 @@ static const struct {
     int flag;
     const char *name;
 } cpu_flag_tab[] = {
-#if   ARCH_AARCH64
+#if   BV_ARCH_AARCH64
     { BV_CPU_FLAG_ARMV8,     "armv8"      },
     { BV_CPU_FLAG_NEON,      "neon"       },
     { BV_CPU_FLAG_VFP,       "vfp"        },
-#elif ARCH_ARM
+#elif BV_ARCH_ARM
     { BV_CPU_FLAG_ARMV5TE,   "armv5te"    },
     { BV_CPU_FLAG_ARMV6,     "armv6"      },
     { BV_CPU_FLAG_ARMV6T2,   "armv6t2"    },
@@ -305,9 +305,9 @@ static const struct {
     { BV_CPU_FLAG_VFPV3,     "vfpv3"      },
     { BV_CPU_FLAG_NEON,      "neon"       },
     { BV_CPU_FLAG_SETEND,    "setend"     },
-#elif ARCH_PPC
+#elif BV_ARCH_PPC
     { BV_CPU_FLAG_ALTIVEC,   "altivec"    },
-#elif ARCH_X86
+#elif BV_ARCH_X86
     { BV_CPU_FLAG_MMX,       "mmx"        },
     { BV_CPU_FLAG_MMXEXT,    "mmxext"     },
     { BV_CPU_FLAG_SSE,       "sse"        },

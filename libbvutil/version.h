@@ -67,7 +67,7 @@
                                            LIBBVUTIL_VERSION_MICRO)
 #define LIBBVUTIL_BUILD         LIBBVUTIL_VERSION_INT
 
-#define LIBBVUTIL_IDENT         "Lavu" BV_STRINGIFY(LIBBVUTIL_VERSION)
+#define LIBBVUTIL_IDENT         "Lbvu" BV_STRINGIFY(LIBBVUTIL_VERSION)
 
 /**
  * @}

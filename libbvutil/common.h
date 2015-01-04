@@ -79,7 +79,7 @@
 extern attribute_deprecated const uint8_t bv_reverse[256];
 #endif
 
-#ifdef HAVE_BV_CONFIG_H
+#ifdef BV_HAVE_BV_CONFIG_H
 #   include "config.h"
 #   include "intmath.h"
 #endif
@@ -104,7 +104,7 @@ bv_const int bv_log2_16bit(unsigned v);
  */
 static bv_always_inline bv_const int bv_clip_c(int a, int amin, int amax)
 {
-#if defined(HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
+#if defined(BV_HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
     if (amin > amax) abort();
 #endif
     if      (a < amin) return amin;
@@ -121,7 +121,7 @@ static bv_always_inline bv_const int bv_clip_c(int a, int amin, int amax)
  */
 static bv_always_inline bv_const int64_t bv_clip64_c(int64_t a, int64_t amin, int64_t amax)
 {
-#if defined(HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
+#if defined(BV_HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
     if (amin > amax) abort();
 #endif
     if      (a < amin) return amin;
@@ -229,7 +229,7 @@ static bv_always_inline int bv_sat_dadd32_c(int a, int b)
  */
 static bv_always_inline bv_const float bv_clipf_c(float a, float amin, float amax)
 {
-#if defined(HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
+#if defined(BV_HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
     if (amin > amax) abort();
 #endif
     if      (a < amin) return amin;
@@ -246,7 +246,7 @@ static bv_always_inline bv_const float bv_clipf_c(float a, float amin, float ama
  */
 static bv_always_inline bv_const double bv_clipd_c(double a, double amin, double amax)
 {
-#if defined(HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
+#if defined(BV_HAVE_BV_CONFIG_H) && defined(ASSERT_LEVEL) && ASSERT_LEVEL >= 2
     if (amin > amax) abort();
 #endif
     if      (a < amin) return amin;
@@ -344,7 +344,7 @@ static bv_always_inline bv_const int bv_popcount64_c(uint64_t x)
     }\
 
 /**
- * @def PUT_UTF8(val, tmp, PUT_BYTE)
+ * @def BV_PUT_UTF8(val, tmp, PUT_BYTE)
  * Convert a 32-bit Unicode character to its UTF-8 encoded form (up to 4 bytes long).
  * @param val is an input-only argument and should be of type uint32_t. It holds
  * a UCS-4 encoded Unicode character that is to be converted to UTF-8. If
@@ -359,7 +359,7 @@ static bv_always_inline bv_const int bv_popcount64_c(uint64_t x)
  * 7 times in the general case, depending on the length of the converted
  * Unicode character.
  */
-#define PUT_UTF8(val, tmp, PUT_BYTE)\
+#define BV_PUT_UTF8(val, tmp, PUT_BYTE)\
     {\
         int bytes, shift;\
         uint32_t in = val;\
@@ -380,7 +380,7 @@ static bv_always_inline bv_const int bv_popcount64_c(uint64_t x)
     }
 
 /**
- * @def PUT_UTF16(val, tmp, PUT_16BIT)
+ * @def BV_PUT_UTF16(val, tmp, PUT_16BIT)
  * Convert a 32-bit Unicode character to its UTF-16 encoded form (2 or 4 bytes).
  * @param val is an input-only argument and should be of type uint32_t. It holds
  * a UCS-4 encoded Unicode character that is to be converted to UTF-16. If
@@ -393,7 +393,7 @@ static bv_always_inline bv_const int bv_popcount64_c(uint64_t x)
  * as the input byte.  For example, PUT_BYTE could be "*output++ = tmp;"
  * PUT_BYTE will be executed 1 or 2 times depending on input character.
  */
-#define PUT_UTF16(val, tmp, PUT_16BIT)\
+#define BV_PUT_UTF16(val, tmp, PUT_16BIT)\
     {\
         uint32_t in = val;\
         if (in < 0x10000) {\
@@ -411,9 +411,9 @@ static bv_always_inline bv_const int bv_popcount64_c(uint64_t x)
 
 #include "mem.h"
 
-#ifdef HAVE_BV_CONFIG_H
+#ifdef BV_HAVE_BV_CONFIG_H
 #    include "internal.h"
-#endif /* HAVE_BV_CONFIG_H */
+#endif /* BV_HAVE_BV_CONFIG_H */
 
 #endif /* BVUTIL_COMMON_H */
 

@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_MALLOC_H
+#if BV_HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 
@@ -59,7 +59,7 @@ void  free(void *ptr);
 
 #endif /* MALLOC_PREFIX */
 
-#define ALIGN (HAVE_AVX ? 32 : 16)
+#define ALIGN (BV_HAVE_AVX ? 32 : 16)
 
 /* NOTE: if you want to override these functions with your own
  * implementations (not recommended) you have to link libav* as
@@ -75,7 +75,7 @@ void bv_max_alloc(size_t max){
 void *bv_malloc(size_t size)
 {
     void *ptr = NULL;
-#if CONFIG_MEMALIGN_HACK
+#if BV_CONFIG_MEMALIGN_HACK
     long diff;
 #endif
 
@@ -83,20 +83,20 @@ void *bv_malloc(size_t size)
     if (size > (max_alloc_size - 32))
         return NULL;
 
-#if CONFIG_MEMALIGN_HACK
+#if BV_CONFIG_MEMALIGN_HACK
     ptr = malloc(size + ALIGN);
     if (!ptr)
         return ptr;
     diff              = ((~(long)ptr)&(ALIGN - 1)) + 1;
     ptr               = (char *)ptr + diff;
     ((char *)ptr)[-1] = diff;
-#elif HAVE_POSIX_MEMALIGN
+#elif BV_HAVE_POSIX_MEMALIGN
     if (size) //OS X on SDK 10.6 has a broken posix_memalign implementation
     if (posix_memalign(&ptr, ALIGN, size))
         ptr = NULL;
-#elif HAVE_ALIGNED_MALLOC
+#elif BV_HAVE_ALIGNED_MALLOC
     ptr = _aligned_malloc(size, ALIGN);
-#elif HAVE_MEMALIGN
+#elif BV_HAVE_MEMALIGN
 #ifndef __DJGPP__
     ptr = memalign(ALIGN, size);
 #else
@@ -133,7 +133,7 @@ void *bv_malloc(size_t size)
         size = 1;
         ptr= bv_malloc(1);
     }
-#if CONFIG_MEMORY_POISONING
+#if BV_CONFIG_MEMORY_POISONING
     if (ptr)
         memset(ptr, BV_MEMORY_POISON, size);
 #endif
@@ -142,7 +142,7 @@ void *bv_malloc(size_t size)
 
 void *bv_realloc(void *ptr, size_t size)
 {
-#if CONFIG_MEMALIGN_HACK
+#if BV_CONFIG_MEMALIGN_HACK
     int diff;
 #endif
 
@@ -150,7 +150,7 @@ void *bv_realloc(void *ptr, size_t size)
     if (size > (max_alloc_size - 32))
         return NULL;
 
-#if CONFIG_MEMALIGN_HACK
+#if BV_CONFIG_MEMALIGN_HACK
     //FIXME this isn't aligned correctly, though it probably isn't needed
     if (!ptr)
         return bv_malloc(size);
@@ -160,7 +160,7 @@ void *bv_realloc(void *ptr, size_t size)
     if (ptr)
         ptr = (char *)ptr + diff;
     return ptr;
-#elif HAVE_ALIGNED_MALLOC
+#elif BV_HAVE_ALIGNED_MALLOC
     return _aligned_realloc(ptr, size + !size, ALIGN);
 #else
     return realloc(ptr, size + !size);
@@ -220,13 +220,13 @@ int bv_reallocp_array(void *ptr, size_t nmemb, size_t size)
 
 void bv_free(void *ptr)
 {
-#if CONFIG_MEMALIGN_HACK
+#if BV_CONFIG_MEMALIGN_HACK
     if (ptr) {
         int v= ((char *)ptr)[-1];
         bv_assert0(v>0 && v<=ALIGN);
         free((char *)ptr - v);
     }
-#elif HAVE_ALIGNED_MALLOC
+#elif BV_HAVE_ALIGNED_MALLOC
     _aligned_free(ptr);
 #else
     free(ptr);
@@ -333,7 +333,7 @@ void *bv_dynarray2_add(void **tab_ptr, int *nb_ptr, size_t elem_size,
         tab_elem_data = (uint8_t *)*tab_ptr + (*nb_ptr) * elem_size;
         if (elem_data)
             memcpy(tab_elem_data, elem_data, elem_size);
-        else if (CONFIG_MEMORY_POISONING)
+        else if (BV_CONFIG_MEMORY_POISONING)
             memset(tab_elem_data, BV_MEMORY_POISON, elem_size);
     }, {
         bv_freep(tab_ptr);
@@ -362,7 +362,7 @@ static void fill16(uint8_t *dst, int len)
 
 static void fill24(uint8_t *dst, int len)
 {
-#if HAVE_BIGENDIAN
+#if BV_HAVE_BIGENDIAN
     uint32_t v = BV_RB24(dst - 3);
     uint32_t a = v << 8  | v >> 16;
     uint32_t b = v << 16 | v >> 8;

@@ -7,8 +7,8 @@ INCINSTDIR := $(INCDIR)/lib$(NAME)
 
 INSTHEADERS := $(INSTHEADERS) $(HEADERS:%=$(SUBDIR)%)
 
-all-$(CONFIG_STATIC): $(SUBDIR)$(LIBNAME)
-all-$(CONFIG_SHARED): $(SUBDIR)$(SLIBNAME)
+all-$(BV_CONFIG_STATIC): $(SUBDIR)$(LIBNAME)
+all-$(BV_CONFIG_SHARED): $(SUBDIR)$(SLIBNAME)
 
 $(SUBDIR)%-test.o: $(SUBDIR)%-test.c
 	$(COMPILE_C)
@@ -28,7 +28,7 @@ $(SUBDIR)x86/%.o: $(SUBDIR)x86/%.asm
 	-$(if $(ASMSTRIPFLAGS), $(STRIP) $(ASMSTRIPFLAGS) $@)
 
 LIBOBJS := $(OBJS) $(SUBDIR)%.h.o $(TESTOBJS)
-$(LIBOBJS) $(LIBOBJS:.o=.s) $(LIBOBJS:.o=.i):   CPPFLAGS += -DHAVE_BV_CONFIG_H
+$(LIBOBJS) $(LIBOBJS:.o=.s) $(LIBOBJS:.o=.i):   CPPFLAGS += -DBV_HAVE_BV_CONFIG_H
 $(TESTOBJS) $(TESTOBJS:.o=.i): CPPFLAGS += -DTEST
 
 $(SUBDIR)$(LIBNAME): $(OBJS)
@@ -38,8 +38,8 @@ $(SUBDIR)$(LIBNAME): $(OBJS)
 
 install-headers: install-lib$(NAME)-headers install-lib$(NAME)-pkgconfig
 
-install-libs-$(CONFIG_STATIC): install-lib$(NAME)-static
-install-libs-$(CONFIG_SHARED): install-lib$(NAME)-shared
+install-libs-$(BV_CONFIG_STATIC): install-lib$(NAME)-static
+install-libs-$(BV_CONFIG_SHARED): install-lib$(NAME)-shared
 
 define RULES
 $(TOOLS):     THISLIB = $(FULLNAME:%=$(LD_LIB))
@@ -105,7 +105,7 @@ endef
 
 $(eval $(RULES))
 
-$(TOOLS):     $(DEP_LIBS) $(SUBDIR)$($(CONFIG_SHARED:yes=S)LIBNAME)
+$(TOOLS):     $(DEP_LIBS) $(SUBDIR)$($(BV_CONFIG_SHARED:yes=S)LIBNAME)
 $(TESTPROGS): $(DEP_LIBS) $(SUBDIR)$(LIBNAME)
 
 testprogs: $(TESTPROGS)

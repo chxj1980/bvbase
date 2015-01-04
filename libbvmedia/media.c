@@ -92,7 +92,29 @@ BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filenam
 
 static int init_imedia(BVMediaContext *s, const char *url)
 {
-    return 0;
+    BVProbeData pd = { url, NULL, 0 };
+    int score = BV_PROBE_SCORE_RETRY;
+    int score_max = score;
+    BVInputMedia *im = NULL;
+    BVInputMedia *im1 = NULL;
+
+    while ((im1 = bv_input_media_next(im1))) {
+        if (im1->read_probe) {
+            score = im->read_probe(s, &pd);
+        } else if (im1->extensions) {
+          if (bv_match_ext(pd.filename, im1->extensions))
+              score = BV_PROBE_SCORE_EXTENSION;
+        }
+        if (bv_match_name(pd.mime_type, im1->mime_type))
+            score = FFMAX(score, BV_PROBE_SCORE_MIME);
+        if (score > score_max) {
+            score_max = score;
+            im = im1;
+        } else if (score == score_max)
+            im = NULL;
+    }
+    s->imedia = im;
+    return im == NULL ? -1: 0;
 }
 
 static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVInputMedia *media, BVDictionary **options)
@@ -151,5 +173,22 @@ fail:
 int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url,
         BVInputMedia *media, BVDictionary **options)
 {
+    return 0;
+}
+
+int bv_input_media_read(BVMediaContext *s, BVPacket *pkt)
+{
+    if (!s->imedia || !s->imedia->read_packet)
+        return BVERROR(ENOSYS);
+    return s->imedia->read_packet(s, pkt);
+}
+
+int bv_input_media_close(BVMediaContext **fmt)
+{
+    BVMediaContext *s = *fmt;
+    if (s->imedia && s->imedia->read_close)
+        s->imedia->read_close(s);
+    bv_media_context_free(s);
+    *fmt = NULL;
     return 0;
 }

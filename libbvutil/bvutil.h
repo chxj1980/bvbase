@@ -190,13 +190,13 @@ const char *bvutil_license(void);
  */
 
 enum BVMediaType {
-    BVMEDIA_TYPE_UNKNOWN = -1,  ///< Usually treated as BVMEDIA_TYPE_DATA
-    BVMEDIA_TYPE_VIDEO,
-    BVMEDIA_TYPE_AUDIO,
-    BVMEDIA_TYPE_DATA,          ///< Opaque data information usually continuous
-    BVMEDIA_TYPE_SUBTITLE,
-    BVMEDIA_TYPE_ATTACHMENT,    ///< Opaque data information usually sparse
-    BVMEDIA_TYPE_NB
+    BV_MEDIA_TYPE_UNKNOWN = -1,  ///< Usually treated as BV_MEDIA_TYPE_DATA
+    BV_MEDIA_TYPE_VIDEO,
+    BV_MEDIA_TYPE_AUDIO,
+    BV_MEDIA_TYPE_DATA,          ///< Opaque data information usually continuous
+    BV_MEDIA_TYPE_SUBTITLE,
+    BV_MEDIA_TYPE_ATTACHMENT,    ///< Opaque data information usually sparse
+    BV_MEDIA_TYPE_NB
 };
 
 /**
@@ -272,6 +272,22 @@ enum BVPictureType {
     BV_PICTURE_TYPE_SP,    ///< Switching Predicted
     BV_PICTURE_TYPE_BI,    ///< BI type
 };
+
+typedef struct _BVProbeData {
+    const char *filename;
+    void *buf;
+    int buf_size;
+    const char *mime_type;
+} BVProbeData;
+
+#define BV_PROBE_SCORE_RETRY (BV_PROBE_SCORE_MAX/4)
+#define BV_PROBE_SCORE_STREAM_RETRY (BV_PROBE_SCORE_MAX/4-1)
+
+#define BV_PROBE_SCORE_EXTENSION  50 ///< score for file extension
+#define BV_PROBE_SCORE_MIME       75 ///< score for file mime type
+#define BV_PROBE_SCORE_MAX       100 ///< maximum score
+
+#define BV_PROBE_PADDING_SIZE 32             ///< extra allocated bytes at the end of the probe buffer
 
 /**
  * Return a single letter to describe the given picture type

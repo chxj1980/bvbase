@@ -26,9 +26,9 @@
 #include "config.h"
 #include "libbvutil/attributes.h"
 
-#if HAVE_INLINE_ASM
+#if BV_HAVE_INLINE_ASM
 
-#if HAVE_ARMV6_INLINE
+#if BV_HAVE_ARMV6_INLINE
 
 #define bv_clip_uint8 bv_clip_uint8_arm
 static bv_always_inline bv_const unsigned bv_clip_uint8_arm(int a)
@@ -86,9 +86,9 @@ static bv_always_inline int bv_sat_dadd32_arm(int a, int b)
     return r;
 }
 
-#endif /* HAVE_ARMV6_INLINE */
+#endif /* BV_HAVE_ARMV6_INLINE */
 
-#if HAVE_ASM_MOD_Q
+#if BV_HAVE_ASM_MOD_Q
 
 #define bv_clipl_int32 bv_clipl_int32_arm
 static bv_always_inline bv_const int32_t bv_clipl_int32_arm(int64_t a)
@@ -103,8 +103,8 @@ static bv_always_inline bv_const int32_t bv_clipl_int32_arm(int64_t a)
     return x;
 }
 
-#endif /* HAVE_ASM_MOD_Q */
+#endif /* BV_HAVE_ASM_MOD_Q */
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 
 #endif /* BVUTIL_ARM_INTMATH_H */

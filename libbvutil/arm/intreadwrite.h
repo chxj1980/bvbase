@@ -23,7 +23,7 @@
 #include "config.h"
 #include "libbvutil/attributes.h"
 
-#if HAVE_FAST_UNALIGNED && HAVE_INLINE_ASM && !BV_GCC_VERSION_AT_LEAST(4,7)
+#if BV_HAVE_FAST_UNALIGNED && BV_HAVE_INLINE_ASM && !BV_GCC_VERSION_AT_LEAST(4,7)
 
 #define BV_RN16 BV_RN16
 static bv_always_inline unsigned BV_RN16(const void *p)
@@ -61,7 +61,7 @@ static bv_always_inline void BV_WN32(void *p, uint32_t v)
     __asm__ ("str  %1, %0" : "=m"(*(uint32_t *)p) : "r"(v));
 }
 
-#if HAVE_ASM_MOD_Q
+#if BV_HAVE_ASM_MOD_Q
 
 #define BV_RN64 BV_RN64
 static bv_always_inline uint64_t BV_RN64(const void *p)
@@ -84,8 +84,8 @@ static bv_always_inline void BV_WN64(void *p, uint64_t v)
              : "r"(v));
 }
 
-#endif /* HAVE_ASM_MOD_Q */
+#endif /* BV_HAVE_ASM_MOD_Q */
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 
 #endif /* BVUTIL_ARM_INTREADWRITE_H */

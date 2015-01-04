@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#if HAVE_INLINE_ASM
+#if BV_HAVE_INLINE_ASM
 
 #define BV_TIMER_UNITS "decicycles"
 #define BV_READ_TIME read_time
@@ -35,11 +35,11 @@ static inline uint64_t read_time(void)
     return ((uint64_t)d << 32) + a;
 }
 
-#elif HAVE_RDTSC
+#elif BV_HAVE_RDTSC
 
 #include <intrin.h>
 #define BV_READ_TIME __rdtsc
 
-#endif /* HAVE_INLINE_ASM */
+#endif /* BV_HAVE_INLINE_ASM */
 
 #endif /* BVUTIL_X86_TIMER_H */

@@ -46,7 +46,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&opn, "size", "800x600", 0);
     bv_dict_set(&opn, "user", "test", 0);
     bv_dict_set(&opn, "passwd", "test", 0);
-    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:8899/onvif/ptz_service", &opn)) < 0) {
+    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:80/onvif/ptz_service", &opn)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);

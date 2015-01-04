@@ -29,60 +29,60 @@
 #include "attributes.h"
 #include "intfloat.h"
 
-#if HAVE_MIPSFPU && HAVE_INLINE_ASM
+#if BV_HAVE_MIPSFPU && BV_HAVE_INLINE_ASM
 #include "libbvutil/mips/libm_mips.h"
-#endif /* HAVE_MIPSFPU && HAVE_INLINE_ASM*/
+#endif /* BV_HAVE_MIPSFPU && BV_HAVE_INLINE_ASM*/
 
-#if !HAVE_ATANF
+#if !BV_HAVE_ATANF
 #undef atanf
 #define atanf(x) ((float)atan(x))
 #endif
 
-#if !HAVE_ATAN2F
+#if !BV_HAVE_ATAN2F
 #undef atan2f
 #define atan2f(y, x) ((float)atan2(y, x))
 #endif
 
-#if !HAVE_POWF
+#if !BV_HAVE_POWF
 #undef powf
 #define powf(x, y) ((float)pow(x, y))
 #endif
 
-#if !HAVE_CBRT
+#if !BV_HAVE_CBRT
 static bv_always_inline double cbrt(double x)
 {
     return x < 0 ? -pow(-x, 1.0 / 3.0) : pow(x, 1.0 / 3.0);
 }
 #endif
 
-#if !HAVE_CBRTF
+#if !BV_HAVE_CBRTF
 static bv_always_inline float cbrtf(float x)
 {
     return x < 0 ? -powf(-x, 1.0 / 3.0) : powf(x, 1.0 / 3.0);
 }
 #endif
 
-#if !HAVE_COSF
+#if !BV_HAVE_COSF
 #undef cosf
 #define cosf(x) ((float)cos(x))
 #endif
 
-#if !HAVE_EXPF
+#if !BV_HAVE_EXPF
 #undef expf
 #define expf(x) ((float)exp(x))
 #endif
 
-#if !HAVE_EXP2
+#if !BV_HAVE_EXP2
 #undef exp2
 #define exp2(x) exp((x) * 0.693147180559945)
-#endif /* HAVE_EXP2 */
+#endif /* BV_HAVE_EXP2 */
 
-#if !HAVE_EXP2F
+#if !BV_HAVE_EXP2F
 #undef exp2f
 #define exp2f(x) ((float)exp2(x))
-#endif /* HAVE_EXP2F */
+#endif /* BV_HAVE_EXP2F */
 
-#if !HAVE_ISINF
+#if !BV_HAVE_ISINF
 static bv_always_inline bv_const int isinf(float x)
 {
     uint32_t v = bv_float2int(x);
@@ -90,9 +90,9 @@ static bv_always_inline bv_const int isinf(float x)
         return 0;
     return !(v & 0x007fffff);
 }
-#endif /* HAVE_ISINF */
+#endif /* BV_HAVE_ISINF */
 
-#if !HAVE_ISNAN
+#if !BV_HAVE_ISNAN
 static bv_always_inline bv_const int isnan(float x)
 {
     uint32_t v = bv_float2int(x);
@@ -100,90 +100,90 @@ static bv_always_inline bv_const int isnan(float x)
         return 0;
     return v & 0x007fffff;
 }
-#endif /* HAVE_ISNAN */
+#endif /* BV_HAVE_ISNAN */
 
-#if !HAVE_LDEXPF
+#if !BV_HAVE_LDEXPF
 #undef ldexpf
 #define ldexpf(x, exp) ((float)ldexp(x, exp))
 #endif
 
-#if !HAVE_LLRINT
+#if !BV_HAVE_LLRINT
 #undef llrint
 #define llrint(x) ((long long)rint(x))
-#endif /* HAVE_LLRINT */
+#endif /* BV_HAVE_LLRINT */
 
-#if !HAVE_LLRINTF
+#if !BV_HAVE_LLRINTF
 #undef llrintf
 #define llrintf(x) ((long long)rint(x))
-#endif /* HAVE_LLRINT */
+#endif /* BV_HAVE_LLRINT */
 
-#if !HAVE_LOG2
+#if !BV_HAVE_LOG2
 #undef log2
 #define log2(x) (log(x) * 1.44269504088896340736)
-#endif /* HAVE_LOG2 */
+#endif /* BV_HAVE_LOG2 */
 
-#if !HAVE_LOG2F
+#if !BV_HAVE_LOG2F
 #undef log2f
 #define log2f(x) ((float)log2(x))
-#endif /* HAVE_LOG2F */
+#endif /* BV_HAVE_LOG2F */
 
-#if !HAVE_LOG10F
+#if !BV_HAVE_LOG10F
 #undef log10f
 #define log10f(x) ((float)log10(x))
 #endif
 
-#if !HAVE_SINF
+#if !BV_HAVE_SINF
 #undef sinf
 #define sinf(x) ((float)sin(x))
 #endif
 
-#if !HAVE_RINT
+#if !BV_HAVE_RINT
 static inline double rint(double x)
 {
     return x >= 0 ? floor(x + 0.5) : ceil(x - 0.5);
 }
-#endif /* HAVE_RINT */
+#endif /* BV_HAVE_RINT */
 
-#if !HAVE_LRINT
+#if !BV_HAVE_LRINT
 static bv_always_inline bv_const long int lrint(double x)
 {
     return rint(x);
 }
-#endif /* HAVE_LRINT */
+#endif /* BV_HAVE_LRINT */
 
-#if !HAVE_LRINTF
+#if !BV_HAVE_LRINTF
 static bv_always_inline bv_const long int lrintf(float x)
 {
     return (int)(rint(x));
 }
-#endif /* HAVE_LRINTF */
+#endif /* BV_HAVE_LRINTF */
 
-#if !HAVE_ROUND
+#if !BV_HAVE_ROUND
 static bv_always_inline bv_const double round(double x)
 {
     return (x > 0) ? floor(x + 0.5) : ceil(x - 0.5);
 }
-#endif /* HAVE_ROUND */
+#endif /* BV_HAVE_ROUND */
 
-#if !HAVE_ROUNDF
+#if !BV_HAVE_ROUNDF
 static bv_always_inline bv_const float roundf(float x)
 {
     return (x > 0) ? floor(x + 0.5) : ceil(x - 0.5);
 }
-#endif /* HAVE_ROUNDF */
+#endif /* BV_HAVE_ROUNDF */
 
-#if !HAVE_TRUNC
+#if !BV_HAVE_TRUNC
 static bv_always_inline bv_const double trunc(double x)
 {
     return (x > 0) ? floor(x) : ceil(x);
 }
-#endif /* HAVE_TRUNC */
+#endif /* BV_HAVE_TRUNC */
 
-#if !HAVE_TRUNCF
+#if !BV_HAVE_TRUNCF
 static bv_always_inline bv_const float truncf(float x)
 {
     return (x > 0) ? floor(x) : ceil(x);
 }
-#endif /* HAVE_TRUNCF */
+#endif /* BV_HAVE_TRUNCF */
 
 #endif /* BVUTIL_LIBM_H */

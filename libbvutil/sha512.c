@@ -131,7 +131,7 @@ static void sha512_transform(uint64_t *state, const uint8_t buffer[128])
     f = state[5];
     g = state[6];
     h = state[7];
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < 80; i++) {
         uint64_t T2;
         if (i < 16)
@@ -245,7 +245,7 @@ void bv_sha512_update(BVSHA512* ctx, const uint8_t* data, unsigned int len)
 
     j = ctx->count & 127;
     ctx->count += len;
-#if CONFIG_SMALL
+#if BV_CONFIG_SMALL
     for (i = 0; i < len; i++) {
         ctx->buffer[j++] = data[i];
         if (128 == j) {

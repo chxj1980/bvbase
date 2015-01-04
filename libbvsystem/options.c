@@ -45,7 +45,7 @@ static const BVClass bv_system_context_class = {
     .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
-static void bv_system_get_context_default(BVSystemContext *system)
+static void bv_system_context_get_default(BVSystemContext *system)
 {
     system->bv_class = &bv_system_context_class;
     bv_opt_set_defaults(system);
@@ -58,7 +58,7 @@ BVSystemContext *bv_system_context_alloc(void)
         bv_log(NULL, BV_LOG_ERROR, "malloc BVSystemContext error");
         return NULL;
     }
-    bv_system_get_context_default(s);
+    bv_system_context_get_default(s);
     return s;
 }
 

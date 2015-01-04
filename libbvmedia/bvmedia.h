@@ -33,23 +33,21 @@ extern "C"{
 #include <libbvutil/packet.h>
 #include <libbvcodec/bvcodec.h>
 #include <libbvconfig/common.h>
+#include <libbvprotocol/bvio.h>
 
 struct _BVMediaContext;
 
-typedef struct _BVProbeData {
-    const char *filename;
-    void *buf;
-    int buf_size;
-    const char *mime_type;
-} BVProbeData;
+#define BV_MEDIA_FLAG_NOFILE    1
 
 typedef struct _BVInputMedia {
     const char *name;
     const char *extensions;
+    const char *mime_type;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVInputMedia *next;
-    int (*read_probe)(BVProbeData *);
+    int flags;
+    int (*read_probe)(struct _BVMediaContext *h, BVProbeData *);
     int (*read_header)(struct _BVMediaContext *h);
     int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*read_close)(struct _BVMediaContext *h);
@@ -72,6 +70,7 @@ typedef struct _BVOutputMedia {
 typedef struct _BVStream {
     int index;
     BVCodecContext *codec;
+    void *priv_data;
 } BVStream;
 
 typedef struct _BVMediaContext {
@@ -79,9 +78,10 @@ typedef struct _BVMediaContext {
     BVInputMedia *imedia;
     BVOutputMedia *omedia;
     void *priv_data;
+    BVIOContext *pb;
     char filename[1024];
     int nb_streams;
-    BVStream **stream;
+    BVStream **streams;
     BVChannel *channel;
 } BVMediaContext;
 
@@ -105,6 +105,13 @@ int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const ch
 
 BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename, const char *mime_type);
 
+BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c);
+
+void bv_stream_free(BVMediaContext *s, BVStream *st);
+
+int bv_input_media_read(BVMediaContext *s, BVPacket *pkt);
+
+int bv_input_media_close(BVMediaContext **fmt);
 #ifdef __cplusplus
 }
 #endif

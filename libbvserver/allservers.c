@@ -27,7 +27,7 @@
 #define REGISTER_SERVER(X, x)                                         \
     {                                                                   \
         extern BVServer bv_##x##_server;                           \
-        if (CONFIG_##X##_SERVER)                                      \
+        if (BV_CONFIG_##X##_SERVER)                                      \
             bv_server_register(&bv_##x##_server);                \
     }
 

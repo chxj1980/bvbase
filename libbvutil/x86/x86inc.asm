@@ -44,7 +44,7 @@
 
 %define WIN64  0
 %define UNIX64 0
-%if ARCH_X86_64
+%if BV_ARCH_X86_64
     %ifidn __OUTPUT_FORMAT__,win32
         %define WIN64  1
     %elifidn __OUTPUT_FORMAT__,win64
@@ -83,7 +83,7 @@
 
 %if WIN64
     %define PIC
-%elif ARCH_X86_64 == 0
+%elif BV_ARCH_X86_64 == 0
 ; x86_32 doesn't require PIC.
 ; Some distros prefer shared objects to be PIC, but nothing breaks if
 ; the code contains a few textrels, so we'll skip that complexity.
@@ -94,7 +94,7 @@
 %endif
 
 %macro CPUNOP 1
-    %if HAVE_CPUNOP
+    %if BV_HAVE_CPUNOP
         CPU %1
     %endif
 %endmacro
@@ -137,7 +137,7 @@
 ; rNm is the original location of arg N (a register or on the stack), dword
 ; rNmp is native size
 
-%macro DECLARE_REG 2-3
+%macro BV_DECLARE_REG 2-3
     %define r%1q %2
     %define r%1d %2d
     %define r%1w %2w
@@ -147,7 +147,7 @@
     %if %0 == 2
         %define r%1m  %2d
         %define r%1mp %2
-    %elif ARCH_X86_64 ; memory
+    %elif BV_ARCH_X86_64 ; memory
         %define r%1m [rstk + stack_offset + %3]
         %define r%1mp qword r %+ %1 %+ m
     %else
@@ -157,7 +157,7 @@
     %define r%1  %2
 %endmacro
 
-%macro DECLARE_REG_SIZE 3
+%macro BV_DECLARE_REG_SIZE 3
     %define r%1q r%1
     %define e%1q r%1
     %define r%1d e%1
@@ -168,22 +168,22 @@
     %define e%1h %3
     %define r%1b %2
     %define e%1b %2
-%if ARCH_X86_64 == 0
+%if BV_ARCH_X86_64 == 0
     %define r%1  e%1
 %endif
 %endmacro
 
-DECLARE_REG_SIZE ax, al, ah
-DECLARE_REG_SIZE bx, bl, bh
-DECLARE_REG_SIZE cx, cl, ch
-DECLARE_REG_SIZE dx, dl, dh
-DECLARE_REG_SIZE si, sil, null
-DECLARE_REG_SIZE di, dil, null
-DECLARE_REG_SIZE bp, bpl, null
+BV_DECLARE_REG_SIZE ax, al, ah
+BV_DECLARE_REG_SIZE bx, bl, bh
+BV_DECLARE_REG_SIZE cx, cl, ch
+BV_DECLARE_REG_SIZE dx, dl, dh
+BV_DECLARE_REG_SIZE si, sil, null
+BV_DECLARE_REG_SIZE di, dil, null
+BV_DECLARE_REG_SIZE bp, bpl, null
 
 ; t# defines for when per-arch register allocation is more complex than just function arguments
 
-%macro DECLARE_REG_TMP 1-*
+%macro BV_DECLARE_REG_TMP 1-*
     %assign %%i 0
     %rep %0
         CAT_XDEFINE t, %%i, r%1
@@ -192,7 +192,7 @@ DECLARE_REG_SIZE bp, bpl, null
     %endrep
 %endmacro
 
-%macro DECLARE_REG_TMP_SIZE 0-*
+%macro BV_DECLARE_REG_TMP_SIZE 0-*
     %rep %0
         %define t%1q t%1 %+ q
         %define t%1d t%1 %+ d
@@ -203,9 +203,9 @@ DECLARE_REG_SIZE bp, bpl, null
     %endrep
 %endmacro
 
-DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+BV_DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
-%if ARCH_X86_64
+%if BV_ARCH_X86_64
     %define gprsize 8
 %else
     %define gprsize 4
@@ -337,7 +337,7 @@ DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
                     %endif
                 %endif
             %endif
-            %if mmsize <= 16 && HAVE_ALIGNED_STACK
+            %if mmsize <= 16 && BV_HAVE_ALIGNED_STACK
                 %assign stack_size_padded stack_size_padded + %%stack_alignment - gprsize - (stack_offset & (%%stack_alignment - 1))
                 SUB rsp, stack_size_padded
             %else
@@ -366,10 +366,10 @@ DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
 %macro SETUP_STACK_POINTER 1
     %ifnum %1
-        %if %1 != 0 && (HAVE_ALIGNED_STACK == 0 || mmsize == 32)
+        %if %1 != 0 && (BV_HAVE_ALIGNED_STACK == 0 || mmsize == 32)
             %if %1 > 0
                 %assign regs_used (regs_used + 1)
-            %elif ARCH_X86_64 && regs_used == num_args && num_args <= 4 + UNIX64 * 2
+            %elif BV_ARCH_X86_64 && regs_used == num_args && num_args <= 4 + UNIX64 * 2
                 %warning "Stack pointer will overwrite register argument"
             %endif
         %endif
@@ -388,21 +388,21 @@ DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
 %if WIN64 ; Windows x64 ;=================================================
 
-DECLARE_REG 0,  rcx
-DECLARE_REG 1,  rdx
-DECLARE_REG 2,  R8
-DECLARE_REG 3,  R9
-DECLARE_REG 4,  R10, 40
-DECLARE_REG 5,  R11, 48
-DECLARE_REG 6,  rax, 56
-DECLARE_REG 7,  rdi, 64
-DECLARE_REG 8,  rsi, 72
-DECLARE_REG 9,  rbx, 80
-DECLARE_REG 10, rbp, 88
-DECLARE_REG 11, R12, 96
-DECLARE_REG 12, R13, 104
-DECLARE_REG 13, R14, 112
-DECLARE_REG 14, R15, 120
+BV_DECLARE_REG 0,  rcx
+BV_DECLARE_REG 1,  rdx
+BV_DECLARE_REG 2,  R8
+BV_DECLARE_REG 3,  R9
+BV_DECLARE_REG 4,  R10, 40
+BV_DECLARE_REG 5,  R11, 48
+BV_DECLARE_REG 6,  rax, 56
+BV_DECLARE_REG 7,  rdi, 64
+BV_DECLARE_REG 8,  rsi, 72
+BV_DECLARE_REG 9,  rbx, 80
+BV_DECLARE_REG 10, rbp, 88
+BV_DECLARE_REG 11, R12, 96
+BV_DECLARE_REG 12, R13, 104
+BV_DECLARE_REG 13, R14, 112
+BV_DECLARE_REG 14, R15, 120
 
 %macro PROLOGUE 2-5+ 0 ; #args, #regs, #xmm_regs, [stack_size,] arg_names...
     %assign num_args %1
@@ -456,7 +456,7 @@ DECLARE_REG 14, R15, 120
         %endrep
     %endif
     %if stack_size_padded > 0
-        %if stack_size > 0 && (mmsize == 32 || HAVE_ALIGNED_STACK == 0)
+        %if stack_size > 0 && (mmsize == 32 || BV_HAVE_ALIGNED_STACK == 0)
             mov rsp, rstkm
         %else
             add %1, stack_size_padded
@@ -488,23 +488,23 @@ DECLARE_REG 14, R15, 120
     AUTO_REP_RET
 %endmacro
 
-%elif ARCH_X86_64 ; *nix x64 ;=============================================
+%elif BV_ARCH_X86_64 ; *nix x64 ;=============================================
 
-DECLARE_REG 0,  rdi
-DECLARE_REG 1,  rsi
-DECLARE_REG 2,  rdx
-DECLARE_REG 3,  rcx
-DECLARE_REG 4,  R8
-DECLARE_REG 5,  R9
-DECLARE_REG 6,  rax, 8
-DECLARE_REG 7,  R10, 16
-DECLARE_REG 8,  R11, 24
-DECLARE_REG 9,  rbx, 32
-DECLARE_REG 10, rbp, 40
-DECLARE_REG 11, R12, 48
-DECLARE_REG 12, R13, 56
-DECLARE_REG 13, R14, 64
-DECLARE_REG 14, R15, 72
+BV_DECLARE_REG 0,  rdi
+BV_DECLARE_REG 1,  rsi
+BV_DECLARE_REG 2,  rdx
+BV_DECLARE_REG 3,  rcx
+BV_DECLARE_REG 4,  R8
+BV_DECLARE_REG 5,  R9
+BV_DECLARE_REG 6,  rax, 8
+BV_DECLARE_REG 7,  R10, 16
+BV_DECLARE_REG 8,  R11, 24
+BV_DECLARE_REG 9,  rbx, 32
+BV_DECLARE_REG 10, rbp, 40
+BV_DECLARE_REG 11, R12, 48
+BV_DECLARE_REG 12, R13, 56
+BV_DECLARE_REG 13, R14, 64
+BV_DECLARE_REG 14, R15, 72
 
 %macro PROLOGUE 2-5+ ; #args, #regs, #xmm_regs, [stack_size,] arg_names...
     %assign num_args %1
@@ -522,7 +522,7 @@ DECLARE_REG 14, R15, 72
 
 %macro RET 0
 %if stack_size_padded > 0
-%if mmsize == 32 || HAVE_ALIGNED_STACK == 0
+%if mmsize == 32 || BV_HAVE_ALIGNED_STACK == 0
     mov rsp, rstkm
 %else
     add rsp, stack_size_padded
@@ -537,16 +537,16 @@ DECLARE_REG 14, R15, 72
 
 %else ; X86_32 ;==============================================================
 
-DECLARE_REG 0, eax, 4
-DECLARE_REG 1, ecx, 8
-DECLARE_REG 2, edx, 12
-DECLARE_REG 3, ebx, 16
-DECLARE_REG 4, esi, 20
-DECLARE_REG 5, edi, 24
-DECLARE_REG 6, ebp, 28
+BV_DECLARE_REG 0, eax, 4
+BV_DECLARE_REG 1, ecx, 8
+BV_DECLARE_REG 2, edx, 12
+BV_DECLARE_REG 3, ebx, 16
+BV_DECLARE_REG 4, esi, 20
+BV_DECLARE_REG 5, edi, 24
+BV_DECLARE_REG 6, ebp, 28
 %define rsp esp
 
-%macro DECLARE_ARG 1-*
+%macro BV_DECLARE_ARG 1-*
     %rep %0
         %define r%1m [rstk + stack_offset + 4*%1 + 4]
         %define r%1mp dword r%1m
@@ -554,7 +554,7 @@ DECLARE_REG 6, ebp, 28
     %endrep
 %endmacro
 
-DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
+BV_DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
 
 %macro PROLOGUE 2-5+ ; #args, #regs, #xmm_regs, [stack_size,] arg_names...
     %assign num_args %1
@@ -578,7 +578,7 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
 
 %macro RET 0
 %if stack_size_padded > 0
-%if mmsize == 32 || HAVE_ALIGNED_STACK == 0
+%if mmsize == 32 || BV_HAVE_ALIGNED_STACK == 0
     mov rsp, rstkm
 %else
     add rsp, stack_size_padded
@@ -840,7 +840,7 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
     %define RESET_MM_PERMUTATION INIT_XMM %1
     %define mmsize 16
     %define num_mmregs 8
-    %if ARCH_X86_64
+    %if BV_ARCH_X86_64
     %define num_mmregs 16
     %endif
     %define mova movdqa
@@ -869,7 +869,7 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
     %define RESET_MM_PERMUTATION INIT_YMM %1
     %define mmsize 32
     %define num_mmregs 8
-    %if ARCH_X86_64
+    %if BV_ARCH_X86_64
     %define num_mmregs 16
     %endif
     %define mova movdqa
@@ -887,7 +887,7 @@ SECTION .note.GNU-stack noalloc noexec nowrite progbits
 
 INIT_XMM
 
-%macro DECLARE_MMCAST 1
+%macro BV_DECLARE_MMCAST 1
     %define  mmmm%1   mm%1
     %define  mmxmm%1  mm%1
     %define  mmymm%1  mm%1
@@ -903,7 +903,7 @@ INIT_XMM
 
 %assign i 0
 %rep 16
-    DECLARE_MMCAST i
+    BV_DECLARE_MMCAST i
 %assign i i+1
 %endrep
 
@@ -1457,7 +1457,7 @@ FMA4_INSTR fnmsubsd, fnmsub132sd, fnmsub213sd, fnmsub231sd
 FMA4_INSTR fnmsubss, fnmsub132ss, fnmsub213ss, fnmsub231ss
 
 ; workaround: vpbroadcastq is broken in x86_32 due to a yasm bug
-%if ARCH_X86_64 == 0
+%if BV_ARCH_X86_64 == 0
 %macro vpbroadcastq 2
 %if sizeof%1 == 16
     movddup %1, %2

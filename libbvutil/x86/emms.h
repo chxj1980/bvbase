@@ -25,7 +25,7 @@
 
 void bvpriv_emms_yasm(void);
 
-#if HAVE_MMX_INLINE
+#if BV_HAVE_MMX_INLINE
 #   define emms_c emms_c
 /**
  * Empty mmx state.
@@ -37,11 +37,11 @@ static bv_always_inline void emms_c(void)
     if(bv_get_cpu_flags() & BV_CPU_FLAG_MMX)
         __asm__ volatile ("emms" ::: "memory");
 }
-#elif HAVE_MMX && HAVE_MM_EMPTY
+#elif BV_HAVE_MMX && BV_HAVE_MM_EMPTY
 #   include <mmintrin.h>
 #   define emms_c _mm_empty
-#elif HAVE_MMX_EXTERNAL
+#elif BV_HAVE_MMX_EXTERNAL
 #   define emms_c bvpriv_emms_yasm
-#endif /* HAVE_MMX_INLINE */
+#endif /* BV_HAVE_MMX_INLINE */
 
 #endif /* BVUTIL_X86_EMMS_H */

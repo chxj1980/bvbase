@@ -5,3 +5,5 @@ NAME = bvmedia
 HEADERS = bvmedia.h
 
 OBJS = utils.o allmedias.o media.o options.o
+
+OBJS-$(BV_CONFIG_ONVIFAVE_INDEV)          += onvifave.o

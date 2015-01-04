@@ -22,6 +22,7 @@
  */
 
 #include <libbvutil/atomic.h>
+#include <libbvutil/avassert.h>
 
 #include "bvmedia.h"
 
@@ -66,3 +67,54 @@ BVOutputMedia *bv_output_media_next(const BVOutputMedia *f)
         return first_ofmt;
 }
 
+BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c)
+{
+    BVStream *st;
+    BVStream **streams;
+
+    if (s->nb_streams >= INT_MAX/sizeof(*streams))
+        return NULL;
+    streams = bv_realloc_array(s->streams, s->nb_streams + 1, sizeof(*streams));
+    if (!streams)
+        return NULL;
+    s->streams = streams;
+
+    st = bv_mallocz(sizeof(BVStream));
+    if (!st)
+        return NULL;
+
+    st->codec = bv_codec_context_alloc(c);
+    if (!st->codec) {
+        bv_free(st);
+        return NULL;
+    }
+#if 0
+    if (!(st->info = av_mallocz(sizeof(*st->info)))) {
+        av_free(st);
+        return NULL;
+    }
+    st->info->last_dts = AV_NOPTS_VALUE;
+    if (s->iformat) {
+        /* no default bitrate if decoding */
+        st->codec->bit_rate = 0;
+
+        /* default pts setting is MPEG-like */
+        avpriv_set_pts_info(st, 33, 1, 90000);
+    }
+#endif
+
+    st->index      = s->nb_streams;
+    s->streams[s->nb_streams++] = st;
+    return st;
+}
+
+void bv_stream_free(BVMediaContext *s, BVStream *st)
+{
+    int j;
+    bv_assert0(s->nb_streams>0);
+    bv_assert0(s->streams[ s->nb_streams - 1 ] == st);
+
+    bv_codec_context_free(st->codec);
+    bv_freep(&st->priv_data);
+    bv_freep(&s->streams[ --s->nb_streams ]);
+}

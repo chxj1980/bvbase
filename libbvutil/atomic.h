@@ -23,13 +23,13 @@
 
 #include "config.h"
 
-#if HAVE_ATOMICS_NATIVE
+#if BV_HAVE_ATOMICS_NATIVE
 
-#if HAVE_ATOMICS_GCC
+#if BV_HAVE_ATOMICS_GCC
 #include "atomic_gcc.h"
-#elif HAVE_ATOMICS_WIN32
+#elif BV_HAVE_ATOMICS_WIN32
 #include "atomic_win32.h"
-#elif HAVE_ATOMICS_SUNCC
+#elif BV_HAVE_ATOMICS_SUNCC
 #include "atomic_suncc.h"
 #endif
 
@@ -74,6 +74,6 @@ int bvpriv_atomic_int_add_and_fetch(volatile int *ptr, int inc);
  */
 void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval);
 
-#endif /* HAVE_ATOMICS_NATIVE */
+#endif /* BV_HAVE_ATOMICS_NATIVE */
 
 #endif /* BVUTIL_ATOMIC_H */

@@ -28,9 +28,15 @@
 extern "C"{
 #endif
 
+#include <libbvutil/bvutil.h>
+
 typedef struct _BVIOContext {
     BVClass *bv_class;
 } BVIOContext;
+
+#define BV_IO_FLAG_READ     1
+#define BV_IO_FLAG_WRITE    2
+#define BV_IO_FLAG_READ_WRITE   (BV_IO_FLAG_READ | BV_IO_FLAG_WRITE)
 
 #ifdef __cplusplus
 }

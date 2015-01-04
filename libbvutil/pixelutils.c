@@ -20,7 +20,7 @@
 #include "common.h"
 #include "pixelutils.h"
 
-#if CONFIG_PIXELUTILS
+#if BV_CONFIG_PIXELUTILS
 
 #include "x86/pixelutils.h"
 
@@ -39,17 +39,17 @@ static bv_always_inline int sad_wxh(const uint8_t *src1, ptrdiff_t stride1,
     return sum;
 }
 
-#define DECLARE_BLOCK_FUNCTIONS(size)                                               \
+#define BV_DECLARE_BLOCK_FUNCTIONS(size)                                               \
 static int block_sad_##size##x##size##_c(const uint8_t *src1, ptrdiff_t stride1,    \
                                          const uint8_t *src2, ptrdiff_t stride2)    \
 {                                                                                   \
     return sad_wxh(src1, stride1, src2, stride2, size, size);                       \
 }
 
-DECLARE_BLOCK_FUNCTIONS(2)
-DECLARE_BLOCK_FUNCTIONS(4)
-DECLARE_BLOCK_FUNCTIONS(8)
-DECLARE_BLOCK_FUNCTIONS(16)
+BV_DECLARE_BLOCK_FUNCTIONS(2)
+BV_DECLARE_BLOCK_FUNCTIONS(4)
+BV_DECLARE_BLOCK_FUNCTIONS(8)
+BV_DECLARE_BLOCK_FUNCTIONS(16)
 
 static const bv_pixelutils_sad_fn sad_c[] = {
     block_sad_2x2_c,
@@ -58,11 +58,11 @@ static const bv_pixelutils_sad_fn sad_c[] = {
     block_sad_16x16_c,
 };
 
-#endif /* CONFIG_PIXELUTILS */
+#endif /* BV_CONFIG_PIXELUTILS */
 
 bv_pixelutils_sad_fn bv_pixelutils_get_sad_fn(int w_bits, int h_bits, int aligned, void *log_ctx)
 {
-#if !CONFIG_PIXELUTILS
+#if !BV_CONFIG_PIXELUTILS
     bv_log(log_ctx, BV_LOG_ERROR, "pixelutils support is required "
            "but libbvutil is not compiled with it\n");
     return NULL;
@@ -77,7 +77,7 @@ bv_pixelutils_sad_fn bv_pixelutils_get_sad_fn(int w_bits, int h_bits, int aligne
     if (w_bits != h_bits) // only squared sad for now
         return NULL;
 
-#if ARCH_X86
+#if BV_ARCH_X86
     ff_pixelutils_sad_init_x86(sad, aligned);
 #endif
 

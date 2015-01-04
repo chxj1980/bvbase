@@ -42,7 +42,7 @@
 #include "pixfmt.h"
 #include "version.h"
 
-#if ARCH_X86
+#if BV_ARCH_X86
 #   include "x86/emms.h"
 #endif
 
@@ -51,20 +51,20 @@
 #endif
 
 #ifndef attribute_align_arg
-#if ARCH_X86_32 && BV_GCC_VERSION_AT_LEAST(4,2)
+#if BV_ARCH_X86_32 && BV_GCC_VERSION_AT_LEAST(4,2)
 #    define attribute_align_arg __attribute__((force_align_arg_pointer))
 #else
 #    define attribute_align_arg
 #endif
 #endif
 
-#if defined(_MSC_VER) && CONFIG_SHARED
+#if defined(_MSC_VER) && BV_CONFIG_SHARED
 #    define bv_export __declspec(dllimport)
 #else
 #    define bv_export
 #endif
 
-#if HAVE_PRAGMA_DEPRECATED
+#if BV_HAVE_PRAGMA_DEPRECATED
 #    if defined(__ICL) || defined (__INTEL_COMPILER)
 #        define BV_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
 #        define BV_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
@@ -103,24 +103,24 @@
     t (*v) o = (void *)FFALIGN((uintptr_t)la_##v, a)
 
 #define LOCAL_ALIGNED_D(a, t, v, s, o, ...)             \
-    DECLARE_ALIGNED(a, t, la_##v) s o;                  \
+    BV_DECLARE_ALIGNED(a, t, la_##v) s o;                  \
     t (*v) o = la_##v
 
 #define LOCAL_ALIGNED(a, t, v, ...) E1(LOCAL_ALIGNED_A(a, t, v, __VA_ARGS__,,))
 
-#if HAVE_LOCAL_ALIGNED_8
+#if BV_HAVE_LOCAL_ALIGNED_8
 #   define LOCAL_ALIGNED_8(t, v, ...) E1(LOCAL_ALIGNED_D(8, t, v, __VA_ARGS__,,))
 #else
 #   define LOCAL_ALIGNED_8(t, v, ...) LOCAL_ALIGNED(8, t, v, __VA_ARGS__)
 #endif
 
-#if HAVE_LOCAL_ALIGNED_16
+#if BV_HAVE_LOCAL_ALIGNED_16
 #   define LOCAL_ALIGNED_16(t, v, ...) E1(LOCAL_ALIGNED_D(16, t, v, __VA_ARGS__,,))
 #else
 #   define LOCAL_ALIGNED_16(t, v, ...) LOCAL_ALIGNED(16, t, v, __VA_ARGS__)
 #endif
 
-#if HAVE_LOCAL_ALIGNED_32
+#if BV_HAVE_LOCAL_ALIGNED_32
 #   define LOCAL_ALIGNED_32(t, v, ...) E1(LOCAL_ALIGNED_D(32, t, v, __VA_ARGS__,,))
 #else
 #   define LOCAL_ALIGNED_32(t, v, ...) LOCAL_ALIGNED(32, t, v, __VA_ARGS__)
@@ -170,14 +170,14 @@
 #endif
 
 /**
- * Return NULL if CONFIG_SMALL is true, otherwise the argument
+ * Return NULL if BV_CONFIG_SMALL is true, otherwise the argument
  * without modification. Used to disable the definition of strings
  * (for example BVCodec long_names).
  */
-#if CONFIG_SMALL
-#   define NULL_IF_CONFIG_SMALL(x) NULL
+#if BV_CONFIG_SMALL
+#   define NULL_IF_BV_CONFIG_SMALL(x) NULL
 #else
-#   define NULL_IF_CONFIG_SMALL(x) x
+#   define NULL_IF_BV_CONFIG_SMALL(x) x
 #endif
 
 /**
@@ -197,11 +197,11 @@
  * @param args argument list of function
  * @param ver  version tag to assign function
  */
-#if HAVE_SYMVER_ASM_LABEL
+#if BV_HAVE_SYMVER_ASM_LABEL
 #   define BV_SYMVER(type, name, args, ver)                     \
     type ff_##name args __asm__ (EXTERN_PREFIX #name "@" ver);  \
     type ff_##name args
-#elif HAVE_SYMVER_GNU_ASM
+#elif BV_HAVE_SYMVER_GNU_ASM
 #   define BV_SYMVER(type, name, args, ver)                             \
     __asm__ (".symver ff_" #name "," EXTERN_PREFIX #name "@" ver);      \
     type ff_##name args;                                                \
@@ -213,7 +213,7 @@
  * Used to disable threading functions in BVCodec definitions
  * when not needed.
  */
-#if HAVE_THREADS
+#if BV_HAVE_THREADS
 #   define ONLY_IF_THREADS_ENABLED(x) x
 #else
 #   define ONLY_IF_THREADS_ENABLED(x) NULL
@@ -240,7 +240,7 @@ void bvpriv_report_missing_feature(void *avc,
 void bvpriv_request_sample(void *avc,
                            const char *msg, ...) bv_printf_format(2, 3);
 
-#if HAVE_LIBC_MSVCRT
+#if BV_HAVE_LIBC_MSVCRT
 #define bvpriv_open ff_open
 #define PTRDIBV_SPECIFIER "Id"
 #define SIZE_SPECIFIER "Iu"
