@@ -2732,7 +2732,8 @@ enable optimizations
 enable runtime_cpudetect
 enable safe_bitstream_reader
 enable static
-enable swscale_alpha
+enable shared
+#enable swscale_alpha
 
 sws_max_filter_size_default=256
 set_default sws_max_filter_size

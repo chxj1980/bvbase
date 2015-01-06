@@ -110,6 +110,17 @@ size_t bv_strlcatf(char *dst, size_t size, const char *fmt, ...)
     return len;
 }
 
+size_t bv_sprintf(char *dst, size_t size, const char *fmt, ...)
+{
+    va_list va;
+    int len;
+
+    va_start(va, fmt);
+    len = vsnprintf(dst, size, fmt, va);
+    va_end(va);
+    return len;
+}
+
 char *bv_asprintf(const char *fmt, ...)
 {
     char *p = NULL;

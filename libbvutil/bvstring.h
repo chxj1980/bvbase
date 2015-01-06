@@ -146,6 +146,15 @@ static inline size_t bv_strnlen(const char *s, size_t len)
 }
 
 /**
+ * Print arguments following specified format into a large enough 
+ * buffer. It is similar to GNU snprintf().
+ * @param fmt printf-compatible format string, specifying how the
+ *            following parameters are used.
+ * @return the dst strlen
+ */
+size_t bv_sprintf(char *dst, size_t size, const char *fmt, ...) bv_printf_format(3, 4);
+
+/**
  * Print arguments following specified format into a large enough auto
  * allocated buffer. It is similar to GNU asprintf().
  * @param fmt printf-compatible format string, specifying how the

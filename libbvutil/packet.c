@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: packet.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 21时47分18秒
+    > File Name: packet.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 21时47分18秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: utils.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年09月25日 星期四 14时19分40秒
+    > File Name: utils.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年09月25日 星期四 14时19分40秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -33,53 +33,53 @@ static BVServer **last_svr = &first_svr;
 
 int bv_server_register(BVServer * svr)
 {
-	BVServer **p = last_svr;
-	svr->next = NULL;
-	while (*p || bvpriv_atomic_ptr_cas((void *volatile *) p, NULL, svr))
-		p = &(*p)->next;
-	last_svr = &svr->next;
+    BVServer **p = last_svr;
+    svr->next = NULL;
+    while (*p || bvpriv_atomic_ptr_cas((void *volatile *) p, NULL, svr))
+        p = &(*p)->next;
+    last_svr = &svr->next;
     return 0;
 }
 
 BVServer *bv_server_next(BVServer * svr)
 {
-	if (svr)
-		return svr->next;
-	else
-		return first_svr;
+    if (svr)
+        return svr->next;
+    else
+        return first_svr;
 }
 
 BVServer *bv_server_find_server(enum BVServerType server_type)
 {
-	BVServer *svr = NULL;
-	if (first_svr == NULL) {
-		bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
-		return NULL;
-	}
+    BVServer *svr = NULL;
+    if (first_svr == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
+        return NULL;
+    }
 
-	while ((svr = bv_server_next(svr))) {
-		if (svr->server_type == server_type) {
-			return svr;
-		}
-	}
-	return NULL;
+    while ((svr = bv_server_next(svr))) {
+        if (svr->server_type == server_type) {
+            return svr;
+        }
+    }
+    return NULL;
 }
 
 BVServer *bv_server_find_server_by_name(const char *svr_name)
 {
-	BVServer *svr = NULL;
+    BVServer *svr = NULL;
 
-	if (first_svr == NULL) {
-		bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
-		return NULL;
-	}
+    if (first_svr == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "BVServer Not RegisterAll");
+        return NULL;
+    }
 
-	while ((svr = bv_server_next(svr))) {
-		if (strncmp(svr->name, svr_name, strlen(svr->name)) == 0) {
-			return svr;
-		}
-	}
-	return NULL;
+    while ((svr = bv_server_next(svr))) {
+        if (strncmp(svr->name, svr_name, strlen(svr->name)) == 0) {
+            return svr;
+        }
+    }
+    return NULL;
 }
 
 static int init_server(BVServerContext *s, const char *url)
@@ -156,13 +156,13 @@ int bv_server_read(BVServerContext *svrctx, BVServerPacket *pkt)
 
 int bv_server_write(BVServerContext *svrctx, const BVServerPacket *pkt)
 {
-	if (!svrctx || !pkt) {
-		bv_log(NULL, BV_LOG_ERROR, "Param Error");
-		return -1;
-	}
-	if (svrctx->server == NULL) {
-		bv_log(NULL, BV_LOG_ERROR, "server error");
-		return -1;
-	}
-	return svrctx->server->svr_write(svrctx, pkt);
+    if (!svrctx || !pkt) {
+        bv_log(NULL, BV_LOG_ERROR, "Param Error");
+        return -1;
+    }
+    if (svrctx->server == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "server error");
+        return -1;
+    }
+    return svrctx->server->svr_write(svrctx, pkt);
 }

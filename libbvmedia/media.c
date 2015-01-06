@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: media.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 19时18分36秒
+    > File Name: media.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 19时18分36秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -100,7 +100,7 @@ static int init_imedia(BVMediaContext *s, const char *url)
 
     while ((im1 = bv_input_media_next(im1))) {
         if (im1->read_probe) {
-            score = im->read_probe(s, &pd);
+            score = im1->read_probe(s, &pd);
         } else if (im1->extensions) {
           if (bv_match_ext(pd.filename, im1->extensions))
               score = BV_PROBE_SCORE_EXTENSION;
@@ -110,8 +110,10 @@ static int init_imedia(BVMediaContext *s, const char *url)
         if (score > score_max) {
             score_max = score;
             im = im1;
-        } else if (score == score_max)
+        } else if (score == score_max){
+        
             im = NULL;
+        }
     }
     s->imedia = im;
     return im == NULL ? -1: 0;
@@ -140,17 +142,20 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     else
         ret = init_imedia(s, url);
     if (ret < 0) {
-        return BVERROR(ENOSYS);
+        ret = BVERROR(ENOSYS);
+        goto fail;
     }
     if (s->imedia->priv_data_size > 0) {
         s->priv_data = bv_mallocz(s->imedia->priv_data_size);
         if (!s->priv_data)
+            ret = BVERROR(ENOMEM);
             goto fail;
         if (s->imedia->priv_class) {
             *(const BVClass **) s->priv_data = s->imedia->priv_class;
             bv_opt_set_defaults(s->priv_data);
             if ((ret = bv_opt_set_dict(s->priv_data, &tmp)) < 0) {
                 bv_log(s, BV_LOG_ERROR, "set dict error\n");
+                ret = BVERROR(EINVAL);
                 goto fail;
             }
         }
@@ -158,20 +163,31 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
 
     if (url)
         bv_strlcpy(s->filename, url, sizeof(s->filename));
-    if (!s->imedia->read_header)
+    if (!s->imedia->read_header) {
+        ret = BVERROR(ENOSYS); 
         goto fail;
+    }
     *fmt = s;
 
     bv_dict_free(&tmp);
     return s->imedia->read_header(s);
 fail:
-    return -1;
+    bv_dict_free(&tmp);
+    return ret;
 }
 
 int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url,
         BVInputMedia *media, BVDictionary **options)
 {
-    return 0;
+    int ret;
+    if (channel) {
+        
+    }
+    ret = input_media_open_internal(fmt, url, media, options);
+    if (ret < 0) {
+        bv_log(NULL, BV_LOG_ERROR, "media open error\n");
+    }
+    return ret;
 }
 
 int bv_input_media_read(BVMediaContext *s, BVPacket *pkt)

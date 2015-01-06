@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: utils.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 17时10分17秒
+    > File Name: utils.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 17时10分17秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

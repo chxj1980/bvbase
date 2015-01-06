@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: file.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2015年01月04日 星期日 10时29分44秒
+    > File Name: file.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2015年01月04日 星期日 10时29分44秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

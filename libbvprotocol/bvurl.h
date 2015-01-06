@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvurl.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 17时48分24秒
+    > File Name: bvurl.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 17时48分24秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,7 @@ extern "C"{
 typedef struct _BVURLContext {
     BVClass *bv_class;
     struct _BVURLProtocol *prot;
-	void *priv_data;
+    void *priv_data;
     char *filename;
 } BVURLContext;
 

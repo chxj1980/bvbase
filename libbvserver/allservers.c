@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: allservers.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年09月25日 星期四 14时42分50秒
+    > File Name: allservers.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年09月25日 星期四 14时42分50秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -33,13 +33,13 @@
 
 void bv_server_register_all(void)
 {
-	static int initialized;
+    static int initialized;
 
-	if (initialized)
-		return;
-	initialized = 1;
+    if (initialized)
+        return;
+    initialized = 1;
 
-	REGISTER_SERVER(BVS, bvs);
-	REGISTER_SERVER(BVC, bvc);
-	REGISTER_SERVER(MTC, mtc);
+    REGISTER_SERVER(BVS, bvs);
+    REGISTER_SERVER(BVC, bvc);
+    REGISTER_SERVER(MTC, mtc);
 }

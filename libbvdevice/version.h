@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: version.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月15日 星期一 10时46分54秒
+    > File Name: version.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月15日 星期一 10时46分54秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

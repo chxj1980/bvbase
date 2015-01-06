@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: allconfigs.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年10月29日 星期三 11时07分20秒
+    > File Name: allconfigs.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年10月29日 星期三 11时07分20秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

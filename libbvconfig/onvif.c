@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: onvif.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年10月30日 星期四 17时58分08秒
+    > File Name: onvif.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年10月30日 星期四 17时58分08秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -23,11 +23,11 @@
 
 #include "bvconfig.h"
 struct OnvifConfigContext {
-	const BVClass *bv_class;
-	char devide_info[128];
+    const BVClass *bv_class;
+    char devide_info[128];
 };
 
 BVConfig bv_onvif_config = {
-	.name = "onvif",
-	.priv_data_size = sizeof(struct OnvifConfigContext),
+    .name = "onvif",
+    .priv_data_size = sizeof(struct OnvifConfigContext),
 };

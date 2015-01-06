@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: packet.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 21时35分16秒
+    > File Name: packet.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 21时35分16秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@ typedef struct _BVPacket {
     int stream_index;
     int64_t pts;
     int64_t dts;
-    void *data;
+    uint8_t *data;
     int size;
     int flags;
 } BVPacket;
@@ -65,7 +65,7 @@ typedef struct _BVPacket {
 typedef struct _BVControlPacket {
     int size;
     int flags;
-    void *data;
+    uint8_t *data;
 } BVControlPacket;
 
 int bv_packet_init(BVPacket *pkt);

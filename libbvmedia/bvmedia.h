@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvmedia.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 12时56分43秒
+    > File Name: bvmedia.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 12时56分43秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ extern "C"{
 
 #include <libbvutil/bvutil.h>
 #include <libbvutil/log.h>
+#include <libbvutil/dict.h>
 #include <libbvutil/packet.h>
 #include <libbvcodec/bvcodec.h>
 #include <libbvconfig/common.h>
@@ -70,6 +71,7 @@ typedef struct _BVOutputMedia {
 typedef struct _BVStream {
     int index;
     BVCodecContext *codec;
+    BVRational time_base;
     void *priv_data;
 } BVStream;
 
@@ -82,7 +84,7 @@ typedef struct _BVMediaContext {
     char filename[1024];
     int nb_streams;
     BVStream **streams;
-    BVChannel *channel;
+//    BVChannel *channel;
 } BVMediaContext;
 
 void bv_input_media_register(BVInputMedia *ifmt);
