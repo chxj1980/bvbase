@@ -42,30 +42,30 @@
                 type *left  = start+1;\
                 type *mid = start + ((end-start)>>1);\
                 if(cmp(start, end) > 0) {\
-                    if(cmp(  end, mid) > 0) FFSWAP(type, *start, *mid);\
-                    else                    FFSWAP(type, *start, *end);\
+                    if(cmp(  end, mid) > 0) BBSWAP(type, *start, *mid);\
+                    else                    BBSWAP(type, *start, *end);\
                 }else{\
-                    if(cmp(start, mid) > 0) FFSWAP(type, *start, *mid);\
+                    if(cmp(start, mid) > 0) BBSWAP(type, *start, *mid);\
                     else checksort= 1;\
                 }\
                 if(cmp(mid, end) > 0){ \
-                    FFSWAP(type, *mid, *end);\
+                    BBSWAP(type, *mid, *end);\
                     checksort=0;\
                 }\
                 if(start == end-2) break;\
-                FFSWAP(type, end[-1], *mid);\
+                BBSWAP(type, end[-1], *mid);\
                 while(left <= right){\
                     while(left<=right && cmp(left, end-1) < 0)\
                         left++;\
                     while(left<=right && cmp(right, end-1) > 0)\
                         right--;\
                     if(left <= right){\
-                        FFSWAP(type, *left, *right);\
+                        BBSWAP(type, *left, *right);\
                         left++;\
                         right--;\
                     }\
                 }\
-                FFSWAP(type, end[-1], *left);\
+                BBSWAP(type, end[-1], *left);\
                 if(checksort && (mid == left-1 || mid == left)){\
                     mid= start;\
                     while(mid<end && cmp(mid, mid+1) <= 0)\
@@ -84,7 +84,7 @@
                 }\
             }else{\
                 if(cmp(start, end) > 0)\
-                    FFSWAP(type, *start, *end);\
+                    BBSWAP(type, *start, *end);\
                 break;\
             }\
         }\
@@ -102,7 +102,7 @@
     for(step=1; step<(num); step+=step){\
         for(i=0; i<(num); i+=2*step){\
             unsigned a[2] = {i, i+step};\
-            unsigned end = FFMIN(i+2*step, (num));\
+            unsigned end = BBMIN(i+2*step, (num));\
             for(j=i; a[0]<i+step && a[1]<end; j++){\
                 int idx= cmp(p+a[0], p+a[1]) > 0;\
                 tmp[j] = p[ a[idx]++ ];\
@@ -112,6 +112,6 @@
                 tmp[j] = p[ a[0]++ ];\
             }\
         }\
-        FFSWAP(type*, p, tmp);\
+        BBSWAP(type*, p, tmp);\
     }\
 }

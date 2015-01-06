@@ -314,8 +314,8 @@ static int set_string_fmt(void *obj, const BVOption *o, const char *val, uint8_t
         }
     }
 
-    min = FFMAX(o->min, -1);
-    max = FFMIN(o->max, fmt_nb-1);
+    min = BBMAX(o->min, -1);
+    max = BBMIN(o->max, fmt_nb-1);
 
     // hack for compatibility with old ffmpeg
     if(min == 0 && max == 0) {
@@ -542,8 +542,8 @@ static int set_format(void *obj, const char *name, int fmt, int search_flags,
         return BVERROR(EINVAL);
     }
 
-    min = FFMAX(o->min, -1);
-    max = FFMIN(o->max, nb_fmts-1);
+    min = BBMAX(o->min, -1);
+    max = BBMIN(o->max, nb_fmts-1);
 
     if (fmt < min || fmt > max) {
         bv_log(obj, BV_LOG_ERROR,

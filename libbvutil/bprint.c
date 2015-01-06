@@ -30,7 +30,7 @@
 #include "error.h"
 #include "mem.h"
 
-#define bv_bprint_room(buf) ((buf)->size - FFMIN((buf)->len, (buf)->size))
+#define bv_bprint_room(buf) ((buf)->size - BBMIN((buf)->len, (buf)->size))
 #define bv_bprint_is_allocated(buf) ((buf)->str != (buf)->reserved_internal_buffer)
 
 static int bv_bprint_alloc(BVBPrint *buf, unsigned room)
@@ -42,10 +42,10 @@ static int bv_bprint_alloc(BVBPrint *buf, unsigned room)
         return BVERROR(EIO);
     if (!bv_bprint_is_complete(buf))
         return BVERROR_INVALIDDATA; /* it is already truncated anyway */
-    min_size = buf->len + 1 + FFMIN(UINT_MAX - buf->len - 1, room);
+    min_size = buf->len + 1 + BBMIN(UINT_MAX - buf->len - 1, room);
     new_size = buf->size > buf->size_max / 2 ? buf->size_max : buf->size * 2;
     if (new_size < min_size)
-        new_size = FFMIN(buf->size_max, min_size);
+        new_size = BBMIN(buf->size_max, min_size);
     old_str = bv_bprint_is_allocated(buf) ? buf->str : NULL;
     new_str = bv_realloc(old_str, new_size);
     if (!new_str)
@@ -60,10 +60,10 @@ static int bv_bprint_alloc(BVBPrint *buf, unsigned room)
 static void bv_bprint_grow(BVBPrint *buf, unsigned extra_len)
 {
     /* arbitrary margin to avoid small overflows */
-    extra_len = FFMIN(extra_len, UINT_MAX - 5 - buf->len);
+    extra_len = BBMIN(extra_len, UINT_MAX - 5 - buf->len);
     buf->len += extra_len;
     if (buf->size)
-        buf->str[FFMIN(buf->len, buf->size - 1)] = 0;
+        buf->str[BBMIN(buf->len, buf->size - 1)] = 0;
 }
 
 void bv_bprint_init(BVBPrint *buf, unsigned size_init, unsigned size_max)
@@ -75,7 +75,7 @@ void bv_bprint_init(BVBPrint *buf, unsigned size_init, unsigned size_max)
         size_max = size_auto;
     buf->str      = buf->reserved_internal_buffer;
     buf->len      = 0;
-    buf->size     = FFMIN(size_auto, size_max);
+    buf->size     = BBMIN(size_auto, size_max);
     buf->size_max = size_max;
     *buf->str = 0;
     if (size_init > buf->size)
@@ -149,7 +149,7 @@ void bv_bprint_chars(BVBPrint *buf, char c, unsigned n)
             break;
     }
     if (room) {
-        real_n = FFMIN(n, room - 1);
+        real_n = BBMIN(n, room - 1);
         memset(buf->str + buf->len, c, real_n);
     }
     bv_bprint_grow(buf, n);
@@ -167,7 +167,7 @@ void bv_bprint_append_data(BVBPrint *buf, const char *data, unsigned size)
             break;
     }
     if (room) {
-        real_n = FFMIN(size, room - 1);
+        real_n = BBMIN(size, room - 1);
         memcpy(buf->str + buf->len, data, real_n);
     }
     bv_bprint_grow(buf, size);
@@ -206,7 +206,7 @@ void bv_bprint_strftime(BVBPrint *buf, const char *fmt, const struct tm *tm)
                    truncated, let us add a stock string and force truncation */
                 static const char txt[] = "[truncated strftime output]";
                 memset(buf->str + buf->len, '!', room);
-                memcpy(buf->str + buf->len, txt, FFMIN(sizeof(txt) - 1, room));
+                memcpy(buf->str + buf->len, txt, BBMIN(sizeof(txt) - 1, room));
                 bv_bprint_grow(buf, room); /* force truncation */
             }
             return;
@@ -234,7 +234,7 @@ void bv_bprint_clear(BVBPrint *buf)
 
 int bv_bprint_finalize(BVBPrint *buf, char **ret_str)
 {
-    unsigned real_size = FFMIN(buf->len + 1, buf->size);
+    unsigned real_size = BBMIN(buf->len + 1, buf->size);
     char *str;
     int ret = 0;
 

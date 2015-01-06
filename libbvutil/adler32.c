@@ -49,7 +49,7 @@ unsigned long bv_adler32_update(unsigned long adler, const uint8_t * buf,
 
     while (len > 0) {
 #if BV_HAVE_FAST_64BIT && BV_HAVE_FAST_UNALIGNED && !BV_CONFIG_SMALL
-        unsigned len2 = FFMIN((len-1) & ~7, 23*8);
+        unsigned len2 = BBMIN((len-1) & ~7, 23*8);
         if (len2) {
             uint64_t a1= 0;
             uint64_t a2= 0;

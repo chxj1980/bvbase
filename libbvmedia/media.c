@@ -106,12 +106,11 @@ static int init_imedia(BVMediaContext *s, const char *url)
               score = BV_PROBE_SCORE_EXTENSION;
         }
         if (bv_match_name(pd.mime_type, im1->mime_type))
-            score = FFMAX(score, BV_PROBE_SCORE_MIME);
+            score = BBMAX(score, BV_PROBE_SCORE_MIME);
         if (score > score_max) {
             score_max = score;
             im = im1;
-        } else if (score == score_max){
-        
+        } else if (score == score_max) {
             im = NULL;
         }
     }
@@ -147,9 +146,10 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     }
     if (s->imedia->priv_data_size > 0) {
         s->priv_data = bv_mallocz(s->imedia->priv_data_size);
-        if (!s->priv_data)
+        if (!s->priv_data) {
             ret = BVERROR(ENOMEM);
             goto fail;
+        }
         if (s->imedia->priv_class) {
             *(const BVClass **) s->priv_data = s->imedia->priv_class;
             bv_opt_set_defaults(s->priv_data);

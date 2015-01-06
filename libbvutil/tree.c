@@ -184,7 +184,7 @@ static int check(BVTreeNode *t)
             return 1000;
         if (t->state > 1 || t->state < -1)
             return 1000;
-        return FFMAX(left, right) + 1;
+        return BBMAX(left, right) + 1;
     }
     return 0;
 }

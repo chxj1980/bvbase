@@ -56,19 +56,19 @@
 /* assume a>0 and b>0 */
 #define BV_CEIL_RSHIFT(a,b) (!bv_builtin_constant_p(b) ? -((-(a)) >> (b)) \
                                                        : ((a) + (1<<(b)) - 1) >> (b))
-#define FFUDIV(a,b) (((a)>0 ?(a):(a)-(b)+1) / (b))
-#define FFUMOD(a,b) ((a)-(b)*FFUDIV(a,b))
-#define FFABS(a) ((a) >= 0 ? (a) : (-(a)))
-#define FFSIGN(a) ((a) > 0 ? 1 : -1)
+#define BBUDIV(a,b) (((a)>0 ?(a):(a)-(b)+1) / (b))
+#define BBUMOD(a,b) ((a)-(b)*BBUDIV(a,b))
+#define BBABS(a) ((a) >= 0 ? (a) : (-(a)))
+#define BBSIGN(a) ((a) > 0 ? 1 : -1)
 
-#define FFMAX(a,b) ((a) > (b) ? (a) : (b))
-#define FFMAX3(a,b,c) FFMAX(FFMAX(a,b),c)
-#define FFMIN(a,b) ((a) > (b) ? (b) : (a))
-#define FFMIN3(a,b,c) FFMIN(FFMIN(a,b),c)
+#define BBMAX(a,b) ((a) > (b) ? (a) : (b))
+#define BBMAX3(a,b,c) BBMAX(BBMAX(a,b),c)
+#define BBMIN(a,b) ((a) > (b) ? (b) : (a))
+#define BBMIN3(a,b,c) BBMIN(BBMIN(a,b),c)
 
-#define FFSWAP(type,a,b) do{type SWAP_tmp= b; b= a; a= SWAP_tmp;}while(0)
+#define BBSWAP(type,a,b) do{type SWAP_tmp= b; b= a; a= SWAP_tmp;}while(0)
 #define BV_ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
-#define FFALIGN(x, a) (((x)+(a)-1)&~((a)-1))
+#define BBALIGN(x, a) (((x)+(a)-1)&~((a)-1))
 
 /* misc math functions */
 

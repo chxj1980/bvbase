@@ -40,7 +40,7 @@ int bv_rc4_init(BVRC4 *r, const uint8_t *key, int key_bits, int decrypt) {
     for (j = 0, i = 0; i < 256; i++, j++) {
         if (j == keylen) j = 0;
         y += state[i] + key[j];
-        FFSWAP(uint8_t, state[i], state[y]);
+        BBSWAP(uint8_t, state[i], state[y]);
     }
     r->x = 1;
     r->y = state[1];
@@ -52,7 +52,7 @@ void bv_rc4_crypt(BVRC4 *r, uint8_t *dst, const uint8_t *src, int count, uint8_t
     uint8_t *state = r->state;
     while (count-- > 0) {
         uint8_t sum = state[x] + state[y];
-        FFSWAP(uint8_t, state[x], state[y]);
+        BBSWAP(uint8_t, state[x], state[y]);
         *dst++ = src ? *src++ ^ state[sum] : state[sum];
         x++;
         y += state[x];

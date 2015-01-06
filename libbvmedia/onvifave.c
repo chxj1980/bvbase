@@ -25,15 +25,12 @@
  * @file
  * onvif video encode main file
  */
-#define _GNU_SOURCE
-#include <string.h>
 #include <libavformat/avformat.h>
 
 #include <libbvutil/bvstring.h>
 #include <libbvutil/log.h>
 #include <libbvutil/opt.h>
 
-//#include "soapH.h"
 #include <wsseapi.h>
 #include "bvmedia.h"
 
@@ -55,7 +52,6 @@ typedef struct OnvifContext {
 #define OFFSET(x) offsetof(OnvifContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
-//    {"server_url", "", OFFSET(svrurl), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"token", "", OFFSET(token), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
@@ -73,25 +69,28 @@ static int onvif_probe(BVMediaContext *s, BVProbeData *p)
         return BV_PROBE_SCORE_MAX;
     return 0;
 }
-#if 0
-static void set_video_info(AVStream *st, OnvifContext *onvifctx)
-{
-    AVCodecContext *codec = st->codec;
-    codec->codec_id = onvifctx->vcodec_id;
-    if (!codec->width)
-        codec->width = onvifctx->width;
-    if (!codec->height)
-        codec->height = onvifctx->height;
-    codec->time_base = (BVRational)onvifctx->video_rate;
-    if (codec->codec_type == AVMEDIA_TYPE_UNKNOWN)
-        codec->codec_type = AVMEDIA_TYPE_VIDEO;
-}
-
-#endif
 
 static enum BVCodecID avid_to_bvid(enum AVCodecID codec_id)
 {
-    return BV_CODEC_ID_H264;
+    int i = 0;
+    struct {
+        enum AVCodecID avid;
+        enum BVCodecID bvid;
+    }IDS[] = {
+        {AV_CODEC_ID_NONE, BV_CODEC_ID_NONE},
+        {AV_CODEC_ID_H264, BV_CODEC_ID_H264},
+        {AV_CODEC_ID_MPEG4, BV_CODEC_ID_MPEG},
+        {AV_CODEC_ID_JPEG2000, BV_CODEC_ID_JPEG},
+        {AV_CODEC_ID_PCM_ALAW, BV_CODEC_ID_G711A},
+        {AV_CODEC_ID_PCM_MULAW, BV_CODEC_ID_G711U},
+        {AV_CODEC_ID_ADPCM_G726, BV_CODEC_ID_G726},
+        {AV_CODEC_ID_AAC, BV_CODEC_ID_AAC},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(IDS); i++) {
+        if (IDS[i].avid == codec_id)
+            return IDS[i].bvid;
+    }
+    return BV_CODEC_ID_NONE;
 }
 
 static void set_video_info(BVStream *bvst, AVStream *avst)
@@ -103,7 +102,14 @@ static void set_video_info(BVStream *bvst, AVStream *avst)
     bvst->time_base = (BVRational){avst->time_base.den, avst->time_base.num};
     bvst->codec->time_base = (BVRational){avst->avg_frame_rate.num, avst->avg_frame_rate.den};
     bvst->codec->bit_rate = avst->codec->bit_rate;
-    bvst->codec->codec_id = BV_CODEC_ID_H264;
+    bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
+    bvst->codec->gop_size = avst->codec->gop_size;
+    if (avst->codec->extradata_size > 0) {
+        bvst->codec->extradata = bv_memdup(avst->codec->extradata, avst->codec->extradata_size);
+        if (bvst->codec->extradata) {
+            bvst->codec->extradata_size = avst->codec->extradata_size;
+        }
+    }
 }
 
 static int set_avcodec_info(BVMediaContext *s, OnvifContext *onvifctx)
@@ -162,7 +168,6 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     int ret = -1;
     char *p = NULL;
     char *q = NULL;
-    char *token = "://";
     struct soap *soap = onvifctx->soap;
     struct _trt__GetStreamUriResponse trt__GetStreamUriResponse;
     struct _trt__GetStreamUri trt__GetStreamUri;
@@ -186,18 +191,14 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     }  else {
         printf("get uri %s\n", trt__GetStreamUriResponse.MediaUri->Uri);
         q = trt__GetStreamUriResponse.MediaUri->Uri;
-        p = bv_stristr(q, token);
-        if (!p) {
-            bv_log(onvifctx, BV_LOG_ERROR, "NULL StreamUri\n");
-            return BVERROR(EINVAL);
-        }
         if (onvifctx->user && onvifctx->passwd) {
-            p += strlen(token);
-            bv_strlcpy(onvifctx->onvif_url, q, p - q);
-            bv_sprintf(onvifctx->onvif_url + strlen(onvifctx->onvif_url), sizeof(onvifctx->onvif_url) - strlen(onvifctx->onvif_url) - 1, "%s:%s@%s", onvifctx->user, onvifctx->passwd, p);
-            bv_log(onvifctx, BV_LOG_INFO, "onvif url %s\n", onvifctx->onvif_url);
+            char tmp[128] = { 0 };
+            bv_sprintf(tmp, sizeof(tmp), "%s:%s@", onvifctx->user, onvifctx->passwd);
+            p = bv_sinsert(q, "://", tmp); 
+            bv_strlcpy(onvifctx->onvif_url, p, sizeof(onvifctx->onvif_url));
+            bv_free(p);
          } else {
-            strncpy(onvifctx->onvif_url, q, sizeof(onvifctx->onvif_url));
+            bv_strlcpy(onvifctx->onvif_url, q, sizeof(onvifctx->onvif_url));
         }
         ret = 0;
     }
@@ -227,34 +228,26 @@ static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
     return ret;
 }
 
-//url like onvifave://albert:123456@192.168.6.149:8899/onvif/device_serveces/?token=000
+//url like onvifave://192.168.6.149:8899/onvif/device_serveces
 static bv_cold int onvif_read_header(BVMediaContext * s)
 {
     int ret;
-    const char *uri, *p, *q;
-    char path[1024];
+    char *p;
     OnvifContext *onvifctx = s->priv_data;
+    if (!onvifctx->token) {
+        bv_log(s, BV_LOG_ERROR, "must set onvifave token url\n");
+        return BVERROR(EINVAL);
+    }
     onvifctx->soap = bv_soap_new(onvifctx);
     if (!onvifctx->soap)
         return BVERROR(ENOMEM);
-    /**
-     *    filename ---> opt
-     */
-    if (s->filename[0] != '\0') {
-        uri = strcasestr(s->filename, "onvifave:");
-        if (uri) {
-            sscanf(uri,"onvifave:%s", path);
-            p = strchr(path, '?');
-            if(p) {
-                q = strcasestr(path, "token=");
-                if (q) {
-                    //sscanf(q, "token=%s", onvifctx.token);
-                }
-                path[p - path] = '\0';
-            }
-            snprintf(onvifctx->svrurl, sizeof(onvifctx->svrurl) - strlen("http:") - 1, "http:%s", path);
-        }
+    p = bv_sreplace(s->filename, "onvifave", "http");
+    if (!p) {
+        return BVERROR(ENOMEM);
     }
+    bv_strlcpy(onvifctx->svrurl, p, sizeof(onvifctx->svrurl));
+    bv_free(p);
+    bv_log(s, BV_LOG_INFO, "svr %s\n", onvifctx->svrurl);
     if (onvifctx->vcodec_id == BV_CODEC_ID_H264 || onvifctx->vcodec_id == BV_CODEC_ID_MPEG) {
         ret = bv_onvif_stream_uri(onvifctx);
     } else if (onvifctx->vcodec_id == BV_CODEC_ID_JPEG) {
@@ -280,14 +273,10 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
         bv_log(onvifctx, BV_LOG_ERROR, "open onvif stream error\n");
         return -1;
     }
-    bv_log(s, BV_LOG_INFO, "run here %s %d\n", __func__, __LINE__);
-#if 1
     if (avformat_find_stream_info(onvifctx->onvif, NULL) < 0) {
         bv_log(onvifctx, BV_LOG_ERROR, "get onvif stream info error\n");
         return -1;
     }
-#endif
-    bv_log(s, BV_LOG_INFO, "run here %s %d\n", __func__, __LINE__);
 
     av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
     set_avcodec_info(s, onvifctx);
@@ -312,8 +301,6 @@ static int copy_data(BVPacket *pkt, AVPacket *rpkt)
 static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
 {
     AVPacket rpkt;
-    int index;
-    AVStream *in_stream, *out_stream;
     OnvifContext *onvifctx = s->priv_data;
     if (onvifctx->onvif == NULL) {
         return BVERROR(EINVAL);
@@ -339,8 +326,6 @@ static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
     pkt->stream_index = index;
 #endif
     copy_data(pkt, &rpkt);
-    bv_log(s, BV_LOG_DEBUG, "source %d %d %d %d %d %d\n", rpkt.data[0],rpkt.data[1],rpkt.data[2],rpkt.data[3],rpkt.data[4],rpkt.data[5]);
-    bv_log(s, BV_LOG_DEBUG, "target %d %d %d %d %d %d\n", pkt->data[0],pkt->data[1],pkt->data[2],pkt->data[3],pkt->data[4],pkt->data[5]);
     av_free_packet(&rpkt);
     return pkt->size;
 }

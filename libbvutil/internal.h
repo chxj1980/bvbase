@@ -100,7 +100,7 @@
 
 #define LOCAL_ALIGNED_A(a, t, v, s, o, ...)             \
     uint8_t la_##v[sizeof(t s o) + (a)];                \
-    t (*v) o = (void *)FFALIGN((uintptr_t)la_##v, a)
+    t (*v) o = (void *)BBALIGN((uintptr_t)la_##v, a)
 
 #define LOCAL_ALIGNED_D(a, t, v, s, o, ...)             \
     BV_DECLARE_ALIGNED(a, t, la_##v) s o;                  \

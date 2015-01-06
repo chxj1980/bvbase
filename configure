@@ -2733,6 +2733,7 @@ enable runtime_cpudetect
 enable safe_bitstream_reader
 enable static
 enable shared
+enable pixelutils
 #enable swscale_alpha
 
 sws_max_filter_size_default=256

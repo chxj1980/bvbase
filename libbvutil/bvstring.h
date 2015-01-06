@@ -165,6 +165,28 @@ size_t bv_sprintf(char *dst, size_t size, const char *fmt, ...) bv_printf_format
 char *bv_asprintf(const char *fmt, ...) bv_printf_format(1, 2);
 
 /**
+ * replace term with needle in haystack string resule in
+ * allocated buffer.
+ * @param haystack the source string
+ * @param term the wanted replace string in haystack
+ * @param needle the string wanted replace in result string
+ * @return the allocated string
+ * @note You have to free the string yourself with bv_free().
+ */
+char *bv_sreplace(const char *haystack, const char *term, const char *needle);
+
+/**
+ * insert needle after term in haystack string resule in
+ * allocated buffer.
+ * @param haystack the source string
+ * @param term the string after string in haystack
+ * @param needle the string wanted inserted in result string
+ * @return the allocated string
+ * @note You have to free the string yourself with bv_free().
+ */
+char *bv_sinsert(const char *haystack, const char *term, const char *needle);
+
+/**
  * Convert a number to a bv_malloced string.
  */
 char *bv_d2str(double d);

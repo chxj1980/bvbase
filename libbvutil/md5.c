@@ -154,7 +154,7 @@ void bv_md5_update(AVMD5 *ctx, const uint8_t *src, int len)
     ctx->len += len;
 
     if (j) {
-        int cnt = FFMIN(len, 64 - j);
+        int cnt = BBMIN(len, 64 - j);
         memcpy(ctx->block + j, src, cnt);
         src += cnt;
         len -= cnt;

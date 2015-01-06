@@ -113,7 +113,7 @@ int bv_fifo_grow(BVFifoBuffer *f, unsigned int size)
     size += bv_fifo_size(f);
 
     if (old_size < size)
-        return bv_fifo_realloc2(f, FFMAX(size, 2*size));
+        return bv_fifo_realloc2(f, BBMAX(size, 2*size));
     return 0;
 }
 
@@ -127,7 +127,7 @@ int bv_fifo_generic_write(BVFifoBuffer *f, void *src, int size,
     uint8_t *wptr= f->wptr;
 
     do {
-        int len = FFMIN(f->end - wptr, size);
+        int len = BBMIN(f->end - wptr, size);
         if (func) {
             if (func(src, wptr, len) <= 0)
                 break;
@@ -152,7 +152,7 @@ int bv_fifo_generic_read(BVFifoBuffer *f, void *dest, int buf_size,
 {
 // Read memory barrier needed for SMP here in theory
     do {
-        int len = FFMIN(f->end - f->rptr, buf_size);
+        int len = BBMIN(f->end - f->rptr, buf_size);
         if (func)
             func(dest, f->rptr, len);
         else {

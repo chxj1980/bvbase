@@ -257,7 +257,7 @@ int bv_aes_init(BVAES *a, const uint8_t *key, int key_bits, int decrypt)
         }
     } else {
         for (i = 0; i < (rounds + 1) >> 1; i++) {
-            FFSWAP(bv_aes_block, a->round_key[i], a->round_key[rounds-i]);
+            BBSWAP(bv_aes_block, a->round_key[i], a->round_key[rounds-i]);
         }
     }
 

@@ -130,7 +130,7 @@ int bv_samples_get_buffer_size(int *linesize, int nb_channels, int nb_samples,
         if (nb_samples > INT_MAX - 31)
             return BVERROR(EINVAL);
         align = 1;
-        nb_samples = FFALIGN(nb_samples, 32);
+        nb_samples = BBALIGN(nb_samples, 32);
     }
 
     /* check for integer overflow */
@@ -138,8 +138,8 @@ int bv_samples_get_buffer_size(int *linesize, int nb_channels, int nb_samples,
         (int64_t)nb_channels * nb_samples > (INT_MAX - (align * nb_channels)) / sample_size)
         return BVERROR(EINVAL);
 
-    line_size = planar ? FFALIGN(nb_samples * sample_size,               align) :
-                         FFALIGN(nb_samples * sample_size * nb_channels, align);
+    line_size = planar ? BBALIGN(nb_samples * sample_size,               align) :
+                         BBALIGN(nb_samples * sample_size * nb_channels, align);
     if (linesize)
         *linesize = line_size;
 
