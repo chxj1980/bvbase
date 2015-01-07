@@ -65,7 +65,7 @@ typedef struct _BVPacket {
 typedef struct _BVControlPacket {
     int size;
     int flags;
-    uint8_t *data;
+    void *data;
 } BVControlPacket;
 
 int bv_packet_init(BVPacket *pkt);

@@ -72,6 +72,7 @@ static void bv_soap_free(struct soap *soap)
     soap_free(soap);
 }
 
+//url likes onvif_ptz://admin:123456@192.168.6.149:8899/onvif/device_services/?token=0000?timeout=5000
 static int onvif_ptz_open(BVDeviceContext *h)
 {
     OnvifPTZContext *onvif_ptz = h->priv_data;
@@ -273,46 +274,25 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
     return ret;
 }
 
-#if 0
-/**
- *  不方便控制 type：参数不容意检测,容易出现段错误
- *  不知道效率能提高多少
- */
-typedef struct OnvifPTZControl {
-    int (*control)(BVDeviceContext *h, const BVControlPacket *, BVControlPacket *);
-} OnvifPTZControl;
-
-
-static OnvifPTZControl onvif_control[] = {
-   [BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE] = onvif_ptz_continuous_move,
-   [BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET] = onvif_ptz_set_preset,
-};
-#endif
-
 static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int ret = -1;
-  //  OnvifPTZContext *onvif_ptz = h->priv_data;
-    switch(type) {
-        case BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE:
-            ret = onvif_ptz_continuous_move(h, pkt_in, pkt_out);
-            break;
-        case BV_DEV_MESSAGE_TYPE_PTZ_STOP:
-            ret = onvif_ptz_stop(h, pkt_in, pkt_out);
-            break;
-        case BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET:
-            ret = onvif_ptz_set_preset(h, pkt_in, pkt_out);
-            break;
-        case BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET:
-            ret = onvif_ptz_goto_preset(h, pkt_in, pkt_out);
-            break;
-        case BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET:
-            ret = onvif_ptz_remove_preset(h, pkt_in, pkt_out);
-            break;
-        default:
-            bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
-            break;
+    int i = 0;
+    struct {
+        enum BVDeviceMessageType type;
+        int (*control)(BVDeviceContext *h, const BVControlPacket *, BVControlPacket *);
+    } ptz_control[] = {
+        {BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, onvif_ptz_continuous_move},
+        {BV_DEV_MESSAGE_TYPE_PTZ_STOP, onvif_ptz_stop},
+        {BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET, onvif_ptz_set_preset},
+        {BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET, onvif_ptz_goto_preset},
+        {BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET, onvif_ptz_remove_preset},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(ptz_control); i++) {
+       if (ptz_control[i].type == type)
+          return ptz_control[i].control(h, pkt_in, pkt_out); 
     }
+    bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
     return ret;
 }
 
