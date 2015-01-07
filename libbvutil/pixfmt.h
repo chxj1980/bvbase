@@ -27,7 +27,7 @@
  *
  */
 
-#include "libbvutil/bvconfig.h"
+#include "libbvutil/bbconfig.h"
 #include "version.h"
 
 #define BVPALETTE_SIZE 1024

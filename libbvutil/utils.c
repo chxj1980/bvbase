@@ -27,7 +27,7 @@
  * various utility functions
  */
 
-#include "libbvutil/bvversion.h"
+#include "libbvutil/bbversion.h"
 const char bv_util_ffversion[] = "BVBase version " BVBASE_VERSION;
 
 unsigned bvutil_version(void)

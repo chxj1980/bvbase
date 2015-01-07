@@ -41,7 +41,7 @@
 
 #include "attributes.h"
 #include "version.h"
-#include "libbvutil/bvconfig.h"
+#include "libbvutil/bbconfig.h"
 
 #if BV_HAVE_BIGENDIAN
 #   define BV_NE(be, le) (be)
