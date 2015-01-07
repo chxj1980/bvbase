@@ -148,7 +148,7 @@ int ff_pca(PCA *pca, double *eigenvector, double *eigenvalue){
     a[l + k*n]=h+s*(g-h*tau); }
                 for(k=0; k<n; k++) {
                     if(k!=i && k!=j){
-                        ROTATE(pca->covariance,FFMIN(k,i),FFMAX(k,i),FFMIN(k,j),FFMAX(k,j))
+                        ROTATE(pca->covariance,BBMIN(k,i),BBMAX(k,i),BBMIN(k,j),BBMAX(k,j))
                     }
                     ROTATE(eigenvector,k,i,k,j)
                 }
@@ -227,7 +227,7 @@ int main(void){
         memset(v, 0, sizeof(v));
         for(j=0; j<LEN; j++){
             for(k=0; k<LEN; k++){
-                v[j] += pca->covariance[FFMIN(k,j) + FFMAX(k,j)*LEN] * eigenvector[i + k*LEN];
+                v[j] += pca->covariance[BBMIN(k,j) + BBMAX(k,j)*LEN] * eigenvector[i + k*LEN];
             }
             v[j] /= eigenvalue[i];
             error += fabs(v[j] - eigenvector[i + j*LEN]);

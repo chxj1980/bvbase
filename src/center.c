@@ -19,7 +19,7 @@
 // section - base operation of sdk
 /////////////////////////////////////////////////////////////////////////////
 
-LIBBVPU_SDK_API	BVPU_SDK_Result BVPU_SDK_Init(BVPU_SDK_GlobalParam *pstGlobalParam)
+LIBBVPU_SDK_API    BVPU_SDK_Result BVPU_SDK_Init(BVPU_SDK_GlobalParam *pstGlobalParam)
 {
     BVPU_SDK_Result result = BVPU_SDK_RESULT_S_OK;
 
@@ -33,7 +33,7 @@ LIBBVPU_SDK_API	BVPU_SDK_Result BVPU_SDK_Init(BVPU_SDK_GlobalParam *pstGlobalPar
 }
 
 
-LIBBVPU_SDK_API	BVPU_SDK_Result BVPU_SDK_Deinit()
+LIBBVPU_SDK_API    BVPU_SDK_Result BVPU_SDK_Deinit()
 {
     BVPU_SDK_Result result = BVPU_SDK_RESULT_S_OK;
 
@@ -110,9 +110,9 @@ LIBBVPU_SDK_API BVPU_SDK_Result BVPU_SDK_MediaStream_WriteMediaData(BVPU_SDK_HMe
 }
 
 LIBBVPU_SDK_API BVPU_SDK_Result BVPU_SDK_MediaStream_Command(BVPU_SDK_HMediaStreamHandle hMediaStreamHandle, 
-			    BVPU_SDK_MediaStreamCommand iCommand, BVPU_SDK_MediaStreamSubcommand iSubCommand, 
-				void *pInBuffer, int iInBufferSize, 
-			    void *pOutBuffer, int* pOutBufferSize)
+                BVPU_SDK_MediaStreamCommand iCommand, BVPU_SDK_MediaStreamSubcommand iSubCommand, 
+                void *pInBuffer, int iInBufferSize, 
+                void *pOutBuffer, int* pOutBufferSize)
 {
     BVPU_SDK_Result result = BVPU_SDK_RESULT_S_OK;
 

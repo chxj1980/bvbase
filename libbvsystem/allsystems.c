@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: allsystems.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月14日 星期日 20时57分24秒
+    > File Name: allsystems.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月14日 星期日 20时57分24秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -33,11 +33,11 @@
 
 void bv_system_register_all(void)
 {
-	static int initialized;
+    static int initialized;
 
-	if (initialized)
-		return;
-	initialized = 1;
+    if (initialized)
+        return;
+    initialized = 1;
 
-	REGISTER_SYSTEM(HIS3515, his3515);
+    REGISTER_SYSTEM(HIS3515, his3515);
 }

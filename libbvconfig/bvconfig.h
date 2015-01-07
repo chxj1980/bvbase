@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvconfig.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年10月23日 星期四 11时48分59秒
+    > File Name: bvconfig.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年10月23日 星期四 11时48分59秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -29,9 +29,9 @@ extern "C"{
 #endif
 
 /**
- *	@file
- *	@ingroup libconfig
- *	libconfig external API header
+ *    @file
+ *    @ingroup libconfig
+ *    libconfig external API header
  */
 
 #include <libbvutil/bvutil.h>
@@ -41,39 +41,39 @@ extern "C"{
 //#include "default/common.h"
 
 enum BVConfigFileType {
-	BV_CONFIG_FILE_TYPE_NONE = -1,
-	BV_CONFIG_FILE_TYPE_JSON,	//json file type now only support this type;
-	BV_CONFIG_FILE_TYPE_XML,
-	BV_CONFIG_FILE_TYPE_PRIV,
+    BV_CONFIG_FILE_TYPE_NONE = -1,
+    BV_CONFIG_FILE_TYPE_JSON,    //json file type now only support this type;
+    BV_CONFIG_FILE_TYPE_XML,
+    BV_CONFIG_FILE_TYPE_PRIV,
 
-	BV_CONFIG_FILE_TYPE_UNKNOWN
+    BV_CONFIG_FILE_TYPE_UNKNOWN
 };
 
 enum BVConfigType {
-	BV_CONFIG_TYPE_NONE = -1,
-	BV_CONFIG_TYPE_LOCAL,
-	BV_CONFIG_TYPE_ONVIF,
-	BV_CONFIG_TYPE_UNKNOWN
+    BV_CONFIG_TYPE_NONE = -1,
+    BV_CONFIG_TYPE_LOCAL,
+    BV_CONFIG_TYPE_ONVIF,
+    BV_CONFIG_TYPE_UNKNOWN
 };
 
 
 typedef struct _BVConfigContext {
     const BVClass *bv_class;
-	struct _BVConfig *config;
-	void *priv_data;
-	char url[1024];
+    struct _BVConfig *config;
+    void *priv_data;
+    char url[1024];
 } BVConfigContext;
 
 typedef struct _BVConfig {
-	const char *name;
-	enum BVConfigType config_type;
-	const BVClass *priv_class;
-	int priv_data_size;
-	struct _BVConfig *next;
+    const char *name;
+    enum BVConfigType config_type;
+    const BVClass *priv_class;
+    int priv_data_size;
+    struct _BVConfig *next;
 //////////////////////////////////////////////////////////////////////
-	int (*open)(BVConfigContext *cfgctx, const char *url, int flags);
-	int (*close)(BVConfigContext *cfgctx);
-//	int (*get_device_info)(BVConfigContext *cfgctx, BVDeviceInfo *devinfo);
+    int (*open)(BVConfigContext *cfgctx, const char *url, int flags);
+    int (*close)(BVConfigContext *cfgctx);
+//    int (*get_device_info)(BVConfigContext *cfgctx, BVDeviceInfo *devinfo);
 } BVConfig;
 
 

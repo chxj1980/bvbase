@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvdevice.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年09月25日 星期四 09时44分50秒
+    > File Name: bvdevice.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年09月25日 星期四 09时44分50秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -36,23 +36,23 @@ extern "C"{
 #include <libbvconfig/common.h>
 
 enum BVDeviceType {
-	BV_DEVICE_TYPE_NONE = -1,
-	BV_DEVICE_TYPE_SERIAL,
-	BV_DEVICE_TYPE_NADN,
-	BV_DEVICE_TYPE_GPS,
-	BV_DEVICE_TYPE_PTZ,
-	BV_DEVICE_TYPE_WLAN,
-	BV_DEVICE_TYPE_MBLNT,	//mobile network 3/4G网络
-	BV_DEVICE_TYPE_HRDSK,	//hard disk
+    BV_DEVICE_TYPE_NONE = -1,
+    BV_DEVICE_TYPE_SERIAL,
+    BV_DEVICE_TYPE_NADN,
+    BV_DEVICE_TYPE_GPS,
+    BV_DEVICE_TYPE_PTZ,
+    BV_DEVICE_TYPE_WLAN,
+    BV_DEVICE_TYPE_MBLNT,    //mobile network 3/4G网络
+    BV_DEVICE_TYPE_HRDSK,    //hard disk
 
     BV_DEVICE_TYPE_ONVIF_DEVICE,
-	BV_DEVICE_TYPE_ONVIF_PTZ,
+    BV_DEVICE_TYPE_ONVIF_PTZ,
 
-	BV_DEVICE_TYPE_UNKNOWN
+    BV_DEVICE_TYPE_UNKNOWN
 };
 
 enum BVDeviceMessageType {
-	BV_DEV_MESSAGE_TYPE_NONE = -1,
+    BV_DEV_MESSAGE_TYPE_NONE = -1,
 
     //PTZ Message Type
     BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE,
@@ -75,7 +75,7 @@ enum BVDeviceMessageType {
 
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
 
-	BV_DEV_MESSAGE_TYPE_UNKNOWN
+    BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
 enum BVMobileDeviceType {
@@ -97,11 +97,11 @@ typedef struct _BVMobileDevice {
 } BVMobileDevice;
 
 typedef struct _BVDeviceContext {
-	const BVClass *bv_class;
-	struct _BVDevice *device;
-	void *priv_data;
+    const BVClass *bv_class;
+    struct _BVDevice *device;
+    void *priv_data;
     size_t buffer_size;
-	char url[1024];     //url likes ptz://dev/ttyusb0 get two inmediaion DeviceType and DeviceName
+    char url[1024];     //url likes ptz://dev/ttyusb0 get two inmediaion DeviceType and DeviceName
     uint8_t *buffer;
     uint8_t *buffer_ptr;
     uint8_t *buffer_end;

@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: his3515.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月22日 星期一 15时42分02秒
+    > File Name: his3515.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月22日 星期一 15时42分02秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

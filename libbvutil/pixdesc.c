@@ -2179,8 +2179,8 @@ static int get_pix_fmt_depth(int *min, int *max, enum BVPixelFormat pix_fmt)
 
     *min = INT_MAX, *max = -INT_MAX;
     for (i = 0; i < desc->nb_components; i++) {
-        *min = FFMIN(desc->comp[i].depth_minus1+1, *min);
-        *max = FFMAX(desc->comp[i].depth_minus1+1, *max);
+        *min = BBMIN(desc->comp[i].depth_minus1+1, *min);
+        *max = BBMAX(desc->comp[i].depth_minus1+1, *max);
     }
     return 0;
 }
@@ -2213,9 +2213,9 @@ static int get_pix_fmt_score(enum BVPixelFormat dst_pix_fmt,
     src_color = get_color_type(src_desc);
     dst_color = get_color_type(dst_desc);
     if (dst_pix_fmt == BV_PIX_FMT_PAL8)
-        nb_components = FFMIN(src_desc->nb_components, 4);
+        nb_components = BBMIN(src_desc->nb_components, 4);
     else
-        nb_components = FFMIN(src_desc->nb_components, dst_desc->nb_components);
+        nb_components = BBMIN(src_desc->nb_components, dst_desc->nb_components);
 
     for (i = 0; i < nb_components; i++) {
         int depth_minus1 = (dst_pix_fmt == BV_PIX_FMT_PAL8) ? 7/nb_components : dst_desc->comp[i].depth_minus1;
@@ -2269,7 +2269,7 @@ static int get_pix_fmt_score(enum BVPixelFormat dst_pix_fmt,
         break;
     }
     if(loss & BV_LOSS_COLORSPACE)
-        score -= (nb_components * 65536) >> FFMIN(dst_desc->comp[0].depth_minus1, src_desc->comp[0].depth_minus1);
+        score -= (nb_components * 65536) >> BBMIN(dst_desc->comp[0].depth_minus1, src_desc->comp[0].depth_minus1);
 
     if (dst_color == BV_COLOR_GRAY &&
         src_color != BV_COLOR_GRAY && (consider & BV_LOSS_CHROMA)) {

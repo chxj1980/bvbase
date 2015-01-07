@@ -7,8 +7,8 @@ CFLAGS += -Wall -g
 
 CFLAGS = -I ../../include/x86 -I ../../3rdparty/binary/ffmpeg/x86/include 
 
-LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice -lssl
-EXAMPLES=  exDevice device_scan
+LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice -lbvmedia -lbvcodec -lssl -L ../../3rdparty/binary/ffmpeg/x86/lib  -lavformat -lavcodec -lavutil
+EXAMPLES=  exDevice device_scan exMedia
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 

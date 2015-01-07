@@ -598,7 +598,7 @@ union unaligned_16 { uint16_t l; } __attribute__((packed)) bv_alias;
     } while(0)
 #endif
 
-#define BV_SWAP(n, a, b) FFSWAP(bv_alias##n, *(bv_alias##n*)(a), *(bv_alias##n*)(b))
+#define BV_SWAP(n, a, b) BBSWAP(bv_alias##n, *(bv_alias##n*)(a), *(bv_alias##n*)(b))
 
 #ifndef BV_SWAP64
 #   define BV_SWAP64(a, b) BV_SWAP(64, a, b)

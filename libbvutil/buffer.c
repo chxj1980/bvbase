@@ -188,7 +188,7 @@ int bv_buffer_realloc(BVBufferRef **pbuf, int size)
         if (!new)
             return BVERROR(ENOMEM);
 
-        memcpy(new->data, buf->data, FFMIN(size, buf->size));
+        memcpy(new->data, buf->data, BBMIN(size, buf->size));
 
         bv_buffer_unref(pbuf);
         *pbuf = new;

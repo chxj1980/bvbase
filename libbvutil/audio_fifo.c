@@ -142,7 +142,7 @@ int bv_audio_fifo_read(BVAudioFifo *af, void **data, int nb_samples)
 
     if (nb_samples < 0)
         return BVERROR(EINVAL);
-    nb_samples = FFMIN(nb_samples, af->nb_samples);
+    nb_samples = BBMIN(nb_samples, af->nb_samples);
     if (!nb_samples)
         return 0;
 
@@ -162,7 +162,7 @@ int bv_audio_fifo_drain(BVAudioFifo *af, int nb_samples)
 
     if (nb_samples < 0)
         return BVERROR(EINVAL);
-    nb_samples = FFMIN(nb_samples, af->nb_samples);
+    nb_samples = BBMIN(nb_samples, af->nb_samples);
 
     if (nb_samples) {
         size = nb_samples * af->sample_size;

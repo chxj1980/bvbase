@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvcodec.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 16时38分55秒
+    > File Name: bvcodec.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 16时38分55秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -72,20 +72,20 @@ typedef struct _BVCodecContext {
     const BVClass *bv_class;
     const BVCodec *codec;
     void *priv_data;
-	enum BVMediaType codec_type;	//BV_MEDIA_TYPE_XXX
-	enum BVCodecID   codec_id;
-	enum BVRCModeID  mode_id;
-	int  width, height;
+    enum BVMediaType codec_type;    //BV_MEDIA_TYPE_XXX
+    enum BVCodecID   codec_id;
+    enum BVRCModeID  mode_id;
+    int  width, height;
     int coded_width, coded_height;
     BVRational time_base;
-	int quality;
-	int bit_rate;
-	int gop_size;
+    int quality;
+    int bit_rate;
+    int gop_size;
     enum BVPixelFormat pix_fmt;
 
-	int sample_rate;
+    int sample_rate;
     enum BVSampleFormat sample_fmt;  ///< sample format
-	int channels;
+    int channels;
 
     uint8_t *extradata;
     int extradata_size;

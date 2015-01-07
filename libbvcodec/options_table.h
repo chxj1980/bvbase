@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: options_table.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月16日 星期二 11时00分38秒
+    > File Name: options_table.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月16日 星期二 11时00分38秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify

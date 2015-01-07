@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: allmedias.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月30日 星期二 16时56分59秒
+    > File Name: allmedias.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月30日 星期二 16时56分59秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -40,12 +40,19 @@
 
 #define REGISTER_INOUTDEV(X, x) REGISTER_OUTDEV(X, x); REGISTER_INDEV(X, x)
 
+#if BV_CONFIG_ONVIFAVE_INDEV
+#include <libavformat/avformat.h>
+#endif
 void bv_media_register_all(void)
 {
     static int initialized;
     if (initialized)
         return ;
     initialized = 1;
-    REGISTER_INDEV(HISAVE, hisave);
+    //REGISTER_INDEV(HISAVE, hisave);
     REGISTER_INDEV(ONVIFAVE, onvifave);
+#if BV_CONFIG_ONVIFAVE_INDEV
+    av_register_all();
+    avformat_network_init();
+#endif
 }

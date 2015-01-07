@@ -168,7 +168,7 @@ static int get_video_buffer(BVFrame *frame, int align)
     if (!frame->linesize[0]) {
         for(i=1; i<=align; i+=i) {
             ret = bv_image_fill_linesizes(frame->linesize, frame->format,
-                                          FFALIGN(frame->width, i));
+                                          BBALIGN(frame->width, i));
             if (ret < 0)
                 return ret;
             if (!(frame->linesize[0] & (align-1)))
@@ -176,11 +176,11 @@ static int get_video_buffer(BVFrame *frame, int align)
         }
 
         for (i = 0; i < 4 && frame->linesize[i]; i++)
-            frame->linesize[i] = FFALIGN(frame->linesize[i], align);
+            frame->linesize[i] = BBALIGN(frame->linesize[i], align);
     }
 
     for (i = 0; i < 4 && frame->linesize[i]; i++) {
-        int h = FFALIGN(frame->height, 32);
+        int h = BBALIGN(frame->height, 32);
         if (i == 1 || i == 2)
             h = BV_CEIL_RSHIFT(h, desc->log2_chroma_h);
 
@@ -242,7 +242,7 @@ static int get_audio_buffer(BVFrame *frame, int align)
     } else
         frame->extended_data = frame->data;
 
-    for (i = 0; i < FFMIN(planes, BV_NUM_DATA_POINTERS); i++) {
+    for (i = 0; i < BBMIN(planes, BV_NUM_DATA_POINTERS); i++) {
         frame->buf[i] = bv_buffer_alloc(frame->linesize[0]);
         if (!frame->buf[i]) {
             bv_frame_unref(frame);

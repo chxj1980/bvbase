@@ -28,7 +28,7 @@
 #include "version.h"
 
 #define MAX_VARS 32
-#define MAX_VARS_ALIGN FFALIGN(MAX_VARS+1,4)
+#define MAX_VARS_ALIGN BBALIGN(MAX_VARS+1,4)
 
 //FIXME avoid direct access to LLSModel from outside
 

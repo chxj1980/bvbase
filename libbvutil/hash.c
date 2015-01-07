@@ -203,7 +203,7 @@ void bv_hash_final_bin(struct BVHashContext *ctx, uint8_t *dst, int size)
     unsigned rsize = bv_hash_get_size(ctx);
 
     bv_hash_final(ctx, buf);
-    memcpy(dst, buf, FFMIN(size, rsize));
+    memcpy(dst, buf, BBMIN(size, rsize));
     if (size > rsize)
         memset(dst + rsize, 0, size - rsize);
 }
@@ -214,7 +214,7 @@ void bv_hash_final_hex(struct BVHashContext *ctx, uint8_t *dst, int size)
     unsigned rsize = bv_hash_get_size(ctx), i;
 
     bv_hash_final(ctx, buf);
-    for (i = 0; i < FFMIN(rsize, size / 2); i++)
+    for (i = 0; i < BBMIN(rsize, size / 2); i++)
         snprintf(dst + i * 2, size - i * 2, "%02x", buf[i]);
 }
 
@@ -226,7 +226,7 @@ void bv_hash_final_b64(struct BVHashContext *ctx, uint8_t *dst, int size)
     bv_hash_final(ctx, buf);
     bv_base64_encode(b64, sizeof(b64), buf, rsize);
     osize = BV_BASE64_SIZE(rsize);
-    memcpy(dst, b64, FFMIN(osize, size));
+    memcpy(dst, b64, BBMIN(osize, size));
     if (size < osize)
         dst[size - 1] = 0;
 }

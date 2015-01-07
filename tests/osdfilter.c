@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: osdfilter.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月22日 星期一 10时37分25秒
+    > File Name: osdfilter.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月22日 星期一 10时37分25秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -26,33 +26,33 @@
 
 static int init_filter(AVFilterGraph *filter_graph, BVOSDConfig *config)
 {
-	AVFilterContext *buffersrc_ctx;
-	AVFilterContext *buffersink_ctx;
-	AVFilterContext *drawtext_ctx;
+    AVFilterContext *buffersrc_ctx;
+    AVFilterContext *buffersink_ctx;
+    AVFilterContext *drawtext_ctx;
 
-	AVFilter *buffersrc;
-	AVFilter *buffersink;
-	AVFilter *drawtext;
+    AVFilter *buffersrc;
+    AVFilter *buffersink;
+    AVFilter *drawtext;
 
-	char args[1024];
-	int ret = -1;
+    char args[1024];
+    int ret = -1;
     enum AVPixelFormat pix_fmts[] = { config->dst_fmt, AV_PIX_FMT_NONE };
     memset(argc, 0, sizeof(args));
-	buffersrc = avfilter_get_by_name("buffer");
-	buffersink = avfilter_get_by_name("buffersink");
-	drawtext = avfilter_get_by_name("drawtext");
+    buffersrc = avfilter_get_by_name("buffer");
+    buffersink = avfilter_get_by_name("buffersink");
+    drawtext = avfilter_get_by_name("drawtext");
 
-	if (!buffersrc || !buffersink || !drawtext) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot find filter %p %p %p\n", buffersrc, buffersink, drawtext);
-		ret = AVERROR(EINVAL);
-		goto end;
-	}
+    if (!buffersrc || !buffersink || !drawtext) {
+        av_log(NULL, AV_LOG_ERROR, "Cannot find filter %p %p %p\n", buffersrc, buffersink, drawtext);
+        ret = AVERROR(EINVAL);
+        goto end;
+    }
 
-	snprintf(args, sizeof(args),"video_size=%dx%d:pix_fmt=%d:time_base=1/%d", config->with, config->height, config->src_fmt, 25);
-	if ((ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "osd_src", args, NULL, filter_graph)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot create buffser source\n");
-		goto end;
-	}
+    snprintf(args, sizeof(args),"video_size=%dx%d:pix_fmt=%d:time_base=1/%d", config->with, config->height, config->src_fmt, 25);
+    if ((ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "osd_src", args, NULL, filter_graph)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Cannot create buffser source\n");
+        goto end;
+    }
 
     snprintf(args, sizeof(args), "fontfile=%s:text='NULL':fontcolor=%s:fontsize=%d:x=0:y=0", config->fontfile, config->fontcolor, config->fontsize);
     if (config->draw_box)
@@ -65,37 +65,37 @@ static int init_filter(AVFilterGraph *filter_graph, BVOSDConfig *config)
         snprintf(args + strlen(args), sizeof(args) - strlen(args), ":shadowcolor=%s:shadowx=%d:shadowy=%d", config->shadowcolor, config->shadowx, config->shadowy);
 
     av_log(NULL, AV_LOG_WARNING, "osd config %s\n", args);
-	if ((ret = avfilter_graph_create_filter(&drawtext_ctx, drawtext, "osd_drawtext", args, NULL, filter_graph)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot create drawtext filter\n");
-		goto end;
-	}
+    if ((ret = avfilter_graph_create_filter(&drawtext_ctx, drawtext, "osd_drawtext", args, NULL, filter_graph)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Cannot create drawtext filter\n");
+        goto end;
+    }
 
-	if ((ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "osd_sink", NULL, NULL, filter_graph)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot create buffser sink\n");
-		goto end;
-	}
+    if ((ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "osd_sink", NULL, NULL, filter_graph)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Cannot create buffser sink\n");
+        goto end;
+    }
 
-	if ((ret = av_opt_set_int_list(buffersink_ctx, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN)) < 0){
+    if ((ret = av_opt_set_int_list(buffersink_ctx, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN)) < 0){
         av_log(NULL, AV_LOG_ERROR, "Cannot set output pixel format\n");
         goto end;
     }
 
-	if((ret = avfilter_link(buffersrc_ctx, 0, drawtext_ctx, 0)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "link buffersrc to drawtext_ctx error\n");
-		goto end;
-	}
-
-	if((ret = avfilter_link(drawtext_ctx, 0, buffersink_ctx, 0)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "link buffersrc to drawtext_ctx error\n");
-		goto end;
-	}
-    if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "graph config error\n");
+    if((ret = avfilter_link(buffersrc_ctx, 0, drawtext_ctx, 0)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "link buffersrc to drawtext_ctx error\n");
         goto end;
-	}
-	av_log(NULL, AV_LOG_ERROR, "ret %d\n", ret);
+    }
+
+    if((ret = avfilter_link(drawtext_ctx, 0, buffersink_ctx, 0)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "link buffersrc to drawtext_ctx error\n");
+        goto end;
+    }
+    if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0) {
+        av_log(NULL, AV_LOG_ERROR, "graph config error\n");
+        goto end;
+    }
+    av_log(NULL, AV_LOG_ERROR, "ret %d\n", ret);
 end:
-	return ret;
+    return ret;
 
 }
 
@@ -163,8 +163,8 @@ int ff_osd_update_data(AVFilterGraph *filter_graph, AVPacket *packet)
 
 int ff_osd_process(AVFilterGraph *filter_graph, AVFrame *src_frm, AVFrame *dst_frm)
 {
-	AVFilterContext *buffersrc_ctx;
-	AVFilterContext *buffersink_ctx;
+    AVFilterContext *buffersrc_ctx;
+    AVFilterContext *buffersink_ctx;
     if (!filter_graph || !src_frm)
         return AVERROR(EINVAL);
     buffersrc_ctx = avfilter_graph_get_filter(filter_graph, "osd_src");

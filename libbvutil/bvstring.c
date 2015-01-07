@@ -110,6 +110,17 @@ size_t bv_strlcatf(char *dst, size_t size, const char *fmt, ...)
     return len;
 }
 
+size_t bv_sprintf(char *dst, size_t size, const char *fmt, ...)
+{
+    va_list va;
+    int len;
+
+    va_start(va, fmt);
+    len = vsnprintf(dst, size, fmt, va);
+    va_end(va);
+    return len;
+}
+
 char *bv_asprintf(const char *fmt, ...)
 {
     char *p = NULL;
@@ -134,6 +145,54 @@ char *bv_asprintf(const char *fmt, ...)
 
 end:
     return p;
+}
+
+char *bv_sreplace(const char *haystack, const char *term, const char *needle)
+{
+    char *p = NULL;
+    const char *q = NULL;
+    size_t len = 0;
+    if (!haystack || !term || !needle)
+        return NULL;
+    len = strlen(haystack) - strlen(term) + strlen(needle);
+    p = bv_mallocz(len + 1);
+    if (!p)
+        return NULL;
+    q = bv_stristr(haystack, term);
+    if (!q) {
+        goto error;
+    }
+
+    bv_strlcpy(p, haystack, q - haystack + 1);
+    bv_strlcatf(p, len + 1, "%s%s", needle, q + strlen(term));
+    return p;
+error:
+    bv_freep(p);
+    return NULL;
+}
+
+char *bv_sinsert(const char *haystack, const char *term, const char *needle)
+{
+    char *p = NULL;
+    const char *q = NULL;
+    size_t len = 0;
+    if (!haystack || !term || !needle)
+        return NULL;
+    len = strlen(haystack) + strlen(needle);
+    p = bv_mallocz(len + 1);
+    if (!p)
+        return NULL;
+    q = bv_stristr(haystack, term);
+    if (!q) {
+        goto error;
+    }
+    q += strlen(term);
+    bv_strlcpy(p, haystack, q  - haystack + 1);
+    bv_strlcatf(p, len + 1, "%s%s", needle, q);
+    return p;
+error:
+    bv_freep(p);
+    return NULL;
 }
 
 char *bv_d2str(double d)
@@ -239,7 +298,7 @@ const char *bv_basename(const char *path)
     char *q = strrchr(path, '\\');
     char *d = strchr(path, ':');
 
-    p = FFMAX3(p, q, d);
+    p = BBMAX3(p, q, d);
 #endif
 
     if (!p)
@@ -258,7 +317,7 @@ const char *bv_dirname(char *path)
 
     d = d ? d + 1 : d;
 
-    p = FFMAX3(p, q, d);
+    p = BBMAX3(p, q, d);
 #endif
 
     if (!p)
@@ -318,7 +377,7 @@ int bv_match_name(const char *name, const char *names)
 
     namelen = strlen(name);
     while ((p = strchr(names, ','))) {
-        len = FFMAX(p - names, namelen);
+        len = BBMAX(p - names, namelen);
         if (!bv_strncasecmp(name, names, len))
             return 1;
         names = p + 1;
@@ -456,6 +515,8 @@ int main(void)
         "\\'fo\\o\\:':  foo  '  :blahblah"
     };
 
+    const char *str = "rtsp://192.168.6.149/onvif/device_services";
+    char *t = NULL;
     printf("Testing bv_get_token()\n");
     for (i = 0; i < BV_ARRAY_ELEMS(strings); i++) {
         const char *p = strings[i];
@@ -465,6 +526,40 @@ int main(void)
         printf(" -> |%s|", q);
         printf(" + |%s|\n", p);
         bv_free(q);
+    }
+    printf("source %s\n", str);
+    t = bv_sreplace(str, "rtsp", "http"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
+    }
+
+    t = bv_sreplace(str, "onvif", "hisi"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
+    }
+    t = bv_sreplace(str, "services", "daemon"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
+    }
+
+    t = bv_sinsert(str, "rtsp", "/http"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
+    }
+
+    t = bv_sinsert(str, "onvif", "/hisi"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
+    }
+    t = bv_sinsert(str, "services", "/daemon"); 
+    if (t) {
+        printf("%s\n", t);
+        bv_free(t);
     }
 
     return 0;

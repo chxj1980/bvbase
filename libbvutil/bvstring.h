@@ -146,6 +146,15 @@ static inline size_t bv_strnlen(const char *s, size_t len)
 }
 
 /**
+ * Print arguments following specified format into a large enough 
+ * buffer. It is similar to GNU snprintf().
+ * @param fmt printf-compatible format string, specifying how the
+ *            following parameters are used.
+ * @return the dst strlen
+ */
+size_t bv_sprintf(char *dst, size_t size, const char *fmt, ...) bv_printf_format(3, 4);
+
+/**
  * Print arguments following specified format into a large enough auto
  * allocated buffer. It is similar to GNU asprintf().
  * @param fmt printf-compatible format string, specifying how the
@@ -154,6 +163,28 @@ static inline size_t bv_strnlen(const char *s, size_t len)
  * @note You have to free the string yourself with bv_free().
  */
 char *bv_asprintf(const char *fmt, ...) bv_printf_format(1, 2);
+
+/**
+ * replace term with needle in haystack string resule in
+ * allocated buffer.
+ * @param haystack the source string
+ * @param term the wanted replace string in haystack
+ * @param needle the string wanted replace in result string
+ * @return the allocated string
+ * @note You have to free the string yourself with bv_free().
+ */
+char *bv_sreplace(const char *haystack, const char *term, const char *needle);
+
+/**
+ * insert needle after term in haystack string resule in
+ * allocated buffer.
+ * @param haystack the source string
+ * @param term the string after string in haystack
+ * @param needle the string wanted inserted in result string
+ * @return the allocated string
+ * @note You have to free the string yourself with bv_free().
+ */
+char *bv_sinsert(const char *haystack, const char *term, const char *needle);
 
 /**
  * Convert a number to a bv_malloced string.

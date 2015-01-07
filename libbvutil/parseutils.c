@@ -356,7 +356,7 @@ int bv_parse_color(uint8_t *rgba_color, const char *color_string, int slen,
     if (slen < 0)
         slen = strlen(color_string);
     bv_strlcpy(color_string2, color_string + hex_offset,
-               FFMIN(slen-hex_offset+1, sizeof(color_string2)));
+               BBMIN(slen-hex_offset+1, sizeof(color_string2)));
     if ((tail = strchr(color_string2, ALPHA_SEP)))
         *tail++ = 0;
     len = strlen(color_string2);

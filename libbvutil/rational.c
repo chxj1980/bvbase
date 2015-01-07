@@ -37,11 +37,11 @@ int bv_reduce(int *dst_num, int *dst_den,
 {
     BVRational a0 = { 0, 1 }, a1 = { 1, 0 };
     int sign = (num < 0) ^ (den < 0);
-    int64_t gcd = bv_gcd(FFABS(num), FFABS(den));
+    int64_t gcd = bv_gcd(BBABS(num), BBABS(den));
 
     if (gcd) {
-        num = FFABS(num) / gcd;
-        den = FFABS(den) / gcd;
+        num = BBABS(num) / gcd;
+        den = BBABS(den) / gcd;
     }
     if (num <= max && den <= max) {
         a1 = (BVRational) { num, den };
@@ -56,7 +56,7 @@ int bv_reduce(int *dst_num, int *dst_den,
 
         if (a2n > max || a2d > max) {
             if (a1.num) x =          (max - a0.num) / a1.num;
-            if (a1.den) x = FFMIN(x, (max - a0.den) / a1.den);
+            if (a1.den) x = BBMIN(x, (max - a0.den) / a1.den);
 
             if (den * (2 * x * a1.den + a0.den) > num * a1.den)
                 a1 = (BVRational) { x * a1.num + a0.num, x * a1.den + a0.den };
@@ -113,7 +113,7 @@ BVRational bv_d2q(double d, int max)
         return (BVRational) { 0,0 };
     if (fabs(d) > INT_MAX + 3LL)
         return (BVRational) { d < 0 ? -1 : 1, 0 };
-    exponent = FFMAX( (int)(log(fabs(d) + 1e-20)/LOG2), 0);
+    exponent = BBMAX( (int)(log(fabs(d) + 1e-20)/LOG2), 0);
     den = 1LL << (61 - exponent);
     // (int64_t)rint() and llrint() do not work with gcc on ia64 and sparc64
     bv_reduce(&a.num, &a.den, floor(d * den + 0.5), den, max);
@@ -191,7 +191,7 @@ int main(void)
                         for (i = 0; i<100; i++) {
                             int exact = start + bv_rescale_q(i+1, b, a);
                             acc = bv_add_stable(a, acc, b, 1);
-                            if (FFABS(acc - exact) > 2) {
+                            if (BBABS(acc - exact) > 2) {
                                 bv_log(NULL, BV_LOG_ERROR, "%d/%d %d/%d, %d %d\n", a.num,
                                        a.den, b.num, b.den, acc, exact);
                                 return 1;

@@ -151,7 +151,7 @@ static uint64_t get_channel_layout_single(const char *name, int name_len)
 
     layout = strtoll(name, &end, 0);
     if (end - name == name_len)
-        return FFMAX(layout, 0);
+        return BBMAX(layout, 0);
     return 0;
 }
 

@@ -201,11 +201,11 @@ int bv_image_alloc(uint8_t *pointers[4], int linesizes[4],
 
     if ((ret = bv_image_check_size(w, h, 0, NULL)) < 0)
         return ret;
-    if ((ret = bv_image_fill_linesizes(linesizes, pix_fmt, align>7 ? FFALIGN(w, 8) : w)) < 0)
+    if ((ret = bv_image_fill_linesizes(linesizes, pix_fmt, align>7 ? BBALIGN(w, 8) : w)) < 0)
         return ret;
 
     for (i = 0; i < 4; i++)
-        linesizes[i] = FFALIGN(linesizes[i], align);
+        linesizes[i] = BBALIGN(linesizes[i], align);
 
     if ((ret = bv_image_fill_pointers(pointers, pix_fmt, h, NULL, linesizes)) < 0)
         return ret;
@@ -297,7 +297,7 @@ void bv_image_copy(uint8_t *dst_data[4], int dst_linesizes[4],
         int i, planes_nb = 0;
 
         for (i = 0; i < desc->nb_components; i++)
-            planes_nb = FFMAX(planes_nb, desc->comp[i].plane + 1);
+            planes_nb = BBMAX(planes_nb, desc->comp[i].plane + 1);
 
         for (i = 0; i < planes_nb; i++) {
             int h = height;
@@ -329,7 +329,7 @@ int bv_image_fill_arrays(uint8_t *dst_data[4], int dst_linesize[4],
         return ret;
 
     for (i = 0; i < 4; i++)
-        dst_linesize[i] = FFALIGN(dst_linesize[i], align);
+        dst_linesize[i] = BBALIGN(dst_linesize[i], align);
 
     return bv_image_fill_pointers(dst_data, pix_fmt, height, (uint8_t *)src, dst_linesize);
 }
@@ -362,7 +362,7 @@ int bv_image_copy_to_buffer(uint8_t *dst, int dst_size,
         return BVERROR(EINVAL);
 
     for (i = 0; i < desc->nb_components; i++)
-        nb_planes = FFMAX(desc->comp[i].plane, nb_planes);
+        nb_planes = BBMAX(desc->comp[i].plane, nb_planes);
     nb_planes++;
 
     bv_image_fill_linesizes(linesize, pix_fmt, width);
@@ -373,7 +373,7 @@ int bv_image_copy_to_buffer(uint8_t *dst, int dst_size,
 
         for (j = 0; j < h; j++) {
             memcpy(dst, src, linesize[i]);
-            dst += FFALIGN(linesize[i], align);
+            dst += BBALIGN(linesize[i], align);
             src += src_linesize[i];
         }
     }

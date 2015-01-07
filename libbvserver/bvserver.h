@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: bvserver.h
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年09月25日 星期四 09时48分36秒
+    > File Name: bvserver.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年09月25日 星期四 09时48分36秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -44,43 +44,43 @@ extern "C"{
 #define MAX_NAME_LEN (128)
 
 enum BVServerType{
-	BV_SERVER_TYPE_NONE = -1,
-	BV_SERVER_TYPE_BVC,		//Besovodeo Command Server
-	BV_SERVER_TYPE_BVS,		//Besovideo Stream Server
-	BV_SERVER_TYPE_BPU,		//Besovideo PU
-	BV_SERVER_TYPE_MTC,		//Ministry of Transportation and Communication of China
+    BV_SERVER_TYPE_NONE = -1,
+    BV_SERVER_TYPE_BVC,        //Besovodeo Command Server
+    BV_SERVER_TYPE_BVS,        //Besovideo Stream Server
+    BV_SERVER_TYPE_BPU,        //Besovideo PU
+    BV_SERVER_TYPE_MTC,        //Ministry of Transportation and Communication of China
 
-	BV_SERVER_TYPE_UNKNOWN
+    BV_SERVER_TYPE_UNKNOWN
 };
 
 typedef struct BVServerContext {
     const BVClass *bv_class;
-	//URLContext *uc;	//not public strunct use BVIOContext instead
-	//BVIOContext *pb;	//pb->opaque ponit to URLContext struct
+    //URLContext *uc;    //not public strunct use BVIOContext instead
+    //BVIOContext *pb;    //pb->opaque ponit to URLContext struct
     char url[1024];
-	char server_name[MAX_NAME_LEN + 1];
-	char server_ip[MAX_NAME_LEN + 1];
-	struct _BVServer *server;
-	char *authr_num;
-	uint16_t port;
-	uint16_t heartbeat_interval;	//心跳间隔 秒
-	uint8_t protocol_type;	//udp tcp
-	void *priv_data;
+    char server_name[MAX_NAME_LEN + 1];
+    char server_ip[MAX_NAME_LEN + 1];
+    struct _BVServer *server;
+    char *authr_num;
+    uint16_t port;
+    uint16_t heartbeat_interval;    //心跳间隔 秒
+    uint8_t protocol_type;    //udp tcp
+    void *priv_data;
 } BVServerContext;
 
 typedef struct _BVServer {
-	const char *name;
-	enum BVServerType server_type;
-	const BVClass *priv_class;
-	int priv_data_size;
-	struct _BVServer *next;
+    const char *name;
+    enum BVServerType server_type;
+    const BVClass *priv_class;
+    int priv_data_size;
+    struct _BVServer *next;
     int (*svr_open) (BVServerContext *svrctx);
     int (*svr_close) (BVServerContext *svrctx);
-	int (*svr_connect) (BVServerContext * svrctx);
-	int (*svr_disconnect) (BVServerContext * svrctx);
-	int (*svr_read) (BVServerContext * svrctx, BVServerPacket *pkt);
-	int (*svr_write) (BVServerContext * svrctx, const BVServerPacket *pkt);
-	int (*get_fd)(BVServerContext *svrctx);
+    int (*svr_connect) (BVServerContext * svrctx);
+    int (*svr_disconnect) (BVServerContext * svrctx);
+    int (*svr_read) (BVServerContext * svrctx, BVServerPacket *pkt);
+    int (*svr_write) (BVServerContext * svrctx, const BVServerPacket *pkt);
+    int (*get_fd)(BVServerContext *svrctx);
 } BVServer;
 
 

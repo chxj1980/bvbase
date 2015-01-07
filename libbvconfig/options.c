@@ -1,8 +1,8 @@
 /*************************************************************************
-	> File Name: options.c
-	> Author: albertfang
-	> Mail: fang.qi@besovideo.com 
-	> Created Time: 2014年12月16日 星期二 10时25分30秒
+    > File Name: options.c
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2014年12月16日 星期二 10时25分30秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -32,45 +32,45 @@
 
 static const char *config_to_name(void *ptr)
 {
-	BVConfigContext *cc = (BVConfigContext *) ptr;
-	if (cc->config)
-		return cc->config->name;
-	return "NULL";
+    BVConfigContext *cc = (BVConfigContext *) ptr;
+    if (cc->config)
+        return cc->config->name;
+    return "NULL";
 }
 
 static const BVClass bv_config_context_class = {
-	.class_name = "BVConfigContext",
-	.item_name = config_to_name,
-	.option = config_options,
-	.version = LIBBVUTIL_VERSION_INT,
-	.category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .class_name = "BVConfigContext",
+    .item_name = config_to_name,
+    .option = config_options,
+    .version = LIBBVUTIL_VERSION_INT,
+    .category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
 };
 
 static void bv_config_context_get_default(BVConfigContext * config)
 {
-	config->bv_class = &bv_config_context_class;
-	bv_opt_set_defaults(config);
+    config->bv_class = &bv_config_context_class;
+    bv_opt_set_defaults(config);
 }
 
 BVConfigContext *bv_config_context_alloc(void)
 {
-	BVConfigContext *s = bv_mallocz(sizeof(BVConfigContext));
-	if (!s) {
-		bv_log(NULL, BV_LOG_ERROR, "malloc BVConfigContext error");
-		return NULL;
-	}
-	bv_config_context_get_default(s);
-	return s;
+    BVConfigContext *s = bv_mallocz(sizeof(BVConfigContext));
+    if (!s) {
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVConfigContext error");
+        return NULL;
+    }
+    bv_config_context_get_default(s);
+    return s;
 }
 
 void bv_config_context_free(BVConfigContext * cfgctx)
 {
-	if (!cfgctx)
-		return;
-	bv_opt_free(cfgctx);
-	if (cfgctx->config && cfgctx->config->priv_class && cfgctx->priv_data)
-		bv_opt_free(cfgctx->priv_data);
-	bv_freep(&cfgctx->priv_data);
-	bv_free(cfgctx);
-	return;
+    if (!cfgctx)
+        return;
+    bv_opt_free(cfgctx);
+    if (cfgctx->config && cfgctx->config->priv_class && cfgctx->priv_data)
+        bv_opt_free(cfgctx->priv_data);
+    bv_freep(&cfgctx->priv_data);
+    bv_free(cfgctx);
+    return;
 }
