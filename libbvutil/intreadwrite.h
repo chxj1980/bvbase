@@ -20,7 +20,7 @@
 #define BVUTIL_INTREADWRITE_H
 
 #include <stdint.h>
-#include "libbvutil/bvconfig.h"
+#include "libbvutil/bbconfig.h"
 #include "attributes.h"
 #include "bswap.h"
 

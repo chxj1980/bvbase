@@ -112,7 +112,9 @@ endef
 
 $(foreach P,$(PROGS),$(eval $(call DOPROG,$(P:$(PROGSSUF)$(EXESUF)=))))
 
-ffprobe.o cmdutils.o libavcodec/utils.o libavformat/utils.o libavdevice/avdevice.o libavfilter/avfilter.o libavutil/utils.o libpostproc/postprocess.o libswresample/swresample.o libswscale/utils.o : libavutil/ffversion.h
+#ffprobe.o cmdutils.o libavcodec/utils.o libavformat/utils.o libavdevice/avdevice.o libavfilter/avfilter.o libavutil/utils.o libpostproc/postprocess.o libswresample/swresample.o libswscale/utils.o : libavutil/ffversion.h
+
+libbvutil/utils.o : libbvutil/bbversion.h
 
 $(PROGS): %$(PROGSSUF)$(EXESUF): %$(PROGSSUF)_g$(EXESUF)
 	$(CP) $< $@
@@ -131,8 +133,8 @@ GIT_LOG     = $(SRC_PATH)/.git/logs/HEAD
 .version: $(wildcard $(GIT_LOG)) $(VERSION_SH) config.mak
 .version: M=@
 
-libavutil/ffversion.h .version:
-	$(M)$(VERSION_SH) $(SRC_PATH) libavutil/ffversion.h $(EXTRA_VERSION)
+libbvutil/bbversion.h .version:
+	$(M)$(VERSION_SH) $(SRC_PATH) libbvutil/bbversion.h $(EXTRA_VERSION)
 	$(Q)touch .version
 
 # force version.sh to run whenever version might have changed
@@ -175,7 +177,7 @@ clean::
 
 distclean::
 	$(RM) $(DISTCLEANSUFFIXES)
-	$(RM) config.* .config libavutil/avconfig.h .version version.h libavutil/ffversion.h libavcodec/codec_names.h
+	$(RM) config.* .config libbvutil/bvconfig.h .version version.h libbvutil/bbversion.h 
 
 config:
 	$(SRC_PATH)/configure $(value BVBASE_CONFIGURATION)

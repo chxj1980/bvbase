@@ -27,7 +27,7 @@
 #define BVUTIL_BSWAP_H
 
 #include <stdint.h>
-#include "libbvutil/bvconfig.h"
+#include "libbvutil/bbconfig.h"
 #include "attributes.h"
 
 #ifdef BV_HAVE_BV_CONFIG_H
