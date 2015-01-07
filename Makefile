@@ -177,7 +177,7 @@ clean::
 
 distclean::
 	$(RM) $(DISTCLEANSUFFIXES)
-	$(RM) config.* .config libbvutil/bvconfig.h .version version.h libbvutil/bbversion.h 
+	$(RM) config.* .config libbvutil/bbconfig.h .version version.h libbvutil/bbversion.h 
 
 config:
 	$(SRC_PATH)/configure $(value BVBASE_CONFIGURATION)
