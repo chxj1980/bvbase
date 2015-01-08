@@ -110,7 +110,6 @@ BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c)
 
 void bv_stream_free(BVMediaContext *s, BVStream *st)
 {
-    int j;
     bv_assert0(s->nb_streams>0);
     bv_assert0(s->streams[ s->nb_streams - 1 ] == st);
 
