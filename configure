@@ -5539,7 +5539,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvserver bvindev bvenc; do
+for type in bvdevice bvsystem bvconfig bvserver bvindev bvenc bvprotocol; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns

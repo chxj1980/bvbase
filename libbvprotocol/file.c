@@ -27,10 +27,10 @@
 #include "config.h"
 
 #include <fcntl.h>
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
-#if HAVE_UNISTD_H
+#if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
@@ -64,7 +64,7 @@ static int file_read(BVURLContext *h, void *buf, size_t size)
 {
     FileContext *c = h->priv_data;
     int r;
-    size = FFMIN(size, c->blocksize);
+    size = BBMIN(size, c->blocksize);
     r = read(c->fd, buf, size);
     return (-1 == r)?BVERROR(errno):r;
 }
@@ -73,7 +73,7 @@ static int file_write(BVURLContext *h, const void *buf, size_t size)
 {
     FileContext *c = h->priv_data;
     int r;
-    size = FFMIN(size, c->blocksize);
+    size = BBMIN(size, c->blocksize);
     r = write(c->fd, buf, size);
     return (-1 == r)?BVERROR(errno):r;
 }
@@ -91,7 +91,7 @@ static int file_check(BVURLContext *h, int mask)
     bv_strstart(filename, "file:", &filename);
 
     {
-#if HAVE_ACCESS && defined(R_OK)
+#if BV_HAVE_ACCESS && defined(R_OK)
     if (access(filename, F_OK) < 0)
         return BVERROR(errno);
     if (mask&BV_IO_FLAG_READ)
@@ -176,7 +176,7 @@ BVURLProtocol bv_file_protocol = {
     .url_write           = file_write,
     .url_seek            = file_seek,
     .url_close           = file_close,
-    .url_fd              = file_get_handle,
+    .url_get_file_handle = file_get_handle,
     .url_check           = file_check,
     .priv_data_size      = sizeof(FileContext),
     .priv_class          = &file_class,

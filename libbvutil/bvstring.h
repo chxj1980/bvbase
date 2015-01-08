@@ -395,6 +395,19 @@ int bv_utf8_decode(int32_t *codep, const uint8_t **bufp, const uint8_t *buf_end,
  */
 int bv_match_list(const char *name, const char *list, char separator);
 
+void bv_url_split(char *proto,         int proto_size,
+                  char *authorization, int authorization_size,
+                  char *hostname,      int hostname_size,
+                  int *port_ptr,
+                  char *path,          int path_size,
+                  const char *url);
+
+int bv_url_join(char *str, int size, const char *proto,
+                const char *authorization, const char *hostname,
+                int port, const char *fmt, ...);
+
+void bv_make_absolute_url(char *buf, int size, const char *base,
+                          const char *rel);
 /**
  * @}
  */
