@@ -18,7 +18,7 @@
 
 #include "config.h"
 #include "bvutil.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "samplefmt.h"
 #include "pixdesc.h"
 
@@ -55,7 +55,7 @@ unsigned bvutil_version(void)
     }
 
 #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 0
-    ff_check_pixfmt_descriptors();
+    bb_check_pixfmt_descriptors();
 #endif
     checks_done = 1;
     return LIBBVUTIL_VERSION_INT;

@@ -289,11 +289,11 @@ fail:
     return ret;
 }
 
-static inline int retry_transfer_wrapper(BVURLContext *h, uint8_t *buf,
-                                         int size, int size_min,
+static inline int retry_transfer_wrapper(BVURLContext *h, void *buf,
+                                         size_t size, int size_min,
                                          int (*transfer_func)(BVURLContext *h,
-                                                              uint8_t *buf,
-                                                              int size))
+                                                              void *buf,
+                                                              size_t size))
 {
     int ret, len;
     int fast_retries = 5;
@@ -303,7 +303,7 @@ static inline int retry_transfer_wrapper(BVURLContext *h, uint8_t *buf,
     while (len < size_min) {
         if (bv_check_interrupt(&h->interrupt_callback))
             return BVERROR_EXIT;
-        ret = transfer_func(h, buf + len, size - len);
+        ret = transfer_func(h, (char *)buf + len, size - len);
         if (ret == BVERROR(EINTR))
             continue;
         if (h->flags & BV_IO_FLAG_NONBLOCK)
@@ -330,21 +330,21 @@ static inline int retry_transfer_wrapper(BVURLContext *h, uint8_t *buf,
     return len;
 }
 
-int bv_url_read(BVURLContext *h, unsigned char *buf, int size)
+int bv_url_read(BVURLContext *h, void *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_READ))
         return BVERROR(EIO);
     return retry_transfer_wrapper(h, buf, size, 1, h->prot->url_read);
 }
 
-int bv_url_read_complete(BVURLContext *h, unsigned char *buf, int size)
+int bv_url_read_complete(BVURLContext *h, void *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_READ))
         return BVERROR(EIO);
     return retry_transfer_wrapper(h, buf, size, size, h->prot->url_read);
 }
 
-int bv_url_write(BVURLContext *h, const unsigned char *buf, int size)
+int bv_url_write(BVURLContext *h, const void *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_WRITE))
         return BVERROR(EIO);
@@ -352,7 +352,7 @@ int bv_url_write(BVURLContext *h, const unsigned char *buf, int size)
     if (h->max_packet_size && size > h->max_packet_size)
         return BVERROR(EIO);
 
-    return retry_transfer_wrapper(h, (unsigned char *)buf, size, size, (void*)h->prot->url_write);
+    return retry_transfer_wrapper(h, (void *)buf, size, size, (void*)h->prot->url_write);
 }
 
 int64_t bv_url_seek(BVURLContext *h, int64_t pos, int whence)

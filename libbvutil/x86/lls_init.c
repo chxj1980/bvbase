@@ -23,19 +23,19 @@
 #include "libbvutil/lls.h"
 #include "libbvutil/x86/cpu.h"
 
-void ff_update_lls_sse2(LLSModel *m, const double *var);
-void ff_update_lls_avx(LLSModel *m, const double *var);
-double ff_evaluate_lls_sse2(LLSModel *m, const double *var, int order);
+void bb_update_lls_sse2(LLSModel *m, const double *var);
+void bb_update_lls_avx(LLSModel *m, const double *var);
+double bb_evaluate_lls_sse2(LLSModel *m, const double *var, int order);
 
-bv_cold void ff_init_lls_x86(LLSModel *m)
+bv_cold void bb_init_lls_x86(LLSModel *m)
 {
     int cpu_flags = bv_get_cpu_flags();
     if (EXTERNAL_SSE2(cpu_flags)) {
-        m->update_lls = ff_update_lls_sse2;
+        m->update_lls = bb_update_lls_sse2;
         if (m->indep_count >= 4)
-            m->evaluate_lls = ff_evaluate_lls_sse2;
+            m->evaluate_lls = bb_evaluate_lls_sse2;
     }
     if (EXTERNAL_AVX(cpu_flags)) {
-        m->update_lls = ff_update_lls_avx;
+        m->update_lls = bb_update_lls_avx;
     }
 }

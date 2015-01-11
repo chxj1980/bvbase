@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "avassert.h"
+#include "bvassert.h"
 #include "bvstring.h"
 #include "common.h"
 #include "pixfmt.h"
@@ -2078,7 +2078,7 @@ int bv_pix_fmt_count_planes(enum BVPixelFormat pix_fmt)
     return ret;
 }
 
-void ff_check_pixfmt_descriptors(void){
+void bb_check_pixfmt_descriptors(void){
     int i, j;
 
     for (i=0; i<BV_ARRAY_ELEMS(bv_pix_fmt_descriptors); i++) {

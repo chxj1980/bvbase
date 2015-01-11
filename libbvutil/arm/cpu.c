@@ -101,7 +101,7 @@ static int get_cpuinfo(uint32_t *hwcap)
     return 0;
 }
 
-int ff_get_cpu_flags_arm(void)
+int bb_get_cpu_flags_arm(void)
 {
     int flags = CORE_CPU_FLAGS;
     uint32_t hwcap;
@@ -142,7 +142,7 @@ int ff_get_cpu_flags_arm(void)
 
 #else
 
-int ff_get_cpu_flags_arm(void)
+int bb_get_cpu_flags_arm(void)
 {
     return BV_CPU_FLAG_ARMV5TE * BV_HAVE_ARMV5TE |
            BV_CPU_FLAG_ARMV6   * BV_HAVE_ARMV6   |

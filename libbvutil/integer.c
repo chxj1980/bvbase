@@ -27,7 +27,7 @@
 
 #include "common.h"
 #include "integer.h"
-#include "avassert.h"
+#include "bvassert.h"
 
 BVInteger bv_add_i(BVInteger a, BVInteger b){
     int i, carry=0;
@@ -159,7 +159,7 @@ int64_t bv_i2int(BVInteger a){
 
 #ifdef TEST
 
-const uint8_t ff_log2_tab[256]={
+const uint8_t bb_log2_tab[256]={
         0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
         5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
         6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,

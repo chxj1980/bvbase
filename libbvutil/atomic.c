@@ -25,36 +25,36 @@
 
 #if BV_HAVE_PTHREADS
 
-#include <pthread.h>
+#include "thread.h"
 
-static pthread_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
+static bv_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int bvpriv_atomic_int_get(volatile int *ptr)
 {
     int res;
 
-    pthread_mutex_lock(&atomic_lock);
+    bv_mutex_lock(&atomic_lock);
     res = *ptr;
-    pthread_mutex_unlock(&atomic_lock);
+    bv_mutex_unlock(&atomic_lock);
 
     return res;
 }
 
 void bvpriv_atomic_int_set(volatile int *ptr, int val)
 {
-    pthread_mutex_lock(&atomic_lock);
+    bv_mutex_lock(&atomic_lock);
     *ptr = val;
-    pthread_mutex_unlock(&atomic_lock);
+    bv_mutex_unlock(&atomic_lock);
 }
 
 int bvpriv_atomic_int_add_and_fetch(volatile int *ptr, int inc)
 {
     int res;
 
-    pthread_mutex_lock(&atomic_lock);
+    bv_mutex_lock(&atomic_lock);
     *ptr += inc;
     res = *ptr;
-    pthread_mutex_unlock(&atomic_lock);
+    bv_mutex_unlock(&atomic_lock);
 
     return res;
 }
@@ -62,11 +62,11 @@ int bvpriv_atomic_int_add_and_fetch(volatile int *ptr, int inc)
 void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
 {
     void *ret;
-    pthread_mutex_lock(&atomic_lock);
+    bv_mutex_lock(&atomic_lock);
     ret = *ptr;
     if (ret == oldval)
         *ptr = newval;
-    pthread_mutex_unlock(&atomic_lock);
+    bv_mutex_unlock(&atomic_lock);
     return ret;
 }
 
@@ -109,7 +109,7 @@ void *bvpriv_atomic_ptr_cas(void * volatile *ptr, void *oldval, void *newval)
 #endif /* !BV_HAVE_ATOMICS_NATIVE */
 
 #ifdef TEST
-#include "avassert.h"
+#include "bvassert.h"
 
 int main(void)
 {

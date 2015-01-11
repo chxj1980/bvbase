@@ -27,7 +27,7 @@
 #include "config.h"
 #include "common.h"
 #include "mem.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "bvstring.h"
 #include "bprint.h"
 

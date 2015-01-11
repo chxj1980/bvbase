@@ -21,6 +21,6 @@
 
 #include "libbvutil/pixelutils.h"
 
-void ff_pixelutils_sad_init_x86(bv_pixelutils_sad_fn *sad, int aligned);
+void bb_pixelutils_sad_init_x86(bv_pixelutils_sad_fn *sad, int aligned);
 
 #endif /* BVUTIL_X86_PIXELUTILS_H */

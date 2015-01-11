@@ -32,10 +32,10 @@
  */
 
 #define BV_PAD_STRUCTURE(name, size, ...) \
-struct ff_pad_helper_##name { __VA_ARGS__ }; \
+struct bb_pad_helper_##name { __VA_ARGS__ }; \
 typedef struct name { \
     __VA_ARGS__ \
-    char reserved_padding[size - sizeof(struct ff_pad_helper_##name)]; \
+    char reserved_padding[size - sizeof(struct bb_pad_helper_##name)]; \
 } name;
 
 /**

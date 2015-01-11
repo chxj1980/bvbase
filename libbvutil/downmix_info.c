@@ -21,7 +21,7 @@
 #include "downmix_info.h"
 #include "frame.h"
 
-AVDownmixInfo *bv_downmix_info_update_side_data(BVFrame *frame)
+BVDownmixInfo *bv_downmix_info_update_side_data(BVFrame *frame)
 {
     BVFrameSideData *side_data;
 
@@ -29,10 +29,10 @@ AVDownmixInfo *bv_downmix_info_update_side_data(BVFrame *frame)
 
     if (!side_data)
         side_data = bv_frame_new_side_data(frame, BV_FRAME_DATA_DOWNMIX_INFO,
-                                           sizeof(AVDownmixInfo));
+                                           sizeof(BVDownmixInfo));
 
     if (!side_data)
         return NULL;
 
-    return (AVDownmixInfo*)side_data->data;
+    return (BVDownmixInfo*)side_data->data;
 }

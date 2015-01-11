@@ -35,7 +35,7 @@ typedef struct PCA{
     double *z;
 }PCA;
 
-PCA *ff_pca_init(int n){
+PCA *bb_pca_init(int n){
     PCA *pca;
     if(n<=0)
         return NULL;
@@ -50,14 +50,14 @@ PCA *ff_pca_init(int n){
     return pca;
 }
 
-void ff_pca_free(PCA *pca){
+void bb_pca_free(PCA *pca){
     bv_freep(&pca->covariance);
     bv_freep(&pca->mean);
     bv_freep(&pca->z);
     bv_free(pca);
 }
 
-void ff_pca_add(PCA *pca, const double *v){
+void bb_pca_add(PCA *pca, const double *v){
     int i, j;
     const int n= pca->n;
 
@@ -69,7 +69,7 @@ void ff_pca_add(PCA *pca, const double *v){
     pca->count++;
 }
 
-int ff_pca(PCA *pca, double *eigenvector, double *eigenvalue){
+int bb_pca(PCA *pca, double *eigenvector, double *eigenvalue){
     int i, j, pass;
     int k=0;
     const int n= pca->n;
@@ -181,7 +181,7 @@ int main(void){
 
     bv_lfg_init(&prng, 1);
 
-    pca= ff_pca_init(LEN);
+    pca= bb_pca_init(LEN);
 
     for(i=0; i<9000000; i++){
         double v[2*LEN+100];
@@ -202,11 +202,11 @@ int main(void){
             v[j] -= sum/LEN;
         }*/
 //        lbt1(v+100,v+100,LEN);
-        ff_pca_add(pca, v);
+        bb_pca_add(pca, v);
     }
 
 
-    ff_pca(pca, eigenvector, eigenvalue);
+    bb_pca(pca, eigenvector, eigenvalue);
     for(i=0; i<LEN; i++){
         pca->count= 1;
         pca->mean[i]= 0;

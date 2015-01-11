@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-typedef struct AVMotionVector {
+typedef struct BVMotionVector {
     /**
      * Where the current macroblock comes from; negative value when it comes
      * from the past, positive value when it comes from the future.
@@ -45,6 +45,6 @@ typedef struct AVMotionVector {
      * Currently unused.
      */
     uint64_t flags;
-} AVMotionVector;
+} BVMotionVector;
 
 #endif /* BVUTIL_MOTION_VECTOR_H */

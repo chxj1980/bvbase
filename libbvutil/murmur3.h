@@ -23,10 +23,10 @@
 
 #include <stdint.h>
 
-struct AVMurMur3 *bv_murmur3_alloc(void);
-void bv_murmur3_init_seeded(struct AVMurMur3 *c, uint64_t seed);
-void bv_murmur3_init(struct AVMurMur3 *c);
-void bv_murmur3_update(struct AVMurMur3 *c, const uint8_t *src, int len);
-void bv_murmur3_final(struct AVMurMur3 *c, uint8_t dst[16]);
+struct BVMurMur3 *bv_murmur3_alloc(void);
+void bv_murmur3_init_seeded(struct BVMurMur3 *c, uint64_t seed);
+void bv_murmur3_init(struct BVMurMur3 *c);
+void bv_murmur3_update(struct BVMurMur3 *c, const uint8_t *src, int len);
+void bv_murmur3_final(struct BVMurMur3 *c, uint8_t dst[16]);
 
 #endif /* BVUTIL_MURMUR3_H */

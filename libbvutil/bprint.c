@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "avassert.h"
+#include "bvassert.h"
 #include "bvstring.h"
 #include "bprint.h"
 #include "common.h"

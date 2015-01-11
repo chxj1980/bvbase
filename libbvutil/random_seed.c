@@ -34,7 +34,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include "avassert.h"
+#include "bvassert.h"
 #include "internal.h"
 #include "intreadwrite.h"
 #include "timer.h"

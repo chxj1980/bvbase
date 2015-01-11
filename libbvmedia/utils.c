@@ -22,7 +22,7 @@
  */
 
 #include <libbvutil/atomic.h>
-#include <libbvutil/avassert.h>
+#include <libbvutil/bvassert.h>
 
 #include "bvmedia.h"
 
@@ -116,4 +116,9 @@ void bv_stream_free(BVMediaContext *s, BVStream *st)
     bv_codec_context_free(st->codec);
     bv_freep(&st->priv_data);
     bv_freep(&s->streams[ --s->nb_streams ]);
+}
+
+int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    return BVERROR(ENOSYS);
 }

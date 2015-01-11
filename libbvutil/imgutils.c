@@ -21,7 +21,7 @@
  * misc image utilities
  */
 
-#include "avassert.h"
+#include "bvassert.h"
 #include "common.h"
 #include "imgutils.h"
 #include "internal.h"

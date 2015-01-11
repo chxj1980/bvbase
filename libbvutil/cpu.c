@@ -77,13 +77,13 @@ int bv_get_cpu_flags(void)
         return flags;
 
     if (BV_ARCH_AARCH64)
-        flags = ff_get_cpu_flags_aarch64();
+        flags = bb_get_cpu_flags_aarch64();
     if (BV_ARCH_ARM)
-        flags = ff_get_cpu_flags_arm();
+        flags = bb_get_cpu_flags_arm();
     if (BV_ARCH_PPC)
-        flags = ff_get_cpu_flags_ppc();
+        flags = bb_get_cpu_flags_ppc();
     if (BV_ARCH_X86)
-        flags = ff_get_cpu_flags_x86();
+        flags = bb_get_cpu_flags_x86();
 
     checked = 1;
     return flags;

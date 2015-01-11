@@ -393,7 +393,7 @@ int bv_opt_set(void *obj, const char *name, const char *val, int search_flags)
             *(int64_t *)dst = 0;
         } else {
 #if BV_API_GET_CHANNEL_LAYOUT_COMPAT
-            int64_t cl = ff_get_channel_layout(val, 0);
+            int64_t cl = bb_get_channel_layout(val, 0);
 #else
             int64_t cl = bv_get_channel_layout(val);
 #endif

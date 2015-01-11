@@ -23,7 +23,7 @@
 
 #include "libbvutil/float_dsp.h"
 
-void ff_float_dsp_init_vfp(BVFloatDSPContext *fdsp, int cpu_flags);
-void ff_float_dsp_init_neon(BVFloatDSPContext *fdsp);
+void bb_float_dsp_init_vfp(BVFloatDSPContext *fdsp, int cpu_flags);
+void bb_float_dsp_init_neon(BVFloatDSPContext *fdsp);
 
 #endif /* BVUTIL_ARM_FLOAT_DSP_ARM_H */

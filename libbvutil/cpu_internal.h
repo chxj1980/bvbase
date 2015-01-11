@@ -26,9 +26,9 @@
 
 #define CPUEXT(flags, cpuext) CPUEXT_SUFFIX(flags, , cpuext)
 
-int ff_get_cpu_flags_aarch64(void);
-int ff_get_cpu_flags_arm(void);
-int ff_get_cpu_flags_ppc(void);
-int ff_get_cpu_flags_x86(void);
+int bb_get_cpu_flags_aarch64(void);
+int bb_get_cpu_flags_arm(void);
+int bb_get_cpu_flags_ppc(void);
+int bb_get_cpu_flags_x86(void);
 
 #endif /* BVUTIL_CPU_INTERNAL_H */
