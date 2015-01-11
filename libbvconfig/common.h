@@ -465,6 +465,26 @@ typedef struct _BVPPPOE {
     char user[16];
     char passwd[16];
 } BVPPPOE;
+
+typedef struct _BVMediaCapability {
+    /* data */
+} BVMediaCapability;
+
+typedef struct _BVPTZCapability {
+    /* data */
+} BVPTZCapability;
+
+typedef struct _BVEventsCapability {
+    /* data */
+} BVEventsCapability;
+
+typedef struct _BVDeviceCapability {
+    /* data */
+} BVDeviceCapability;
+
+typedef struct _BVSystemCapability {
+    /* data */
+} BVSystemCapability;
 #endif
 #ifdef __cplusplus
 }

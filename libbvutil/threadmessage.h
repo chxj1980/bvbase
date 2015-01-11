@@ -19,9 +19,9 @@
 #ifndef BVUTIL_THREADMESSAGE_H
 #define BVUTIL_THREADMESSAGE_H
 
-typedef struct AVThreadMessageQueue AVThreadMessageQueue;
+typedef struct BVThreadMessageQueue BVThreadMessageQueue;
 
-typedef enum AVThreadMessageFlags {
+typedef enum BVThreadMessageFlags {
 
     /**
      * Perform non-blocking operation.
@@ -30,7 +30,7 @@ typedef enum AVThreadMessageFlags {
      */
     BV_THREAD_MESSAGE_NONBLOCK = 1,
 
-} AVThreadMessageFlags;
+} BVThreadMessageFlags;
 
 /**
  * Allocate a new message queue.
@@ -41,7 +41,7 @@ typedef enum AVThreadMessageFlags {
  * @return  >=0 for success; <0 for error, in particular BVERROR(ENOSYS) if
  *          lavu was built without thread support
  */
-int bv_thread_message_queue_alloc(AVThreadMessageQueue **mq,
+int bv_thread_message_queue_alloc(BVThreadMessageQueue **mq,
                                   unsigned nelem,
                                   unsigned elsize);
 
@@ -50,19 +50,19 @@ int bv_thread_message_queue_alloc(AVThreadMessageQueue **mq,
  *
  * The message queue must no longer be in use by another thread.
  */
-void bv_thread_message_queue_free(AVThreadMessageQueue **mq);
+void bv_thread_message_queue_free(BVThreadMessageQueue **mq);
 
 /**
  * Send a message on the queue.
  */
-int bv_thread_message_queue_send(AVThreadMessageQueue *mq,
+int bv_thread_message_queue_send(BVThreadMessageQueue *mq,
                                  void *msg,
                                  unsigned flags);
 
 /**
  * Receive a message from the queue.
  */
-int bv_thread_message_queue_recv(AVThreadMessageQueue *mq,
+int bv_thread_message_queue_recv(BVThreadMessageQueue *mq,
                                  void *msg,
                                  unsigned flags);
 
@@ -74,7 +74,7 @@ int bv_thread_message_queue_recv(AVThreadMessageQueue *mq,
  * Conventional values, such as BVERROR_EOF or BVERROR(EAGAIN), can be used
  * to cause the receiving thread to stop or suspend its operation.
  */
-void bv_thread_message_queue_set_err_send(AVThreadMessageQueue *mq,
+void bv_thread_message_queue_set_err_send(BVThreadMessageQueue *mq,
                                           int err);
 
 /**
@@ -85,7 +85,7 @@ void bv_thread_message_queue_set_err_send(AVThreadMessageQueue *mq,
  * BVERROR(EAGAIN), can be used to cause the sending thread to stop or
  * suspend its operation.
  */
-void bv_thread_message_queue_set_err_recv(AVThreadMessageQueue *mq,
+void bv_thread_message_queue_set_err_recv(BVThreadMessageQueue *mq,
                                           int err);
 
 #endif /* BVUTIL_THREADMESSAGE_H */

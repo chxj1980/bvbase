@@ -26,7 +26,7 @@
 
 #include "bvdevice.h"
 
-const char FILE_NAME[] = "utils.c";
+static const char FILE_NAME[] = "utils.c";
 
 static BVDevice *first_dev = NULL;
 static BVDevice **last_dev = &first_dev;

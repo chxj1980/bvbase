@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#include "avassert.h"
+#include "bvassert.h"
 
 #define MIN_EXP -126
 #define MAX_EXP  126

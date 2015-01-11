@@ -78,7 +78,7 @@ bv_pixelutils_sad_fn bv_pixelutils_get_sad_fn(int w_bits, int h_bits, int aligne
         return NULL;
 
 #if BV_ARCH_X86
-    ff_pixelutils_sad_init_x86(sad, aligned);
+    bb_pixelutils_sad_init_x86(sad, aligned);
 #endif
 
     return sad[w_bits - 1];

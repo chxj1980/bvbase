@@ -25,7 +25,7 @@
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
 
-const char *FILE_NAME = "media.c";
+static const char *FILE_NAME = "media.c";
 
 BVInputMedia *bv_input_media_find(const char *short_name)
 {
@@ -173,6 +173,7 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     return s->imedia->read_header(s);
 fail:
     bv_dict_free(&tmp);
+    bv_media_context_free(s);
     return ret;
 }
 
@@ -206,3 +207,4 @@ int bv_input_media_close(BVMediaContext **fmt)
     *fmt = NULL;
     return 0;
 }
+

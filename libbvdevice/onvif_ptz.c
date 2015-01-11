@@ -32,7 +32,7 @@ typedef struct OnvifPTZContext {
     char *user;
     char *passwd;
     char url[1024];
-    char token[64];
+    char *token;
     struct soap *soap;
 } OnvifPTZContext;
 
@@ -53,9 +53,6 @@ static struct soap *bv_soap_new(OnvifPTZContext *onvif_ptz)
         timeout = ONVIF_TMO;
     }
 
-    if (onvif_ptz->user && onvif_ptz->passwd) {
-        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
-    }
     soap->recv_timeout = timeout;
     soap->send_timeout = timeout;
     soap->connect_timeout = timeout;
@@ -84,7 +81,7 @@ static int onvif_ptz_open(BVDeviceContext *h)
     }
     p = strstr(h->url, ":");
     sprintf(onvif_ptz->url, "http%s",p);
-    sprintf(onvif_ptz->token, "00000"); 
+    //sprintf(onvif_ptz->token, "Profile_1"); 
     onvif_ptz->soap = bv_soap_new(onvif_ptz);
     if (onvif_ptz->soap == NULL) {
         return -1;
@@ -125,6 +122,9 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *
     tptz__ContinuousMove.Timeout = &continuous_move->duration;
     Velocity.PanTilt = &PanTilt;
     Velocity.Zoom = & Zoom;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     PanTilt.x = continuous_move->velocity.pan_tilt.x;
     PanTilt.y = continuous_move->velocity.pan_tilt.y;
@@ -156,6 +156,9 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVC
     MEMSET_STRUCT(tptz__Stop);
     MEMSET_STRUCT(tptz__StopResponse);
     soap_default_SOAP_ENV__Header(soap, &header);
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     tptz__Stop.ProfileToken = onvif_ptz->token;
     tptz__Stop.PanTilt = (enum xsd__boolean *)&stop->pan_tilt;
@@ -190,6 +193,9 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_i
     tptz__SetPreset.ProfileToken = onvif_ptz->token;
     tptz__SetPreset.PresetName = preset->name;
     tptz__SetPreset.PresetToken = preset->token;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     retval = soap_call___tptz__SetPreset(soap, onvif_ptz->url, NULL, &tptz__SetPreset, &tptz__SetPresetResponse);
     if (retval != SOAP_OK) {
@@ -227,6 +233,9 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
     tptz__GotoPreset.ProfileToken = onvif_ptz->token;
     tptz__GotoPreset.PresetToken = goto_preset->token;
     tptz__GotoPreset.Speed = &Speed;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     Speed.PanTilt = &PanTilt;
     Speed.Zoom = & Zoom;
@@ -263,6 +272,9 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
     soap_default_SOAP_ENV__Header(soap, &header);
     tptz__RemovePreset.ProfileToken = onvif_ptz->token;
     tptz__RemovePreset.PresetToken = preset->token;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     retval = soap_call___tptz__RemovePreset(soap, onvif_ptz->url, NULL, &tptz__RemovePreset, &tptz__RemovePresetResponse);
     if (retval != SOAP_OK) {
@@ -311,6 +323,7 @@ static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
     {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"token", "token name", OFFSET(token), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 

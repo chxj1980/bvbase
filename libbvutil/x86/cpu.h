@@ -74,8 +74,8 @@
 #define INLINE_FMA4(flags)          CPUEXT_SUFFIX(flags, _INLINE, FMA4)
 #define INLINE_AVX2(flags)          CPUEXT_SUFFIX(flags, _INLINE, AVX2)
 
-void ff_cpu_cpuid(int index, int *eax, int *ebx, int *ecx, int *edx);
-void ff_cpu_xgetbv(int op, int *eax, int *edx);
-int  ff_cpu_cpuid_test(void);
+void bb_cpu_cpuid(int index, int *eax, int *ebx, int *ecx, int *edx);
+void bb_cpu_xgetbv(int op, int *eax, int *edx);
+int  bb_cpu_cpuid_test(void);
 
 #endif /* BVUTIL_X86_CPU_H */

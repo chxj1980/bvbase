@@ -30,29 +30,45 @@
 
 #if BV_HAVE_PTHREADS
 #include <pthread.h>
+#elif BV_HAVE_W32THREADS
+#include "compat/w32pthreads.h"
 #elif BV_HAVE_OS2THREADS
 #include "compat/os2threads.h"
 #else
-#include "compat/w32pthreads.h"
+#error "Unknown threads implementation"
 #endif
 
-#define AVMutex pthread_mutex_t
+#define BVMutex pthread_mutex_t
+#define BVCond  pthread_cond_t
 
-#define ff_mutex_init    pthread_mutex_init
-#define ff_mutex_lock    pthread_mutex_lock
-#define ff_mutex_unlock  pthread_mutex_unlock
-#define ff_mutex_destroy pthread_mutex_destroy
+#define bv_mutex_init       pthread_mutex_init
+#define bv_mutex_lock       pthread_mutex_lock
+#define bv_mutex_unlock     pthread_mutex_unlock
+#define bv_mutex_destroy    pthread_mutex_destroy
+
+#define bv_cond_init        pthread_cond_init
+#define bv_cond_wait        pthread_cond_wait
+#define bv_cond_signal      pthread_cond_signal
+#define bv_cond_broadcast   pthread_cond_broadcast
+#define bv_cond_destroy     pthread_cond_destroy
 
 #else
 
 #define USE_ATOMICS 1
 
-#define AVMutex char
+#define BVMutex char
+#define BVCond  char
 
-#define ff_mutex_init(mutex, attr) (0)
-#define ff_mutex_lock(mutex) (0)
-#define ff_mutex_unlock(mutex) (0)
-#define ff_mutex_destroy(mutex) (0)
+#define bv_mutex_init(mutex, attr)      (0)
+#define bv_mutex_lock(mutex)            (0)
+#define bv_mutex_unlock(mutex)          (0)
+#define bv_mutex_destroy(mutex)         (0)
+
+#define bv_cond_init(cond, attr)        (0) 
+#define bv_cond_wait(cond, attr)        (0)
+#define bv_cond_signal(cond)            (0) 
+#define bv_cond_broadcast(cond)         (0)
+#define bv_cond_destroy(cond)           (0)
 
 #endif
 

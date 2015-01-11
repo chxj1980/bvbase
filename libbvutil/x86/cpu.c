@@ -31,10 +31,10 @@
 #if BV_HAVE_YASM
 
 #define cpuid(index, eax, ebx, ecx, edx)        \
-    ff_cpu_cpuid(index, &eax, &ebx, &ecx, &edx)
+    bb_cpu_cpuid(index, &eax, &ebx, &ecx, &edx)
 
 #define xgetbv(index, eax, edx)                 \
-    ff_cpu_xgetbv(index, &eax, &edx)
+    bb_cpu_xgetbv(index, &eax, &edx)
 
 #elif BV_HAVE_INLINE_ASM
 
@@ -68,7 +68,7 @@
 
 #elif BV_HAVE_YASM
 
-#define cpuid_test ff_cpu_cpuid_test
+#define cpuid_test bb_cpu_cpuid_test
 
 #elif BV_HAVE_INLINE_ASM
 
@@ -87,7 +87,7 @@ static int cpuid_test(void)
 #endif
 
 /* Function to test if multimedia instructions are supported...  */
-int ff_get_cpu_flags_x86(void)
+int bb_get_cpu_flags_x86(void)
 {
     int rval = 0;
 

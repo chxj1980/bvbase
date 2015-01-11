@@ -36,17 +36,17 @@
 #include "md5.h"
 #include "mem.h"
 
-typedef struct AVMD5{
+typedef struct BVMD5{
     uint64_t len;
     uint8_t  block[64];
     uint32_t ABCD[4];
-} AVMD5;
+} BVMD5;
 
-const int bv_md5_size = sizeof(AVMD5);
+const int bv_md5_size = sizeof(BVMD5);
 
-struct AVMD5 *bv_md5_alloc(void)
+struct BVMD5 *bv_md5_alloc(void)
 {
-    return bv_mallocz(sizeof(struct AVMD5));
+    return bv_mallocz(sizeof(struct BVMD5));
 }
 
 static const uint8_t S[4][4] = {
@@ -135,7 +135,7 @@ static void body(uint32_t ABCD[4], uint32_t *src, int nblocks)
     }
 }
 
-void bv_md5_init(AVMD5 *ctx)
+void bv_md5_init(BVMD5 *ctx)
 {
     ctx->len     = 0;
 
@@ -145,7 +145,7 @@ void bv_md5_init(AVMD5 *ctx)
     ctx->ABCD[3] = 0x67452301;
 }
 
-void bv_md5_update(AVMD5 *ctx, const uint8_t *src, int len)
+void bv_md5_update(BVMD5 *ctx, const uint8_t *src, int len)
 {
     const uint8_t *end;
     int j;
@@ -180,7 +180,7 @@ void bv_md5_update(AVMD5 *ctx, const uint8_t *src, int len)
         memcpy(ctx->block, src, len);
 }
 
-void bv_md5_final(AVMD5 *ctx, uint8_t *dst)
+void bv_md5_final(BVMD5 *ctx, uint8_t *dst)
 {
     int i;
     uint64_t finalcount = bv_le2ne64(ctx->len << 3);
@@ -197,7 +197,7 @@ void bv_md5_final(AVMD5 *ctx, uint8_t *dst)
 
 void bv_md5_sum(uint8_t *dst, const uint8_t *src, const int len)
 {
-    AVMD5 ctx;
+    BVMD5 ctx;
 
     bv_md5_init(&ctx);
     bv_md5_update(&ctx, src, len);

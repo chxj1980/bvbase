@@ -7,7 +7,7 @@ HEADERS = adler32.h                                                     \
           attributes.h                                                  \
           audio_fifo.h                                                  \
           audioconvert.h                                                \
-          avassert.h                                                    \
+          bvassert.h                                                    \
           bvstring.h                                                    \
           bvutil.h                                                      \
           base64.h                                                      \

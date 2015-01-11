@@ -36,7 +36,7 @@
 #include <malloc.h>
 #endif
 
-#include "avassert.h"
+#include "bvassert.h"
 #include "bvutil.h"
 #include "common.h"
 #include "dynarray.h"
@@ -485,7 +485,7 @@ void *bv_fast_realloc(void *ptr, unsigned int *size, size_t min_size)
     return ptr;
 }
 
-static inline int ff_fast_malloc(void *ptr, unsigned int *size, size_t min_size, int zero_realloc)
+static inline int bb_fast_malloc(void *ptr, unsigned int *size, size_t min_size, int zero_realloc)
 {
     void **p = ptr;
     if (min_size < *size)
@@ -501,6 +501,6 @@ static inline int ff_fast_malloc(void *ptr, unsigned int *size, size_t min_size,
 
 void bv_fast_malloc(void *ptr, unsigned int *size, size_t min_size)
 {
-    ff_fast_malloc(ptr, size, min_size, 0);
+    bb_fast_malloc(ptr, size, min_size, 0);
 }
 

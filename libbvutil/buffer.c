@@ -210,7 +210,7 @@ BVBufferPool *bv_buffer_pool_init(int size, BVBufferRef* (*alloc)(int size))
     if (!pool)
         return NULL;
 
-    ff_mutex_init(&pool->mutex, NULL);
+    bv_mutex_init(&pool->mutex, NULL);
 
     pool->size     = size;
     pool->alloc    = alloc ? alloc : bv_buffer_alloc;
@@ -233,7 +233,7 @@ static void buffer_pool_free(BVBufferPool *pool)
         buf->free(buf->opaque, buf->data);
         bv_freep(&buf);
     }
-    ff_mutex_destroy(&pool->mutex);
+    bv_mutex_destroy(&pool->mutex);
     bv_freep(&pool);
 }
 
@@ -299,10 +299,10 @@ static void pool_release_buffer(void *opaque, uint8_t *data)
 #if USE_ATOMICS
     add_to_pool(buf);
 #else
-    ff_mutex_lock(&pool->mutex);
+    bv_mutex_lock(&pool->mutex);
     buf->next = pool->pool;
     pool->pool = buf;
-    ff_mutex_unlock(&pool->mutex);
+    bv_mutex_unlock(&pool->mutex);
 #endif
 
     if (!bvpriv_atomic_int_add_and_fetch(&pool->refcount, -1))
@@ -370,7 +370,7 @@ BVBufferRef *bv_buffer_pool_get(BVBufferPool *pool)
         return NULL;
     }
 #else
-    ff_mutex_lock(&pool->mutex);
+    bv_mutex_lock(&pool->mutex);
     buf = pool->pool;
     if (buf) {
         ret = bv_buffer_create(buf->data, pool->size, pool_release_buffer,
@@ -382,7 +382,7 @@ BVBufferRef *bv_buffer_pool_get(BVBufferPool *pool)
     } else {
         ret = pool_alloc_buffer(pool);
     }
-    ff_mutex_unlock(&pool->mutex);
+    bv_mutex_unlock(&pool->mutex);
 #endif
 
     if (ret)

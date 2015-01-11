@@ -25,7 +25,7 @@
  * @author Michael Niedermayer <michaelni@gmx.at>
  */
 
-#include "avassert.h"
+#include "bvassert.h"
 #include <limits.h>
 
 #include "common.h"

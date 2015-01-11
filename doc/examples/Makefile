@@ -1,14 +1,17 @@
 # use pkg-config for getting CFLAGS and LDLIBS
 include $(SUBDIR)../../config.mak
 
-CFLAGS += -Wall -g
-#CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
-#LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
+BVBASE_DIR=/home/albert/selfgit/binary
 
-CFLAGS = -I ../../include/x86 -I ../../3rdparty/binary/ffmpeg/x86/include 
+CFLAGS=  -I/home/albert/selfgit/binary/ffmpeg/x86/include -I/home/albert/selfgit/binary/onvif/x86/include -I/home/albert/selfgit/binary/openssl/x86/include -std=c99 -fomit-frame-pointer -pthread  
 
-LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice -lbvmedia -lbvcodec -lssl -L ../../3rdparty/binary/ffmpeg/x86/lib  -lavformat -lavcodec -lavutil
+LDFLAGS= -L/home/albert/selfgit/binary/ffmpeg/x86/lib -lavformat -lavcodec -lavutil -L/home/albert/selfgit/binary/onvif/x86/lib -lonvifc -L/home/albert/selfgit/binary/openssl/x86/lib -lssl -lcrypto  
+
+CFLAGS += -I$(BVBASE_DIR)/bvbase/x86/include
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/x86/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil
 EXAMPLES=  exDevice device_scan exMedia
+
+CFLAGS += -Wall -g
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 
@@ -17,9 +20,6 @@ OBJS=$(addsuffix .o,$(EXAMPLES))
 .phony: all clean-test clean
 
 all: $(OBJS) $(EXAMPLES)
-
-clean-test:
-	$(RM) test*.pgm test.h264 test.mp2 test.sw test.mpg
 
 clean: 
 	$(RM) $(EXAMPLES) $(OBJS)

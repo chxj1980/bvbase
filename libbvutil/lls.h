@@ -58,7 +58,7 @@ typedef struct LLSModel {
 } LLSModel;
 
 void bvpriv_init_lls(LLSModel *m, int indep_count);
-void ff_init_lls_x86(LLSModel *m);
+void bb_init_lls_x86(LLSModel *m);
 void bvpriv_solve_lls(LLSModel *m, double threshold, unsigned short min_order);
 
 #endif /* BVUTIL_LLS_H */

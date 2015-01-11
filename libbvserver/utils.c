@@ -26,7 +26,7 @@
 
 #include "bvserver.h"
 
-const char FILE_NAME[] = "utils.c";
+static const char FILE_NAME[] = "utils.c";
 
 static BVServer *first_svr = NULL;
 static BVServer **last_svr = &first_svr;

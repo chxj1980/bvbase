@@ -28,7 +28,7 @@
 
 #include "mathematics.h"
 #include "libbvutil/common.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "version.h"
 
 #if BV_API_BV_REVERSE

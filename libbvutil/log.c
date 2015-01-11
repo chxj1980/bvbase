@@ -41,8 +41,8 @@
 #include "log.h"
 
 #if BV_HAVE_PTHREADS
-#include <pthread.h>
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#include "thread.h"
+static BVMutex mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #define LINE_SZ 1024
@@ -300,7 +300,7 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
     if (level > bv_log_level)
         return;
 #if BV_HAVE_PTHREADS
-    pthread_mutex_lock(&mutex);
+    bv_mutex_lock(&mutex);
 #endif
 
     format_line(ptr, level, fmt, vl, part, &print_prefix, type);
@@ -334,7 +334,7 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
 end:
     bv_bprint_finalize(part+3, NULL);
 #if BV_HAVE_PTHREADS
-    pthread_mutex_unlock(&mutex);
+    bv_mutex_unlock(&mutex);
 #endif
 }
 

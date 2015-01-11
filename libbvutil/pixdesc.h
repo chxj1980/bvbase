@@ -295,7 +295,7 @@ int bv_pix_fmt_get_chroma_sub_sample(enum BVPixelFormat pix_fmt,
  */
 int bv_pix_fmt_count_planes(enum BVPixelFormat pix_fmt);
 
-void ff_check_pixfmt_descriptors(void);
+void bb_check_pixfmt_descriptors(void);
 
 /**
  * Utility function to swap the endianness of a pixel format.

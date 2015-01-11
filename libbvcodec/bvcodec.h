@@ -36,12 +36,12 @@ extern "C"{
 enum BVCodecID {
     BV_CODEC_ID_NONE = 0,
     //video
-    BV_CODEC_ID_H264,
+    BV_CODEC_ID_H264 = 0x64,
     BV_CODEC_ID_MPEG,
     BV_CODEC_ID_JPEG,
 
     //Audio
-    BV_CODEC_ID_G711A,
+    BV_CODEC_ID_G711A = 0x258,
     BV_CODEC_ID_G711U,
     BV_CODEC_ID_G726,
     BV_CODEC_ID_AAC,

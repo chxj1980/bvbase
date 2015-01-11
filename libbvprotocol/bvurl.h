@@ -86,9 +86,9 @@ int bv_url_open(BVURLContext **puc, const char *filename, int flags,
                const BVIOInterruptCB *int_cb, BVDictionary **options);
 
 
-int bv_url_read(BVURLContext *h, unsigned char *buf, int size);
-int bv_url_read_complete(BVURLContext *h, unsigned char *buf, int size);
-int bv_url_write(BVURLContext *h, const unsigned char *buf, int size);
+int bv_url_read(BVURLContext *h, void *buf, size_t size);
+int bv_url_read_complete(BVURLContext *h, void *buf, size_t size);
+int bv_url_write(BVURLContext *h, const void *buf, size_t size);
 int64_t bv_url_seek(BVURLContext *h, int64_t pos, int whence);
 int bv_url_closep(BVURLContext **hh);
 int bv_url_close(BVURLContext *h);

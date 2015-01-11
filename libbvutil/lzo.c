@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "bvutil.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "common.h"
 #include "intreadwrite.h"
 #include "lzo.h"

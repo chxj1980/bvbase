@@ -31,7 +31,7 @@
 #include "version.h"
 
 /**
- * @addtogroup lavu_tree AVTree
+ * @addtogroup lavu_tree BVTree
  * @ingroup lavu_data
  *
  * Low-complexity tree container

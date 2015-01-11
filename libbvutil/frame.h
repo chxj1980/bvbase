@@ -62,12 +62,12 @@ enum BVFrameSideDataType {
      */
     BV_FRAME_DATA_STEREO3D,
     /**
-     * The data is the AVMatrixEncoding enum defined in libbvutil/channel_layout.h.
+     * The data is the BVMatrixEncoding enum defined in libbvutil/channel_layout.h.
      */
     BV_FRAME_DATA_MATRIXENCODING,
     /**
      * Metadata relevant to a downmix procedure.
-     * The data is the AVDownmixInfo struct defined in libbvutil/downmix_info.h.
+     * The data is the BVDownmixInfo struct defined in libbvutil/downmix_info.h.
      */
     BV_FRAME_DATA_DOWNMIX_INFO,
     /**
@@ -90,7 +90,7 @@ enum BVFrameSideDataType {
     /**
      * Motion vectors exported by some codecs (on demand through the export_mvs
      * flag set in the libavcodec BVCodecContext flags2 option).
-     * The data is the AVMotionVector struct defined in
+     * The data is the BVMotionVector struct defined in
      * libbvutil/motion_vector.h.
      */
     BV_FRAME_DATA_MOTION_VECTORS,
@@ -509,7 +509,7 @@ typedef struct BVFrame {
 
     /**
      * duration of the corresponding packet, expressed in
-     * AVStream->time_base units, 0 if unknown.
+     * BVStream->time_base units, 0 if unknown.
      * Code outside libavcodec should access this field using:
      * bv_frame_get_pkt_duration(frame)
      * - encoding: unused

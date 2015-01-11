@@ -22,25 +22,25 @@
 #include "intreadwrite.h"
 #include "murmur3.h"
 
-typedef struct AVMurMur3 {
+typedef struct BVMurMur3 {
     uint64_t h1, h2;
     uint8_t state[16];
     int state_pos;
     uint64_t len;
-} AVMurMur3;
+} BVMurMur3;
 
-AVMurMur3 *bv_murmur3_alloc(void)
+BVMurMur3 *bv_murmur3_alloc(void)
 {
-    return bv_mallocz(sizeof(AVMurMur3));
+    return bv_mallocz(sizeof(BVMurMur3));
 }
 
-void bv_murmur3_init_seeded(AVMurMur3 *c, uint64_t seed)
+void bv_murmur3_init_seeded(BVMurMur3 *c, uint64_t seed)
 {
     memset(c, 0, sizeof(*c));
     c->h1 = c->h2 = seed;
 }
 
-void bv_murmur3_init(AVMurMur3 *c)
+void bv_murmur3_init(BVMurMur3 *c)
 {
     // arbitrary random number as seed
     bv_murmur3_init_seeded(c, 0x725acc55daddca55);
@@ -89,7 +89,7 @@ static uint64_t inline update_h2(uint64_t k, uint64_t h1, uint64_t h2)
     return k;
 }
 
-void bv_murmur3_update(AVMurMur3 *c, const uint8_t *src, int len)
+void bv_murmur3_update(BVMurMur3 *c, const uint8_t *src, int len)
 {
     const uint8_t *end;
     uint64_t h1 = c->h1, h2 = c->h2;
@@ -138,7 +138,7 @@ static inline uint64_t fmix(uint64_t k)
     return k;
 }
 
-void bv_murmur3_final(AVMurMur3 *c, uint8_t dst[16])
+void bv_murmur3_final(BVMurMur3 *c, uint8_t dst[16])
 {
     uint64_t h1 = c->h1, h2 = c->h2;
     memset(c->state + c->state_pos, 0, sizeof(c->state) - c->state_pos);
@@ -159,7 +159,7 @@ int main(void)
 {
     int i;
     uint8_t hash_result[16] = {0};
-    AVMurMur3 *ctx = bv_murmur3_alloc();
+    BVMurMur3 *ctx = bv_murmur3_alloc();
 #if 1
     uint8_t in[256] = {0};
     uint8_t *hashes = bv_mallocz(256 * 16);
