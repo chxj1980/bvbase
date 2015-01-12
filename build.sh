@@ -5,7 +5,7 @@ if [ $# != 1 ]; then
     exit
 fi
 
-BVBASE_DIR=/home/albert/selfgit/binary
+BVBASE_DIR=$(pwd)/3rdparty/binary
 NAME=bvbase
 
 case $1 in

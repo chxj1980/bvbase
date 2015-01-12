@@ -1,11 +1,11 @@
 # use pkg-config for getting CFLAGS and LDLIBS
 include $(SUBDIR)../../config.mak
 
-BVBASE_DIR=/home/albert/selfgit/binary
+BVBASE_DIR=$(shell pwd)/../../3rdparty/binary/
 
-CFLAGS=  -I/home/albert/selfgit/binary/ffmpeg/x86/include -I/home/albert/selfgit/binary/onvif/x86/include -I/home/albert/selfgit/binary/openssl/x86/include -std=c99 -fomit-frame-pointer -pthread  
+CFLAGS=  -I$(BVBASE_DIR)/ffmpeg/x86/include -I$(BVBASE_DIR)/onvif/x86/include -I$(BVBASE_DIR)/openssl/x86/include -std=c99 -fomit-frame-pointer -pthread  
 
-LDFLAGS= -L/home/albert/selfgit/binary/ffmpeg/x86/lib -lavformat -lavcodec -lavutil -L/home/albert/selfgit/binary/onvif/x86/lib -lonvifc -L/home/albert/selfgit/binary/openssl/x86/lib -lssl -lcrypto  
+LDFLAGS= -L$(BVBASE_DIR)/ffmpeg/x86/lib -lavformat -lavcodec -lavutil -L$(BVBASE_DIR)/onvif/x86/lib -lonvifc -L$(BVBASE_DIR)/openssl/x86/lib -lssl -lcrypto  
 
 CFLAGS += -I$(BVBASE_DIR)/bvbase/x86/include
 LDFLAGS += -L$(BVBASE_DIR)/bvbase/x86/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil
