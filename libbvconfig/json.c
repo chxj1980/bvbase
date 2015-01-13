@@ -67,10 +67,10 @@ static int get_system_info(BVConfigContext * cfgctx, BVSystemInfo * sys_info)
 }
 #endif
 
-BVConfig bv_json_config = {
+BVConfigFile bv_json_cfile = {
     .name = "json",
     .priv_data_size = sizeof(struct JsonConfigContext),
-    .open = open_url,
-    .close = close_url,
+//    .open = open_url,
+//    .close = close_url,
 //    .get_system_info = get_system_info,
 };

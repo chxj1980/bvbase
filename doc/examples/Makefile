@@ -9,7 +9,7 @@ LDFLAGS= -L$(BVBASE_DIR)/ffmpeg/x86/lib -lavformat -lavcodec -lavutil -L$(BVBASE
 
 CFLAGS += -I$(BVBASE_DIR)/bvbase/x86/include
 LDFLAGS += -L$(BVBASE_DIR)/bvbase/x86/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil
-EXAMPLES=  exDevice device_scan exMedia
+EXAMPLES=  exDevice device_scan exMedia a
 
 CFLAGS += -Wall -g
 

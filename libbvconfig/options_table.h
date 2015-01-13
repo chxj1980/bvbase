@@ -37,4 +37,11 @@ static const BVOption config_options[] = {
     {NULL}
 };
 
+static const BVOption config_file_options[] = {
+//    {"buffer_size", NULL, OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 4096}, 0, INT_MAX, E},
+
+    {NULL}
+};
+
+
 #endif /* end of include guard: BV_OPTIONS_TABLE_H */

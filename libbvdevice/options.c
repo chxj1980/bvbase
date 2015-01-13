@@ -42,7 +42,7 @@ static const BVClass bv_device_context_class = {
     .item_name      = device_to_name,
     .option         = device_options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
 static void bv_device_context_get_default(BVDeviceContext *device)

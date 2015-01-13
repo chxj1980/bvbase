@@ -32,6 +32,14 @@
             bv_config_register(&bv_##x##_config);                \
     }
 
+#define REGISTER_CFILE(X, x)                                         \
+    {                                                                   \
+        extern BVConfigFile bv_##x##_cfile;                           \
+        if (BV_CONFIG_##X##_CFILE)                                      \
+            bv_config_file_register(&bv_##x##_cfile);                \
+    }
+
+
 void bv_config_register_all(void)
 {
     static int initialized;
@@ -40,6 +48,8 @@ void bv_config_register_all(void)
         return;
     initialized = 1;
 
-    REGISTER_CONFIG(JSON, json);
+    REGISTER_CFILE(JSON, json);
+
+    REGISTER_CONFIG(LOCAL, local);
     REGISTER_CONFIG(ONVIF, onvif);
 }

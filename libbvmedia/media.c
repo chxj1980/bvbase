@@ -161,6 +161,12 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
         }
     }
 
+#if 0
+    //用户自己打开文件
+    if (!s->pb && !(s->imedia->flags & BV_MEDIA_FLAGS_NOFILE)) {
+        //open bvio
+    }
+#endif
     if (url)
         bv_strlcpy(s->filename, url, sizeof(s->filename));
     if (!s->imedia->read_header) {

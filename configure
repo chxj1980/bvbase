@@ -1305,6 +1305,7 @@ COMPONENT_LIST="
 	bvindevs
 	bvsystems
 	bvconfigs
+	bvcfiles
 	bvservers
 "
 
@@ -2398,7 +2399,7 @@ nvenc_encoder_deps="nvenc"
 onvif_ptz_device_deps="libonvifc"
 onvif_dev_device_deps="libonvifc"
 onvif_config_deps="libonvifc"
-json_config_deps="libjansson"
+json_cfile_deps="libjansson"
 onvifave_indev_deps="libonvifc libavformat"
 
 # demuxers / muxers
@@ -2827,10 +2828,11 @@ find_things(){
 
 BVDEVICE_LIST=$(find_things   device DEVICE libbvdevice/alldevices.c)
 BVCONFIG_LIST=$(find_things   config CONFIG libbvconfig/allconfigs.c)
+BVCFILE_LIST=$(find_things    cfile  CFILE libbvconfig/allconfigs.c)
 BVSERVER_LIST=$(find_things   server SERVER libbvserver/allservers.c)
 BVSYSTEM_LIST=$(find_things   system SYSTEM libbvsystem/allsystems.c)
-BVINDEV_LIST=$(find_things   indev INDEV libbvmedia/allmedias.c)
-BVPROTOCOL_LIST=$(find_things   protocol PROTOCOL libbvprotocol/allprotocols.c)
+BVINDEV_LIST=$(find_things	  indev  INDEV libbvmedia/allmedias.c)
+BVPROTOCOL_LIST=$(find_things protocol PROTOCOL libbvprotocol/allprotocols.c)
 
 ALL_COMPONENTS="
     $BSF_LIST
@@ -2847,6 +2849,7 @@ ALL_COMPONENTS="
 
 	$BVDEVICE_LIST
 	$BVCONFIG_LIST
+	$BVCFILE_LIST
 	$BVSERVER_LIST
 	$BVSYSTEM_LIST
 	$BVINDEV_LIST
@@ -5539,7 +5542,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvserver bvindev bvenc bvprotocol; do
+for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvenc bvprotocol; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns

@@ -42,7 +42,7 @@ static const BVClass bv_server_context_class = {
     .item_name      = server_to_name,
     .option         = server_options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       =   BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       =   BV_CLASS_CATEGORY_SERVER,
 };
 
 static void bv_server_context_get_default(BVServerContext *server)

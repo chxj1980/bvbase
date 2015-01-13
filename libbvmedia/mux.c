@@ -109,7 +109,7 @@ static int init_muxer(BVMediaContext *s, BVDictionary **options)
             && (ret = bv_opt_set_dict2(s->priv_data, &tmp, BV_OPT_SEARCH_CHILDREN)) < 0)
         goto fail;
 
-    if (s->nb_streams == 0 && !(omedia->flags & BV_OUTPUT_MEDIA_FLAGS_NO_STREAMS)) {
+    if (s->nb_streams == 0 && !(omedia->flags & BV_MEDIA_FLAGS_NOSTREAMS)) {
         bv_log(s, BV_LOG_ERROR, "No Streams to mux\n");
         ret = BVERROR(EINVAL);
         goto fail;
