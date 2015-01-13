@@ -332,7 +332,7 @@ static const BVClass onvif_class = {
     .item_name      = bv_default_item_name,
     .option         = options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_ptz_device = {

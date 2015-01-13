@@ -46,8 +46,10 @@ typedef struct OnvifContext {
     int width, height;
     char onvif_url[128];
     int timeout;
+    int snpsht;
     struct soap *soap;
     AVFormatContext *onvif;
+    AVIOContext *snapshot;
     struct SOAP_ENV__Header soap_header;
 } OnvifContext;
 
@@ -106,6 +108,7 @@ static void set_video_info(BVStream *bvst, AVStream *avst)
     bvst->codec->bit_rate = avst->codec->bit_rate;
     bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
     bvst->codec->gop_size = avst->codec->gop_size;
+    bvst->codec->profile  = avst->codec->profile;
     if (avst->codec->extradata_size > 0) {
         bvst->codec->extradata = bv_memdup(avst->codec->extradata, avst->codec->extradata_size);
         if (bvst->codec->extradata) {
@@ -254,6 +257,7 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
 {
     int ret;
     char *p;
+    int i = 0;
     OnvifContext *onvifctx = s->priv_data;
     if (!onvifctx->token) {
         bv_log(s, BV_LOG_ERROR, "must set onvifave token url\n");
@@ -273,6 +277,7 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
         ret = bv_onvif_stream_uri(onvifctx);
     } else if (onvifctx->vcodec_id == BV_CODEC_ID_JPEG) {
         ret = bv_onvif_snapshot_uri(onvifctx);
+        onvifctx->snpsht = 1;
     } else {
         bv_log(onvifctx, BV_LOG_ERROR, "video codec id error\n");
         bv_soap_free(onvifctx->soap);
@@ -297,13 +302,14 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
         bv_soap_free(onvifctx->soap);
         return -1;
     }
+#if 0
     if (avformat_find_stream_info(onvifctx->onvif, NULL) < 0) {
         avformat_close_input(&onvifctx->onvif);
         bv_soap_free(onvifctx->soap);
         bv_log(onvifctx, BV_LOG_ERROR, "get onvif stream info error\n");
         return -1;
     }
-
+#endif
     av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
     set_avcodec_info(s, onvifctx);
     return 0;
@@ -358,7 +364,7 @@ static const BVClass onvif_class = {
     .item_name = bv_default_item_name,
     .option = options,
     .version = LIBBVUTIL_VERSION_INT,
-    .category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category = BV_CLASS_CATEGORY_DEMUXER,
 };
 
 BVInputMedia bv_onvifave_demuxer = {
@@ -369,6 +375,6 @@ BVInputMedia bv_onvifave_demuxer = {
     .read_packet = onvif_read_packet,
     .read_close = onvif_read_close,
     .control_message = onvif_control,
-    .flags = BV_MEDIA_FLAG_NOFILE,
+    .flags = BV_MEDIA_FLAGS_NOFILE,
     .priv_class = &onvif_class,
 };

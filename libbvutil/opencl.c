@@ -31,7 +31,7 @@
 #include "thread.h"
 #include "atomic.h"
 
-static volatile bv_mutex_t *atomic_opencl_lock = NULL;
+static volatile BVMutex *atomic_opencl_lock = NULL;
 #define LOCK_OPENCL bv_mutex_lock(atomic_opencl_lock)
 #define UNLOCK_OPENCL bv_mutex_unlock(atomic_opencl_lock)
 #else
@@ -316,7 +316,7 @@ static inline int init_opencl_mtx(void)
 #if BV_HAVE_THREADS
     if (!atomic_opencl_lock) {
         int err;
-        bv_mutex_t *tmp = bv_malloc(sizeof(bv_mutex_t));
+        BVMutex *tmp = bv_malloc(sizeof(BVMutex));
         if (!tmp)
             return BVERROR(ENOMEM);
         if ((err = bv_mutex_init(tmp, NULL))) {

@@ -38,7 +38,9 @@ extern "C"{
 
 struct _BVMediaContext;
 
-#define BV_MEDIA_FLAG_NOFILE    1
+#define BV_MEDIA_FLAGS_NOFILE       0x0001
+
+#define BV_MEDIA_FLAGS_NOSTREAMS    0x1000
 
 typedef struct _BVInputMedia {
     const char *name;
@@ -54,8 +56,6 @@ typedef struct _BVInputMedia {
     int (*read_close)(struct _BVMediaContext *h);
     int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
 } BVInputMedia;
-
-#define BV_OUTPUT_MEDIA_FLAGS_NO_STREAMS    (1)
 
 typedef struct _BVOutputMedia {
     const char *name;

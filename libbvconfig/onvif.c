@@ -22,12 +22,35 @@
  */
 
 #include "bvconfig.h"
+
 struct OnvifConfigContext {
     const BVClass *bv_class;
-    char devide_info[128];
+    int timeout;
+    char *user;
+    char *passwd;
+};
+
+#define OFFSET(x) offsetof(struct OnvifConfigContext, x)
+#define DEC BV_OPT_FLAG_DECODING_PARAM
+static const BVOption options[] = {
+    {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+    {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {NULL}
+};
+
+static const BVClass onvif_class = {
+    .class_name     = "onvif config",
+    .item_name      = bv_default_item_name,
+    .option         = options,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       = BV_CLASS_CATEGORY_CONFIG,
 };
 
 BVConfig bv_onvif_config = {
     .name = "onvif",
+    .type = BV_CONFIG_TYPE_ONVIF,
+    .flags = BV_CONFIG_FLAGS_NOFILE | BV_CONFIG_FLAGS_NETWORK,
     .priv_data_size = sizeof(struct OnvifConfigContext),
+    .priv_class = &onvif_class,
 };

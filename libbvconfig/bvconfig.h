@@ -56,35 +56,81 @@ enum BVConfigType {
     BV_CONFIG_TYPE_UNKNOWN
 };
 
+typedef enum {
+    BV_SECTION_ID_NONE = -1,
+    BV_SECTION_ID_ROOT,
+} BVSectionID;
+
+#define BV_CONFIG_SECTION_FLAGS_IS_WRAPPER              1 ///< the section only contains other sections, but has no data at its own level
+#define BV_CONFIG_SECTION_FLAGS_IS_ARRAY                2 ///< the section contains an array of elements of the same type
+#define BV_CONFIG_SECTION_FLAGS_HAS_VARIABLE_FIELDS     4 ///< the section may contain a variable number of fields with variable keys.
+                                                          ///  For these sections the element_name field is mandatory.
+
+typedef struct _BVConfigSection {
+    int id;
+    const char *name;
+    int flags;
+} BVConfigSection;
+
+typedef struct _BVConfigFileContext {
+    const BVClass *bv_class;
+    struct _BVConfigFile *cfile;
+    void *priv_data;
+} BVConfigFileContext;
+
+typedef struct _BVConfigFile {
+    const char *name;
+    enum BVConfigFileType type;
+    const BVClass *priv_class;
+    int priv_data_size;
+    struct _BVConfigFile *next;
+    int (*init)(BVConfigFileContext *s);
+    int (*uninit)(BVConfigFileContext *s);
+    int (*read_string)(BVConfigFileContext *s, BVConfigSection *section, const char *key, char *value);
+    int (*read_int)(BVConfigFileContext *s, BVConfigSection *section, const char *key, int *value);
+    int (*read_double)(BVConfigSection *s, BVConfigSection *section, const char *key, double *value);
+} BVConfigFile;
 
 typedef struct _BVConfigContext {
     const BVClass *bv_class;
     struct _BVConfig *config;
     void *priv_data;
+    BVConfigFileContext *pdb;
     char url[1024];
 } BVConfigContext;
 
+#define BV_CONFIG_FLAGS_NOFILE      0x0001
+
+#define BV_CONFIG_FLAGS_NETWORK     0x1000
+
 typedef struct _BVConfig {
     const char *name;
-    enum BVConfigType config_type;
+    enum BVConfigType type;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVConfig *next;
+    int flags;
 //////////////////////////////////////////////////////////////////////
-    int (*open)(BVConfigContext *cfgctx, const char *url, int flags);
+    int (*open)(BVConfigContext *cfgctx, const char *url, int flags, BVDictionary **options);
     int (*close)(BVConfigContext *cfgctx);
 //    int (*get_device_info)(BVConfigContext *cfgctx, BVDeviceInfo *devinfo);
+    int (*get_remote_capability)(BVConfigContext *cfgctx);
 } BVConfig;
-
 
 void bv_config_register_all(void);
 int bv_config_register(BVConfig * cfg);
 BVConfig *bv_config_next(BVConfig * cfg);
-BVConfig *bv_config_find_config(enum BVConfigType config_type);
-BVConfig *bv_config_find_config_by_name(const char *cfg_name);
+BVConfig *bv_config_find(enum BVConfigType type);
+BVConfig *bv_config_find_by_name(const char *cfg_name);
 BVConfigContext *bv_config_context_alloc(void);
 void bv_config_context_free(BVConfigContext * cfgctx);
 
+int bv_config_file_register(BVConfigFile * config_file);
+BVConfigFile *bv_config_file_next(BVConfigFile * config_file);
+BVConfigFile *bv_config_file_find(enum BVConfigFileType config_file_type);
+BVConfigFile *bv_config_file_find_by_name(const char *file_config_name);
+BVConfigFileContext *bv_config_file_context_alloc(void);
+void bv_config_file_context_free(BVConfigFileContext * cfgctx);
 //////////////////////////////////////////////////////////////////////
 #if 0
 //VIDev && VODev

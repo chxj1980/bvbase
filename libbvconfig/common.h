@@ -467,23 +467,37 @@ typedef struct _BVPPPOE {
 } BVPPPOE;
 
 typedef struct _BVMediaCapability {
-    /* data */
+    char *url;
 } BVMediaCapability;
 
+typedef struct _BVDeviceIOCapability {
+    char *url;
+    uint8_t video_sources;
+    uint8_t audio_sources;
+    uint8_t video_outputs;
+    uint8_t audio_outputs;
+    uint8_t relay_outputs;
+    uint8_t serial_ports;
+} BVDeviceIOCapability;
+
 typedef struct _BVPTZCapability {
-    /* data */
+    char *url;
 } BVPTZCapability;
 
 typedef struct _BVEventsCapability {
-    /* data */
+    char *url;
 } BVEventsCapability;
 
 typedef struct _BVDeviceCapability {
-    /* data */
+    char *url;
 } BVDeviceCapability;
 
 typedef struct _BVSystemCapability {
-    /* data */
+    BVDeviceCapability *device;
+    BVEventsCapability *event;
+    BVMediaCapability *media;
+    BVPTZCapability *ptz;
+    BVDeviceIOCapability *deviceio;
 } BVSystemCapability;
 #endif
 #ifdef __cplusplus
