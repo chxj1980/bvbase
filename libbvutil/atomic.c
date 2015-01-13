@@ -27,7 +27,7 @@
 
 #include "thread.h"
 
-static bv_mutex_t atomic_lock = PTHREAD_MUTEX_INITIALIZER;
+static BVMutex atomic_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int bvpriv_atomic_int_get(volatile int *ptr)
 {
