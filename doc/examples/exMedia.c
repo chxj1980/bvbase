@@ -33,18 +33,18 @@ int main(int argc, const char *argv[])
     BVMediaContext *mc = NULL;
     BVDictionary *opn = NULL;
     bv_media_register_all(); 
-    bv_log_set_level(BV_LOG_DEBUG);
-    av_log_set_level(BV_LOG_DEBUG);
+    bv_log_set_level(BV_LOG_INFO);
+    //av_log_set_level(BV_LOG_DEBUG);
 #if 1
     bv_dict_set(&opn, "user", "admin", 0);
-    bv_dict_set(&opn, "passwd", "123456", 0);
-    bv_dict_set(&opn, "token", "MainStream", 0);
+    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "Profile_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
 #else
     bv_dict_set(&opn, "token", "Profile_1", 0);
 #endif
-    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.150:80/onvif/media", NULL, &opn) < 0) {
+    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");
         return -1;
     }
@@ -72,14 +72,17 @@ int main(int argc, const char *argv[])
             bv_log(mc, BV_LOG_INFO, "audio sample_fmt %d\n", mc->streams[i]->codec->sample_fmt);
         }
     }
-    while (i < 3000) {
+    while (i < 6000) {
        bv_packet_init(&pkt); 
        if (bv_input_media_read(mc, &pkt) < 0)
            continue;
        //bv_log(mc, BV_LOG_DEBUG, "pkt size %d pts %lld strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
-       if (fd >= 0) {
-         write(fd, pkt.data, pkt.size);
-       }
+       if (pkt.stream_index == 0) {
+            bv_log(mc, BV_LOG_DEBUG, "%02x %02x %02x %02x \n", pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
+            if (fd >= 0) {
+                write(fd, pkt.data, pkt.size);
+            }
+        }
        i ++;
        bv_packet_free(&pkt);
     }

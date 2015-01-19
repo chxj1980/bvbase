@@ -82,6 +82,10 @@ char *bv_stristr(const char *haystack, const char *needle);
  */
 char *bv_strnstr(const char *haystack, const char *needle, size_t hay_length);
 
+int bv_strnsub(const char *haystack, const char *needle, size_t hay_length);
+
+char *bv_strsub(const char *haystack, const char *needle, int sub);
+
 /**
  * Copy the string src to dst, but no more than size - 1 bytes, and
  * null-terminate dst.

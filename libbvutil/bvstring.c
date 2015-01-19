@@ -80,6 +80,36 @@ char *bv_strnstr(const char *haystack, const char *needle, size_t hay_length)
     return NULL;
 }
 
+int bv_strnsub(const char *haystack, const char *needle, size_t hay_length)
+{
+    int sub = 0;
+    char *p = (char *)haystack;
+    for (; ; ) {
+       p = bv_strnstr(p, needle, strlen(p));
+       if (!p)
+           break;
+       sub ++;
+       p += strlen(needle);
+    }
+    return sub;
+}
+
+char *bv_strsub(const char *haystack, const char *needle, int sub)
+{
+    int lsub = 0;
+    char *p = (char *)haystack;
+    for (; ; ) {
+       p = bv_strnstr(p, needle, strlen(p));
+       if (!p)
+           break;
+       lsub ++;
+       p += strlen(needle);
+       if (lsub == sub)
+           return p;
+    }
+    return NULL;
+}
+
 size_t bv_strlcpy(char *dst, const char *src, size_t size)
 {
     size_t len = 0;

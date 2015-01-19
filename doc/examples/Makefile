@@ -8,8 +8,8 @@ CFLAGS=  -I$(BVBASE_DIR)/ffmpeg/x86/include -I$(BVBASE_DIR)/onvif/x86/include -I
 LDFLAGS= -L$(BVBASE_DIR)/ffmpeg/x86/lib -lavformat -lavcodec -lavutil -L$(BVBASE_DIR)/onvif/x86/lib -lonvifc -L$(BVBASE_DIR)/openssl/x86/lib -lssl -lcrypto  
 
 CFLAGS += -I$(BVBASE_DIR)/bvbase/x86/include
-LDFLAGS += -L$(BVBASE_DIR)/bvbase/x86/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil
-EXAMPLES=  exDevice device_scan exMedia a
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/x86/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig
+EXAMPLES=  exDevice device_scan exMedia a exConfig
 
 CFLAGS += -Wall -g
 
