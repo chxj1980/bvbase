@@ -141,7 +141,7 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     else
         ret = init_imedia(s, url);
     if (ret < 0) {
-        ret = BVERROR(ENOSYS);
+        ret = BVERROR(EINVAL);
         goto fail;
     }
     if (s->imedia->priv_data_size > 0) {
@@ -176,7 +176,11 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     *fmt = s;
 
     bv_dict_free(&tmp);
-    return s->imedia->read_header(s);
+    ret = s->imedia->read_header(s);
+    if (ret) {
+        goto fail;
+    }
+    return 0;
 fail:
     bv_dict_free(&tmp);
     bv_media_context_free(s);

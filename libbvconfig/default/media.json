@@ -251,6 +251,40 @@
 			}
 		]
 	],
+    "video_encoder_options"[
+        [
+            {
+                "name":"VideoEO_0000/0000",
+                "comment":"Storage",
+                "type":"onvif",
+                "options":[
+                    {
+                        "codec_id":"H264",
+                        "quality":"[0..10]",
+                        "nb_resolutions":2,
+                        "resolutions":[
+                            {
+                                "size":"704x576"
+                            },
+                            {
+                                "size":"1280x960"
+                            }
+                        ]
+                    },
+                    {
+                        "codec_id":"JPEG",
+                        "quality":"[0..10]"
+                    
+                    } 
+                ],
+            },
+            {
+                "name":"VideoEO_0001/0000",
+                "comment":"Transforms",
+                "type":"locale",
+            }
+        ]  
+    ],
 	"Video_encoders":[
 		[
 			{
@@ -314,7 +348,6 @@
 				"profile_level":"baseline",
 				"frame_rate":25,
 				"bitrate":2048
-dd
 			},
 			{
 				"name":"VideoE_0002/0002",
