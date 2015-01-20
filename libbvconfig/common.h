@@ -85,6 +85,16 @@ typedef struct _BVFloatRange {
     float max;
 } BVFloatRange;
 
+typedef struct _BVIntList {
+    int nb_int;
+    int64_t *items;
+} BVIntList;
+
+typedef struct _BVFloatList {
+    int nb_float;
+    float *items;
+} BVFloatList;
+
 typedef struct _BVCertification {
     char server[BV_MAX_URL_LEN];
     char user_name[BV_MAX_NAME_LEN];
@@ -205,6 +215,20 @@ typedef struct _BVVideoEncoder {
  //   BVVideoEncoderOption *option;
     void *any_attr;
 } BVVideoEncoder;
+
+typedef struct _BVAudioOption {
+    enum BVCodecID codec_id;
+    BVIntList bitrate_list;
+    BVIntList sample_rate_list;
+} BVAudioOption;
+
+typedef struct _BVAudioEncoderOption {
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
+    int nb_options;
+    BVAudioOption *options;
+    void *any_attr;
+} BVAudioEncoderOption;
 
 typedef struct _BVAudioEncoder {
     char token[BV_MAX_NAME_LEN];

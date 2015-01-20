@@ -166,3 +166,30 @@ int bv_config_get_video_encoder_options(BVConfigContext *s, int channel, int ind
         return BVERROR(ENOSYS);
     return s->config->get_video_encoder_options(s, channel, index, config);
 }
+
+int bv_config_get_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_encoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_encoder(s, channel, index, config);
+}
+
+int bv_config_set_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_audio_encoder)
+        return BVERROR(ENOSYS);
+    return s->config->set_audio_encoder(s, channel, index, config);
+}
+
+int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_encoder_options)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_encoder_options(s, channel, index, config);
+}

@@ -133,6 +133,7 @@ typedef struct _BVConfig {
 
     int (*get_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
     int (*set_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
+    int (*get_audio_encoder_options)(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
 } BVConfig;
 
 void bv_config_register_all(void);
@@ -164,6 +165,12 @@ int bv_config_get_video_encoder(BVConfigContext *s, int channel, int index, BVVi
 int bv_config_set_video_encoder(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
 
 int bv_config_get_video_encoder_options(BVConfigContext *s, int channel, int index, BVVideoEncoderOption *config);
+
+int bv_config_get_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
+
+int bv_config_set_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
+
+int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
 #if 0
 //VIDev && VODev
 int bv_config_get_video_source_device(BVConfigContext *s, int index, BVVideoSourceDevice *video_source_device);
