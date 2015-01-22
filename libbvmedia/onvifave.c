@@ -45,6 +45,7 @@ typedef struct OnvifContext {
     BVRational video_rate;
     int width, height;
     char onvif_url[128];
+    char *media_url;
     int timeout;
     int snpsht;
     struct soap *soap;
@@ -62,6 +63,7 @@ static const BVOption options[] = {
     {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
     {"video_rate", "", OFFSET(video_rate), BV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC},
     {"size", "set video size", OFFSET(width), BV_OPT_TYPE_IMAGE_SIZE, {.str = "hd720"}, 0, 0, DEC},
+    {"media_url", "", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"timeout", "", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = -5000}, INT_MIN, INT_MAX, DEC},
 
     {NULL}
@@ -187,7 +189,9 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     struct tt__StreamSetup StreamSetup;    /* required element of type tt:StreamSetup */
     struct tt__Transport Transport;    /* required element of type tt:Transport */
     struct SOAP_ENV__Header header;
-
+    if (!onvifctx->media_url) {
+        return BVERROR(ENOSYS);
+    }
     trt__GetStreamUri.ProfileToken = onvifctx->token;
     trt__GetStreamUri.StreamSetup = &StreamSetup;
     StreamSetup.Transport = &Transport;
@@ -206,7 +210,7 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
     }
 
-    retval = soap_call___trt__GetStreamUri(soap, onvifctx->svrurl , NULL, &trt__GetStreamUri, &trt__GetStreamUriResponse);
+    retval = soap_call___trt__GetStreamUri(soap, onvifctx->media_url , NULL, &trt__GetStreamUri, &trt__GetStreamUriResponse);
     if (retval != SOAP_OK) {
         bv_log(NULL, BV_LOG_INFO, "get media url error\n");
         bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -227,7 +231,6 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     return ret;
 }
 
-
 static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
@@ -236,12 +239,15 @@ static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
     struct _trt__GetSnapshotUri trt__GetSnapshotUri;
     struct _trt__GetSnapshotUriResponse trt__GetSnapshotUriResponse;
 
+    if (!onvifctx->media_url) {
+        return BVERROR(ENOSYS);
+    }
     trt__GetSnapshotUri.ProfileToken = onvifctx->token;
 
     if (onvifctx->user && onvifctx->passwd) {
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
     }
-    retval = soap_call___trt__GetSnapshotUri(soap, onvifctx->svrurl, NULL, &trt__GetSnapshotUri, &trt__GetSnapshotUriResponse);
+    retval = soap_call___trt__GetSnapshotUri(soap, onvifctx->media_url, NULL, &trt__GetSnapshotUri, &trt__GetSnapshotUriResponse);
     if(retval != SOAP_OK) {
         bv_log(NULL, BV_LOG_INFO, "get SnapshotUri error");
         bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -257,28 +263,28 @@ static int bv_onvif_service_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
     struct soap *soap = onvifctx->soap;
-    struct _tds__GetCapabilities tds__GetCapabilities;
-    struct _tds__GetCapabilitiesResponse tds__GetCapabilitiesResponse;
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
     enum tt__CapabilityCategory Category = tt__CapabilityCategory__Media;
-    
+
+    MEMSET_STRUCT(request);
+    MEMSET_STRUCT(response);
+
     if (onvifctx->user && onvifctx->passwd) {
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
     }
 
-    MEMSET_STRUCT(tds__GetCapabilities);
-    MEMSET_STRUCT(tds__GetCapabilitiesResponse);
-
-    tds__GetCapabilities.Category = &Category;
-    tds__GetCapabilities.__sizeCategory = 1;
-    retval = soap_call___tds__GetCapabilities(soap, onvifctx->svrurl, NULL, &tds__GetCapabilities, &tds__GetCapabilitiesResponse);
+    request.Category = &Category;
+    request.__sizeCategory = 1;
+    retval = soap_call___tds__GetCapabilities(soap, onvifctx->svrurl, NULL, &request, &response);
     if(retval != SOAP_OK) {
         bv_log(NULL, BV_LOG_INFO, "get MediaService URI error");
         bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
     } else {
-        strncpy(onvifctx->svrurl, tds__GetCapabilitiesResponse.Capabilities->Media->XAddr, sizeof(onvifctx->svrurl));
+        onvifctx->media_url = bv_strdup(response.Capabilities->Media->XAddr);
     }
-    bv_log(onvifctx, BV_LOG_INFO, "Get MediaService URI %s\n", onvifctx->svrurl);
-    return retval;
+    bv_log(onvifctx, BV_LOG_INFO, "Get MediaService URI %s\n", onvifctx->media_url);
+    return 0;
 }
 
 //url like onvifave://192.168.6.149:8899/onvif/device_serveces
@@ -286,7 +292,6 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
 {
     int ret;
     char *p;
-    int i = 0;
     OnvifContext *onvifctx = s->priv_data;
     if (!onvifctx->token) {
         bv_log(s, BV_LOG_ERROR, "must set onvifave token url\n");

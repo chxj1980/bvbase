@@ -74,8 +74,8 @@ Standard options:
   --fatal-warnings         fail if any configure warning is generated
   --prefix=PREFIX          install in PREFIX [$prefix]
   --bindir=DIR             install binaries in DIR [PREFIX/bin]
-  --datadir=DIR            install data files in DIR [PREFIX/share/ffmpeg]
-  --docdir=DIR             install documentation in DIR [PREFIX/share/doc/ffmpeg]
+  --datadir=DIR            install data files in DIR [PREFIX/share/bvbase]
+  --docdir=DIR             install documentation in DIR [PREFIX/share/doc/bvbase]
   --libdir=DIR             install libs in DIR [PREFIX/lib]
   --shlibdir=DIR           install shared libs in DIR [LIBDIR]
   --incdir=DIR             install includes in DIR [PREFIX/include]
@@ -1303,6 +1303,8 @@ COMPONENT_LIST="
     bvprotocols
 	bvdevices
 	bvindevs
+	bvmuxers
+	bvdemuxers
 	bvsystems
 	bvconfigs
 	bvcfiles
@@ -2680,8 +2682,8 @@ logfile="config.log"
 # installation paths
 prefix_default="/usr/local"
 bindir_default='${prefix}/bin'
-datadir_default='${prefix}/share/ffmpeg'
-docdir_default='${prefix}/share/doc/ffmpeg'
+datadir_default='${prefix}/share/bvbase'
+docdir_default='${prefix}/share/doc/bvbase'
 incdir_default='${prefix}/include'
 libdir_default='${prefix}/lib'
 mandir_default='${prefix}/share/man'
@@ -2826,13 +2828,15 @@ find_things(){
 #PROTOCOL_LIST=$(find_things protocol PROTOCOL libavformat/allformats.c)
 #FILTER_LIST=$(find_things   filter   FILTER   libavfilter/allfilters.c)
 
-BVDEVICE_LIST=$(find_things   device DEVICE libbvdevice/alldevices.c)
-BVCONFIG_LIST=$(find_things   config CONFIG libbvconfig/allconfigs.c)
-BVCFILE_LIST=$(find_things    cfile  CFILE libbvconfig/allconfigs.c)
-BVSERVER_LIST=$(find_things   server SERVER libbvserver/allservers.c)
-BVSYSTEM_LIST=$(find_things   system SYSTEM libbvsystem/allsystems.c)
-BVINDEV_LIST=$(find_things	  indev  INDEV libbvmedia/allmedias.c)
-BVPROTOCOL_LIST=$(find_things protocol PROTOCOL libbvprotocol/allprotocols.c)
+BVDEVICE_LIST=$(find_things   device	DEVICE		libbvdevice/alldevices.c)
+BVCONFIG_LIST=$(find_things   config	CONFIG		libbvconfig/allconfigs.c)
+BVCFILE_LIST=$(find_things    cfile		CFILE		libbvconfig/allconfigs.c)
+BVSERVER_LIST=$(find_things   server	SERVER		libbvserver/allservers.c)
+BVSYSTEM_LIST=$(find_things   system	SYSTEM		libbvsystem/allsystems.c)
+BVINDEV_LIST=$(find_things	  indev		INDEV		libbvmedia/allmedias.c)
+BVMUXER_LIST=$(find_things    muxer		_MUX		libbvmedia/allmedias.c)
+BVDEMUXER_LIST=$(find_things  demuxer	DEMUX		libbvmedia/allmedias.c)
+BVPROTOCOL_LIST=$(find_things protocol	PROTOCOL	libbvprotocol/allprotocols.c)
 
 ALL_COMPONENTS="
     $BSF_LIST
@@ -2853,6 +2857,8 @@ ALL_COMPONENTS="
 	$BVSERVER_LIST
 	$BVSYSTEM_LIST
 	$BVINDEV_LIST
+	$BVMUXER_LIST
+	$BVDEMUXER_LIST
 	$BVPROTOCOL_LIST
 "
 
@@ -3051,7 +3057,7 @@ case "$toolchain" in
     msvc)
         # Check whether the current MSVC version needs the C99 converter.
         # From MSVC 2013 (compiler major version 18) onwards, it does actually
-        # support enough of C99 to build ffmpeg. Default to the new
+        # support enough of C99 to build BVBase Default to the new
         # behaviour if the regexp was unable to match anything, since this
         # successfully parses the version number of existing supported
         # versions that require the converter (MSVC 2010 and 2012).
@@ -5542,7 +5548,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvenc bvprotocol; do
+for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvmuxer bvdemuxer bvenc bvprotocol; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns

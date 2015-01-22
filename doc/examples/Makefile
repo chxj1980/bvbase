@@ -3,7 +3,7 @@ include $(SUBDIR)../../config.mak
 
 BVBASE_DIR=$(shell pwd)/../../3rdparty/binary
 
-PLANTFORM=hi3515
+PLANTFORM=x86
 
 CFLAGS=  -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include -I$(BVBASE_DIR)/onvif/$(PLANTFORM)/include -I$(BVBASE_DIR)/openssl/$(PLANTFORM)/include -std=c99 -fomit-frame-pointer -pthread  
 

@@ -146,6 +146,8 @@ static int init_muxer(BVMediaContext *s, BVDictionary **options)
                break;
        }
     }
+    //FIXME check others
+    return 0;
 
 fail:
     bv_dict_free(&tmp);

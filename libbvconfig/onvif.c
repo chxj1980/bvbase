@@ -36,6 +36,7 @@ typedef struct OnvifContext {
     char *device_url;
     char *ptz_url;
     char *deviceio_url;
+    char *imaging_url;
     char *user;
     char *passwd;
     struct soap *soap;
@@ -77,40 +78,44 @@ static void bv_soap_free(struct soap *soap)
 static int bv_onvif_service_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
-    int i = 0;
     struct soap *soap = onvifctx->soap;
-    struct _tds__GetServices tds__GetServices;
-    struct _tds__GetServicesResponse tds__GetServicesResponse;
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
+    enum tt__CapabilityCategory Category = tt__CapabilityCategory__All;
 
-    MEMSET_STRUCT(tds__GetServices);
-    MEMSET_STRUCT(tds__GetServicesResponse);
-    tds__GetServices.IncludeCapability = xsd__boolean__false_;
+    MEMSET_STRUCT(request);
+    MEMSET_STRUCT(response);
 
-    retval = soap_call___tds__GetServices(soap, onvifctx->svrurl, NULL, &tds__GetServices, &tds__GetServicesResponse);
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
 
+    request.Category = &Category;
+    request.__sizeCategory = 1;
+    retval = soap_call___tds__GetCapabilities(soap, onvifctx->svrurl, NULL, &request, &response);
     if(retval != SOAP_OK) {
-        bv_log(NULL, BV_LOG_ERROR, "get Services URI error");
-        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        bv_log(NULL, BV_LOG_INFO, "get Services URI error");
+        bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
         return retval;
     }
-    for (i = 0; i < tds__GetServicesResponse.__sizeService; i++) {
-       if (bv_strcasecmp(SOAP_NAMESPACE_OF_tds, tds__GetServicesResponse.Service[i].Namespace) == 0) {
-           onvifctx->device_url = bv_strdup(tds__GetServicesResponse.Service[i].XAddr);
-       }
-
-       if (bv_strcasecmp(SOAP_NAMESPACE_OF_trt, tds__GetServicesResponse.Service[i].Namespace) == 0) {
-            onvifctx->media_url = bv_strdup(tds__GetServicesResponse.Service[i].XAddr);
-       }
-
-       if (bv_strcasecmp(SOAP_NAMESPACE_OF_tptz, tds__GetServicesResponse.Service[i].Namespace) == 0) {
-           onvifctx->ptz_url = bv_strdup(tds__GetServicesResponse.Service[i].XAddr);
-       }
-
-       if (bv_strcasecmp(SOAP_NAMESPACE_OF_tmd, tds__GetServicesResponse.Service[i].Namespace) == 0) {
-           onvifctx->deviceio_url = bv_strdup(tds__GetServicesResponse.Service[i].XAddr);
-       }
-    } 
-
+    if (response.Capabilities->Media) {
+        onvifctx->media_url = bv_strdup(response.Capabilities->Media->XAddr);
+    }
+    if (response.Capabilities->Device) {
+        onvifctx->device_url = bv_strdup(response.Capabilities->Device->XAddr);
+    }
+    if (response.Capabilities->PTZ) {
+        onvifctx->ptz_url = bv_strdup(response.Capabilities->PTZ->XAddr);
+    }
+    if (response.Capabilities->Imaging) {
+        onvifctx->imaging_url = bv_strdup(response.Capabilities->Imaging->XAddr);
+    }
+    if (response.Capabilities->Extension) {
+        if (response.Capabilities->Extension->DeviceIO) {
+            onvifctx->deviceio_url = bv_strdup(response.Capabilities->Extension->DeviceIO->XAddr);
+        }
+    
+    }
     return 0;
 }
 
@@ -121,6 +126,14 @@ static int onvif_probe(BVConfigContext *h, BVProbeData *p)
     return 0;
 }
 
+static void dump_service_url(OnvifContext *onvifctx)
+{
+    bv_log(onvifctx, BV_LOG_DEBUG, "onvif device service url %s\n", onvifctx->device_url);
+    bv_log(onvifctx, BV_LOG_DEBUG, "onvif media service url %s\n", onvifctx->media_url);
+    bv_log(onvifctx, BV_LOG_DEBUG, "onvif ptz service url %s\n", onvifctx->ptz_url);
+    bv_log(onvifctx, BV_LOG_DEBUG, "onvif imaging service url %s\n", onvifctx->imaging_url);
+    bv_log(onvifctx, BV_LOG_DEBUG, "onvif deviceio service url %s\n", onvifctx->deviceio_url);
+}
 //url likes onvif_cfg://192.168.6.149:80/onvif/device_service
 static int onvif_open(BVConfigContext *h)
 {
@@ -146,7 +159,7 @@ static int onvif_open(BVConfigContext *h)
         ret = BVERROR(EINVAL);
         goto fail;
     }
-
+    dump_service_url(onvifctx);
     return 0;
 fail:
     bv_soap_free(onvifctx->soap);
@@ -249,7 +262,7 @@ static int onvif_get_device_info(BVConfigContext *h, BVDeviceInfo *devinfo)
     }
 
     retval = bv_onvif_get_device_io(onvifctx, devinfo);
-    if (retval != BVERROR(ENOSYS)) {
+    if (retval && retval != BVERROR(ENOSYS)) {
         bv_log(h, BV_LOG_ERROR, "get onvif device IO info error\n");
         return retval;
     }
@@ -808,6 +821,9 @@ static int onvif_set_audio_encoder(BVConfigContext *h, int channel, int index, B
     if (!request.Configuration) {
         return BVERROR(EINVAL);
     }
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
     bv_log(h, BV_LOG_DEBUG, "set audio encoder name %s token %s\n", configs_name, configs_token);
     request.Configuration->Name = configs_name;
     request.Configuration->token = configs_token;
@@ -923,6 +939,7 @@ static const BVOption options[] = {
     {"ptz_url", "user password", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"device_url", "user password", OFFSET(device_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"deviceio_url", "user password", OFFSET(deviceio_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"imaging_url", "user password", OFFSET(imaging_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 
