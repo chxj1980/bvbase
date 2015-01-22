@@ -43,9 +43,9 @@ int main(int argc, const char *argv[])
         return BVERROR(EINVAL);
     }
     bv_dict_set(&opn, "user", "admin", 0);
-    bv_dict_set(&opn, "passwd", "12345", 0);
-    bv_dict_set(&opn, "token", "001", 0);
-    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:8899/onvif/device_service", &opn)) < 0) {
+//    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "MainStream", 0);
+    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.134:8899/onvif/device_service", &opn))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);

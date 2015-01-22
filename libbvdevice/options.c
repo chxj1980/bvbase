@@ -73,6 +73,6 @@ void bv_device_context_free(BVDeviceContext * devctx)
     if (devctx->buffer)
         bv_free(devctx->buffer);
     bv_free(devctx);
-    return; 
+    return;
 }
 

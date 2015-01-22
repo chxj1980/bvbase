@@ -149,11 +149,11 @@ int main(int argc, const char *argv[])
 
     bv_log_set_level(BV_LOG_DEBUG);
     bv_config_register_all();
-//    bv_dict_set(&options, "user", "admin", 0);
+    bv_dict_set(&options, "user", "admin", 0);
     bv_dict_set(&options, "passwd", "12345", 0);
     bv_dict_set(&options, "timeout", "5", 0);
     memset(&devinfo, 0, sizeof(devinfo));
-    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:8899/onvif/device_service", NULL, &options)) < 0) {
+    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:80/onvif/device_service", NULL, &options)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error");
         bv_dict_free(&options);
         return BVERROR(EINVAL);
@@ -173,7 +173,6 @@ int main(int argc, const char *argv[])
         dump_profiles(profiles + i);
 //        free_profiles(profiles + i);
     }
-
     strcpy(video_encoder.token, profiles[0].video_encoder->token);
     if (bv_config_get_video_encoder(config_context, 1, 1, &video_encoder) < 0) {
         bv_log(config_context, BV_LOG_ERROR, "get encoder config error\n");
@@ -206,8 +205,8 @@ int main(int argc, const char *argv[])
         dump_audio_encoder(&audio_encoder);
     }
 
-    audio_encoder.codec_context.sample_rate = 16;
-    audio_encoder.codec_context.bit_rate = 32;
+    audio_encoder.codec_context.sample_rate = 8;
+    audio_encoder.codec_context.bit_rate = 16;
     bv_log(config_context, BV_LOG_INFO, "audio encoder token %s\n", audio_encoder.token);
     if (bv_config_set_audio_encoder(config_context, 1, 1, &audio_encoder)) {
         bv_log(config_context, BV_LOG_ERROR, "set audio config error\n");

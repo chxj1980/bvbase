@@ -437,7 +437,7 @@ int64_t bv_url_size(BVURLContext *h)
 int bv_url_get_file_handle(BVURLContext *h)
 {
     if (!h->prot->url_get_file_handle)
-        return -1;
+        return BVERROR(ENOSYS);
     return h->prot->url_get_file_handle(h);
 }
 
@@ -459,7 +459,7 @@ int bv_url_get_multi_file_handle(BVURLContext *h, int **handles, int *numhandles
 int bv_url_shutdown(BVURLContext *h, int flags)
 {
     if (!h->prot->url_shutdown)
-        return BVERROR(EINVAL);
+        return BVERROR(ENOSYS);
     return h->prot->url_shutdown(h, flags);
 }
 

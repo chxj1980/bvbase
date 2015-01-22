@@ -40,6 +40,20 @@
 
 #define REGISTER_INOUTDEV(X, x) REGISTER_OUTDEV(X, x); REGISTER_INDEV(X, x)
 
+#define REGISTER_MUXER(X, x)                                           \
+    {                                                                   \
+        extern BVOutputMedia bv_##x##_muxer;                           \
+        if (BV_CONFIG_##X##_MUXER)                                        \
+            bv_output_media_register(&bv_##x##_muxer);                 \
+    }
+
+#define REGISTER_DEMUXER(X, x)                                            \
+    {                                                                   \
+        extern BVInputMedia bv_##x##_demuxer;                          \
+        if (BV_CONFIG_##X##_DEMUXER)                                         \
+            bv_input_media_register(&bv_##x##_demuxer);                \
+    }
+
 #if BV_CONFIG_ONVIFAVE_INDEV
 #include <libavformat/avformat.h>
 #endif
@@ -51,6 +65,7 @@ void bv_media_register_all(void)
     initialized = 1;
     //REGISTER_INDEV(HISAVE, hisave);
     REGISTER_INDEV(ONVIFAVE, onvifave);
+    REGISTER_MUXER(DAV, dav);
 #if BV_CONFIG_ONVIFAVE_INDEV
     av_register_all();
     avformat_network_init();
