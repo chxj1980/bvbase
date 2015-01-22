@@ -27,9 +27,9 @@
 #ifndef BVUTIL_PCA_H
 #define BVUTIL_PCA_H
 
-struct PCA *ff_pca_init(int n);
-void ff_pca_free(struct PCA *pca);
-void ff_pca_add(struct PCA *pca, const double *v);
-int ff_pca(struct PCA *pca, double *eigenvector, double *eigenvalue);
+struct PCA *bb_pca_init(int n);
+void bb_pca_free(struct PCA *pca);
+void bb_pca_add(struct PCA *pca, const double *v);
+int bb_pca(struct PCA *pca, double *eigenvector, double *eigenvalue);
 
 #endif /* BVUTIL_PCA_H */

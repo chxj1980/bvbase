@@ -34,19 +34,19 @@
 
 extern const int bv_md5_size;
 
-struct AVMD5;
+struct BVMD5;
 
 /**
- * Allocate an AVMD5 context.
+ * Allocate an BVMD5 context.
  */
-struct AVMD5 *bv_md5_alloc(void);
+struct BVMD5 *bv_md5_alloc(void);
 
 /**
  * Initialize MD5 hashing.
  *
  * @param ctx pointer to the function context (of size bv_md5_size)
  */
-void bv_md5_init(struct AVMD5 *ctx);
+void bv_md5_init(struct BVMD5 *ctx);
 
 /**
  * Update hash value.
@@ -55,7 +55,7 @@ void bv_md5_init(struct AVMD5 *ctx);
  * @param src input data to update hash with
  * @param len input data length
  */
-void bv_md5_update(struct AVMD5 *ctx, const uint8_t *src, int len);
+void bv_md5_update(struct BVMD5 *ctx, const uint8_t *src, int len);
 
 /**
  * Finish hashing and output digest value.
@@ -63,7 +63,7 @@ void bv_md5_update(struct AVMD5 *ctx, const uint8_t *src, int len);
  * @param ctx hash function context
  * @param dst buffer where output digest value is stored
  */
-void bv_md5_final(struct AVMD5 *ctx, uint8_t *dst);
+void bv_md5_final(struct BVMD5 *ctx, uint8_t *dst);
 
 /**
  * Hash an array of data.

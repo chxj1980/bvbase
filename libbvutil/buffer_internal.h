@@ -73,7 +73,7 @@ typedef struct BufferPoolEntry {
 } BufferPoolEntry;
 
 struct BVBufferPool {
-    AVMutex mutex;
+    BVMutex mutex;
     BufferPoolEntry *pool;
 
     /*

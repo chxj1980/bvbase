@@ -41,8 +41,8 @@
 #include "log.h"
 
 #if BV_HAVE_PTHREADS
-#include <pthread.h>
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#include "thread.h"
+static BVMutex mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #define LINE_SZ 1024
@@ -67,11 +67,11 @@ static const uint8_t color[16 + BV_CLASS_CATEGORY_NB] = {
     [16+BV_CLASS_CATEGORY_DEMUXER         ] =  5,
     [16+BV_CLASS_CATEGORY_ENCODER         ] = 11,
     [16+BV_CLASS_CATEGORY_DECODER         ] =  3,
-    [16+BV_CLASS_CATEGORY_FILTER          ] = 10,
-    [16+BV_CLASS_CATEGORY_BITSTREAM_FILTER] =  9,
-    [16+BV_CLASS_CATEGORY_SWSCALER        ] =  7,
-    [16+BV_CLASS_CATEGORY_SWRESAMPLER     ] =  7,
-    [16+BV_CLASS_CATEGORY_DEVICE_VIDEO_OUTPUT ] = 13,
+    [16+BV_CLASS_CATEGORY_CONFIG          ] = 10,
+    [16+BV_CLASS_CATEGORY_PROTOCOL        ] =  9,
+    [16+BV_CLASS_CATEGORY_SYSTEM          ] =  7,
+    [16+BV_CLASS_CATEGORY_SERVER          ] =  7,
+    [16+BV_CLASS_CATEGORY_DEVICE          ] = 13,
     [16+BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT  ] = 5,
     [16+BV_CLASS_CATEGORY_DEVICE_AUDIO_OUTPUT ] = 13,
     [16+BV_CLASS_CATEGORY_DEVICE_AUDIO_INPUT  ] = 5,
@@ -98,11 +98,11 @@ static const uint32_t color[16 + BV_CLASS_CATEGORY_NB] = {
     [16+BV_CLASS_CATEGORY_DEMUXER         ] = 207 << 8 | 0x05,
     [16+BV_CLASS_CATEGORY_ENCODER         ] =  51 << 8 | 0x16,
     [16+BV_CLASS_CATEGORY_DECODER         ] =  39 << 8 | 0x06,
-    [16+BV_CLASS_CATEGORY_FILTER          ] = 155 << 8 | 0x12,
-    [16+BV_CLASS_CATEGORY_BITSTREAM_FILTER] = 192 << 8 | 0x14,
-    [16+BV_CLASS_CATEGORY_SWSCALER        ] = 153 << 8 | 0x14,
-    [16+BV_CLASS_CATEGORY_SWRESAMPLER     ] = 147 << 8 | 0x14,
-    [16+BV_CLASS_CATEGORY_DEVICE_VIDEO_OUTPUT ] = 213 << 8 | 0x15,
+    [16+BV_CLASS_CATEGORY_CONFIG          ] = 155 << 8 | 0x12,
+    [16+BV_CLASS_CATEGORY_PROTOCOL        ] = 192 << 8 | 0x14,
+    [16+BV_CLASS_CATEGORY_SYSTEM          ] = 153 << 8 | 0x14,
+    [16+BV_CLASS_CATEGORY_SERVER          ] = 147 << 8 | 0x14,
+    [16+BV_CLASS_CATEGORY_DEVICE          ] = 213 << 8 | 0x15,
     [16+BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT  ] = 207 << 8 | 0x05,
     [16+BV_CLASS_CATEGORY_DEVICE_AUDIO_OUTPUT ] = 213 << 8 | 0x15,
     [16+BV_CLASS_CATEGORY_DEVICE_AUDIO_INPUT  ] = 207 << 8 | 0x05,
@@ -300,7 +300,7 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
     if (level > bv_log_level)
         return;
 #if BV_HAVE_PTHREADS
-    pthread_mutex_lock(&mutex);
+    bv_mutex_lock(&mutex);
 #endif
 
     format_line(ptr, level, fmt, vl, part, &print_prefix, type);
@@ -334,7 +334,7 @@ void bv_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
 end:
     bv_bprint_finalize(part+3, NULL);
 #if BV_HAVE_PTHREADS
-    pthread_mutex_unlock(&mutex);
+    bv_mutex_unlock(&mutex);
 #endif
 }
 

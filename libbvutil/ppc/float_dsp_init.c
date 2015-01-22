@@ -25,16 +25,16 @@
 #include "libbvutil/ppc/cpu.h"
 #include "float_dsp_altivec.h"
 
-bv_cold void ff_float_dsp_init_ppc(BVFloatDSPContext *fdsp, int bit_exact)
+bv_cold void bb_float_dsp_init_ppc(BVFloatDSPContext *fdsp, int bit_exact)
 {
     if (!PPC_ALTIVEC(bv_get_cpu_flags()))
         return;
 
-    fdsp->vector_fmul = ff_vector_fmul_altivec;
-    fdsp->vector_fmul_add = ff_vector_fmul_add_altivec;
-    fdsp->vector_fmul_reverse = ff_vector_fmul_reverse_altivec;
+    fdsp->vector_fmul = bb_vector_fmul_altivec;
+    fdsp->vector_fmul_add = bb_vector_fmul_add_altivec;
+    fdsp->vector_fmul_reverse = bb_vector_fmul_reverse_altivec;
 
     if (!bit_exact) {
-        fdsp->vector_fmul_window = ff_vector_fmul_window_altivec;
+        fdsp->vector_fmul_window = bb_vector_fmul_window_altivec;
     }
 }

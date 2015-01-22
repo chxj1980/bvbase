@@ -27,7 +27,7 @@
 #define REGISTER_PROTOCOL(X, x)                                         \
     {                                                                   \
         extern BVURLProtocol bv_##x##_protocol;                           \
-        if (CONFIG_##X##_PROTOCOL)                                      \
+        if (BV_CONFIG_##X##_PROTOCOL)                                      \
             bv_protocol_register(&bv_##x##_protocol);                \
     }
 
@@ -40,4 +40,6 @@ void bv_protocol_register_all(void)
     initialized = 1;
 
     REGISTER_PROTOCOL(FILE, file);
+    REGISTER_PROTOCOL(TCP, tcp);
+    REGISTER_PROTOCOL(UDP, udp);
 }

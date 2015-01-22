@@ -1,14 +1,19 @@
 # use pkg-config for getting CFLAGS and LDLIBS
 include $(SUBDIR)../../config.mak
 
+BVBASE_DIR=$(shell pwd)/../../3rdparty/binary
+
+PLANTFORM=x86
+
+CFLAGS=  -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include -I$(BVBASE_DIR)/onvif/$(PLANTFORM)/include -I$(BVBASE_DIR)/openssl/$(PLANTFORM)/include -std=c99 -fomit-frame-pointer -pthread  
+
+LDFLAGS= -L$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/lib -lavformat -lavcodec -lavutil -L$(BVBASE_DIR)/onvif/$(PLANTFORM)/lib -lonvifc -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto  
+
+CFLAGS += -I$(BVBASE_DIR)/bvbase/$(PLANTFORM)/include
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig
+EXAMPLES=  exDevice device_scan exMedia a exConfig
+
 CFLAGS += -Wall -g
-#CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
-#LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
-
-CFLAGS = -I ../../include/x86 -I ../../3rdparty/binary/ffmpeg/x86/include 
-
-LDFLAGS =  -L ../../3rdparty/binary/onvif/x86/lib -lonvifc -L ../../lib/x86/ -lbvutil -lbvdevice -lbvmedia -lbvcodec -lssl -L ../../3rdparty/binary/ffmpeg/x86/lib  -lavformat -lavcodec -lavutil
-EXAMPLES=  exDevice device_scan exMedia
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 
@@ -17,9 +22,6 @@ OBJS=$(addsuffix .o,$(EXAMPLES))
 .phony: all clean-test clean
 
 all: $(OBJS) $(EXAMPLES)
-
-clean-test:
-	$(RM) test*.pgm test.h264 test.mp2 test.sw test.mpg
 
 clean: 
 	$(RM) $(EXAMPLES) $(OBJS)

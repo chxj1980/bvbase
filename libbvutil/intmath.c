@@ -25,15 +25,15 @@
 
 int bv_log2(unsigned v)
 {
-    return ff_log2(v);
+    return bb_log2(v);
 }
 
 int bv_log2_16bit(unsigned v)
 {
-    return ff_log2_16bit(v);
+    return bb_log2_16bit(v);
 }
 
 int bv_ctz(int v)
 {
-    return ff_ctz(v);
+    return bb_ctz(v);
 }

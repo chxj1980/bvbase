@@ -20,7 +20,7 @@
 #include "libbvutil/cpu_internal.h"
 #include "config.h"
 
-int ff_get_cpu_flags_aarch64(void)
+int bb_get_cpu_flags_aarch64(void)
 {
     return BV_CPU_FLAG_ARMV8 * BV_HAVE_ARMV8 |
            BV_CPU_FLAG_NEON  * BV_HAVE_NEON  |

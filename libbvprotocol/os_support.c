@@ -25,28 +25,28 @@
 #define _SVID_SOURCE
 
 #include "config.h"
-#include "avformat.h"
+#include "bvurl.h"
 #include "os_support.h"
 
-#if CONFIG_NETWORK
+#if BV_CONFIG_NETWORK
 #include <fcntl.h>
-#if !HAVE_POLL_H
-#if HAVE_SYS_TIME_H
+#if !BV_HAVE_POLL_H
+#if BV_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif /* HAVE_SYS_TIME_H */
-#if HAVE_WINSOCK2_H
+#endif /* BV_HAVE_SYS_TIME_H */
+#if BV_HAVE_WINSOCK2_H
 #include <winsock2.h>
-#elif HAVE_SYS_SELECT_H
+#elif BV_HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif /* HAVE_WINSOCK2_H */
-#endif /* !HAVE_POLL_H */
+#endif /* BV_HAVE_WINSOCK2_H */
+#endif /* !BV_HAVE_POLL_H */
 
 #include "network.h"
 
-#if !HAVE_INET_ATON
+#if !BV_HAVE_INET_ATON
 #include <stdlib.h>
 
-int ff_inet_aton(const char *str, struct in_addr *add)
+int bb_inet_aton(const char *str, struct in_addr *add)
 {
     unsigned int add1 = 0, add2 = 0, add3 = 0, add4 = 0;
 
@@ -61,21 +61,21 @@ int ff_inet_aton(const char *str, struct in_addr *add)
     return 1;
 }
 #else
-int ff_inet_aton(const char *str, struct in_addr *add)
+int bb_inet_aton(const char *str, struct in_addr *add)
 {
     return inet_aton(str, add);
 }
-#endif /* !HAVE_INET_ATON */
+#endif /* !BV_HAVE_INET_ATON */
 
-#if !HAVE_GETADDRINFO
-int ff_getaddrinfo(const char *node, const char *service,
+#if !BV_HAVE_GETADDRINFO
+int bb_getaddrinfo(const char *node, const char *service,
                    const struct addrinfo *hints, struct addrinfo **res)
 {
     struct hostent *h = NULL;
     struct addrinfo *ai;
     struct sockaddr_in *sin;
 
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
     int (WSAAPI *win_getaddrinfo)(const char *node, const char *service,
                                   const struct addrinfo *hints,
                                   struct addrinfo **res);
@@ -83,23 +83,23 @@ int ff_getaddrinfo(const char *node, const char *service,
     win_getaddrinfo = GetProcAddress(ws2mod, "getaddrinfo");
     if (win_getaddrinfo)
         return win_getaddrinfo(node, service, hints, res);
-#endif /* HAVE_WINSOCK2_H */
+#endif /* BV_HAVE_WINSOCK2_H */
 
     *res = NULL;
-    sin  = av_mallocz(sizeof(struct sockaddr_in));
+    sin  = bv_mallocz(sizeof(struct sockaddr_in));
     if (!sin)
         return EAI_FAIL;
     sin->sin_family = AF_INET;
 
     if (node) {
-        if (!ff_inet_aton(node, &sin->sin_addr)) {
+        if (!bb_inet_aton(node, &sin->sin_addr)) {
             if (hints && (hints->ai_flags & AI_NUMERICHOST)) {
-                av_free(sin);
+                bv_free(sin);
                 return EAI_FAIL;
             }
             h = gethostbyname(node);
             if (!h) {
-                av_free(sin);
+                bv_free(sin);
                 return EAI_FAIL;
             }
             memcpy(&sin->sin_addr, h->h_addr_list[0], sizeof(struct in_addr));
@@ -116,9 +116,9 @@ int ff_getaddrinfo(const char *node, const char *service,
     if (service)
         sin->sin_port = htons(atoi(service));
 
-    ai = av_mallocz(sizeof(struct addrinfo));
+    ai = bv_mallocz(sizeof(struct addrinfo));
     if (!ai) {
-        av_free(sin);
+        bv_free(sin);
         return EAI_FAIL;
     }
 
@@ -140,15 +140,15 @@ int ff_getaddrinfo(const char *node, const char *service,
     ai->ai_addr    = (struct sockaddr *)sin;
     ai->ai_addrlen = sizeof(struct sockaddr_in);
     if (hints && (hints->ai_flags & AI_CANONNAME))
-        ai->ai_canonname = h ? av_strdup(h->h_name) : NULL;
+        ai->ai_canonname = h ? bv_strdup(h->h_name) : NULL;
 
     ai->ai_next = NULL;
     return 0;
 }
 
-void ff_freeaddrinfo(struct addrinfo *res)
+void bb_freeaddrinfo(struct addrinfo *res)
 {
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
     void (WSAAPI *win_freeaddrinfo)(struct addrinfo *res);
     HMODULE ws2mod = GetModuleHandle("ws2_32.dll");
     win_freeaddrinfo = (void (WSAAPI *)(struct addrinfo *res))
@@ -157,20 +157,20 @@ void ff_freeaddrinfo(struct addrinfo *res)
         win_freeaddrinfo(res);
         return;
     }
-#endif /* HAVE_WINSOCK2_H */
+#endif /* BV_HAVE_WINSOCK2_H */
 
-    av_freep(&res->ai_canonname);
-    av_freep(&res->ai_addr);
-    av_freep(&res);
+    bv_freep(&res->ai_canonname);
+    bv_freep(&res->ai_addr);
+    bv_freep(&res);
 }
 
-int ff_getnameinfo(const struct sockaddr *sa, int salen,
+int bb_getnameinfo(const struct sockaddr *sa, int salen,
                    char *host, int hostlen,
                    char *serv, int servlen, int flags)
 {
     const struct sockaddr_in *sin = (const struct sockaddr_in *)sa;
 
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
     int (WSAAPI *win_getnameinfo)(const struct sockaddr *sa, socklen_t salen,
                                   char *host, DWORD hostlen,
                                   char *serv, DWORD servlen, int flags);
@@ -178,7 +178,7 @@ int ff_getnameinfo(const struct sockaddr *sa, int salen,
     win_getnameinfo = GetProcAddress(ws2mod, "getnameinfo");
     if (win_getnameinfo)
         return win_getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
-#endif /* HAVE_WINSOCK2_H */
+#endif /* BV_HAVE_WINSOCK2_H */
 
     if (sa->sa_family != AF_INET)
         return EAI_FAMILY;
@@ -206,10 +206,10 @@ int ff_getnameinfo(const struct sockaddr *sa, int salen,
 
     if (serv && servlen > 0) {
         struct servent *ent = NULL;
-#if HAVE_GETSERVBYPORT
+#if BV_HAVE_GETSERVBYPORT
         if (!(flags & NI_NUMERICSERV))
             ent = getservbyport(sin->sin_port, flags & NI_DGRAM ? "udp" : "tcp");
-#endif /* HAVE_GETSERVBYPORT */
+#endif /* BV_HAVE_GETSERVBYPORT */
 
         if (ent)
             snprintf(serv, servlen, "%s", ent->s_name);
@@ -219,10 +219,10 @@ int ff_getnameinfo(const struct sockaddr *sa, int salen,
 
     return 0;
 }
-#endif /* !HAVE_GETADDRINFO */
+#endif /* !BV_HAVE_GETADDRINFO */
 
-#if !HAVE_GETADDRINFO || HAVE_WINSOCK2_H
-const char *ff_gai_strerror(int ecode)
+#if !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H
+const char *bb_gai_strerror(int ecode)
 {
     switch (ecode) {
     case EAI_AGAIN:
@@ -250,11 +250,11 @@ const char *ff_gai_strerror(int ecode)
 
     return "Unknown error";
 }
-#endif /* !HAVE_GETADDRINFO || HAVE_WINSOCK2_H */
+#endif /* !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H */
 
-int ff_socket_nonblock(int socket, int enable)
+int bb_socket_nonblock(int socket, int enable)
 {
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
     u_long param = enable;
     return ioctlsocket(socket, FIONBIO, &param);
 #else
@@ -262,11 +262,11 @@ int ff_socket_nonblock(int socket, int enable)
         return fcntl(socket, F_SETFL, fcntl(socket, F_GETFL) | O_NONBLOCK);
     else
         return fcntl(socket, F_SETFL, fcntl(socket, F_GETFL) & ~O_NONBLOCK);
-#endif /* HAVE_WINSOCK2_H */
+#endif /* BV_HAVE_WINSOCK2_H */
 }
 
-#if !HAVE_POLL_H
-int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
+#if !BV_HAVE_POLL_H
+int bb_poll(struct pollfd *fds, nfds_t numfds, int timeout)
 {
     fd_set read_set;
     fd_set write_set;
@@ -275,12 +275,12 @@ int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
     int n;
     int rc;
 
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
     if (numfds >= FD_SETSIZE) {
         errno = EINVAL;
         return -1;
     }
-#endif /* HAVE_WINSOCK2_H */
+#endif /* BV_HAVE_WINSOCK2_H */
 
     FD_ZERO(&read_set);
     FD_ZERO(&write_set);
@@ -290,12 +290,12 @@ int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
     for (i = 0; i < numfds; i++) {
         if (fds[i].fd < 0)
             continue;
-#if !HAVE_WINSOCK2_H
+#if !BV_HAVE_WINSOCK2_H
         if (fds[i].fd >= FD_SETSIZE) {
             errno = EINVAL;
             return -1;
         }
-#endif /* !HAVE_WINSOCK2_H */
+#endif /* !BV_HAVE_WINSOCK2_H */
 
         if (fds[i].events & POLLIN)
             FD_SET(fds[i].fd, &read_set);
@@ -337,6 +337,6 @@ int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
 
     return rc;
 }
-#endif /* !HAVE_POLL_H */
+#endif /* !BV_HAVE_POLL_H */
 
-#endif /* CONFIG_NETWORK */
+#endif /* BV_CONFIG_NETWORK */

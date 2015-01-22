@@ -179,11 +179,11 @@ float bvpriv_scalarproduct_float_c(const float *v1, const float *v2, int len);
 void bvpriv_float_dsp_init(BVFloatDSPContext *fdsp, int strict);
 
 
-void ff_float_dsp_init_aarch64(BVFloatDSPContext *fdsp);
-void ff_float_dsp_init_arm(BVFloatDSPContext *fdsp);
-void ff_float_dsp_init_ppc(BVFloatDSPContext *fdsp, int strict);
-void ff_float_dsp_init_x86(BVFloatDSPContext *fdsp);
-void ff_float_dsp_init_mips(BVFloatDSPContext *fdsp);
+void bb_float_dsp_init_aarch64(BVFloatDSPContext *fdsp);
+void bb_float_dsp_init_arm(BVFloatDSPContext *fdsp);
+void bb_float_dsp_init_ppc(BVFloatDSPContext *fdsp, int strict);
+void bb_float_dsp_init_x86(BVFloatDSPContext *fdsp);
+void bb_float_dsp_init_mips(BVFloatDSPContext *fdsp);
 
 /**
  * Allocate a float DSP context.

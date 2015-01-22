@@ -43,7 +43,7 @@ static const BVClass bv_config_context_class = {
     .item_name = config_to_name,
     .option = config_options,
     .version = LIBBVUTIL_VERSION_INT,
-    .category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category = BV_CLASS_CATEGORY_CONFIG,
 };
 
 static void bv_config_context_get_default(BVConfigContext * config)
@@ -69,6 +69,52 @@ void bv_config_context_free(BVConfigContext * cfgctx)
         return;
     bv_opt_free(cfgctx);
     if (cfgctx->config && cfgctx->config->priv_class && cfgctx->priv_data)
+        bv_opt_free(cfgctx->priv_data);
+    bv_freep(&cfgctx->priv_data);
+    bv_free(cfgctx);
+    return;
+}
+
+
+static const char *config_file_to_name(void *ptr)
+{
+    BVConfigFileContext *cc = (BVConfigFileContext *) ptr;
+    if (cc->cfile)
+        return cc->cfile->name;
+    return "NULL";
+}
+
+static const BVClass bv_config_file_context_class = {
+    .class_name = "BVConfigFileContext",
+    .item_name = config_file_to_name,
+    .option = config_file_options,
+    .version = LIBBVUTIL_VERSION_INT,
+    .category = BV_CLASS_CATEGORY_CONFIG,
+};
+
+static void bv_config_file_context_get_default(BVConfigFileContext * config_file)
+{
+    config_file->bv_class = &bv_config_file_context_class;
+    bv_opt_set_defaults(config_file);
+}
+
+BVConfigFileContext *bv_config_file_context_alloc(void)
+{
+    BVConfigFileContext *s = bv_mallocz(sizeof(BVConfigFileContext));
+    if (!s) {
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVConfigFileContext error");
+        return NULL;
+    }
+    bv_config_file_context_get_default(s);
+    return s;
+}
+
+void bv_config_file_context_free(BVConfigFileContext * cfgctx)
+{
+    if (!cfgctx)
+        return;
+    bv_opt_free(cfgctx);
+    if (cfgctx->cfile && cfgctx->cfile->priv_class && cfgctx->priv_data)
         bv_opt_free(cfgctx->priv_data);
     bv_freep(&cfgctx->priv_data);
     bv_free(cfgctx);

@@ -33,16 +33,18 @@ int main(int argc, const char *argv[])
     BVMediaContext *mc = NULL;
     BVDictionary *opn = NULL;
     bv_media_register_all(); 
-    bv_log_set_level(BV_LOG_ERROR);
+    bv_log_set_level(BV_LOG_INFO);
+    //av_log_set_level(BV_LOG_DEBUG);
 #if 1
     bv_dict_set(&opn, "user", "admin", 0);
-    bv_dict_set(&opn, "passwd", "123456", 0);
-    bv_dict_set(&opn, "token", "MainStream", 0);
+    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "Profile_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
+    bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
 #else
-    bv_dict_set(&opn, "token", "000", 0);
+    bv_dict_set(&opn, "token", "Profile_1", 0);
 #endif
-    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80", NULL, &opn) < 0) {
+    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");
         return -1;
     }
@@ -52,21 +54,35 @@ int main(int argc, const char *argv[])
     if (fd < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open file error\n");
     }
-    bv_log(mc, BV_LOG_INFO, "stream count %d\n", mc->nb_streams);
-    bv_log(mc, BV_LOG_INFO, "codec time base %d/%d\n", mc->streams[0]->codec->time_base.den, mc->streams[0]->codec->time_base.num);
-    bv_log(mc, BV_LOG_INFO, "stream time base %d/%d\n", mc->streams[0]->time_base.den, mc->streams[0]->time_base.num);
-    bv_log(mc, BV_LOG_INFO, "gop size %d\n", mc->streams[0]->codec->gop_size);
-    bv_log(mc, BV_LOG_INFO, "extradata size %d\n", mc->streams[0]->codec->extradata_size);
-    bv_log(mc, BV_LOG_INFO, "codec ID %d\n", mc->streams[0]->codec->codec_id);
-    bv_log(mc, BV_LOG_INFO, "video size %dX%d\n", mc->streams[0]->codec->width, mc->streams[0]->codec->height);
-    while (i < 300) {
+
+    for (i = 0; i < mc->nb_streams; i++) {
+        if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_VIDEO) {
+            bv_log(mc, BV_LOG_INFO, "stream count %d\n", mc->nb_streams);
+            bv_log(mc, BV_LOG_INFO, "codec time base %d/%d\n", mc->streams[i]->codec->time_base.den, mc->streams[i]->codec->time_base.num);
+            bv_log(mc, BV_LOG_INFO, "stream time base %d/%d\n", mc->streams[i]->time_base.den, mc->streams[i]->time_base.num);
+            bv_log(mc, BV_LOG_INFO, "gop size %d\n", mc->streams[i]->codec->gop_size);
+            bv_log(mc, BV_LOG_INFO, "extradata size %d\n", mc->streams[i]->codec->extradata_size);
+            bv_log(mc, BV_LOG_INFO, "codec ID %d\n", mc->streams[i]->codec->codec_id);
+            bv_log(mc, BV_LOG_INFO, "video size %dX%d\n", mc->streams[i]->codec->width, mc->streams[i]->codec->height);
+            bv_log(mc, BV_LOG_INFO, "video profile %d\n", mc->streams[i]->codec->profile);
+        } else if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
+            bv_log(mc, BV_LOG_INFO, "audio sample_rate %d\n", mc->streams[i]->codec->sample_rate);
+            bv_log(mc, BV_LOG_INFO, "audio channels %d\n", mc->streams[i]->codec->channels);
+            bv_log(mc, BV_LOG_INFO, "audio type %d\n", mc->streams[i]->codec->codec_id);
+            bv_log(mc, BV_LOG_INFO, "audio sample_fmt %d\n", mc->streams[i]->codec->sample_fmt);
+        }
+    }
+    while (i < 6000) {
        bv_packet_init(&pkt); 
        if (bv_input_media_read(mc, &pkt) < 0)
            continue;
-       bv_log(mc, BV_LOG_DEBUG, "pkt size %d pts %lld strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
-       if (fd >= 0) {
-         write(fd, pkt.data, pkt.size);
-       }
+       //bv_log(mc, BV_LOG_DEBUG, "pkt size %d pts %lld strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
+       if (pkt.stream_index == 0) {
+            bv_log(mc, BV_LOG_DEBUG, "%02x %02x %02x %02x \n", pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
+            if (fd >= 0) {
+                write(fd, pkt.data, pkt.size);
+            }
+        }
        i ++;
        bv_packet_free(&pkt);
     }

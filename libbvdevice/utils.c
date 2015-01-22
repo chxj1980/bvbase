@@ -26,7 +26,7 @@
 
 #include "bvdevice.h"
 
-const char FILE_NAME[] = "utils.c";
+static const char FILE_NAME[] = "utils.c";
 
 static BVDevice *first_dev = NULL;
 static BVDevice **last_dev = &first_dev;
@@ -154,8 +154,10 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     if (url)
         bv_strlcpy(s->url, url, sizeof(s->url));
     if (!(s->device->flags & BV_DEVICE_FLAG_NOOPEN)) {
-        if (!s->device->dev_open || s->device->dev_open(s) < 0)
+        if (!s->device->dev_open || s->device->dev_open(s) < 0) {
+            ret = BVERROR(EIO);
             goto fail;
+        }
     }
     *h = s;
     bv_dict_free(&tmp);

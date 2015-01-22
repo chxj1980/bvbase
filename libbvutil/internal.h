@@ -199,13 +199,13 @@
  */
 #if BV_HAVE_SYMVER_ASM_LABEL
 #   define BV_SYMVER(type, name, args, ver)                     \
-    type ff_##name args __asm__ (EXTERN_PREFIX #name "@" ver);  \
-    type ff_##name args
+    type bb_##name args __asm__ (EXTERN_PREFIX #name "@" ver);  \
+    type bb_##name args
 #elif BV_HAVE_SYMVER_GNU_ASM
 #   define BV_SYMVER(type, name, args, ver)                             \
-    __asm__ (".symver ff_" #name "," EXTERN_PREFIX #name "@" ver);      \
-    type ff_##name args;                                                \
-    type ff_##name args
+    __asm__ (".symver bb_" #name "," EXTERN_PREFIX #name "@" ver);      \
+    type bb_##name args;                                                \
+    type bb_##name args
 #endif
 
 /**
@@ -241,7 +241,7 @@ void bvpriv_request_sample(void *avc,
                            const char *msg, ...) bv_printf_format(2, 3);
 
 #if BV_HAVE_LIBC_MSVCRT
-#define bvpriv_open ff_open
+#define bvpriv_open bb_open
 #define PTRDIBV_SPECIFIER "Id"
 #define SIZE_SPECIFIER "Iu"
 #else
@@ -257,7 +257,7 @@ int bvpriv_open(const char *filename, int flags, ...);
 int bvpriv_set_systematic_pal2(uint32_t pal[256], enum BVPixelFormat pix_fmt);
 
 #if BV_API_GET_CHANNEL_LAYOUT_COMPAT
-uint64_t ff_get_channel_layout(const char *name, int compat);
+uint64_t bb_get_channel_layout(const char *name, int compat);
 #endif
 
 #endif /* BVUTIL_INTERNAL_H */

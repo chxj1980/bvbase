@@ -22,7 +22,8 @@
  */
 
 #define _GNU_SOURCE
-#include <soapH.h>
+#include <wsseapi.h>
+#include <wsaapi.h>
 #include <string.h>
 
 #include "bvdevice.h"
@@ -39,25 +40,6 @@ typedef struct OnvifDeviceContext {
     struct soap *soap;
     int timeout;
 } OnvifDeviceContext;
-
-static int get_uuid(char *uuid, int length)
-{
-    unsigned int Flagrand;
-    unsigned char macaddr[6];
-    srand((int) time(NULL));
-    Flagrand = rand() % 9000 + 1000;    //保证四位整数
-    macaddr[0] = 0x11;
-    macaddr[1] = 0x25;
-    macaddr[2] = 0x33;
-    macaddr[3] = 0x43;
-    macaddr[4] = 0x57;
-    macaddr[5] = 0x65;
-    snprintf(uuid, length, "urn:uuid:%ud68a-1dd2-11b2-a105-%02X%02X%02X%02X%02X%02X",
-        Flagrand, macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
-
-    printf("get uuid is %s\n", uuid);
-    return 0;
-}
 
 static struct soap *bv_soap_new(int timeout)
 {
@@ -90,34 +72,34 @@ static void bv_soap_free(struct soap *soap)
 
 static void set_device_info(BVMobileDevice *device_info, struct __wsdd__ProbeMatches *resp)
 {
-#if 0
-    printf("Target Service Address  : %s\r\n",
+    char *input_str = resp->wsdd__ProbeMatches->ProbeMatch->Types;
+#if 1
+    bv_log(NULL, BV_LOG_INFO, "Target Service Address  : %s\r\n",
         resp->wsdd__ProbeMatches->ProbeMatch->XAddrs);
-    printf("Target EP Address       : %s\r\n",
+    bv_log(NULL, BV_LOG_INFO, "Target EP Address       : %s\r\n",
         resp->wsdd__ProbeMatches->ProbeMatch->wsa__EndpointReference.Address);
-    printf("Target Type             : %s\r\n",
+    bv_log(NULL, BV_LOG_INFO, "Target Type             : %s\r\n",
         resp->wsdd__ProbeMatches->ProbeMatch->Types);
-    printf("Target Metadata Version : %d\r\n",
+    bv_log(NULL, BV_LOG_INFO, "Target Metadata Version : %d\r\n",
         resp->wsdd__ProbeMatches->ProbeMatch->MetadataVersion);
 #endif
-    char *input_str = resp->wsdd__ProbeMatches->ProbeMatch->Types;
     strncpy(device_info->url, resp->wsdd__ProbeMatches->ProbeMatch->XAddrs, sizeof(device_info->url) -1);
     device_info->timeout = ONVIF_TMO;
     device_info->type = BV_MOBILE_DEVICE_TYPE_NONE;
     if(strcasestr(input_str,ONVIF_NVS)) {
-        printf("device is Storage\n");
+        bv_log(NULL, BV_LOG_INFO, "device is Storage\n");
         device_info->type |= BV_MOBILE_DEVICE_TYPE_NVS;
     }
     if(strcasestr(input_str,ONVIF_NVT)) {
-        printf("device is Transmitter\n");
+        bv_log(NULL, BV_LOG_INFO, "device is Transmitter\n");
         device_info->type |= BV_MOBILE_DEVICE_TYPE_NVT;
     }
     if(strcasestr(input_str,ONVIF_NVA)) {
-        printf("device is Analytics\n");
+        bv_log(NULL, BV_LOG_INFO, "device is Analytics\n");
         device_info->type |= BV_MOBILE_DEVICE_TYPE_NVA;
     }
     if(strcasestr(input_str,ONVIF_NVD)) {
-        printf("device is Display\n");
+        bv_log(NULL, BV_LOG_INFO, "device is Display\n");
         device_info->type |= BV_MOBILE_DEVICE_TYPE_NVD;
     }
 }
@@ -125,9 +107,7 @@ static void set_device_info(BVMobileDevice *device_info, struct __wsdd__ProbeMat
 static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret)
 {
     OnvifDeviceContext *devctx = h->priv_data;
-    int timeout = devctx->timeout;
     BVMobileDevice *current = device;
-    char uuid[64] = { 0 };
     int device_num = 0;
     int retval = SOAP_OK;
     wsdd__ProbeType req;
@@ -146,34 +126,33 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 
     soap_default_SOAP_ENV__Header(soap, &header);
 
-    get_uuid(uuid, 64);
-    header.wsa__MessageID = uuid;
-    header.wsa__To = "urn:schemas-xmlsoap-org:ws:2005:04:discovery";
-    header.wsa__Action = "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
+    header.wsa__MessageID = (char *)soap_wsa_rand_uuid(soap);
+    header.wsa__To = (char *) "urn:schemas-xmlsoap-org:ws:2005:04:discovery";
+    header.wsa__Action = (char *) "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
     soap->header = &header;
 
     soap_default_wsdd__ScopesType(soap, &sScope);
-    sScope.__item = "";
+    sScope.__item = (char *)"";
     soap_default_wsdd__ProbeType(soap, &req);
     req.Scopes = &sScope;
-    req.Types = "dn";                //"dn:NetworkVideoTransmitter";
+    req.Types = (char *)"";                //"dn:NetworkVideoTransmitter";
     retval = soap_send___wsdd__Probe(soap, soap_endpoint, NULL, &req);
     //发送组播消息成功后，开始循环接收各位设备发送过来的消息
     while (retval == SOAP_OK) {
         retval = soap_recv___wsdd__ProbeMatches(soap, &resp);
         if (retval == SOAP_OK) {
-            if (resp.wsdd__ProbeMatches->ProbeMatch != NULL
+            if (resp.wsdd__ProbeMatches &&resp.wsdd__ProbeMatches->ProbeMatch != NULL
                 && resp.wsdd__ProbeMatches->ProbeMatch->XAddrs != NULL) {
                 current = device + device_num;
                 set_device_info(current, &resp);
                 device_num ++;
                 if(device_num > *max_ret) {
-                    printf("reach max ret %d\n", *max_ret);
+                    bv_log(NULL, BV_LOG_INFO, "reach max ret %d\n", *max_ret);
                     break;
                 }
             }
         } else if (soap->error) {
-            printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error,
+            bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error,
                 *soap_faultcode(soap), *soap_faultstring(soap));
             retval = soap->error;
         }
@@ -219,7 +198,7 @@ static const BVClass onvif_class = {
     .item_name      = bv_default_item_name,
     .option         = options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_dev_device = {

@@ -21,7 +21,7 @@
 #include "util_altivec.h"
 #include "float_dsp_altivec.h"
 
-void ff_vector_fmul_altivec(float *dst, const float *src0, const float *src1,
+void bb_vector_fmul_altivec(float *dst, const float *src0, const float *src1,
                             int len)
 {
     int i;
@@ -37,7 +37,7 @@ void ff_vector_fmul_altivec(float *dst, const float *src0, const float *src1,
     }
 }
 
-void ff_vector_fmul_window_altivec(float *dst, const float *src0,
+void bb_vector_fmul_window_altivec(float *dst, const float *src0,
                                    const float *src1, const float *win, int len)
 {
     vector float zero, t0, t1, s0, s1, wi, wj;
@@ -70,7 +70,7 @@ void ff_vector_fmul_window_altivec(float *dst, const float *src0,
     }
 }
 
-void ff_vector_fmul_add_altivec(float *dst, const float *src0,
+void bb_vector_fmul_add_altivec(float *dst, const float *src0,
                                 const float *src1, const float *src2,
                                 int len)
 {
@@ -92,7 +92,7 @@ void ff_vector_fmul_add_altivec(float *dst, const float *src0,
     }
 }
 
-void ff_vector_fmul_reverse_altivec(float *dst, const float *src0,
+void bb_vector_fmul_reverse_altivec(float *dst, const float *src0,
                                     const float *src1, int len)
 {
     int i;

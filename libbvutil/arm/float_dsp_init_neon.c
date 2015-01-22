@@ -25,35 +25,35 @@
 #include "libbvutil/float_dsp.h"
 #include "float_dsp_arm.h"
 
-void ff_vector_fmul_neon(float *dst, const float *src0, const float *src1, int len);
+void bb_vector_fmul_neon(float *dst, const float *src0, const float *src1, int len);
 
-void ff_vector_fmac_scalar_neon(float *dst, const float *src, float mul,
+void bb_vector_fmac_scalar_neon(float *dst, const float *src, float mul,
                                 int len);
 
-void ff_vector_fmul_scalar_neon(float *dst, const float *src, float mul,
+void bb_vector_fmul_scalar_neon(float *dst, const float *src, float mul,
                                 int len);
 
-void ff_vector_fmul_window_neon(float *dst, const float *src0,
+void bb_vector_fmul_window_neon(float *dst, const float *src0,
                                 const float *src1, const float *win, int len);
 
-void ff_vector_fmul_add_neon(float *dst, const float *src0, const float *src1,
+void bb_vector_fmul_add_neon(float *dst, const float *src0, const float *src1,
                              const float *src2, int len);
 
-void ff_vector_fmul_reverse_neon(float *dst, const float *src0,
+void bb_vector_fmul_reverse_neon(float *dst, const float *src0,
                                  const float *src1, int len);
 
-void ff_butterflies_float_neon(float *v1, float *v2, int len);
+void bb_butterflies_float_neon(float *v1, float *v2, int len);
 
-float ff_scalarproduct_float_neon(const float *v1, const float *v2, int len);
+float bb_scalarproduct_float_neon(const float *v1, const float *v2, int len);
 
-bv_cold void ff_float_dsp_init_neon(BVFloatDSPContext *fdsp)
+bv_cold void bb_float_dsp_init_neon(BVFloatDSPContext *fdsp)
 {
-    fdsp->vector_fmul = ff_vector_fmul_neon;
-    fdsp->vector_fmac_scalar = ff_vector_fmac_scalar_neon;
-    fdsp->vector_fmul_scalar = ff_vector_fmul_scalar_neon;
-    fdsp->vector_fmul_window = ff_vector_fmul_window_neon;
-    fdsp->vector_fmul_add    = ff_vector_fmul_add_neon;
-    fdsp->vector_fmul_reverse = ff_vector_fmul_reverse_neon;
-    fdsp->butterflies_float = ff_butterflies_float_neon;
-    fdsp->scalarproduct_float = ff_scalarproduct_float_neon;
+    fdsp->vector_fmul = bb_vector_fmul_neon;
+    fdsp->vector_fmac_scalar = bb_vector_fmac_scalar_neon;
+    fdsp->vector_fmul_scalar = bb_vector_fmul_scalar_neon;
+    fdsp->vector_fmul_window = bb_vector_fmul_window_neon;
+    fdsp->vector_fmul_add    = bb_vector_fmul_add_neon;
+    fdsp->vector_fmul_reverse = bb_vector_fmul_reverse_neon;
+    fdsp->butterflies_float = bb_butterflies_float_neon;
+    fdsp->scalarproduct_float = bb_scalarproduct_float_neon;
 }

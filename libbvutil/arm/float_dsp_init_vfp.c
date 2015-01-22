@@ -23,24 +23,24 @@
 #include "cpu.h"
 #include "float_dsp_arm.h"
 
-void ff_vector_fmul_vfp(float *dst, const float *src0, const float *src1,
+void bb_vector_fmul_vfp(float *dst, const float *src0, const float *src1,
                         int len);
 
-void ff_vector_fmul_window_vfp(float *dst, const float *src0,
+void bb_vector_fmul_window_vfp(float *dst, const float *src0,
                                const float *src1, const float *win, int len);
 
-void ff_vector_fmul_reverse_vfp(float *dst, const float *src0,
+void bb_vector_fmul_reverse_vfp(float *dst, const float *src0,
                                 const float *src1, int len);
 
-void ff_butterflies_float_vfp(float *bv_restrict v1, float *bv_restrict v2, int len);
+void bb_butterflies_float_vfp(float *bv_restrict v1, float *bv_restrict v2, int len);
 
-bv_cold void ff_float_dsp_init_vfp(BVFloatDSPContext *fdsp, int cpu_flags)
+bv_cold void bb_float_dsp_init_vfp(BVFloatDSPContext *fdsp, int cpu_flags)
 {
     if (!have_vfpv3(cpu_flags)) {
-        fdsp->vector_fmul = ff_vector_fmul_vfp;
-        fdsp->vector_fmul_window = ff_vector_fmul_window_vfp;
+        fdsp->vector_fmul = bb_vector_fmul_vfp;
+        fdsp->vector_fmul_window = bb_vector_fmul_window_vfp;
     }
-    fdsp->vector_fmul_reverse = ff_vector_fmul_reverse_vfp;
+    fdsp->vector_fmul_reverse = bb_vector_fmul_reverse_vfp;
     if (!have_vfpv3(cpu_flags))
-        fdsp->butterflies_float = ff_butterflies_float_vfp;
+        fdsp->butterflies_float = bb_butterflies_float_vfp;
 }

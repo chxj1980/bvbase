@@ -1,15 +1,3 @@
-[submodule "3rdparty/src/ffmpeg"]
-	path = 3rdparty/src/ffmpeg
-	url = git@192.168.6.147:ffmpeg
-[submodule "3rdparty/src/jansson"]
-	path = 3rdparty/src/jansson
-	url = git@192.168.6.147:jansson
-[submodule "3rdparty/src/freetype"]
-	path = 3rdparty/src/freetype
-	url = git@192.168.6.147:freetype
-[submodule "3rdparty/src/onvif"]
-	path = 3rdparty/src/onvif
-	url = git@192.168.6.147:onvif
-[submodule "3rdparty/src/hissdk"]
-	path = 3rdparty/src/hissdk
-	url = git@192.168.6.147:hissdk
+[submodule "3rdparty/binary"]
+	path = 3rdparty/binary
+	url = git@192.168.6.147:binary.git

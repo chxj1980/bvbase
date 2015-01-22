@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef AVFORMAT_OS_SUPPORT_H
-#define AVFORMAT_OS_SUPPORT_H
+#ifndef BV_PROTOCOL_OS_SUPPORT_H
+#define BV_PROTOCOL_OS_SUPPORT_H
 
 /**
  * @file
@@ -32,10 +32,10 @@
 #include <sys/stat.h>
 
 #ifdef _WIN32
-#if HAVE_DIRECT_H
+#if BV_HAVE_DIRECT_H
 #include <direct.h>
 #endif
-#if HAVE_IO_H
+#if BV_HAVE_IO_H
 #include <io.h>
 #endif
 #endif
@@ -58,7 +58,7 @@
 
 
 #ifdef __ANDROID__
-#  if HAVE_UNISTD_H
+#  if BV_HAVE_UNISTD_H
 #    include <unistd.h>
 #  endif
 #  ifdef lseek
@@ -69,7 +69,7 @@
 
 static inline int is_dos_path(const char *path)
 {
-#if HAVE_DOS_PATHS
+#if BV_HAVE_DOS_PATHS
     if (path[0] && path[1] == ':')
         return 1;
 #endif
@@ -95,23 +95,23 @@ static inline int is_dos_path(const char *path)
 #endif
 #endif
 
-#if CONFIG_NETWORK
-#if !HAVE_SOCKLEN_T
+#if BV_CONFIG_NETWORK
+#if !BV_HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
 
 /* most of the time closing a socket is just closing an fd */
-#if !HAVE_CLOSESOCKET
+#if !BV_HAVE_CLOSESOCKET
 #define closesocket close
 #endif
 
-#if !HAVE_POLL_H
+#if !BV_HAVE_POLL_H
 typedef unsigned long nfds_t;
 
-#if HAVE_WINSOCK2_H
+#if BV_HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
-#if !HAVE_STRUCT_POLLFD
+#if !BV_HAVE_STRUCT_POLLFD
 struct pollfd {
     int fd;
     short events;  /* events to look for */
@@ -134,10 +134,10 @@ struct pollfd {
 #endif
 
 
-int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout);
-#define poll ff_poll
-#endif /* HAVE_POLL_H */
-#endif /* CONFIG_NETWORK */
+int bb_poll(struct pollfd *fds, nfds_t numfds, int timeout);
+#define poll bb_poll
+#endif /* BV_HAVE_POLL_H */
+#endif /* BV_CONFIG_NETWORK */
 
 #if defined(__MINGW32CE__)
 #define mkdir(a, b) _mkdir(a)
@@ -170,7 +170,7 @@ static inline int win32_##name(const char *filename_utf8) \
         goto fallback;                                    \
                                                           \
     ret = wfunc(filename_w);                              \
-    av_free(filename_w);                                  \
+    bv_free(filename_w);                                  \
     return ret;                                           \
                                                           \
 fallback:                                                 \
@@ -190,18 +190,18 @@ static inline int win32_rename(const char *src_utf8, const char *dest_utf8)
     if (utf8towchar(src_utf8, &src_w))
         return -1;
     if (utf8towchar(dest_utf8, &dest_w)) {
-        av_free(src_w);
+        bv_free(src_w);
         return -1;
     }
     if (!src_w || !dest_w) {
-        av_free(src_w);
-        av_free(dest_w);
+        bv_free(src_w);
+        bv_free(dest_w);
         goto fallback;
     }
 
     ret = MoveFileExW(src_w, dest_w, MOVEFILE_REPLACE_EXISTING);
-    av_free(src_w);
-    av_free(dest_w);
+    bv_free(src_w);
+    bv_free(dest_w);
     // Lacking proper mapping from GetLastError() error codes to errno codes
     if (ret)
         errno = EPERM;
@@ -234,4 +234,4 @@ fallback:
 
 #endif
 
-#endif /* AVFORMAT_OS_SUPPORT_H */
+#endif /* BV_PROTOCOL_OS_SUPPORT_H */

@@ -33,7 +33,7 @@ int main(int argc, const char *argv[])
     int max_ret = 20;
     BVDictionary *opn = NULL;
     bv_device_register_all();
-    bv_dict_set(&opn, "timeout", "2", 0);
+    bv_dict_set(&opn, "timeout", "5", 0);
     if (bv_device_open(&devctx, NULL, "onvif_dev://", &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error \n");
         bv_dict_free(&opn);

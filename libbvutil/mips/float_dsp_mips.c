@@ -372,7 +372,7 @@ static void vector_fmul_reverse_mips(float *dst, const float *src0, const float 
 }
 #endif /* BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU */
 
-void ff_float_dsp_init_mips(BVFloatDSPContext *fdsp) {
+void bb_float_dsp_init_mips(BVFloatDSPContext *fdsp) {
 #if BV_HAVE_INLINE_ASM && BV_HAVE_MIPSFPU
     fdsp->vector_fmul = vector_fmul_mips;
     fdsp->vector_fmul_scalar  = vector_fmul_scalar_mips;

@@ -21,38 +21,38 @@
 #include "pixelutils.h"
 #include "cpu.h"
 
-int ff_pixelutils_sad_8x8_mmx(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_8x8_mmx(const uint8_t *src1, ptrdiff_t stride1,
                               const uint8_t *src2, ptrdiff_t stride2);
-int ff_pixelutils_sad_8x8_mmxext(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_8x8_mmxext(const uint8_t *src1, ptrdiff_t stride1,
                                  const uint8_t *src2, ptrdiff_t stride2);
 
-int ff_pixelutils_sad_16x16_mmxext(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_16x16_mmxext(const uint8_t *src1, ptrdiff_t stride1,
                                    const uint8_t *src2, ptrdiff_t stride2);
-int ff_pixelutils_sad_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
                                  const uint8_t *src2, ptrdiff_t stride2);
-int ff_pixelutils_sad_a_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_a_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
                                    const uint8_t *src2, ptrdiff_t stride2);
-int ff_pixelutils_sad_u_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
+int bb_pixelutils_sad_u_16x16_sse2(const uint8_t *src1, ptrdiff_t stride1,
                                    const uint8_t *src2, ptrdiff_t stride2);
 
-void ff_pixelutils_sad_init_x86(bv_pixelutils_sad_fn *sad, int aligned)
+void bb_pixelutils_sad_init_x86(bv_pixelutils_sad_fn *sad, int aligned)
 {
     int cpu_flags = bv_get_cpu_flags();
 
     if (EXTERNAL_MMX(cpu_flags)) {
-        sad[2] = ff_pixelutils_sad_8x8_mmx;
+        sad[2] = bb_pixelutils_sad_8x8_mmx;
     }
 
     if (EXTERNAL_MMXEXT(cpu_flags)) {
-        sad[2] = ff_pixelutils_sad_8x8_mmxext;
-        sad[3] = ff_pixelutils_sad_16x16_mmxext;
+        sad[2] = bb_pixelutils_sad_8x8_mmxext;
+        sad[3] = bb_pixelutils_sad_16x16_mmxext;
     }
 
     if (EXTERNAL_SSE2(cpu_flags)) {
         switch (aligned) {
-        case 0: sad[3] = ff_pixelutils_sad_16x16_sse2;   break; // src1 unaligned, src2 unaligned
-        case 1: sad[3] = ff_pixelutils_sad_u_16x16_sse2; break; // src1   aligned, src2 unaligned
-        case 2: sad[3] = ff_pixelutils_sad_a_16x16_sse2; break; // src1   aligned, src2   aligned
+        case 0: sad[3] = bb_pixelutils_sad_16x16_sse2;   break; // src1 unaligned, src2 unaligned
+        case 1: sad[3] = bb_pixelutils_sad_u_16x16_sse2; break; // src1   aligned, src2 unaligned
+        case 2: sad[3] = bb_pixelutils_sad_a_16x16_sse2; break; // src1   aligned, src2   aligned
         }
     }
 }

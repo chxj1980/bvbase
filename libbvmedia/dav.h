@@ -1,15 +1,9 @@
-/**
- *          File: bvpu_timer.c
- *
- *        Create: 2014年12月19日 星期五 17时10分40秒
- *
- *   Discription: 
- *
- *        Author: yuwei.zhang
- *         Email: yuwei.zhang@besovideo.com
- *
- *===========================================================================
- */
+/*************************************************************************
+    > File Name: dav.h
+    > Author: albertfang
+    > Mail: fang.qi@besovideo.com 
+    > Created Time: 2015年01月21日 星期三 15时24分35秒
+ ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,20 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) @ BesoVideo, 2014
+ * Copyright (C) albert@BesoVideo, 2015
  */
 
-#include <stdio.h>
+/**
+ *  dav file struct used by BesoVideo
+ *  It's a simple file container 
+ */
 
-#include "bvpu_timer.h"
+#ifndef BV_MEDIA_DAV_H
+#define BV_MEDIA_DAV_H
 
-//
-// Timer manager module.
-// TODO:
-// 1. Provide function to get time.
-// 2. Loop get time though thread.
-// 3. Update time as user config though thread has created, when
-//    user enabled.
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 
-/*=============== End of file: bvpu_timer.c ==========================*/
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* end of include guard: BV_MEDIA_DAV_H */

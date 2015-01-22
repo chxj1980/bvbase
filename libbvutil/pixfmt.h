@@ -191,8 +191,8 @@ enum BVPixelFormat {
      * BVBase supports these formats since May 8 2012 and Jan 28 2012 (commits f9ca1ac7 and 143a5c55)
      * Libav added them Oct 12 2012 with incompatible values (commit 6d5600e85)
      */
-    BV_PIX_FMT_YUVA422P_LIBAV,  ///< planar YUV 4:2:2 24bpp, (1 Cr & Cb sample per 2x1 Y & A samples)
-    BV_PIX_FMT_YUVA444P_LIBAV,  ///< planar YUV 4:4:4 32bpp, (1 Cr & Cb sample per 1x1 Y & A samples)
+    BV_PIX_FMT_YUVA422P_LIBBV,  ///< planar YUV 4:2:2 24bpp, (1 Cr & Cb sample per 2x1 Y & A samples)
+    BV_PIX_FMT_YUVA444P_LIBBV,  ///< planar YUV 4:4:4 32bpp, (1 Cr & Cb sample per 1x1 Y & A samples)
 
     BV_PIX_FMT_YUVA420P9BE,  ///< planar YUV 4:2:0 22.5bpp, (1 Cr & Cb sample per 2x2 Y & A samples), big-endian
     BV_PIX_FMT_YUVA420P9LE,  ///< planar YUV 4:2:0 22.5bpp, (1 Cr & Cb sample per 2x2 Y & A samples), little-endian
@@ -227,10 +227,10 @@ enum BVPixelFormat {
      * also see Fri Nov 25 01:38:21 2011 +0100 92afb431621c79155fcb7171d26f137eb1bee028
      * Libav added them Sun Mar 16 23:05:47 2014 +0100 with incompatible values (commit 1481d24c3a0abf81e1d7a514547bd5305232be30)
      */
-    BV_PIX_FMT_RGBA64BE_LIBAV,     ///< packed RGBA 16:16:16:16, 64bpp, 16R, 16G, 16B, 16A, the 2-byte value for each R/G/B/A component is stored as big-endian
-    BV_PIX_FMT_RGBA64LE_LIBAV,     ///< packed RGBA 16:16:16:16, 64bpp, 16R, 16G, 16B, 16A, the 2-byte value for each R/G/B/A component is stored as little-endian
-    BV_PIX_FMT_BGRA64BE_LIBAV,     ///< packed RGBA 16:16:16:16, 64bpp, 16B, 16G, 16R, 16A, the 2-byte value for each R/G/B/A component is stored as big-endian
-    BV_PIX_FMT_BGRA64LE_LIBAV,     ///< packed RGBA 16:16:16:16, 64bpp, 16B, 16G, 16R, 16A, the 2-byte value for each R/G/B/A component is stored as little-endian
+    BV_PIX_FMT_RGBA64BE_LIBBV,     ///< packed RGBA 16:16:16:16, 64bpp, 16R, 16G, 16B, 16A, the 2-byte value for each R/G/B/A component is stored as big-endian
+    BV_PIX_FMT_RGBA64LE_LIBBV,     ///< packed RGBA 16:16:16:16, 64bpp, 16R, 16G, 16B, 16A, the 2-byte value for each R/G/B/A component is stored as little-endian
+    BV_PIX_FMT_BGRA64BE_LIBBV,     ///< packed RGBA 16:16:16:16, 64bpp, 16B, 16G, 16R, 16A, the 2-byte value for each R/G/B/A component is stored as big-endian
+    BV_PIX_FMT_BGRA64LE_LIBBV,     ///< packed RGBA 16:16:16:16, 64bpp, 16B, 16G, 16R, 16A, the 2-byte value for each R/G/B/A component is stored as little-endian
 
     BV_PIX_FMT_YVYU422,   ///< packed YUV 4:2:2, 16bpp, Y0 Cr Y1 Cb
 
@@ -298,12 +298,12 @@ enum BVPixelFormat {
 };
 
 #if BV_HAVE_INCOMPATIBLE_LIBBV_ABI
-#define BV_PIX_FMT_YUVA422P BV_PIX_FMT_YUVA422P_LIBAV
-#define BV_PIX_FMT_YUVA444P BV_PIX_FMT_YUVA444P_LIBAV
-#define BV_PIX_FMT_RGBA64BE BV_PIX_FMT_RGBA64BE_LIBAV
-#define BV_PIX_FMT_RGBA64LE BV_PIX_FMT_RGBA64LE_LIBAV
-#define BV_PIX_FMT_BGRA64BE BV_PIX_FMT_BGRA64BE_LIBAV
-#define BV_PIX_FMT_BGRA64LE BV_PIX_FMT_BGRA64LE_LIBAV
+#define BV_PIX_FMT_YUVA422P BV_PIX_FMT_YUVA422P_LIBBV
+#define BV_PIX_FMT_YUVA444P BV_PIX_FMT_YUVA444P_LIBBV
+#define BV_PIX_FMT_RGBA64BE BV_PIX_FMT_RGBA64BE_LIBBV
+#define BV_PIX_FMT_RGBA64LE BV_PIX_FMT_RGBA64LE_LIBBV
+#define BV_PIX_FMT_BGRA64BE BV_PIX_FMT_BGRA64BE_LIBBV
+#define BV_PIX_FMT_BGRA64LE BV_PIX_FMT_BGRA64LE_LIBBV
 #endif
 
 

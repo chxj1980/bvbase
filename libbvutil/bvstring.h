@@ -82,6 +82,10 @@ char *bv_stristr(const char *haystack, const char *needle);
  */
 char *bv_strnstr(const char *haystack, const char *needle, size_t hay_length);
 
+int bv_strnsub(const char *haystack, const char *needle, size_t hay_length);
+
+char *bv_strsub(const char *haystack, const char *needle, int sub);
+
 /**
  * Copy the string src to dst, but no more than size - 1 bytes, and
  * null-terminate dst.
@@ -395,6 +399,19 @@ int bv_utf8_decode(int32_t *codep, const uint8_t **bufp, const uint8_t *buf_end,
  */
 int bv_match_list(const char *name, const char *list, char separator);
 
+void bv_url_split(char *proto,         int proto_size,
+                  char *authorization, int authorization_size,
+                  char *hostname,      int hostname_size,
+                  int *port_ptr,
+                  char *path,          int path_size,
+                  const char *url);
+
+int bv_url_join(char *str, int size, const char *proto,
+                const char *authorization, const char *hostname,
+                int port, const char *fmt, ...);
+
+void bv_make_absolute_url(char *buf, int size, const char *base,
+                          const char *rel);
 /**
  * @}
  */

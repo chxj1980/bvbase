@@ -18,7 +18,7 @@
  */
 
 #include "channel_layout.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "buffer.h"
 #include "common.h"
 #include "dict.h"
@@ -685,7 +685,7 @@ const char *bv_frame_side_data_name(enum BVFrameSideDataType type)
     case BV_FRAME_DATA_PANSCAN:         return "BVPanScan";
     case BV_FRAME_DATA_A53_CC:          return "ATSC A53 Part 4 Closed Captions";
     case BV_FRAME_DATA_STEREO3D:        return "Stereoscopic 3d metadata";
-    case BV_FRAME_DATA_MATRIXENCODING:  return "AVMatrixEncoding";
+    case BV_FRAME_DATA_MATRIXENCODING:  return "BVMatrixEncoding";
     case BV_FRAME_DATA_DOWNMIX_INFO:    return "Metadata relevant to a downmix procedure";
     case BV_FRAME_DATA_REPLAYGAIN:      return "BVReplayGain";
     case BV_FRAME_DATA_DISPLAYMATRIX:   return "3x3 displaymatrix";

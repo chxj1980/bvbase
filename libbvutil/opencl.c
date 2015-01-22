@@ -24,22 +24,16 @@
 #include "opencl.h"
 #include "bvstring.h"
 #include "log.h"
-#include "avassert.h"
+#include "bvassert.h"
 #include "opt.h"
 
 #if BV_HAVE_THREADS
-#if BV_HAVE_PTHREADS
-#include <pthread.h>
-#elif BV_HAVE_W32THREADS
-#include "compat/w32pthreads.h"
-#elif BV_HAVE_OS2THREADS
-#include "compat/os2threads.h"
-#endif
+#include "thread.h"
 #include "atomic.h"
 
-static volatile pthread_mutex_t *atomic_opencl_lock = NULL;
-#define LOCK_OPENCL pthread_mutex_lock(atomic_opencl_lock)
-#define UNLOCK_OPENCL pthread_mutex_unlock(atomic_opencl_lock)
+static volatile BVMutex *atomic_opencl_lock = NULL;
+#define LOCK_OPENCL bv_mutex_lock(atomic_opencl_lock)
+#define UNLOCK_OPENCL bv_mutex_unlock(atomic_opencl_lock)
 #else
 #define LOCK_OPENCL
 #define UNLOCK_OPENCL
@@ -322,15 +316,15 @@ static inline int init_opencl_mtx(void)
 #if BV_HAVE_THREADS
     if (!atomic_opencl_lock) {
         int err;
-        pthread_mutex_t *tmp = bv_malloc(sizeof(pthread_mutex_t));
+        BVMutex *tmp = bv_malloc(sizeof(BVMutex));
         if (!tmp)
             return BVERROR(ENOMEM);
-        if ((err = pthread_mutex_init(tmp, NULL))) {
+        if ((err = bv_mutex_init(tmp, NULL))) {
             bv_free(tmp);
             return BVERROR(err);
         }
         if (bvpriv_atomic_ptr_cas(&atomic_opencl_lock, NULL, tmp)) {
-            pthread_mutex_destroy(tmp);
+            bv_mutex_destroy(tmp);
             bv_free(tmp);
         }
     }

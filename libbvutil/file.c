@@ -154,7 +154,7 @@ int bv_tempfile(const char *prefix, char **filename, int log_offset, void *log_c
 #endif
     /* -----common section-----*/
     if (!*filename) {
-        bv_log(&file_log_ctx, BV_LOG_ERROR, "ff_tempfile: Cannot allocate file name\n");
+        bv_log(&file_log_ctx, BV_LOG_ERROR, "bb_tempfile: Cannot allocate file name\n");
         return BVERROR(ENOMEM);
     }
 #if !BV_HAVE_MKSTEMP
@@ -178,7 +178,7 @@ int bv_tempfile(const char *prefix, char **filename, int log_offset, void *log_c
     /* -----common section-----*/
     if (fd < 0) {
         int err = BVERROR(errno);
-        bv_log(&file_log_ctx, BV_LOG_ERROR, "ff_tempfile: Cannot open temporary file %s\n", *filename);
+        bv_log(&file_log_ctx, BV_LOG_ERROR, "bb_tempfile: Cannot open temporary file %s\n", *filename);
         bv_freep(filename);
         return err;
     }

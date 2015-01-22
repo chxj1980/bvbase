@@ -156,7 +156,7 @@ static uint64_t get_channel_layout_single(const char *name, int name_len)
 }
 
 #if BV_API_GET_CHANNEL_LAYOUT_COMPAT
-uint64_t ff_get_channel_layout(const char *name, int compat)
+uint64_t bb_get_channel_layout(const char *name, int compat)
 #else
 uint64_t bv_get_channel_layout(const char *name)
 #endif
@@ -182,7 +182,7 @@ uint64_t bv_get_channel_layout(const char *name)
 #if BV_API_GET_CHANNEL_LAYOUT_COMPAT
 uint64_t bv_get_channel_layout(const char *name)
 {
-    return ff_get_channel_layout(name, 1);
+    return bb_get_channel_layout(name, 1);
 }
 #endif
 

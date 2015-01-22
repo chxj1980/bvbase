@@ -34,7 +34,7 @@ extern "C"{
 #include <libbvutil/bvutil.h>
 #include <libbvutil/log.h>
 
-#define BV_MAX_NAME_LEN    (64)
+#define BV_MAX_NAME_LEN   (128)
 #define BV_MAX_URL_LEN    (512)
 #define BV_MAX_PRESET_NUM (256)
 
@@ -55,67 +55,10 @@ enum BVFileType {
     BV_FILE_TYPE_FIRMWARE = (1 << 4),
 };
 
-#if 0
-enum BVRCModeID {
-    BV_RC_MODE_ID_VBR = 0, /* VBR must be 0 for compatible with 3511 */
-    BV_RC_MODE_ID_CBR,
-    BV_RC_MODE_ID_ABR,
-    BV_RC_MODE_ID_FIXQP,
-    BV_RC_MODE_ID_BUTT,
-};
-
-/**
- *    采用Ffmpeg中的，还是自己定义呢？？？？
- */
-enum BVCodecID {
-    BV_CODEC_ID_NONE = 0,
-    //video
-    BV_CODEC_ID_H264,
-    BV_CODEC_ID_MPEG,
-    BV_CODEC_ID_JPG,
-    
-    //Audio
-    BV_CODEC_ID_G711A,
-    BV_CODEC_ID_G711U,
-    BV_CODEC_ID_G726,
-    BV_CODEC_ID_AAC,
-
-    BV_CODEC_ID_UNKNOWN
-};
-
-enum BVMediaType {
-    BV_MEDIA_TYPE_UNKNOWN = -1,  ///< Usually treated as BV_MEDIA_TYPE_DATA
-    BV_MEDIA_TYPE_VIDEO,
-    BV_MEDIA_TYPE_AUDIO,
-    BV_MEDIA_TYPE_DATA,          ///< Opaque data information usually continuous
-    BV_MEDIA_TYPE_SUBTITLE,
-    BV_MEDIA_TYPE_ATTACHMENT,    ///< Opaque data information usually sparse
-    BV_MEDIA_TYPE_NB
-};
-
-typedef struct _BVCodecContext {
-    enum BVMediaType codec_type;    //BV_MEDIA_TYPE_XXX
-//    enum BVCodecID   codec_id;
-    enum BVRCModeID  mode_id;
-    int  width, height;
-    int coded_width, coded_height;
-    int framerate;
-    int quality;
-    int bit_rate;
-    int gop_size;
-    enum BVPixelFormat pix_fmt;
-
-    int sample_rate;
-    enum BVSampleFormat sample_fmt;  ///< sample format
-    int channels;
-
-    int profile;
-} BVCodecContext;
-#endif
-
 enum BVConfigType {
-    BV_CONFIG_TYPE_NONE,
-    BV_CONFIG_TYPE_LOCALE,
+    BV_CONFIG_TYPE_NONE = -1,
+    BV_CONFIG_TYPE_LOCAL,
+    BV_CONFIG_TYPE_ONVIF,
     BV_CONFIG_TYPE_UNKNOWN,
 };
 
@@ -131,6 +74,26 @@ enum BVEncryptionType {
     BV_ENCRYPTION_TYPE_MD5,
     BV_ENCRYPTION_TYPE_CRC,
 };
+
+typedef struct _BVIntRange {
+    int64_t min;
+    int64_t max;
+} BVIntRange;
+
+typedef struct _BVFloatRange {
+    float min;
+    float max;
+} BVFloatRange;
+
+typedef struct _BVIntList {
+    int nb_int;
+    int64_t *items;
+} BVIntList;
+
+typedef struct _BVFloatList {
+    int nb_float;
+    float *items;
+} BVFloatList;
 
 typedef struct _BVCertification {
     char server[BV_MAX_URL_LEN];
@@ -192,7 +155,9 @@ typedef struct _BVVideoCapture {
 } BVVideoCapture;
 
 typedef struct _BVVideoSource {
-    BVBasicInfo basic_info;
+   // BVBasicInfo basic_info;
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
     float framerate;
     BVIntRectange bounds;
     BVVideoResolution resolution;
@@ -215,20 +180,60 @@ enum BVAudioInputType {
 };
 
 typedef struct _BVAudioSource {
-    BVBasicInfo basic_info;
+    //BVBasicInfo basic_info;
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
     int channels;
     enum BVAudioInputType input_type;
     void *any_attr;
 } BVAudioSource;
 
+typedef struct _BVVideoOption {
+    enum BVCodecID codec_id;
+    int nb_resolutions;
+    BVVideoResolution *resolutions;
+    BVIntRange framerate_range;
+    BVIntRange gop_range;
+    BVIntRange bitrate_range;
+} BVVideoOption;
+
+typedef struct _BVVideoEncoderOption {
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
+    BVIntRange quality;
+    BVVideoOption *h264;
+    BVVideoOption *mpeg;
+    BVVideoOption *jpeg;
+    void *any_attr;
+} BVVideoEncoderOption;
+
 typedef struct _BVVideoEncoder {
-    BVBasicInfo basic_info;
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
+    bool enable;
     BVCodecContext codec_context;
+ //   BVVideoEncoderOption *option;
     void *any_attr;
 } BVVideoEncoder;
 
+typedef struct _BVAudioOption {
+    enum BVCodecID codec_id;
+    BVIntList bitrate_list;
+    BVIntList sample_rate_list;
+} BVAudioOption;
+
+typedef struct _BVAudioEncoderOption {
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
+    int nb_options;
+    BVAudioOption *options;
+    void *any_attr;
+} BVAudioEncoderOption;
+
 typedef struct _BVAudioEncoder {
-    BVBasicInfo basic_info;
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
+    bool enable;
     BVCodecContext codec_context;
     void *any_attr;
 } BVAudioEncoder;
@@ -241,9 +246,24 @@ typedef struct _BVAudioDecoder {
     /* data */
 } BVAudioDecoder;
 
+enum BVEncodeChannelType {
+    BV_CHANNEL_TYPE_STORAGE = 0,
+    BV_CHANNEL_TYPE_PREVIEW,
+    BV_CHANNEL_TYPE_PICTURE,
+
+    BV_CHANNEL_TYPE_UNKNOWN
+};
+
+typedef struct _BVEncodeChannelConfig {
+    enum BVEncodeChannelType type;
+    BVAudioEncoder *audio_encoder;
+    BVVideoEncoder *video_encoder;
+} BVEncodeChannelConfig;
+
 typedef struct _BVMediaProfile {
     BVBasicInfo basic_info;
-    BVCertification *certification;
+    char token[BV_MAX_NAME_LEN];
+//    BVCertification *certification;
     BVVideoSource *video_source;
     BVAudioSource *audio_source;
     BVVideoEncoder *video_encoder;
@@ -259,7 +279,6 @@ enum BVChannelType {
 
     BV_CHANNEL_TYPE_UNKNOWN
 };
-#else
 enum BVChannelType {
     BV_CHANNEL_TYPE_HISAVI,
     BV_CHANNEL_TYPE_HISAVE,
@@ -274,8 +293,9 @@ enum BVChannelType {
 
 typedef struct _BVChannel {
     int index;
-    enum BVChannelType type;
-    BVMediaProfile profile;
+    enum BVConfigType type;
+   // BVMediaProfile profile;
+    BVCertification *certification;
 } BVChannel;
 
 typedef struct _BVDeviceInfo {
@@ -288,6 +308,7 @@ typedef struct _BVDeviceInfo {
     char manufacturer_name[BV_MAX_NAME_LEN];    //厂商名字
     char device_id[BV_MAX_NAME_LEN];            //设备ID
     char device_name[BV_MAX_NAME_LEN];            //设备名字
+    char firware_version[BV_MAX_NAME_LEN];          //固件版本
 
     uint8_t cpu_usage;                            //CPU使用率
     uint8_t memory_usage;                        //内存使用率
@@ -296,11 +317,12 @@ typedef struct _BVDeviceInfo {
     uint8_t channel_count;
     uint8_t video_dev_count;
     uint8_t audio_dev_count;
-    uint8_t video_in_count;
-    uint8_t video_out_count;
-    uint8_t audio_in_count;
-    uint8_t audio_out_count;
-    uint8_t serial_port_count;
+    uint8_t video_sources;
+    uint8_t video_outputs;
+    uint8_t audio_sources;
+    uint8_t audio_outputs;
+    uint8_t relay_outputs;
+    uint8_t serial_ports;
     uint8_t alert_in_count;
     uint8_t alert_out_count;
     uint8_t ptz_count;
@@ -395,13 +417,31 @@ enum BVPTZProtocol {
     BV_PTZ_PROTO_YAAN,
 };
 
+enum BVRS232ControlMode {
+    BV_RS232_CONTROL_MODE_NONE = -1,
+    BV_RS232_CONTROL_MODE_CONSOLE,                      //控制台
+    BV_RS232_CONTROL_MODE_TRANSPARENT_CHANNEL,          //透明通道
+    BV_RS232_CONTROL_MODE_UNKNOWN
+};
+
 typedef struct _BVRS232 {
     uint32_t baud_rate;
     uint8_t data_bits;
     uint8_t stop_bit;
     uint8_t parity;
     uint8_t flow_control;
+    enum BVRS232ControlMode control_mode;
 } BVRS232;
+
+typedef struct _BVRS485{
+    uint32_t baud_rate;
+    uint8_t data_bits;
+    uint8_t stop_bit;
+    uint8_t parity;
+    uint8_t flow_control;
+    uint8_t address;
+    //FIXME 解码器类型
+} BVRS485;
 
 typedef struct _BVPTZPreset {
     int index;
@@ -418,7 +458,8 @@ typedef struct _BVPTZ {
     int index;
     BVBasicInfo basic_info;
     enum BVPTZProtocol protocol;
-    BVRS232 rs232;
+//    BVRS232 rs232;
+    BVRS485 rs485;
     uint32_t preset_num;
     BVPTZPreset preset[BV_MAX_PRESET_NUM];
 } BVPTZ;
@@ -465,6 +506,40 @@ typedef struct _BVPPPOE {
     char user[16];
     char passwd[16];
 } BVPPPOE;
+
+typedef struct _BVMediaCapability {
+    char *url;
+} BVMediaCapability;
+
+typedef struct _BVDeviceIOCapability {
+    char *url;
+    uint8_t video_sources;
+    uint8_t audio_sources;
+    uint8_t video_outputs;
+    uint8_t audio_outputs;
+    uint8_t relay_outputs;
+    uint8_t serial_ports;
+} BVDeviceIOCapability;
+
+typedef struct _BVPTZCapability {
+    char *url;
+} BVPTZCapability;
+
+typedef struct _BVEventsCapability {
+    char *url;
+} BVEventsCapability;
+
+typedef struct _BVDeviceCapability {
+    char *url;
+} BVDeviceCapability;
+
+typedef struct _BVSystemCapability {
+    BVDeviceCapability *device;
+    BVEventsCapability *event;
+    BVMediaCapability *media;
+    BVPTZCapability *ptz;
+    BVDeviceIOCapability *deviceio;
+} BVSystemCapability;
 #endif
 #ifdef __cplusplus
 }

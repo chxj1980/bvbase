@@ -129,15 +129,15 @@ bv_cold void bvpriv_float_dsp_init(BVFloatDSPContext *fdsp, int bit_exact)
     fdsp->scalarproduct_float = bvpriv_scalarproduct_float_c;
 
     if (BV_ARCH_AARCH64)
-        ff_float_dsp_init_aarch64(fdsp);
+        bb_float_dsp_init_aarch64(fdsp);
     if (BV_ARCH_ARM)
-        ff_float_dsp_init_arm(fdsp);
+        bb_float_dsp_init_arm(fdsp);
     if (BV_ARCH_PPC)
-        ff_float_dsp_init_ppc(fdsp, bit_exact);
+        bb_float_dsp_init_ppc(fdsp, bit_exact);
     if (BV_ARCH_X86)
-        ff_float_dsp_init_x86(fdsp);
+        bb_float_dsp_init_x86(fdsp);
     if (BV_ARCH_MIPS)
-        ff_float_dsp_init_mips(fdsp);
+        bb_float_dsp_init_mips(fdsp);
 }
 
 bv_cold BVFloatDSPContext *bvpriv_float_dsp_alloc(int bit_exact)

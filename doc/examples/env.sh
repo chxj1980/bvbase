@@ -1,1 +1,2 @@
-export LD_LIBRARY_PATH=/home/albert/selfgit/bvbase/3rdparty/binary/onvif/x86/lib/:/home/albert/selfgit/bvbase/lib/x86/:/home/albert/selfgit/bvbase/3rdparty/binary/ffmpeg/x86/lib/
+BVBASE_DIR=/home/albert/selfgit/bvbase/3rdparty/binary
+export LD_LIBRARY_PATH=$BVBASE_DIR/ffmpeg/x86/lib:$BVBASE_DIR/onvif/x86/lib:$BVBASE_DIR/openssl/x86/lib:$BVBASE_DIR/bvbase/x86/lib

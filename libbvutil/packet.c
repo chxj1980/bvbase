@@ -29,7 +29,8 @@ int bv_packet_init(BVPacket *pkt)
 {
     pkt->pts = pkt->dts = BV_NOPTS_VALUE;
     pkt->flags = pkt->stream_index = 0;
-    pkt->buf = pkt->data = NULL;
+    pkt->buf = NULL;
+    pkt->data = NULL;
     pkt->size = 0;
     return 0;
 }

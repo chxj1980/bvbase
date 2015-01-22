@@ -22,17 +22,19 @@
  */
 
 #include "bvdevice.h"
-
 #include <soapH.h>
 #include <wsseapi.h>
+
+#include <libbvutil/bvstring.h>
 
 typedef struct OnvifPTZContext {
     const BVClass *bv_class;
     int timeout;
     char *user;
     char *passwd;
-    char url[1024];
-    char token[64];
+    char svrurl[1024];
+    char *token;
+    char *ptz_url;
     struct soap *soap;
 } OnvifPTZContext;
 
@@ -53,9 +55,6 @@ static struct soap *bv_soap_new(OnvifPTZContext *onvif_ptz)
         timeout = ONVIF_TMO;
     }
 
-    if (onvif_ptz->user && onvif_ptz->passwd) {
-        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
-    }
     soap->recv_timeout = timeout;
     soap->send_timeout = timeout;
     soap->connect_timeout = timeout;
@@ -72,7 +71,37 @@ static void bv_soap_free(struct soap *soap)
     soap_free(soap);
 }
 
-//url likes onvif_ptz://admin:123456@192.168.6.149:8899/onvif/device_services/?token=0000?timeout=5000
+static int bv_onvif_service_uri(OnvifPTZContext *onvif_ptz)
+{
+    int retval = SOAP_OK;
+    struct soap *soap = onvif_ptz->soap;
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
+    enum tt__CapabilityCategory Category = tt__CapabilityCategory__PTZ;
+
+    MEMSET_STRUCT(request);
+    MEMSET_STRUCT(response);
+
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
+
+    request.Category = &Category;
+    request.__sizeCategory = 1;
+    retval = soap_call___tds__GetCapabilities(soap, onvif_ptz->svrurl, NULL, &request, &response);
+    if(retval != SOAP_OK) {
+        bv_log(onvif_ptz, BV_LOG_ERROR, "get PTZService URI error");
+        bv_log(onvif_ptz, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return retval;
+    } else {
+        onvif_ptz->ptz_url = bv_strdup(response.Capabilities->PTZ->XAddr);
+    }
+    bv_log(onvif_ptz, BV_LOG_INFO, "Get PTZService URI %s\n", onvif_ptz->ptz_url);
+    return retval;
+}
+
+
+//svrurl likes onvif_ptz://admin:123456@192.168.6.149:8899/onvif/device_services/?token=0000?timeout=5000
 static int onvif_ptz_open(BVDeviceContext *h)
 {
     OnvifPTZContext *onvif_ptz = h->priv_data;
@@ -82,13 +111,22 @@ static int onvif_ptz_open(BVDeviceContext *h)
         bv_log(onvif_ptz, BV_LOG_ERROR, "url is NULL\n");
         return -1;
     }
-    p = strstr(h->url, ":");
-    sprintf(onvif_ptz->url, "http%s",p);
-    sprintf(onvif_ptz->token, "00000"); 
-    onvif_ptz->soap = bv_soap_new(onvif_ptz);
-    if (onvif_ptz->soap == NULL) {
-        return -1;
+    p = bv_sreplace(h->url, "onvif_ptz", "http");
+    if (!p) {
+        return BVERROR(ENOMEM);
     }
+    bv_strlcpy(onvif_ptz->svrurl, p, sizeof(onvif_ptz->svrurl));
+    bv_free(p);
+
+    onvif_ptz->soap = bv_soap_new(onvif_ptz);
+    if (!onvif_ptz->soap)
+        return BVERROR(ENOMEM);
+    if (bv_onvif_service_uri(onvif_ptz)) {
+        bv_soap_free(onvif_ptz->soap);
+        return BVERROR(EINVAL);
+    }
+    bv_log(h, BV_LOG_DEBUG, "ptz svr %s\n", onvif_ptz->ptz_url);
+
     return 0;
 }
 
@@ -102,7 +140,7 @@ static int onvif_ptz_probe(BVDeviceContext *h, const char *args)
 
 static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
+    int ret = 0;
     int retval = SOAP_OK;
     struct _tptz__ContinuousMove tptz__ContinuousMove; 
     struct tt__PTZSpeed Velocity;
@@ -126,11 +164,18 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *
     Velocity.PanTilt = &PanTilt;
     Velocity.Zoom = & Zoom;
 
+    if (!onvif_ptz->ptz_url) {
+        return BVERROR(ENOSYS);
+    }
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
+
     PanTilt.x = continuous_move->velocity.pan_tilt.x;
     PanTilt.y = continuous_move->velocity.pan_tilt.y;
     Zoom.x = continuous_move->velocity.zoom.x;
     
-    retval = soap_call___tptz__ContinuousMove(soap, onvif_ptz->url, NULL, &tptz__ContinuousMove, &tptz__ContinuousMoveResponse);
+    retval = soap_call___tptz__ContinuousMove(soap, onvif_ptz->ptz_url, NULL, &tptz__ContinuousMove, &tptz__ContinuousMoveResponse);
 
     if (retval != SOAP_OK) {
         printf("PTZ ContinuousMove error");
@@ -143,7 +188,7 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *
 
 static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
+    int ret = 0;
     int retval = SOAP_OK;
     struct SOAP_ENV__Header header;
     struct _tptz__Stop tptz__Stop;
@@ -157,11 +202,18 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVC
     MEMSET_STRUCT(tptz__StopResponse);
     soap_default_SOAP_ENV__Header(soap, &header);
 
+    if (!onvif_ptz->ptz_url) {
+        return BVERROR(ENOSYS);
+    }
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
+
     tptz__Stop.ProfileToken = onvif_ptz->token;
     tptz__Stop.PanTilt = (enum xsd__boolean *)&stop->pan_tilt;
     tptz__Stop.Zoom = (enum xsd__boolean *)&stop->zoom;
 
-    retval = soap_call___tptz__Stop(soap, onvif_ptz->url, NULL, &tptz__Stop, &tptz__StopResponse);
+    retval = soap_call___tptz__Stop(soap, onvif_ptz->ptz_url, NULL, &tptz__Stop, &tptz__StopResponse);
     if (retval != SOAP_OK) {
         printf("PTZ ContinuousMove error");
         printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -173,7 +225,7 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVC
 
 static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
+    int ret = 0;
     int retval = SOAP_OK;
     struct SOAP_ENV__Header header;
     struct _tptz__SetPreset tptz__SetPreset;
@@ -186,12 +238,18 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_i
     MEMSET_STRUCT(tptz__SetPreset);
     MEMSET_STRUCT(tptz__SetPresetResponse);
 
+    if (!onvif_ptz->ptz_url) {
+        return BVERROR(ENOSYS);
+    }
     soap_default_SOAP_ENV__Header(soap, &header);
     tptz__SetPreset.ProfileToken = onvif_ptz->token;
     tptz__SetPreset.PresetName = preset->name;
     tptz__SetPreset.PresetToken = preset->token;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
-    retval = soap_call___tptz__SetPreset(soap, onvif_ptz->url, NULL, &tptz__SetPreset, &tptz__SetPresetResponse);
+    retval = soap_call___tptz__SetPreset(soap, onvif_ptz->ptz_url, NULL, &tptz__SetPreset, &tptz__SetPresetResponse);
     if (retval != SOAP_OK) {
         printf("PTZ SetPreset error");
         printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -203,7 +261,7 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_i
 
 static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
+    int ret = 0;
     int retval = SOAP_OK;
     struct SOAP_ENV__Header header;
     struct _tptz__GotoPreset tptz__GotoPreset;
@@ -223,10 +281,16 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
     MEMSET_STRUCT(PanTilt);
     MEMSET_STRUCT(Zoom);
 
+    if (!onvif_ptz->ptz_url) {
+        return BVERROR(ENOSYS);
+    }
     soap_default_SOAP_ENV__Header(soap, &header);
     tptz__GotoPreset.ProfileToken = onvif_ptz->token;
     tptz__GotoPreset.PresetToken = goto_preset->token;
     tptz__GotoPreset.Speed = &Speed;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
     Speed.PanTilt = &PanTilt;
     Speed.Zoom = & Zoom;
@@ -235,7 +299,7 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
     PanTilt.y = goto_preset->speed.pan_tilt.y;
     Zoom.x = goto_preset->speed.zoom.x;
 
-    retval = soap_call___tptz__GotoPreset(soap, onvif_ptz->url, NULL, &tptz__GotoPreset, &tptz__GotoPresetResponse);
+    retval = soap_call___tptz__GotoPreset(soap, onvif_ptz->ptz_url, NULL, &tptz__GotoPreset, &tptz__GotoPresetResponse);
     if (retval != SOAP_OK) {
         printf("PTZ SetPreset error");
         printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -247,7 +311,7 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
 
 static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
+    int ret = 0;
     int retval = SOAP_OK;
     struct SOAP_ENV__Header header;
     struct _tptz__RemovePreset tptz__RemovePreset;
@@ -260,11 +324,18 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
     MEMSET_STRUCT(tptz__RemovePreset);
     MEMSET_STRUCT(tptz__RemovePresetResponse);
 
+    if (!onvif_ptz->ptz_url) {
+        return BVERROR(ENOSYS);
+    }
+
     soap_default_SOAP_ENV__Header(soap, &header);
     tptz__RemovePreset.ProfileToken = onvif_ptz->token;
     tptz__RemovePreset.PresetToken = preset->token;
+    if (onvif_ptz->user && onvif_ptz->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
+    }
 
-    retval = soap_call___tptz__RemovePreset(soap, onvif_ptz->url, NULL, &tptz__RemovePreset, &tptz__RemovePresetResponse);
+    retval = soap_call___tptz__RemovePreset(soap, onvif_ptz->ptz_url, NULL, &tptz__RemovePreset, &tptz__RemovePresetResponse);
     if (retval != SOAP_OK) {
         printf("PTZ RemovePreset error");
         printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
@@ -311,6 +382,8 @@ static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
     {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"token", "token name", OFFSET(token), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"ptz_url", "ptz service utl", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 
@@ -319,7 +392,7 @@ static const BVClass onvif_class = {
     .item_name      = bv_default_item_name,
     .option         = options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_ptz_device = {

@@ -25,7 +25,7 @@
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
 
-const char *FILE_NAME = "media.c";
+static const char *FILE_NAME = "media.c";
 
 BVInputMedia *bv_input_media_find(const char *short_name)
 {
@@ -141,7 +141,7 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     else
         ret = init_imedia(s, url);
     if (ret < 0) {
-        ret = BVERROR(ENOSYS);
+        ret = BVERROR(EINVAL);
         goto fail;
     }
     if (s->imedia->priv_data_size > 0) {
@@ -161,6 +161,12 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
         }
     }
 
+#if 0
+    //用户自己打开文件
+    if (!s->pb && !(s->imedia->flags & BV_MEDIA_FLAGS_NOFILE)) {
+        //open bvio
+    }
+#endif
     if (url)
         bv_strlcpy(s->filename, url, sizeof(s->filename));
     if (!s->imedia->read_header) {
@@ -170,9 +176,14 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     *fmt = s;
 
     bv_dict_free(&tmp);
-    return s->imedia->read_header(s);
+    ret = s->imedia->read_header(s);
+    if (ret) {
+        goto fail;
+    }
+    return 0;
 fail:
     bv_dict_free(&tmp);
+    bv_media_context_free(s);
     return ret;
 }
 
@@ -206,3 +217,4 @@ int bv_input_media_close(BVMediaContext **fmt)
     *fmt = NULL;
     return 0;
 }
+

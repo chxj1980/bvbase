@@ -47,7 +47,7 @@ BVConfig *bv_config_next(BVConfig * cfg)
         return first_cfg;
 }
 
-BVConfig *bv_config_find_config(enum BVConfigType config_type)
+BVConfig *bv_config_find(enum BVConfigType type)
 {
     BVConfig *cfg = NULL;
     if (first_cfg == NULL) {
@@ -56,14 +56,14 @@ BVConfig *bv_config_find_config(enum BVConfigType config_type)
     }
 
     while ((cfg = bv_config_next(cfg))) {
-        if (cfg->config_type == config_type) {
+        if (cfg->type == type) {
             return cfg;
         }
     }
     return NULL;
 }
 
-BVConfig *bv_config_find_config_by_name(const char *cfg_name)
+BVConfig *bv_config_find_by_name(const char *cfg_name)
 {
     BVConfig *cfg = NULL;
     if (first_cfg == NULL) {
@@ -74,6 +74,59 @@ BVConfig *bv_config_find_config_by_name(const char *cfg_name)
     while ((cfg = bv_config_next(cfg))) {
         if (strncmp(cfg->name, cfg_name, strlen(cfg->name)) == 0) {
             return cfg;
+        }
+    }
+    return NULL;
+}
+
+static BVConfigFile *first_file_config = NULL;
+static BVConfigFile **last_file_config = &first_file_config;
+
+int bv_config_file_register(BVConfigFile * config_file)
+{
+    BVConfigFile **p = last_file_config;
+    config_file->next = NULL;
+    while (*p || bvpriv_atomic_ptr_cas((void *volatile *) p, NULL, config_file))
+        p = &(*p)->next;
+    last_file_config = &config_file->next;
+    return 0;
+}
+
+BVConfigFile *bv_config_file_next(BVConfigFile * config_file)
+{
+    if (config_file)
+        return config_file->next;
+    else
+        return first_file_config;
+}
+
+BVConfigFile *bv_config_file_find(enum BVConfigFileType config_file_type)
+{
+    BVConfigFile *config_file = NULL;
+    if (first_file_config == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "BVConfigFile Not RegisterAll");
+        return NULL;
+    }
+
+    while ((config_file = bv_config_file_next(config_file))) {
+        if (config_file->type == config_file_type) {
+            return config_file;
+        }
+    }
+    return NULL;
+}
+
+BVConfigFile *bv_config_file_find_by_name(const char *file_config_name)
+{
+    BVConfigFile *config_file = NULL;
+    if (first_file_config == NULL) {
+        bv_log(NULL, BV_LOG_ERROR, "BVConfigFile Not RegisterAll");
+        return NULL;
+    }
+
+    while ((config_file = bv_config_file_next(config_file))) {
+        if (strncmp(config_file->name, file_config_name, strlen(config_file->name)) == 0) {
+            return config_file;
         }
     }
     return NULL;

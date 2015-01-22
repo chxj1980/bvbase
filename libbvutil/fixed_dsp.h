@@ -119,8 +119,8 @@ static bv_always_inline int fixed_sqrt(int x, int bits)
     int shift1 = 30 - bits;
     int shift2 = bits - 15;
 
-    if (shift1 > 0) retval = ff_sqrt(x << shift1);
-    else retval = ff_sqrt(x >> -shift1);
+    if (shift1 > 0) retval = bb_sqrt(x << shift1);
+    else retval = bb_sqrt(x >> -shift1);
 
     if (shift2 > 0) {
         retval = retval << shift2;

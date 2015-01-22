@@ -36,7 +36,7 @@
  * This function MAY rely on signal() or fork() in order to make sure AltiVec
  * is present.
  */
-int ff_get_cpu_flags_ppc(void)
+int bb_get_cpu_flags_ppc(void)
 {
 #if BV_HAVE_ALTIVEC
 #ifdef __AMIGAOS4__

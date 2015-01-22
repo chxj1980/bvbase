@@ -23,7 +23,7 @@
 
 #include <windows.h>
 #include "libbvutil/version.h"
-#include "libbvutil/ffversion.h"
+#include "libbvutil/bbversion.h"
 #include "config.h"
 
 1 VERSIONINFO

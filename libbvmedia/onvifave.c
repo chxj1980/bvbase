@@ -32,6 +32,7 @@
 #include <libbvutil/opt.h>
 
 #include <wsseapi.h>
+#include <wsaapi.h>
 #include "bvmedia.h"
 
 typedef struct OnvifContext {
@@ -44,9 +45,13 @@ typedef struct OnvifContext {
     BVRational video_rate;
     int width, height;
     char onvif_url[128];
+    char *media_url;
     int timeout;
+    int snpsht;
     struct soap *soap;
     AVFormatContext *onvif;
+    AVIOContext *snapshot;
+    struct SOAP_ENV__Header soap_header;
 } OnvifContext;
 
 #define OFFSET(x) offsetof(OnvifContext, x)
@@ -58,6 +63,7 @@ static const BVOption options[] = {
     {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
     {"video_rate", "", OFFSET(video_rate), BV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC},
     {"size", "set video size", OFFSET(width), BV_OPT_TYPE_IMAGE_SIZE, {.str = "hd720"}, 0, 0, DEC},
+    {"media_url", "", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"timeout", "", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = -5000}, INT_MIN, INT_MAX, DEC},
 
     {NULL}
@@ -104,12 +110,22 @@ static void set_video_info(BVStream *bvst, AVStream *avst)
     bvst->codec->bit_rate = avst->codec->bit_rate;
     bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
     bvst->codec->gop_size = avst->codec->gop_size;
+    bvst->codec->profile  = avst->codec->profile;
     if (avst->codec->extradata_size > 0) {
         bvst->codec->extradata = bv_memdup(avst->codec->extradata, avst->codec->extradata_size);
         if (bvst->codec->extradata) {
             bvst->codec->extradata_size = avst->codec->extradata_size;
         }
     }
+}
+
+static void set_audio_info(BVStream *bvst, AVStream *avst)
+{
+    bvst->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
+    bvst->codec->sample_rate = avst->codec->sample_rate;
+    bvst->codec->channels = avst->codec->channels;
+    bvst->codec->sample_fmt = (enum BVSampleFormat )avst->codec->sample_fmt;
+    bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
 }
 
 static int set_avcodec_info(BVMediaContext *s, OnvifContext *onvifctx)
@@ -123,11 +139,16 @@ static int set_avcodec_info(BVMediaContext *s, OnvifContext *onvifctx)
         bvst = bv_stream_new(s, NULL);
         if (avst->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             set_video_info(bvst, avst);
+        } else if (avst->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            set_audio_info(bvst, avst);
+        } else {
+            bv_log(s, BV_LOG_WARNING, "Unsupport CodecType\n");
         }
     }
     return 0;
 }
 #define ONVIF_TMO (-5000)
+#define MEMSET_STRUCT(X)    memset(&(X), 0, sizeof((X)));
 static struct soap *bv_soap_new(OnvifContext *onvifctx)
 {
     struct soap *soap = NULL;
@@ -140,11 +161,6 @@ static struct soap *bv_soap_new(OnvifContext *onvifctx)
     if (!timeout) {
         timeout = ONVIF_TMO;
     }
-
-    if (onvifctx->user && onvifctx->passwd) {
-        soap_wsse_add_UsernameTokenDigest(soap, "onvifave_user", onvifctx->user, onvifctx->passwd);
-    }
-
     soap->recv_timeout = timeout;
     soap->send_timeout = timeout;
     soap->connect_timeout = timeout;
@@ -161,7 +177,6 @@ static void bv_soap_free(struct soap *soap)
     soap_free(soap);
 }
 
-
 static int bv_onvif_stream_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
@@ -173,7 +188,10 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     struct _trt__GetStreamUri trt__GetStreamUri;
     struct tt__StreamSetup StreamSetup;    /* required element of type tt:StreamSetup */
     struct tt__Transport Transport;    /* required element of type tt:Transport */
-
+    struct SOAP_ENV__Header header;
+    if (!onvifctx->media_url) {
+        return BVERROR(ENOSYS);
+    }
     trt__GetStreamUri.ProfileToken = onvifctx->token;
     trt__GetStreamUri.StreamSetup = &StreamSetup;
     StreamSetup.Transport = &Transport;
@@ -183,13 +201,21 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     StreamSetup.__size = 1;
     StreamSetup.__any = NULL;
     StreamSetup.__anyAttribute = NULL;
+    soap_default_SOAP_ENV__Header(soap, &header);
+    soap->header = &header;
 
-    retval = soap_call___trt__GetStreamUri(soap, onvifctx->svrurl , NULL, &trt__GetStreamUri, &trt__GetStreamUriResponse);
+    header.wsa__MessageID = (char *)soap_wsa_rand_uuid(soap);
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+
+    retval = soap_call___trt__GetStreamUri(soap, onvifctx->media_url , NULL, &trt__GetStreamUri, &trt__GetStreamUriResponse);
     if (retval != SOAP_OK) {
-        printf("get media url error\n");
-        printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        bv_log(NULL, BV_LOG_INFO, "get media url error\n");
+        bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
     }  else {
-        printf("get uri %s\n", trt__GetStreamUriResponse.MediaUri->Uri);
+        bv_log(NULL, BV_LOG_INFO, "get uri %s\n", trt__GetStreamUriResponse.MediaUri->Uri);
         q = trt__GetStreamUriResponse.MediaUri->Uri;
         if (onvifctx->user && onvifctx->passwd) {
             char tmp[128] = { 0 };
@@ -205,7 +231,6 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     return ret;
 }
 
-
 static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
@@ -214,18 +239,52 @@ static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
     struct _trt__GetSnapshotUri trt__GetSnapshotUri;
     struct _trt__GetSnapshotUriResponse trt__GetSnapshotUriResponse;
 
+    if (!onvifctx->media_url) {
+        return BVERROR(ENOSYS);
+    }
     trt__GetSnapshotUri.ProfileToken = onvifctx->token;
 
-    retval = soap_call___trt__GetSnapshotUri(soap, onvifctx->svrurl, NULL, &trt__GetSnapshotUri, &trt__GetSnapshotUriResponse);
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+    retval = soap_call___trt__GetSnapshotUri(soap, onvifctx->media_url, NULL, &trt__GetSnapshotUri, &trt__GetSnapshotUriResponse);
     if(retval != SOAP_OK) {
-        printf("get SnapshotUri error");
-        printf("[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        bv_log(NULL, BV_LOG_INFO, "get SnapshotUri error");
+        bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
     } else {
         strncpy(onvifctx->onvif_url, trt__GetSnapshotUriResponse.MediaUri->Uri, sizeof(onvifctx->onvif_url));
         ret = 0;
     }
-
+    bv_log(onvifctx, BV_LOG_INFO, "snapshot url %s\n", onvifctx->onvif_url);
     return ret;
+}
+
+static int bv_onvif_service_uri(OnvifContext *onvifctx)
+{
+    int retval = SOAP_OK;
+    struct soap *soap = onvifctx->soap;
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
+    enum tt__CapabilityCategory Category = tt__CapabilityCategory__Media;
+
+    MEMSET_STRUCT(request);
+    MEMSET_STRUCT(response);
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+
+    request.Category = &Category;
+    request.__sizeCategory = 1;
+    retval = soap_call___tds__GetCapabilities(soap, onvifctx->svrurl, NULL, &request, &response);
+    if(retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_INFO, "get MediaService URI error");
+        bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+    } else {
+        onvifctx->media_url = bv_strdup(response.Capabilities->Media->XAddr);
+    }
+    bv_log(onvifctx, BV_LOG_INFO, "Get MediaService URI %s\n", onvifctx->media_url);
+    return 0;
 }
 
 //url like onvifave://192.168.6.149:8899/onvif/device_serveces
@@ -238,28 +297,36 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
         bv_log(s, BV_LOG_ERROR, "must set onvifave token url\n");
         return BVERROR(EINVAL);
     }
-    onvifctx->soap = bv_soap_new(onvifctx);
-    if (!onvifctx->soap)
-        return BVERROR(ENOMEM);
     p = bv_sreplace(s->filename, "onvifave", "http");
     if (!p) {
         return BVERROR(ENOMEM);
     }
     bv_strlcpy(onvifctx->svrurl, p, sizeof(onvifctx->svrurl));
     bv_free(p);
-    bv_log(s, BV_LOG_INFO, "svr %s\n", onvifctx->svrurl);
+
+    onvifctx->soap = bv_soap_new(onvifctx);
+    if (!onvifctx->soap)
+        return BVERROR(ENOMEM);
+
+    if (bv_onvif_service_uri(onvifctx)) {
+        ret = BVERROR(EINVAL);
+        goto fail;
+    }
+    bv_log(s, BV_LOG_DEBUG, "svr %s\n", onvifctx->svrurl);
     if (onvifctx->vcodec_id == BV_CODEC_ID_H264 || onvifctx->vcodec_id == BV_CODEC_ID_MPEG) {
         ret = bv_onvif_stream_uri(onvifctx);
     } else if (onvifctx->vcodec_id == BV_CODEC_ID_JPEG) {
         ret = bv_onvif_snapshot_uri(onvifctx);
+        onvifctx->snpsht = 1;
     } else {
         bv_log(onvifctx, BV_LOG_ERROR, "video codec id error\n");
-        return -1;
+        ret = BVERROR(EINVAL);
+        goto fail;
     }
 
     if(ret < 0) {
         bv_log(onvifctx, BV_LOG_ERROR, "onvif get stream uri error\n");
-        return -1;
+        goto fail;
     }
     /**
      *  RTSP 流的处理协议的解析等等 现在使用FFmpeg中的，已有的功能。
@@ -271,16 +338,23 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
      */
     if(avformat_open_input(&onvifctx->onvif, onvifctx->onvif_url, NULL, NULL) < 0) {
         bv_log(onvifctx, BV_LOG_ERROR, "open onvif stream error\n");
-        return -1;
+        ret = BVERROR(ENOSYS);
+        goto fail;
     }
+#if 0
     if (avformat_find_stream_info(onvifctx->onvif, NULL) < 0) {
+        avformat_close_input(&onvifctx->onvif);
+        bv_soap_free(onvifctx->soap);
         bv_log(onvifctx, BV_LOG_ERROR, "get onvif stream info error\n");
         return -1;
     }
-
+#endif
     av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
     set_avcodec_info(s, onvifctx);
     return 0;
+fail:
+    bv_soap_free(onvifctx->soap);
+    return ret;
 }
 
 static int copy_data(BVPacket *pkt, AVPacket *rpkt)
@@ -309,22 +383,6 @@ static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
     if(av_read_frame(onvifctx->onvif, &rpkt) < 0) {
         return BVERROR(EIO);
     }
-#if 0
-    in_stream = onvifctx->onvif->streams[rpkt.stream_index];
-    index = bv_find_best_stream(s, in_stream->codec->codec_type, -1, -1, NULL, 0);
-    if (index < 0) {
-        bv_log(s, BV_LOG_WARNING, "Not find This Type stream \n");
-        return BVERROR(EINVAL);
-    }
-    index = rpkt.stream_index;
-    out_stream = s->streams[index];
-    //bv_copy_packet(pkt, &rpkt);
-
-    pkt->pts = bv_rescale_q_rnd(rpkt.pts, in_stream->time_base, out_stream->time_base, BV_ROUND_NEAR_INF|BV_ROUND_PASS_MINMAX);
-    pkt->dts = bv_rescale_q_rnd(rpkt.dts, in_stream->time_base, out_stream->time_base, BV_ROUND_NEAR_INF|BV_ROUND_PASS_MINMAX);
-    pkt->duration = bv_rescale_q(rpkt.duration, in_stream->time_base, out_stream->time_base);
-    pkt->stream_index = index;
-#endif
     copy_data(pkt, &rpkt);
     av_free_packet(&rpkt);
     return pkt->size;
@@ -338,7 +396,7 @@ static bv_cold int onvif_read_close(BVMediaContext * s)
     return 0;
 }
 
-static bv_cold int onvif_control(BVMediaContext *s, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+static bv_cold int onvif_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     return 0;
 }
@@ -348,17 +406,17 @@ static const BVClass onvif_class = {
     .item_name = bv_default_item_name,
     .option = options,
     .version = LIBBVUTIL_VERSION_INT,
-    .category = BV_CLASS_CATEGORY_DEVICE_VIDEO_INPUT,
+    .category = BV_CLASS_CATEGORY_DEMUXER,
 };
 
 BVInputMedia bv_onvifave_demuxer = {
-    .name = "onvifave",
-    .priv_data_size = sizeof(OnvifContext),
-    .read_probe     = onvif_probe,
-    .read_header = onvif_read_header,
-    .read_packet = onvif_read_packet,
-    .read_close = onvif_read_close,
-    .control_message = onvif_control,
-    .flags = BV_MEDIA_FLAG_NOFILE,
-    .priv_class = &onvif_class,
+    .name               = "onvifave",
+    .priv_data_size     = sizeof(OnvifContext),
+    .read_probe         = onvif_probe,
+    .read_header        = onvif_read_header,
+    .read_packet        = onvif_read_packet,
+    .read_close         = onvif_read_close,
+    .control_message    = onvif_control,
+    .flags              = BV_MEDIA_FLAGS_NOFILE,
+    .priv_class         = &onvif_class,
 };

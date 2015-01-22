@@ -38,7 +38,9 @@ extern "C"{
 
 struct _BVMediaContext;
 
-#define BV_MEDIA_FLAG_NOFILE    1
+#define BV_MEDIA_FLAGS_NOFILE       0x0001
+
+#define BV_MEDIA_FLAGS_NOSTREAMS    0x1000
 
 typedef struct _BVInputMedia {
     const char *name;
@@ -52,7 +54,7 @@ typedef struct _BVInputMedia {
     int (*read_header)(struct _BVMediaContext *h);
     int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*read_close)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
 } BVInputMedia;
 
 typedef struct _BVOutputMedia {
@@ -62,10 +64,11 @@ typedef struct _BVOutputMedia {
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVOutputMedia *next;
-    int (*write_head)(struct _BVMediaContext *h);
+    int flags;
+    int (*write_header)(struct _BVMediaContext *h);
     int (*write_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*write_trailer)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
 } BVOutputMedia;
 
 typedef struct _BVStream {
@@ -105,8 +108,6 @@ void bv_media_context_free(BVMediaContext * devctx);
 
 int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
 
-BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename, const char *mime_type);
-
 BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c);
 
 void bv_stream_free(BVMediaContext *s, BVStream *st);
@@ -114,6 +115,18 @@ void bv_stream_free(BVMediaContext *s, BVStream *st);
 int bv_input_media_read(BVMediaContext *s, BVPacket *pkt);
 
 int bv_input_media_close(BVMediaContext **fmt);
+
+BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename, const char *mime_type);
+
+int bv_output_media_open(BVMediaContext **fmt, const char *url, const char *format, BVOutputMedia *media, BVDictionary **options);
+
+int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options);
+
+int bv_output_media_write(BVMediaContext *s, BVPacket *pkt);
+
+int bv_output_media_close(BVMediaContext **fmt);
+
+int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 #ifdef __cplusplus
 }
 #endif

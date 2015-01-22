@@ -41,7 +41,7 @@
 /**
  * Possible downmix types.
  */
-enum AVDownmixType {
+enum BVDownmixType {
     BV_DOWNMIX_TYPE_UNKNOWN, /**< Not indicated. */
     BV_DOWNMIX_TYPE_LORO,    /**< Lo/Ro 2-channel downmix (Stereo). */
     BV_DOWNMIX_TYPE_LTRT,    /**< Lt/Rt 2-channel downmix, Dolby Surround compatible. */
@@ -55,11 +55,11 @@ enum AVDownmixType {
  * All fields are set by the decoder to the value indicated in the audio
  * bitstream (if present), or to a "sane" default otherwise.
  */
-typedef struct AVDownmixInfo {
+typedef struct BVDownmixInfo {
     /**
      * Type of downmix preferred by the mastering engineer.
      */
-    enum AVDownmixType preferred_downmix_type;
+    enum BVDownmixType preferred_downmix_type;
 
     /**
      * Absolute scale factor representing the nominal level of the center
@@ -90,7 +90,7 @@ typedef struct AVDownmixInfo {
      * mixed into L/R channels during downmixing.
      */
     double lfe_mix_level;
-} AVDownmixInfo;
+} BVDownmixInfo;
 
 /**
  * Get a frame's BV_FRAME_DATA_DOWNMIX_INFO side data for editing.
@@ -99,10 +99,10 @@ typedef struct AVDownmixInfo {
  *
  * @param frame the frame for which the side data is to be obtained or created
  *
- * @return the AVDownmixInfo structure to be edited by the caller, or NULL if
+ * @return the BVDownmixInfo structure to be edited by the caller, or NULL if
  *         the structure cannot be allocated.
  */
-AVDownmixInfo *bv_downmix_info_update_side_data(BVFrame *frame);
+BVDownmixInfo *bv_downmix_info_update_side_data(BVFrame *frame);
 
 /**
  * @}
