@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <sys/types.h>
 #include <libbvutil/bvutil.h>
 #include <libbvmedia/bvmedia.h>
@@ -40,7 +41,7 @@ int main(int argc, const char *argv[])
     char filename[1024] = { 0 };
     bv_media_register_all(); 
     bv_protocol_register_all();
-    bv_log_set_level(BV_LOG_DEBUG);
+    bv_log_set_level(BV_LOG_INFO);
 //    av_log_set_level(BV_LOG_DEBUG);
 #if 1
     bv_dict_set(&opn, "user", "admin", 0);
@@ -52,7 +53,8 @@ int main(int argc, const char *argv[])
     bv_dict_set(&opn, "token", "Profile_1", 0);
 #endif
 
-    sprintf(filename, "%s", "bvfs://00_20120412_031132_");
+    //sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
+    sprintf(filename, "%s", "bvfs://tmp/00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
     if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");
@@ -68,8 +70,8 @@ int main(int argc, const char *argv[])
     for (i = 0; i < mc->nb_streams; i++) {
         if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_VIDEO) {
             bv_log(mc, BV_LOG_INFO, "stream count %d\n", mc->nb_streams);
-            bv_log(mc, BV_LOG_INFO, "codec time base %d/%d\n", mc->streams[i]->codec->time_base.den, mc->streams[i]->codec->time_base.num);
-            bv_log(mc, BV_LOG_INFO, "stream time base %d/%d\n", mc->streams[i]->time_base.den, mc->streams[i]->time_base.num);
+            bv_log(mc, BV_LOG_INFO, "codec time base %d/%d\n", mc->streams[i]->codec->time_base.num, mc->streams[i]->codec->time_base.den);
+            bv_log(mc, BV_LOG_INFO, "stream time base %d/%d\n", mc->streams[i]->time_base.num, mc->streams[i]->time_base.den);
             bv_log(mc, BV_LOG_INFO, "gop size %d\n", mc->streams[i]->codec->gop_size);
             bv_log(mc, BV_LOG_INFO, "extradata size %d\n", mc->streams[i]->codec->extradata_size);
             bv_log(mc, BV_LOG_INFO, "codec ID %d\n", mc->streams[i]->codec->codec_id);
@@ -77,6 +79,7 @@ int main(int argc, const char *argv[])
             bv_log(mc, BV_LOG_INFO, "video profile %d\n", mc->streams[i]->codec->profile);
         } else if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
             bv_log(mc, BV_LOG_INFO, "audio sample_rate %d\n", mc->streams[i]->codec->sample_rate);
+            bv_log(mc, BV_LOG_INFO, "audio stream time base %d/%d\n", mc->streams[i]->time_base.num, mc->streams[i]->time_base.den);
             bv_log(mc, BV_LOG_INFO, "audio channels %d\n", mc->streams[i]->codec->channels);
             bv_log(mc, BV_LOG_INFO, "audio type %d\n", mc->streams[i]->codec->codec_id);
             bv_log(mc, BV_LOG_INFO, "audio sample_fmt %d\n", mc->streams[i]->codec->sample_fmt);
@@ -85,6 +88,7 @@ int main(int argc, const char *argv[])
     for (i = 0; i < mc->nb_streams; i++) {
         if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_VIDEO) {
             st = bv_stream_new(out, NULL);
+            st->time_base = (BVRational){1, 1000000};
             st->codec->time_base = (BVRational){1, 25};
             st->codec->width = 1280;
             st->codec->height = 960;
@@ -93,19 +97,21 @@ int main(int argc, const char *argv[])
         } else if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
             st = bv_stream_new(out, NULL);
             st->codec->sample_rate = 8000;
+            st->time_base = (BVRational){1, 1000000};
             st->codec->codec_id = BV_CODEC_ID_G711A;
             st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
             st->codec->channels = 1;
         }
     }
+    if (!(out->omedia->flags & BV_MEDIA_FLAGS_NOFILE)) {
+        bv_dict_set_int(&iopn, "file_type", 1, 0);
+        bv_dict_set_int(&iopn, "storage_type", 2, 0);
+        bv_dict_set_int(&iopn, "channel_num", 2, 0);
 
-    bv_dict_set_int(&iopn, "file_type", 1, 0);
-    bv_dict_set_int(&iopn, "storage_type", 2, 0);
-    bv_dict_set_int(&iopn, "channel_num", 2, 0);
-
-    if (bv_io_open(&out->pb, filename, BV_IO_FLAG_WRITE, NULL, &iopn) < 0) {
-        bv_log(out, BV_LOG_ERROR, "open file error\n");
-        goto close2;
+        if (bv_io_open(&out->pb, filename, BV_IO_FLAG_WRITE, NULL, &iopn) < 0) {
+            bv_log(out, BV_LOG_ERROR, "open file error\n");
+            goto close2;
+        }
     }
     if (bv_output_media_write_header(out, NULL) < 0) {
         bv_log(out, BV_LOG_ERROR, "write header error\n");
@@ -115,8 +121,11 @@ int main(int argc, const char *argv[])
        bv_packet_init(&pkt); 
        if (bv_input_media_read(mc, &pkt) < 0)
            continue;
-       pkt.pts = pkt.pts * 100 / 9;
-       bv_log(mc, BV_LOG_DEBUG, "pkt size %d pts %lld strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
+       st = mc->streams[pkt.stream_index];
+       bv_log(mc, BV_LOG_DEBUG, "Before pkt size %d pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
+       pkt.pts = bv_rescale_q(pkt.pts, mc->streams[pkt.stream_index]->time_base, out->streams[pkt.stream_index]->time_base);
+       //pkt.pts = (pkt.pts * mc->streams[pkt.stream_index]->time_base.num * out->streams[pkt.stream_index]->time_base.den) / mc->streams[pkt.stream_index]->time_base.den;
+       bv_log(mc, BV_LOG_DEBUG, "After pkt size %d  pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
        if (bv_output_media_write(out, &pkt)) {
             bv_log(out, BV_LOG_ERROR, "write packet error\n");
        }
@@ -124,9 +133,11 @@ int main(int argc, const char *argv[])
        bv_packet_free(&pkt);
     }
 close2:
-    bv_dict_free(&iopn);
     bv_output_media_write_trailer(out);
-    bv_io_close(out->pb);
+    if (!(out->omedia->flags & BV_MEDIA_FLAGS_NOFILE)) {
+        bv_dict_free(&iopn);
+        bv_io_close(out->pb);
+    }
     bv_output_media_close(&out);
 close1:
     bv_dict_free(&opn);
