@@ -36,15 +36,50 @@ case $1 in
         ;;
 esac
 
+ARCH=$1
 #export PKG_CONFIG_PATH=$BVBASE_DIR/freetype/$1/lib/pkgconfig
 
+enable_bvfs()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/bvfs/$ARCH/lib:
+	EXENABLE+="--enable-libbvfs "
+	EXTCFLAGS+="-I$BVBASE_DIR/bvfs/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/bvfs/$ARCH/lib -lbvfs "
+}
 
-EXTCFLAGS="-I$BVBASE_DIR/ffmpeg/$1/include -I$BVBASE_DIR/onvif/$1/include -I$BVBASE_DIR/openssl/$1/include"
-EXTLFLAGS="-L$BVBASE_DIR/ffmpeg/$1/lib -lavformat -lavcodec -lavutil -L$BVBASE_DIR/onvif/$1/lib -lonvifc -L$BVBASE_DIR/openssl/$1/lib -lssl -lcrypto"
+enable_onvifc()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/onvif/$ARCH/lib:$BVBASE_DIR/openssl/$ARCH/lib:
+	EXENABLE+="--enable-libonvifc "
+	EXTCFLAGS+="-I$BVBASE_DIR/onvif/$ARCH/include -I$BVBASE_DIR/openssl/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/onvif/$ARCH/lib -lonvifc -L$BVBASE_DIR/openssl/$ARCH/lib -lssl -lcrypto "
+}
 
-export LD_LIBRARY_PATH=$BVBASE_DIR/ffmpeg/$1/lib:$BVBASE_DIR/onvif/$1/lib:$BVBASE_DIR/openssl/$1/lib
-EXENABLE="--enable-libavformat --enable-libonvifc "
+enable_ffmpeg()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/ffmpeg/$ARCH/lib:
+	EXENABLE+="--enable-libavformat "
+	EXTCFLAGS+="-I$BVBASE_DIR/ffmpeg/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/ffmpeg/$ARCH/lib -lavformat -lavcodec -lavutil "
+}
 
+enable_jansson()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/jansson/$ARCH/lib:
+	EXENABLE+="--enable-libjansson "
+	EXTCFLAGS+="-I$BVBASE_DIR/jansson/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/jansson/$ARCH/lib -ljansson "
+}
+
+enable_bvfs
+
+enable_onvifc
+
+enable_ffmpeg
+
+#enable_jansson
+
+export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc
 if [ "$1" != "x86" ];then
 	./configure --prefix=$BVBASE_DIR/$NAME/$1 --enable-cross-compile --disable-doc --disable-debug --disable-manpages \

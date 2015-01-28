@@ -50,16 +50,16 @@ typedef struct _BVURLContext {
 #define BV_URL_PROTOCOL_FLAG_NETWORK 0x01
 #define BV_URL_PROTOCOL_FLAG_NESTED_SCHEME  0x02
 #define BV_SEEK_SIZE    (INT_MIN)
-#define BV_SEEK_FORCE    (32)
+
+extern const BVClass bv_url_context_class;
 typedef struct _BVURLProtocol {
     const char *name;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVURLProtocol *next;
-    int (*url_open)(BVURLContext *h, const char *url, int flags);
-    int (*url_open2)(BVURLContext *h, const char *url, int flags, BVDictionary **options);
-    int (*url_read)(BVURLContext *h, void *buf, size_t size);
-    int (*url_write)(BVURLContext *h, const void *buf, size_t size);
+    int (*url_open)(BVURLContext *h, const char *url, int flags, BVDictionary **options);
+    int (*url_read)(BVURLContext *h, uint8_t *buf, size_t size);
+    int (*url_write)(BVURLContext *h, const uint8_t *buf, size_t size);
     int64_t (*url_seek)(BVURLContext *h, int64_t pos, int whence);
     int (*url_control)(BVURLContext *h, int type, BVControlPacket *in, BVControlPacket *out);
     int (*url_get_file_handle)(BVURLContext *h);
@@ -72,12 +72,13 @@ typedef struct _BVURLProtocol {
 
 BVURLProtocol *bv_url_protocol_next(const BVURLProtocol *prev);
 
-const char *avio_enum_protocols(void **opaque, int output);
-
+const char *bv_url_enum_protocols(void **opaque, int output);
 
 int bv_url_register_protocol(BVURLProtocol *protocol);
 
 int bv_url_connect(BVURLContext *uc, BVDictionary **options);
+
+void bv_protocol_register_all(void);
 
 int bv_url_alloc(BVURLContext **puc, const char *filename, int flags,
                 const BVIOInterruptCB *int_cb);
@@ -86,14 +87,14 @@ int bv_url_open(BVURLContext **puc, const char *filename, int flags,
                const BVIOInterruptCB *int_cb, BVDictionary **options);
 
 
-int bv_url_read(BVURLContext *h, void *buf, size_t size);
-int bv_url_read_complete(BVURLContext *h, void *buf, size_t size);
-int bv_url_write(BVURLContext *h, const void *buf, size_t size);
+int bv_url_read(BVURLContext *h, uint8_t *buf, size_t size);
+int bv_url_read_complete(BVURLContext *h, uint8_t *buf, size_t size);
+int bv_url_write(BVURLContext *h, const uint8_t *buf, size_t size);
 int64_t bv_url_seek(BVURLContext *h, int64_t pos, int whence);
 int bv_url_closep(BVURLContext **hh);
 int bv_url_close(BVURLContext *h);
-const char *avio_find_protocol_name(const char *url);
-int avio_check(const char *url, int flags);
+const char *bv_url_find_protocol_name(const char *url);
+int bv_url_check(const char *url, int flags);
 int64_t bv_url_size(BVURLContext *h);
 int bv_url_get_file_handle(BVURLContext *h);
 int bv_url_get_multi_file_handle(BVURLContext *h, int **handles, int *numhandles);
@@ -102,6 +103,7 @@ int bv_url_shutdown(BVURLContext *h, int flags);
 
 int bv_check_interrupt(BVIOInterruptCB *cb);
 
+int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 #ifdef __cplusplus
 }
 #endif

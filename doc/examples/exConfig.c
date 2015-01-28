@@ -153,7 +153,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&options, "passwd", "12345", 0);
     bv_dict_set(&options, "timeout", "5", 0);
     memset(&devinfo, 0, sizeof(devinfo));
-    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:80/onvif/device_service", NULL, &options)) < 0) {
+    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.134:8899/onvif/device_service", NULL, &options)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error");
         bv_dict_free(&options);
         return BVERROR(EINVAL);
@@ -165,6 +165,8 @@ int main(int argc, const char *argv[])
     bv_log(config_context, BV_LOG_INFO, "id %s\n", devinfo.device_id);
     bv_log(config_context, BV_LOG_INFO, "videosource %d\n", devinfo.video_sources);
     bv_log(config_context, BV_LOG_INFO, "audioSource %d\n", devinfo.audio_sources);
+    bv_log(config_context, BV_LOG_INFO, "videooutputs %d\n", devinfo.video_outputs);
+    bv_log(config_context, BV_LOG_INFO, "audiooutputs %d\n", devinfo.audio_outputs);
     int  max_num = 5;
     if (bv_config_get_media_profiles(config_context, profiles, &max_num) < 0) {
         bv_log(config_context, BV_LOG_ERROR, "get media profiles error\n");

@@ -10,8 +10,11 @@ CFLAGS=  -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include -I$(BVBASE_DIR)/onvif/$(PLA
 LDFLAGS= -L$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/lib -lavformat -lavcodec -lavutil -L$(BVBASE_DIR)/onvif/$(PLANTFORM)/lib -lonvifc -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto  
 
 CFLAGS += -I$(BVBASE_DIR)/bvbase/$(PLANTFORM)/include
-LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig
-EXAMPLES=  exDevice device_scan exMedia a exConfig
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig -lbvprotocol
+
+CFLAGS += -I$(BVBASE_DIR)/bvfs/$(PLANTFORM)/include
+LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs
+EXAMPLES=  exDevice device_scan exMedia a exConfig exUrl
 
 CFLAGS += -Wall -g
 

@@ -205,15 +205,43 @@ static int bv_onvif_get_device_io(OnvifContext *onvifctx, BVDeviceInfo *devinfo)
 {
     int retval = SOAP_OK;
     struct soap *soap = onvifctx->soap;
-#if 1
+
     struct _tmd__GetServiceCapabilities tmd__GetServiceCapabilities;
     struct _tmd__GetServiceCapabilitiesResponse tmd__GetServiceCapabilitiesResponse;
-    MEMSET_STRUCT(tmd__GetServiceCapabilities);
-    MEMSET_STRUCT(tmd__GetServiceCapabilitiesResponse);
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
+    enum tt__CapabilityCategory category = tt__CapabilityCategory__All;
+  
     if (onvifctx->deviceio_url == NULL) {
         bv_log(onvifctx, BV_LOG_ERROR, "deviceio_url is NULL\n");
-        return BVERROR(ENOSYS);
+
+        MEMSET_STRUCT(request);
+        MEMSET_STRUCT(response);
+        request.__sizeCategory = 1;
+        request.Category = &category;
+
+        retval = soap_call___tds__GetCapabilities(soap, onvifctx->device_url, NULL, &request, &response);
+        if(retval != SOAP_OK) {
+            bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error\n");
+            bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+            return retval;
+        }
+        if (!response.Capabilities->Extension || !response.Capabilities->Extension->DeviceIO) {
+            bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error >>>");
+            return BVERROR(ENOSYS);
+        }
+        devinfo->video_sources = response.Capabilities->Extension->DeviceIO->VideoSources;
+        devinfo->audio_sources = response.Capabilities->Extension->DeviceIO->AudioSources;
+        devinfo->video_outputs = response.Capabilities->Extension->DeviceIO->VideoOutputs;
+        devinfo->audio_outputs = response.Capabilities->Extension->DeviceIO->AudioOutputs;
+        devinfo->relay_outputs = response.Capabilities->Extension->DeviceIO->RelayOutputs;
+        //TODO
+        //devinfo->serial_ports  = response.Capabilities->Device->;
+        return 0;
     }
+
+    MEMSET_STRUCT(tmd__GetServiceCapabilities);
+    MEMSET_STRUCT(tmd__GetServiceCapabilitiesResponse);
     retval = soap_call___tmd__GetServiceCapabilities(soap, onvifctx->deviceio_url, NULL, &tmd__GetServiceCapabilities, &tmd__GetServiceCapabilitiesResponse);
     if(retval != SOAP_OK) {
         bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error");
@@ -226,27 +254,6 @@ static int bv_onvif_get_device_io(OnvifContext *onvifctx, BVDeviceInfo *devinfo)
     devinfo->audio_outputs = tmd__GetServiceCapabilitiesResponse.Capabilities->AudioOutputs;
     devinfo->relay_outputs = tmd__GetServiceCapabilitiesResponse.Capabilities->RelayOutputs;
     devinfo->serial_ports  = tmd__GetServiceCapabilitiesResponse.Capabilities->SerialPorts;
-#else
-    struct _tds__GetCapabilities request;
-    struct _tds__GetCapabilitiesResponse response;
-    enum tt__CapabilityCategory category = tt__CapabilityCategory__All;
-    MEMSET_STRUCT(request);
-    MEMSET_STRUCT(response);
-    request.__sizeCategory = 1;
-    request.Category = &category;
-
-    retval = soap_call___tds__GetCapabilities(soap, onvifctx->device_url, NULL, &request, &response);
-    if(retval != SOAP_OK) {
-        bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error");
-        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
-        return retval;
-    }
-    if (!response.Capabilities->Extension || !response.Capabilities->Extension->DeviceIO) {
-        bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error >>>");
-        return BVERROR(ENOSYS);
-    }
-    devinfo->video_sources = response.Capabilities->Extension->DeviceIO->VideoSources;
-#endif
     return 0;
 }
 

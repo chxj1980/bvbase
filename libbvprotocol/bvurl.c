@@ -86,7 +86,7 @@ const BVClass bv_url_context_class = {
 };
 /*@}*/
 
-const char *avio_enum_protocols(void **opaque, int output)
+const char *bv_url_enum_protocols(void **opaque, int output)
 {
     BVURLProtocol *p;
     *opaque = bv_url_protocol_next(*opaque);
@@ -94,7 +94,7 @@ const char *avio_enum_protocols(void **opaque, int output)
         return NULL;
     if ((output && p->url_write) || (!output && p->url_read))
         return p->name;
-    return avio_enum_protocols(opaque, output);
+    return bv_url_enum_protocols(opaque, output);
 }
 
 int bv_url_register_protocol(BVURLProtocol *protocol)
@@ -196,12 +196,7 @@ fail:
 
 int bv_url_connect(BVURLContext *uc, BVDictionary **options)
 {
-    int err =
-        uc->prot->url_open2 ? uc->prot->url_open2(uc,
-                                                  uc->filename,
-                                                  uc->flags,
-                                                  options) :
-        uc->prot->url_open(uc, uc->filename, uc->flags);
+    int err = uc->prot->url_open(uc, uc->filename, uc->flags, options);
     if (err)
         return err;
     uc->is_connected = 1;
@@ -289,10 +284,10 @@ fail:
     return ret;
 }
 
-static inline int retry_transfer_wrapper(BVURLContext *h, void *buf,
+static inline int retry_transfer_wrapper(BVURLContext *h, uint8_t *buf,
                                          size_t size, int size_min,
                                          int (*transfer_func)(BVURLContext *h,
-                                                              void *buf,
+                                                              uint8_t *buf,
                                                               size_t size))
 {
     int ret, len;
@@ -303,7 +298,7 @@ static inline int retry_transfer_wrapper(BVURLContext *h, void *buf,
     while (len < size_min) {
         if (bv_check_interrupt(&h->interrupt_callback))
             return BVERROR_EXIT;
-        ret = transfer_func(h, (char *)buf + len, size - len);
+        ret = transfer_func(h, buf + len, size - len);
         if (ret == BVERROR(EINTR))
             continue;
         if (h->flags & BV_IO_FLAG_NONBLOCK)
@@ -330,21 +325,21 @@ static inline int retry_transfer_wrapper(BVURLContext *h, void *buf,
     return len;
 }
 
-int bv_url_read(BVURLContext *h, void *buf, size_t size)
+int bv_url_read(BVURLContext *h, uint8_t *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_READ))
         return BVERROR(EIO);
     return retry_transfer_wrapper(h, buf, size, 1, h->prot->url_read);
 }
 
-int bv_url_read_complete(BVURLContext *h, void *buf, size_t size)
+int bv_url_read_complete(BVURLContext *h, uint8_t *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_READ))
         return BVERROR(EIO);
     return retry_transfer_wrapper(h, buf, size, size, h->prot->url_read);
 }
 
-int bv_url_write(BVURLContext *h, const void *buf, size_t size)
+int bv_url_write(BVURLContext *h, const uint8_t *buf, size_t size)
 {
     if (!(h->flags & BV_IO_FLAG_WRITE))
         return BVERROR(EIO);
@@ -352,7 +347,7 @@ int bv_url_write(BVURLContext *h, const void *buf, size_t size)
     if (h->max_packet_size && size > h->max_packet_size)
         return BVERROR(EIO);
 
-    return retry_transfer_wrapper(h, (void *)buf, size, size, (void*)h->prot->url_write);
+    return retry_transfer_wrapper(h, (uint8_t *)buf, size, size, (void *)h->prot->url_write);
 }
 
 int64_t bv_url_seek(BVURLContext *h, int64_t pos, int whence)
@@ -361,7 +356,7 @@ int64_t bv_url_seek(BVURLContext *h, int64_t pos, int whence)
 
     if (!h->prot->url_seek)
         return BVERROR(ENOSYS);
-    ret = h->prot->url_seek(h, pos, whence & ~BV_SEEK_FORCE);
+    ret = h->prot->url_seek(h, pos, whence & ~BV_IO_SEEK_FORCE);
     return ret;
 }
 
@@ -393,14 +388,14 @@ int bv_url_close(BVURLContext *h)
 }
 
 
-const char *avio_find_protocol_name(const char *url)
+const char *bv_url_find_protocol_name(const char *url)
 {
     BVURLProtocol *p = url_find_protocol(url);
 
     return p ? p->name : NULL;
 }
 
-int avio_check(const char *url, int flags)
+int bv_url_check(const char *url, int flags)
 {
     BVURLContext *h;
     int ret = bv_url_alloc(&h, url, flags, NULL);
@@ -469,4 +464,12 @@ int bv_check_interrupt(BVIOInterruptCB *cb)
     if (cb && cb->callback && (ret = cb->callback(cb->opaque)))
         return ret;
     return 0;
+}
+
+int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    if (!h->prot->url_control) {
+        return BVERROR(ENOSYS);
+    }
+    return h->prot->url_control(h, type, pkt_in, pkt_out);
 }
