@@ -1,0 +1,1 @@
+OBJS-$(BV_CONFIG_HISAVE_INDEV)				+= hi3515/hisave.o

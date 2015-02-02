@@ -104,8 +104,8 @@ static void set_video_info(BVStream *bvst, AVStream *avst)
     bvst->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
     bvst->codec->width = avst->codec->width;
     bvst->codec->height = avst->codec->height;
-//    bvst->codec->time_base = (BVRational){avst->codec->time_base.den, avst->codec->time_base.num};
-    bvst->time_base = (BVRational){avst->time_base.den, avst->time_base.num};
+    bvst->codec->time_base = (BVRational){avst->codec->time_base.num, avst->codec->time_base.den};
+    bvst->time_base = (BVRational){avst->time_base.num, avst->time_base.den};
     bvst->codec->time_base = (BVRational){avst->avg_frame_rate.num, avst->avg_frame_rate.den};
     bvst->codec->bit_rate = avst->codec->bit_rate;
     bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
@@ -123,6 +123,7 @@ static void set_audio_info(BVStream *bvst, AVStream *avst)
 {
     bvst->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     bvst->codec->sample_rate = avst->codec->sample_rate;
+    bvst->time_base = (BVRational){avst->time_base.num, avst->time_base.den};
     bvst->codec->channels = avst->codec->channels;
     bvst->codec->sample_fmt = (enum BVSampleFormat )avst->codec->sample_fmt;
     bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);

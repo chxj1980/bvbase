@@ -58,7 +58,7 @@ static const BVClass tcp_class = {
 };
 
 /* return non zero if error */
-static int tcp_open(BVURLContext *h, const char *uri, int flags)
+static int tcp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **options)
 {
     struct addrinfo hints = { 0 }, *ai, *cur_ai;
     int port, fd = -1;
@@ -163,7 +163,7 @@ static int tcp_open(BVURLContext *h, const char *uri, int flags)
     return ret;
 }
 
-static int tcp_read(BVURLContext *h, void *buf, size_t size)
+static int tcp_read(BVURLContext *h, uint8_t *buf, size_t size)
 {
     TCPContext *s = h->priv_data;
     int ret;
@@ -177,7 +177,7 @@ static int tcp_read(BVURLContext *h, void *buf, size_t size)
     return ret < 0 ? bb_neterrno() : ret;
 }
 
-static int tcp_write(BVURLContext *h, const void *buf, size_t size)
+static int tcp_write(BVURLContext *h, const uint8_t *buf, size_t size)
 {
     TCPContext *s = h->priv_data;
     int ret;

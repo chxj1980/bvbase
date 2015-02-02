@@ -246,7 +246,9 @@ External library support:
   --enable-libx264         enable H.264 encoding via x264 [no]
   --enable-libonvifc       enable onvif client
   --enable-libjansson      enable jansson config
+  --enable-libbvfs         enable bvfs file system
   --enable-libavformat     enable ffmpeg avformat
+  --enable-libhis3515      enable his3515
   --enable-libx265         enable HEVC encoding via x265 [no]
   --enable-libxavs         enable AVS encoding via xavs [no]
   --enable-libxcb          enable X11 grabbing using XCB [auto]
@@ -1385,9 +1387,11 @@ EXTERNAL_LIBRARY_LIST="
     libwavpack
     libwebp
     libx264
-	libonvifc
-	libavformat
-	libjansson
+    libonvifc
+    libavformat
+    libjansson
+    libbvfs
+    his3515
     libx265
     libxavs
     libxcb
@@ -2403,6 +2407,8 @@ onvif_dev_device_deps="libonvifc"
 onvif_config_deps="libonvifc"
 json_cfile_deps="libjansson"
 onvifave_indev_deps="libonvifc libavformat"
+bvfs_protocol_deps="libbvfs"
+hisave_indev_deps_any="his3515 his3516"
 
 # demuxers / muxers
 ac3_demuxer_select="ac3_parser"
@@ -4985,8 +4991,10 @@ enabled openssl           && { check_lib openssl/ssl.h SSL_library_init -lssl -l
 enabled qtkit_indev      && { check_header_oc QTKit/QTKit.h || disable qtkit_indev; }
 
 enabled libonvifc         && { check_header soapH.h || die "ERROR: soapH.h header not found"; }
-enabled libjansson        && { check_header jansson.h || die "ERROR: jansson,h header not found"; }
-enabled libavformat       && { check_header libavformat/avformat.h || die "ERROR: jansson,h header not found"; }
+enabled libjansson        && { check_header jansson.h || die "ERROR: jansson.h header not found"; }
+enabled libavformat       && { check_header libavformat/avformat.h || die "ERROR: avformat.h header not found"; }
+enabled libbvfs           && { check_header bvfs.h || die "ERROR: bvfs.h header not found"; }
+
 if enabled gnutls; then
     { check_lib nettle/bignum.h nettle_mpz_get_str_256 -lnettle -lhogweed -lgmp && enable nettle; } ||
     { check_lib gcrypt.h gcry_mpi_new -lgcrypt && enable gcrypt; }

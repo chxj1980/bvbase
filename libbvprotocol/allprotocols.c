@@ -21,14 +21,18 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
-#include "bvprotocol.h"
+#include "bvurl.h"
 #include <config.h>
+
+#if BV_CONFIG_LIBBVFS
+#include <bvfs.h>
+#endif
 
 #define REGISTER_PROTOCOL(X, x)                                         \
     {                                                                   \
         extern BVURLProtocol bv_##x##_protocol;                           \
         if (BV_CONFIG_##X##_PROTOCOL)                                      \
-            bv_protocol_register(&bv_##x##_protocol);                \
+            bv_url_register_protocol(&bv_##x##_protocol);                \
     }
 
 void bv_protocol_register_all(void)
@@ -42,4 +46,8 @@ void bv_protocol_register_all(void)
     REGISTER_PROTOCOL(FILE, file);
     REGISTER_PROTOCOL(TCP, tcp);
     REGISTER_PROTOCOL(UDP, udp);
+    REGISTER_PROTOCOL(BVFS, bvfs);
+#if BV_CONFIG_LIBBVFS
+    bvfs_init(1, 0);
+#endif
 }

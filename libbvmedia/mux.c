@@ -157,7 +157,8 @@ fail:
 int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options)
 {
     int ret = 0;
-
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
     if (ret = init_muxer(s, options))
         return ret;
 
@@ -170,12 +171,63 @@ int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options)
     return 0;
 }
 
+static int check_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    if (!pkt)
+        return 0;
+    if (pkt->stream_index < 0 || pkt->stream_index >= s->nb_streams) {
+        bv_log(s, BV_LOG_ERROR, "Invalid Packet index %d\n", pkt->stream_index);
+        return BVERROR(EINVAL);
+    }
+    return 0;
+}
+
+static int write_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    return s->omedia->write_packet(s, pkt);
+}
+
 int bv_output_media_write(BVMediaContext *s, BVPacket *pkt)
 {
-    return BVERROR(ENOSYS);
+    int ret;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    if (!s->omedia->write_packet)
+        return BVERROR(ENOSYS);
+    ret = check_packet(s, pkt);
+    if (ret < 0)
+        return ret;
+    if (!pkt) {
+        //NULL Packet
+    }
+    ret = write_packet(s, pkt);
+    return ret;
+}
+
+static int write_trailer(BVMediaContext *s)
+{
+    return s->omedia->write_trailer(s);
+}
+
+int bv_output_media_write_trailer(BVMediaContext *s)
+{
+    int ret;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    if (!s->omedia->write_trailer)
+        return BVERROR(ENOSYS);
+    ret = write_trailer(s);
+    if (s->pb)
+        bv_io_flush(s->pb);
+    return ret;
 }
 
 int bv_output_media_close(BVMediaContext **fmt)
 {
-    return BVERROR(ENOSYS);
+    BVMediaContext *s = *fmt;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    bv_media_context_free(s);
+    *fmt = NULL;
+    return 0;
 }

@@ -63,7 +63,7 @@ void bv_media_register_all(void)
     if (initialized)
         return ;
     initialized = 1;
-    //REGISTER_INDEV(HISAVE, hisave);
+    REGISTER_INDEV(HISAVE, hisave);
     REGISTER_INDEV(ONVIFAVE, onvifave);
     REGISTER_MUXER(DAV, dav);
 #if BV_CONFIG_ONVIFAVE_INDEV

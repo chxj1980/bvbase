@@ -124,6 +124,8 @@ int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options);
 
 int bv_output_media_write(BVMediaContext *s, BVPacket *pkt);
 
+int bv_output_media_write_trailer(BVMediaContext *s);
+
 int bv_output_media_close(BVMediaContext **fmt);
 
 int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
