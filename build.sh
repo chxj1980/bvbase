@@ -8,6 +8,15 @@ fi
 BVBASE_DIR=$(pwd)/3rdparty/binary
 NAME=bvbase
 
+enable_his3515()
+{
+	CROSS_COMPILE=arm-hisi-linux-
+	HOST=arm-hisi-linux
+	EXTRA="--cpu=arm926ej-s --arch=armv5te"
+	EXENABLE+="--enable-his3515 "
+}
+
+
 case $1 in
     dm6446)
         CROSS_COMPILE=arm_v5t_le-
@@ -18,9 +27,7 @@ case $1 in
 		HOST=arm-none-linux-gnueabi
 		;;
 	hi3515)
-		CROSS_COMPILE=arm-hisi-linux-
-		HOST=arm-hisi-linux
-		EXTRA="--cpu=arm926ej-s --arch=armv5te"
+		enable_his3515
 		;;
 	hi3518)
 		CROSS_COMPILE=arm-hisiv100nptl-linux-

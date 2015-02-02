@@ -433,7 +433,7 @@ typedef struct _BVRS232 {
     enum BVRS232ControlMode control_mode;
 } BVRS232;
 
-typedef struct _BVRS485{
+typedef struct _BVRS485 {
     uint32_t baud_rate;
     uint8_t data_bits;
     uint8_t stop_bit;
@@ -460,8 +460,13 @@ typedef struct _BVPTZ {
     enum BVPTZProtocol protocol;
 //    BVRS232 rs232;
     BVRS485 rs485;
+#if 0
     uint32_t preset_num;
     BVPTZPreset preset[BV_MAX_PRESET_NUM];
+#else
+    uint8_t nb_presets;
+    BVPTZPreset *presets;
+#endif
 } BVPTZ;
 
 enum BVNetInterface {
