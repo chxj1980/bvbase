@@ -43,9 +43,9 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "Not Find This device\n");
         return BVERROR(EINVAL);
     }
-//    bv_dict_set(&opn, "user", "admin", 0);
+    bv_dict_set(&opn, "user", "admin", 0);
     bv_dict_set(&opn, "passwd", "12345", 0);
-    bv_dict_set(&opn, "token", "MainStream", 0);
+    bv_dict_set(&opn, "token", "mainStream/Profile_1/PTZ/PTZToken/PTZNODETOKEN", 0);
     if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:80/onvif/device_service", &opn))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
@@ -58,7 +58,7 @@ int main(int argc, const char *argv[])
     stop.pan_tilt = true;
     stop.zoom = true;
 #if 1
-#if 0
+#if 1
     //Left
     continuous_move.velocity.pan_tilt.x = -0.5f;
     continuous_move.velocity.pan_tilt.y = 0.0f;

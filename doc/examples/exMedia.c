@@ -46,7 +46,8 @@ int main(int argc, const char *argv[])
 #if 1
     bv_dict_set(&opn, "user", "admin", 0);
     bv_dict_set(&opn, "passwd", "12345", 0);
-    bv_dict_set(&opn, "token", "Profile_1", 0);
+    bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
+    bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
 #else

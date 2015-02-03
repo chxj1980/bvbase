@@ -501,7 +501,7 @@ typedef struct _BVPPPOE {
 } BVPPPOE;
 
 typedef struct _BVMediaProfile {
-    BVBasicInfo basic_info;
+  //  BVBasicInfo basic_info;
     char token[BV_MAX_NAME_LEN];
 //    BVCertification *certification;
     BVVideoSource *video_source;

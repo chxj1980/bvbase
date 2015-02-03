@@ -38,13 +38,16 @@
 typedef struct OnvifContext {
     BVClass *bv_class;
     char svrurl[1024];
-    char *token;
+    char *vtoken;
+    char *atoken;
     char *user;
     char *passwd;
     enum BVCodecID vcodec_id;
     BVRational video_rate;
     int width, height;
     char onvif_url[128];
+    char profile_name[32];
+    char profile_token[32];
     char *media_url;
     int timeout;
     int snpsht;
@@ -57,7 +60,8 @@ typedef struct OnvifContext {
 #define OFFSET(x) offsetof(OnvifContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
-    {"token", "", OFFSET(token), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
@@ -193,7 +197,7 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     if (!onvifctx->media_url) {
         return BVERROR(ENOSYS);
     }
-    trt__GetStreamUri.ProfileToken = onvifctx->token;
+    trt__GetStreamUri.ProfileToken = onvifctx->profile_token;
     trt__GetStreamUri.StreamSetup = &StreamSetup;
     StreamSetup.Transport = &Transport;
     StreamSetup.Stream = tt__StreamType__RTP_Unicast;
@@ -243,7 +247,7 @@ static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
     if (!onvifctx->media_url) {
         return BVERROR(ENOSYS);
     }
-    trt__GetSnapshotUri.ProfileToken = onvifctx->token;
+    trt__GetSnapshotUri.ProfileToken = onvifctx->profile_token;
 
     if (onvifctx->user && onvifctx->passwd) {
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
@@ -292,12 +296,30 @@ static int bv_onvif_service_uri(OnvifContext *onvifctx)
 static bv_cold int onvif_read_header(BVMediaContext * s)
 {
     int ret;
-    char *p;
+    char *p, *q, *r;
+    int size;
     OnvifContext *onvifctx = s->priv_data;
-    if (!onvifctx->token) {
+    if (!onvifctx->vtoken && !onvifctx->atoken) {
         bv_log(s, BV_LOG_ERROR, "must set onvifave token url\n");
         return BVERROR(EINVAL);
     }
+    if (onvifctx->vtoken) {
+        q = onvifctx->vtoken;
+    } else {
+        q= onvifctx->atoken;
+    }
+    p = bv_strsub(q, "/", 1);
+    r = bv_strsub(q, "/", 2);
+    if (!p || !r) {
+        bv_log(s, BV_LOG_ERROR, "onvifave token error\n");
+        return BVERROR(EINVAL);
+    }
+    size = sizeof(onvifctx->profile_name);
+    size = size > p - q ? p - q : size;
+    bv_strlcpy(onvifctx->profile_name, q, p - q);
+    size = sizeof(onvifctx->profile_token);
+    size = size > r - p ? r - p : size;
+    bv_strlcpy(onvifctx->profile_token, p, size);
     p = bv_sreplace(s->filename, "onvifave", "http");
     if (!p) {
         return BVERROR(ENOMEM);
