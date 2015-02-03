@@ -2,7 +2,7 @@
 	"certifications":[
 		[
 			{
-				"server:":"http://192.168.6.149:8089"
+				"server:":"http://192.168.6.149:8089",
 				"user":"admin",
 				"passwd":"",
 				"data":"xxsfksdklfkls;d;dks;ddf",
@@ -251,7 +251,7 @@
 			}
 		]
 	],
-    "video_encoder_options"[
+    "video_encoder_options":[
         [
             {
                 "name":"VideoEO_0000/0000",
@@ -274,14 +274,13 @@
                     {
                         "codec_id":"JPEG",
                         "quality":"[0..10]"
-                    
                     } 
-                ],
+                ]
             },
             {
                 "name":"VideoEO_0001/0000",
                 "comment":"Transforms",
-                "type":"locale",
+                "type":"locale"
             }
         ]  
     ],
@@ -502,7 +501,7 @@
 						"type":"STRING",
 						"font_size":20,
 						"border_size":2,
-						"img_rect":{"left":20, "top":100, "width":400, "height":40 },
+						"img_rect":{"left":20, "top":100, "width":400, "height":40 }
 					}
 				]
 			}
@@ -531,21 +530,19 @@
 						"type":"STRING",
 						"font_size":20,
 						"border_size":2,
-						"img_rect":{"left":20, "top":100, "width":400, "height":40 },
+						"img_rect":{"left":20, "top":100, "width":400, "height":40 }
 					}
 				]
 			}
 		]
 	],
-	"PTZ":[
+	"PTZDevice":[
 		[
 			{
 				"name":"PTZ_0000/0000",
 				"url":"onvif_ptz://onvif/ptz_services",
-				"pan_tile_min":-1,
-				"pan_tile_max":1,
-				"zoom_min":-1,
-				"zoom_max":1,
+				"pan_tile":"[-1..1]",
+				"zoom":"[-1..1]",
 				"protocol":"PELCO_P",
                 "rs232":{
                     "data_bits":8,

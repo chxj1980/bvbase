@@ -29,15 +29,43 @@
 
 typedef struct HisAVEContext {
     BVClass *bv_class;
+    char *vtoken;   //videv/vichn/vechn
+    enum BVCodecID vcodec_id;
+    enum BVRCModeID mode_id;
+    int width, height;
+    int quality;
+    int bit_rate;
+    int gop_size;
+    int src_framerate;
+    int framerate;
+
+    char *atoken;
+    enum BVCodecID acodec_id;
+    int sample_rate;
+    int channels;
 } HisAVEContext;
 
-#define OFFSET(x) offset(HisAVEContext, x)
+#define OFFSET(x) offsetof(HisAVEContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
+    { "vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
+    { "mode_id", "", OFFSET(mode_id), BV_OPT_TYPE_INT, {.i64 = BV_RC_MODE_ID_CBR}, 0, 255, DEC},
+    { "width", "", OFFSET(width), BV_OPT_TYPE_INT, {.i64 = 704}, 0, INT_MAX, DEC},
+    { "height", "", OFFSET(height), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "quality", "", OFFSET(quality), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "bit_rate", "", OFFSET(bit_rate), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "gop_size", "", OFFSET(gop_size), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "src_framerate", "", OFFSET(src_framerate), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 576}, 0, INT_MAX, DEC},
+    { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "acodec_id", "", OFFSET(acodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_G711A}, 0, INT_MAX, DEC},
+    { "sample_rate", "", OFFSET(sample_rate), BV_OPT_TYPE_INT, {.i64 = 8000}, 0, INT_MAX, DEC},
+    { "channels", "", OFFSET(channels), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 2, DEC},
     { NULL },
 };
 
-static const BVClass hisave_class = {
+static const BVClass his_class = {
     .class_name = "hisave indev",
     .item_name = bv_default_item_name,
     .option = options,
@@ -47,7 +75,7 @@ static const BVClass hisave_class = {
 
 static int his_probe(BVMediaContext *s, BVProbeData *p)
 {
-    if (bv_strstart(p->file_name, "hisave:", NULL))
+    if (bv_strstart(p->filename, "hisave:", NULL))
         return BV_PROBE_SCORE_MAX;
     return 0;
 }

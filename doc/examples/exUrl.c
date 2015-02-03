@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
         return -1;
     }
     while (time(NULL) - start_time < 300) {
-        if (bv_url_write(s, buf, 1024) != 1024) {
+        if (bv_url_write(s, (const uint8_t *)buf, 1024) != 1024) {
             bv_log(s, BV_LOG_ERROR, "write file error\n");
             goto closed;
         }

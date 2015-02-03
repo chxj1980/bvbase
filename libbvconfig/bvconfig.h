@@ -134,6 +134,9 @@ typedef struct _BVConfig {
     int (*get_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
     int (*set_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
     int (*get_audio_encoder_options)(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
+    int (*get_ptz_device)(BVConfigContext *s, int channel, int index, BVPTZDevice *config);
+    int (*save_ptz_preset)(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
+    int (*dele_ptz_preset)(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
 } BVConfig;
 
 void bv_config_register_all(void);
@@ -171,6 +174,12 @@ int bv_config_get_audio_encoder(BVConfigContext *s, int channel, int index, BVAu
 int bv_config_set_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
 
 int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
+
+int bv_config_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config);
+
+int bv_config_save_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
+
+int bv_config_dele_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
 #if 0
 //VIDev && VODev
 int bv_config_get_video_source_device(BVConfigContext *s, int index, BVVideoSourceDevice *video_source_device);

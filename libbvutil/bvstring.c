@@ -113,6 +113,10 @@ char *bv_strsub(const char *haystack, const char *needle, int sub)
 size_t bv_strlcpy(char *dst, const char *src, size_t size)
 {
     size_t len = 0;
+    if (!src) {
+        dst[0] = '\0';
+        return len;
+    }
     while (++len < size && *src)
         *dst++ = *src++;
     if (len <= size)
