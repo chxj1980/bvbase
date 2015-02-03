@@ -1,1 +1,1 @@
-OBJS-$(BV_CONFIG_HISAVE_INDEV)				+= hi3515/hisave.o
+OBJS-$(BV_CONFIG_HISAVE_INDEV)				+= his3515/hisave.o

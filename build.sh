@@ -1,47 +1,17 @@
 #!/bin/bash
 
-if [ $# != 1 ]; then
+usage()
+{
     echo "$0 x86/dm6446/dm365/hi3515/hi3535"
-    exit
+	exit 1
+}
+
+if [ $# != 1 ]; then
+	usage
 fi
 
 BVBASE_DIR=$(pwd)/3rdparty/binary
 NAME=bvbase
-
-enable_his3515()
-{
-	CROSS_COMPILE=arm-hisi-linux-
-	HOST=arm-hisi-linux
-	EXTRA="--cpu=arm926ej-s --arch=armv5te"
-	EXENABLE+="--enable-his3515 "
-}
-
-
-case $1 in
-    dm6446)
-        CROSS_COMPILE=arm_v5t_le-
-		HOST=arm_v5t_le
-        ;;
-	dm365)
-		CROSS_COMPILE=arm-none-linux-gnueabi-
-		HOST=arm-none-linux-gnueabi
-		;;
-	hi3515)
-		enable_his3515
-		;;
-	hi3518)
-		CROSS_COMPILE=arm-hisiv100nptl-linux-
-		HOST=arm-hisiv100nptl-linux
-        ;;
-	hi3535)
-		EXFLAGS="-march=armv7-a -mcpu=cortex-a9"
-		CFLAGS+=$EXFLAGS
-		CROSS_COMPILE=arm-hisiv100nptl-linux-
-		HOST=arm-hisiv100nptl-linux
-		;;
-       x86)
-        ;;
-esac
 
 ARCH=$1
 #export PKG_CONFIG_PATH=$BVBASE_DIR/freetype/$1/lib/pkgconfig
@@ -77,6 +47,46 @@ enable_jansson()
 	EXTCFLAGS+="-I$BVBASE_DIR/jansson/$ARCH/include "
 	EXTLFLAGS+="-L$BVBASE_DIR/jansson/$ARCH/lib -ljansson "
 }
+
+enable_his3515()
+{
+	CROSS_COMPILE=arm-hisi-linux-
+	HOST=arm-hisi-linux
+	EXTRA="--cpu=arm926ej-s --arch=armv5te"
+	EXENABLE+="--enable-his3515 "
+	EXTCFLAGS+="-I$BVBASE_DIR/hissdk/his3515/include "
+	#FIXME
+	EXTLFLAGS+="-L$BVBASE_DIR/hissdk/his3515/lib "
+}
+
+case $1 in
+    dm6446)
+        CROSS_COMPILE=arm_v5t_le-
+		HOST=arm_v5t_le
+        ;;
+	dm365)
+		CROSS_COMPILE=arm-none-linux-gnueabi-
+		HOST=arm-none-linux-gnueabi
+		;;
+	hi3515)
+		enable_his3515
+		;;
+	hi3518)
+		CROSS_COMPILE=arm-hisiv100nptl-linux-
+		HOST=arm-hisiv100nptl-linux
+        ;;
+	hi3535)
+		EXFLAGS="-march=armv7-a -mcpu=cortex-a9"
+		CFLAGS+=$EXFLAGS
+		CROSS_COMPILE=arm-hisiv100nptl-linux-
+		HOST=arm-hisiv100nptl-linux
+		;;
+    x86)
+        ;;
+	*)
+		usage
+		;;
+esac
 
 enable_bvfs
 

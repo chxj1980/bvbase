@@ -29,10 +29,11 @@
 int main(int argc, const char *argv[])
 {
     BVDeviceContext *devctx = NULL; 
-    BVMobileDevice device[20] = { 0 };
+    BVMobileDevice device[20] ;
     int max_ret = 20;
     BVDictionary *opn = NULL;
     bv_device_register_all();
+    memset(device, 0, sizeof(BVMobileDevice) * 20);
     bv_dict_set(&opn, "timeout", "5", 0);
     if (bv_device_open(&devctx, NULL, "onvif_dev://", &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error \n");

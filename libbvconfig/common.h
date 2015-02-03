@@ -260,17 +260,6 @@ typedef struct _BVEncodeChannelConfig {
     BVVideoEncoder *video_encoder;
 } BVEncodeChannelConfig;
 
-typedef struct _BVMediaProfile {
-    BVBasicInfo basic_info;
-    char token[BV_MAX_NAME_LEN];
-//    BVCertification *certification;
-    BVVideoSource *video_source;
-    BVAudioSource *audio_source;
-    BVVideoEncoder *video_encoder;
-    BVAudioEncoder *audio_encoder;
-    //BVPTZ *ptz;
-} BVMediaProfile;
-
 #if 0
 enum BVChannelType {
     BV_CHANNEL_TYPE_STORAGE = 0,
@@ -445,6 +434,7 @@ typedef struct _BVRS485 {
 
 typedef struct _BVPTZPreset {
     int index;
+    int flags;  //预置位已用为1
     char name[BV_MAX_NAME_LEN];
     char token[BV_MAX_NAME_LEN];
 } BVPTZPreset;
@@ -454,20 +444,19 @@ typedef struct _BVPTZGotoPreset {
     BVPTZVector speed;
 } BVPTZGotoPreset;
 
-typedef struct _BVPTZ {
-    int index;
-    BVBasicInfo basic_info;
+typedef struct _BVPTZDevice {
+    char token[BV_MAX_NAME_LEN];
+    enum BVConfigType type;
     enum BVPTZProtocol protocol;
-//    BVRS232 rs232;
     BVRS485 rs485;
-#if 0
-    uint32_t preset_num;
-    BVPTZPreset preset[BV_MAX_PRESET_NUM];
-#else
-    uint8_t nb_presets;
+    BVFloatRange pan_range;
+    BVFloatRange tilt_range;
+    BVFloatRange zoom_range;
+    uint16_t max_preset;
+    uint16_t nb_presets;
     BVPTZPreset *presets;
-#endif
-} BVPTZ;
+    void *any_attr;
+} BVPTZDevice;
 
 enum BVNetInterface {
     BV_NET_INTERFACE_NONE = 0,
@@ -486,7 +475,6 @@ enum BVNetPrimary {
     BV_NET_PRIMARY_UNKNOWN,
 };
 
-#if 1
 typedef struct _BVNetWorkInfo {
     uint32_t work_mode;        //wifi 3G/4G ethernet
     enum BVNetPrimary primary;
@@ -512,40 +500,17 @@ typedef struct _BVPPPOE {
     char passwd[16];
 } BVPPPOE;
 
-typedef struct _BVMediaCapability {
-    char *url;
-} BVMediaCapability;
+typedef struct _BVMediaProfile {
+    BVBasicInfo basic_info;
+    char token[BV_MAX_NAME_LEN];
+//    BVCertification *certification;
+    BVVideoSource *video_source;
+    BVAudioSource *audio_source;
+    BVVideoEncoder *video_encoder;
+    BVAudioEncoder *audio_encoder;
+    BVPTZDevice    *ptz_device;
+} BVMediaProfile;
 
-typedef struct _BVDeviceIOCapability {
-    char *url;
-    uint8_t video_sources;
-    uint8_t audio_sources;
-    uint8_t video_outputs;
-    uint8_t audio_outputs;
-    uint8_t relay_outputs;
-    uint8_t serial_ports;
-} BVDeviceIOCapability;
-
-typedef struct _BVPTZCapability {
-    char *url;
-} BVPTZCapability;
-
-typedef struct _BVEventsCapability {
-    char *url;
-} BVEventsCapability;
-
-typedef struct _BVDeviceCapability {
-    char *url;
-} BVDeviceCapability;
-
-typedef struct _BVSystemCapability {
-    BVDeviceCapability *device;
-    BVEventsCapability *event;
-    BVMediaCapability *media;
-    BVPTZCapability *ptz;
-    BVDeviceIOCapability *deviceio;
-} BVSystemCapability;
-#endif
 #ifdef __cplusplus
 }
 #endif

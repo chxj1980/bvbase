@@ -14,7 +14,7 @@ LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcode
 
 CFLAGS += -I$(BVBASE_DIR)/bvfs/$(PLANTFORM)/include
 LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs
-EXAMPLES=  exDevice device_scan exMedia a exConfig exUrl
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl
 
 CFLAGS += -Wall -g
 

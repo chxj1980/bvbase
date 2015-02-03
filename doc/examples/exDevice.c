@@ -26,6 +26,7 @@
 #include <libbvutil/opt.h>
 #include <libbvutil/log.h>
 #include <libbvconfig/common.h>
+#include <unistd.h>
 
 int main(int argc, const char *argv[])
 {

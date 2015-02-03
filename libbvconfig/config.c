@@ -193,3 +193,30 @@ int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int ind
         return BVERROR(ENOSYS);
     return s->config->get_audio_encoder_options(s, channel, index, config);
 }
+
+int bv_config_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_ptz_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_ptz_device(s, channel, index, config);
+}
+
+int bv_config_save_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    if (!s || !preset)
+        return BVERROR(EINVAL);
+    if (!s->config->save_ptz_preset)
+        return BVERROR(ENOSYS);
+    return s->config->save_ptz_preset(s, channel, index, preset);
+}
+
+int bv_config_dele_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    if (!s || !preset)
+        return BVERROR(EINVAL);
+    if (!s->config->dele_ptz_preset)
+        return BVERROR(ENOSYS);
+    return s->config->dele_ptz_preset(s, channel, index, preset);
+}

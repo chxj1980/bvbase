@@ -43,6 +43,14 @@ static void dump_profiles(BVMediaProfile *profile)
     if (profile->audio_encoder) {
         bv_log(NULL, BV_LOG_INFO, "media info audio samplerate %d\n", profile->audio_encoder->codec_context.sample_rate);
     }
+    if (profile->ptz_device) {
+        bv_log(NULL, BV_LOG_INFO, "max presets %d\n", profile->ptz_device->max_preset);
+        bv_log(NULL, BV_LOG_INFO, "current presets %d\n", profile->ptz_device->nb_presets);
+        int i = 0;
+        for (i = 0; i< profile->ptz_device->nb_presets; i++) {
+            bv_log(NULL, BV_LOG_INFO, "preset num %d name %s token %s\n", i, profile->ptz_device->presets[i].name, profile->ptz_device->presets[i].token);
+        }
+    }
     bv_log(NULL, BV_LOG_INFO, "dump profiles end <<<<<<<<<<<<<<<<<<\n");
 }
 
@@ -56,6 +64,11 @@ static void free_profiles(BVMediaProfile *profile)
         bv_free(profile->video_encoder);
     if (profile->audio_encoder)
         bv_free(profile->audio_encoder);
+    if (profile->ptz_device) {
+        if (profile->ptz_device->presets)
+            bv_free(profile->ptz_device->presets);
+        bv_free(profile->ptz_device);
+    }
 }
 
 static void dump_video_encoder(BVVideoEncoder *encoder)
@@ -127,6 +140,26 @@ static void free_audio_encoder_options(BVAudioEncoderOption *audio_encoder_optio
     bv_free(audio_encoder_option->options);
 }
 
+static void dump_ptz_device(BVPTZDevice *ptz_device)
+{
+    bv_log(NULL, BV_LOG_INFO, "dump ptz device info start >>>>>>>>>>>>\n");
+    bv_log(NULL, BV_LOG_INFO, "ptz pan_range[%0.2f..%0.2f]  tilt_range[%0.2f..%0.2f] zoom range[%0.2f..%.2f]\n", ptz_device->pan_range.min, ptz_device->pan_range.max, ptz_device->tilt_range.min, ptz_device->tilt_range.max, ptz_device->zoom_range.min, ptz_device->zoom_range.max);
+    bv_log(NULL, BV_LOG_INFO, "max presets %d\n", ptz_device->max_preset);
+    bv_log(NULL, BV_LOG_INFO, "current presets %d\n", ptz_device->nb_presets);
+    int i = 0;
+    for (i = 0; i< ptz_device->nb_presets; i++) {
+        bv_log(NULL, BV_LOG_INFO, "preset num %d flags %d name %s token %s\n", i, ptz_device->presets[i].flags, ptz_device->presets[i].name, ptz_device->presets[i].token);
+    }
+
+    bv_log(NULL, BV_LOG_INFO, "dump ptz device info end   >>>>>>>>>>>>\n");
+}
+
+static void free_ptz_device(BVPTZDevice *ptz_device)
+{
+    if (ptz_device->presets)
+        bv_free(ptz_device->presets);
+}
+
 int main(int argc, const char *argv[])
 {
     int ret = 0;
@@ -137,6 +170,7 @@ int main(int argc, const char *argv[])
     BVAudioEncoder audio_encoder;
     BVAudioEncoderOption audio_encoder_option;
     BVDeviceInfo devinfo;
+    BVPTZDevice ptz_device;
     BVConfigContext *config_context = NULL; 
     BVDictionary *options = NULL;
 
@@ -146,6 +180,7 @@ int main(int argc, const char *argv[])
     MEMSET_STRUCT(devinfo);
     MEMSET_STRUCT(audio_encoder);
     MEMSET_STRUCT(audio_encoder_option);
+    MEMSET_STRUCT(ptz_device);
 
     bv_log_set_level(BV_LOG_DEBUG);
     bv_config_register_all();
@@ -153,7 +188,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&options, "passwd", "12345", 0);
     bv_dict_set(&options, "timeout", "5", 0);
     memset(&devinfo, 0, sizeof(devinfo));
-    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.134:8899/onvif/device_service", NULL, &options)) < 0) {
+    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:80/onvif/device_service", NULL, &options)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error");
         bv_dict_free(&options);
         return BVERROR(EINVAL);
@@ -221,6 +256,14 @@ int main(int argc, const char *argv[])
         dump_audio_encoder_options(&audio_encoder_option);
         //free
         free_audio_encoder_options(&audio_encoder_option);
+    }
+
+    strcpy(ptz_device.token, profiles[0].ptz_device->token);
+    if (bv_config_get_ptz_device(config_context, 1, 1, &ptz_device)) {
+        bv_log(config_context, BV_LOG_ERROR, "get ptz device error\n");
+    } else {
+        dump_ptz_device(&ptz_device);
+        free_ptz_device(&ptz_device);
     }
 #endif
     for (i = 0; i < max_num; i++) {

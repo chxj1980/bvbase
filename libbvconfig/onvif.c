@@ -421,12 +421,114 @@ static int save_audio_encoder(BVAudioEncoder *audio_encoder, struct tt__AudioEnc
     return 0;
 }
 
+static int onvif_get_ptz_presets(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    int retval, i;
+    char *p, *q;
+    char *url = NULL;
+    char profile_token[32] = { 0 };
+    size_t size;
+    struct soap *soap = onvifctx->soap;
+    struct _tptz__GetPresets request;
+    struct _tptz__GetPresetsResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return BVERROR(ENOSYS);
+    }
+    p = bv_strsub(config->token, "/", 1);
+    q = bv_strsub(config->token, "/", 2);
+    if (!p || !q) {
+        retval = BVERROR(EINVAL);
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return retval;
+    }
+    size = sizeof(profile_token);
+    size = size > q - p ? q - p : size;
+    bv_strlcpy(profile_token, p, size);     //notify bv_strlcpy() copy (size - 1) characters
+    request.ProfileToken = profile_token;
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+
+    retval = soap_call___tptz__GetPresets(soap, url, NULL, &request, &response);
+    if (retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv ptz presets error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return BVERROR(EIO);
+    }
+    config->nb_presets = response.__sizePreset;
+    if (config->nb_presets > 0)
+        config->presets = bv_malloc_array(config->nb_presets, sizeof(BVPTZPreset));
+    for (i = 0; i < response.__sizePreset; i++) {
+        config->presets[i].index = i;
+        bv_strlcpy(config->presets[i].name, response.Preset[i].Name, sizeof(config->presets[i].name));
+        bv_strlcpy(config->presets[i].token, response.Preset[i].token, sizeof(config->presets[i].token));
+        if (response.Preset[i].PTZPosition) {
+            config->presets[i].flags = 1;
+        }
+    }
+    return 0;
+}
+
+static int onvif_get_ptz_node(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    struct soap *soap = onvifctx->soap;
+    char *p, *url;
+    int retval;
+    struct _tptz__GetNode request; 
+    struct _tptz__GetNodeResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return BVERROR(ENOSYS);
+    }
+    p = bv_strsub(config->token, "/", 4);
+    if (!p) {
+        retval = BVERROR(EINVAL);
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return retval;
+    }
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+    request.NodeToken = p;
+    retval = soap_call___tptz__GetNode(soap, url, NULL, &request, &response);
+    if (retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv ptz node error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return BVERROR(EIO);
+    }
+    config->max_preset = response.PTZNode->MaximumNumberOfPresets;
+    return 0;
+}
+
+static int save_ptz_device(BVPTZDevice *ptz_device, struct tt__PTZConfiguration *PTZConfiguration)
+{
+    ptz_device->type = BV_CONFIG_TYPE_ONVIF;
+    ptz_device->pan_range.min = PTZConfiguration->PanTiltLimits->Range->XRange->Min;
+    ptz_device->pan_range.max = PTZConfiguration->PanTiltLimits->Range->XRange->Max;
+    ptz_device->tilt_range.min = PTZConfiguration->PanTiltLimits->Range->YRange->Min;
+    ptz_device->tilt_range.max = PTZConfiguration->PanTiltLimits->Range->YRange->Max;
+    ptz_device->zoom_range.min = PTZConfiguration->ZoomLimits->Range->XRange->Min;
+    ptz_device->zoom_range.max = PTZConfiguration->ZoomLimits->Range->XRange->Max;
+    return 0;
+}
+
 static int save_profile(BVConfigContext *h, BVMediaProfile *profile, struct tt__Profile *Profile)
 {
     BVVideoSource *video_source =  NULL;
     BVAudioSource *audio_source = NULL;
     BVVideoEncoder *video_encoder = NULL;
     BVAudioEncoder *audio_encoder = NULL;
+    BVPTZDevice    *ptz_device    = NULL;
     bv_sprintf(profile->token, sizeof(profile->token), "%s/%s", Profile->Name, Profile->token);
     if (Profile->VideoSourceConfiguration) {
        profile->video_source = bv_mallocz(sizeof(*profile->video_source));
@@ -457,7 +559,12 @@ static int save_profile(BVConfigContext *h, BVMediaProfile *profile, struct tt__
     }
 
     if (Profile->PTZConfiguration) {
-        //FIXME NotSupport
+        profile->ptz_device = bv_mallocz(sizeof(*profile->ptz_device));
+        ptz_device = profile->ptz_device;
+        bv_sprintf(ptz_device->token, sizeof(ptz_device->token), "%s/%s/%s/%s", profile->token, Profile->PTZConfiguration->Name, Profile->PTZConfiguration->token, Profile->PTZConfiguration->NodeToken);
+        save_ptz_device(ptz_device, Profile->PTZConfiguration);
+        onvif_get_ptz_node(h, ptz_device);
+        onvif_get_ptz_presets(h, ptz_device);
     }
     return 0;
 }
@@ -936,6 +1043,76 @@ fail:
     return BVERROR(ENOMEM);
 }
 
+static struct tt__PTZConfiguration * get_ptz_device(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    struct soap *soap = onvifctx->soap;
+    int retval, size;
+    char *p, *q, *url;
+    char profile_token[32] = { 0 };
+    struct _tptz__GetConfiguration request;
+    struct _tptz__GetConfigurationResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return NULL;
+    }
+    p = bv_strsub(config->token, "/", 3);
+    q = bv_strsub(config->token, "/", 4);
+    if (!p || !q) {
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return NULL;
+    }
+    size = sizeof(profile_token);
+    size = size > q - p ? q - p : size;
+    bv_strlcpy(profile_token, p, size);     //notify bv_strlcpy() copy (size - 1) characters
+    request.PTZConfigurationToken = profile_token;
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+    retval = soap_call___tptz__GetConfiguration(soap, url, NULL, &request, &response);
+    if(retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "get ptz device encoder error");
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return NULL;
+    }
+    return response.PTZConfiguration;
+}
+
+static int onvif_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)
+{
+    struct tt__PTZConfiguration *PTZConfiguration = NULL; 
+    PTZConfiguration = get_ptz_device(s, config);
+    if (!PTZConfiguration) {
+        return BVERROR(EINVAL);
+    }
+    save_ptz_device(config, PTZConfiguration);
+    if (onvif_get_ptz_node(s, config) < 0) {
+        return BVERROR(EINVAL);
+    }
+    if (onvif_get_ptz_presets(s, config) < 0) {
+        return BVERROR(EINVAL);
+    }
+    return 0;
+}
+
+/**
+ *  onvif device we should not save ptz preset information
+ *  just return OK
+ */
+static int onvif_save_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    return 0;
+}
+
+static int onvif_dele_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    return 0;
+}
 #define OFFSET(x) offsetof(OnvifContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
@@ -975,4 +1152,7 @@ BVConfig bv_onvif_config = {
     .get_audio_encoder  = onvif_get_audio_encoder,
     .set_audio_encoder  = onvif_set_audio_encoder,
     .get_audio_encoder_options = onvif_get_audio_encoder_options,
+    .get_ptz_device     = onvif_get_ptz_device,
+    .save_ptz_preset    = onvif_save_ptz_preset,
+    .dele_ptz_preset    = onvif_dele_ptz_preset,
 };
