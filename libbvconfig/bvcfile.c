@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: his3515.c
+    > File Name: bvcfile.c
     > Author: albertfang
     > Mail: fang.qi@besovideo.com 
-    > Created Time: 2014年12月22日 星期一 15时42分02秒
+    > Created Time: 2015年02月04日 星期三 10时50分54秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -18,12 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) albert@BesoVideo, 2014
+ * Copyright (C) albert@BesoVideo, 2015
  */
 
-#include "bvsystem.h"
+#include "bvcfile.h"
 
-BVSystem bv_his3515_system = {
-    .name = "His3515",
-    .type = BV_SYSTEM_TYPE_HIS3515,
-};
+int bv_config_file_open(BVConfigFileContext **s, const char *url, BVConfigFile *config, BVDictionary **options)
+{
+    return BVERROR(ENOSYS);
+}
+
+int bv_config_file_close(BVConfigFileContext **s)
+{
+    return BVERROR(ENOSYS);
+}
+

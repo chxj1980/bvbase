@@ -1,8 +1,8 @@
 include $(SUBDIR)../config.mak
 
-NAME = bvserver
+NAME    = bvserver
 
 HEADERS = bvserver.h
 
-OBJS = utils.o allservers.o	options.o
+OBJS    = utils.o allservers.o	options.o
 

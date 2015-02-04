@@ -109,12 +109,14 @@ static int onvif_ptz_open(BVDeviceContext *h)
     OnvifPTZContext *onvif_ptz = h->priv_data;
     char *p, *q;
     int size;
-    bv_log(onvif_ptz, BV_LOG_ERROR, "onvif ptz open\n");
     if (h->url[0] == '\0') {
         bv_log(onvif_ptz, BV_LOG_ERROR, "url is NULL\n");
-        return -1;
+        return BVERROR(EINVAL);
     }
-
+    if (!onvif_ptz->token) {
+        bv_log(onvif_ptz, BV_LOG_ERROR, "onvif ptz token is NULL\n");
+        return BVERROR(EINVAL);
+    }
     p = bv_strsub(onvif_ptz->token, "/", 1);
     q = bv_strsub(onvif_ptz->token, "/", 2);
     if (!p) {
