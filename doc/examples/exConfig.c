@@ -188,7 +188,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&options, "passwd", "12345", 0);
     bv_dict_set(&options, "timeout", "5", 0);
     memset(&devinfo, 0, sizeof(devinfo));
-    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:80/onvif/device_service", NULL, &options)) < 0) {
+    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.150:80/onvif/device_service", NULL, &options)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error");
         bv_dict_free(&options);
         return BVERROR(EINVAL);
@@ -217,53 +217,56 @@ int main(int argc, const char *argv[])
         dump_video_encoder(&video_encoder);
     }
 
+    if (profiles[0].video_encoder) {
+        strcpy(video_encoder_option.token, profiles[0].video_encoder->token);
+        bv_log(config_context, BV_LOG_INFO, "video_encoder_option token %s\n", video_encoder_option.token);
+        if (bv_config_get_video_encoder_options(config_context, 1, 1, &video_encoder_option) < 0) {
+            bv_log(config_context, BV_LOG_ERROR, "get encoder config options error\n");
+        }
+        bv_log(config_context, BV_LOG_INFO, "video quality range %lld .. %lld\n", video_encoder_option.quality.min, video_encoder_option.quality.max);
+        video_encoder.codec_context.bit_rate = 1000;
+        video_encoder.codec_context.gop_size = 30;
+        video_encoder.codec_context.time_base = (BVRational) {1 , 15};
+        video_encoder.codec_context.quality = (int)video_encoder_option.quality.max - 1;
+        bv_log(config_context, BV_LOG_INFO, "quality %d\n", video_encoder.codec_context.quality); 
+        if (bv_config_set_video_encoder(config_context, 1, 1, &video_encoder)) {
+            bv_log(config_context, BV_LOG_ERROR, "set encoder config error\n");
+        }
 
-    strcpy(video_encoder_option.token, profiles[0].video_encoder->token);
-    bv_log(config_context, BV_LOG_INFO, "video_encoder_option token %s\n", video_encoder_option.token);
-    if (bv_config_get_video_encoder_options(config_context, 1, 1, &video_encoder_option) < 0) {
-        bv_log(config_context, BV_LOG_ERROR, "get encoder config options error\n");
+        free_video_encoder_option(&video_encoder_option);
     }
-    bv_log(config_context, BV_LOG_INFO, "video quality range %lld .. %lld\n", video_encoder_option.quality.min, video_encoder_option.quality.max);
-    video_encoder.codec_context.bit_rate = 1000;
-    video_encoder.codec_context.gop_size = 30;
-    video_encoder.codec_context.time_base = (BVRational) {1 , 15};
-    video_encoder.codec_context.quality = (int)video_encoder_option.quality.max - 1;
-    bv_log(config_context, BV_LOG_INFO, "quality %d\n", video_encoder.codec_context.quality); 
-    if (bv_config_set_video_encoder(config_context, 1, 1, &video_encoder)) {
-        bv_log(config_context, BV_LOG_ERROR, "set encoder config error\n");
+    if (profiles[0].audio_encoder) {
+        strcpy(audio_encoder.token, profiles[0].audio_encoder->token);
+        if (bv_config_get_audio_encoder(config_context, 1, 1, &audio_encoder)) {
+            bv_log(config_context, BV_LOG_ERROR, "get audio config error\n");
+        } else {
+            dump_audio_encoder(&audio_encoder);
+        }
+
+        audio_encoder.codec_context.sample_rate = 8;
+        audio_encoder.codec_context.bit_rate = 16;
+        bv_log(config_context, BV_LOG_INFO, "audio encoder token %s\n", audio_encoder.token);
+        if (bv_config_set_audio_encoder(config_context, 1, 1, &audio_encoder)) {
+            bv_log(config_context, BV_LOG_ERROR, "set audio config error\n");
+        }
+
+        strcpy(audio_encoder_option.token, profiles[0].audio_encoder->token);
+        if (bv_config_get_audio_encoder_options(config_context, 1, 1, &audio_encoder_option)) {
+            bv_log(config_context, BV_LOG_ERROR, "get audio_encoder_option error\n");
+        } else {
+            dump_audio_encoder_options(&audio_encoder_option);
+            //free
+            free_audio_encoder_options(&audio_encoder_option);
+        }
     }
-
-    free_video_encoder_option(&video_encoder_option);
-
-    strcpy(audio_encoder.token, profiles[0].audio_encoder->token);
-    if (bv_config_get_audio_encoder(config_context, 1, 1, &audio_encoder)) {
-        bv_log(config_context, BV_LOG_ERROR, "get audio config error\n");
-    } else {
-        dump_audio_encoder(&audio_encoder);
-    }
-
-    audio_encoder.codec_context.sample_rate = 8;
-    audio_encoder.codec_context.bit_rate = 16;
-    bv_log(config_context, BV_LOG_INFO, "audio encoder token %s\n", audio_encoder.token);
-    if (bv_config_set_audio_encoder(config_context, 1, 1, &audio_encoder)) {
-        bv_log(config_context, BV_LOG_ERROR, "set audio config error\n");
-    }
-
-    strcpy(audio_encoder_option.token, profiles[0].audio_encoder->token);
-    if (bv_config_get_audio_encoder_options(config_context, 1, 1, &audio_encoder_option)) {
-        bv_log(config_context, BV_LOG_ERROR, "get audio_encoder_option error\n");
-    } else {
-        dump_audio_encoder_options(&audio_encoder_option);
-        //free
-        free_audio_encoder_options(&audio_encoder_option);
-    }
-
-    strcpy(ptz_device.token, profiles[0].ptz_device->token);
-    if (bv_config_get_ptz_device(config_context, 1, 1, &ptz_device)) {
-        bv_log(config_context, BV_LOG_ERROR, "get ptz device error\n");
-    } else {
-        dump_ptz_device(&ptz_device);
-        free_ptz_device(&ptz_device);
+    if (profiles[0].ptz_device) {
+        strcpy(ptz_device.token, profiles[0].ptz_device->token);
+        if (bv_config_get_ptz_device(config_context, 1, 1, &ptz_device)) {
+            bv_log(config_context, BV_LOG_ERROR, "get ptz device error\n");
+        } else {
+            dump_ptz_device(&ptz_device);
+            free_ptz_device(&ptz_device);
+        }
     }
 #endif
     for (i = 0; i < max_num; i++) {

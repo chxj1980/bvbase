@@ -40,6 +40,17 @@ enum BVConfigFileType {
     BV_CONFIG_FILE_TYPE_UNKNOWN
 };
 
+typedef enum BVConfigObjectType {
+    BV_CONFIG_OBJTYPE_OBJECT,
+    BV_CONFIG_OBJTYPE_ARRAY,
+    BV_CONFIG_OBJTYPE_STRING,
+    BV_CONFIG_OBJTYPE_INTEGER,
+    BV_CONFIG_OBJTYPE_FLOAT,
+    BV_CONFIG_OBJTYPE_TRUE,
+    BV_CONFIG_OBJTYPE_FALSE,
+    BV_CONFIG_OBJTYPE_NULL
+} BVConfigObjectType;
+
 typedef enum {
     BV_SECTION_ID_NONE = -1,
     BV_SECTION_ID_ROOT,
@@ -75,12 +86,11 @@ typedef struct _BVConfigFile {
     int (*goto_section)(BVConfigFileContext *s, BVConfigSection *section);
     int (*create_section)(BVConfigSection *s, BVConfigSection *section);
     int (*delete_section)(BVConfigSection *s, BVConfigSection *section);
-    int (*read_string)(BVConfigFileContext *s, const char *key, char *value);
-    int (*read_int)(BVConfigFileContext *s, const char *key, int *value);
-    int (*read_double)(BVConfigSection *s, const char *key, double *value);
-    int (*write_string)(BVConfigFileContext *s, const char *key, char *value);
-    int (*write_int)(BVConfigFileContext *s, const char *key, int value);
-    int (*write_double)(BVConfigFileContext *s, const char *key, double value);
+    int (*read)(BVConfigFileContext *s, BVConfigObjectType type, const char *key, void *value);
+    int (*write)(BVConfigFileContext *s, BVConfigObjectType type,  const char *key, void *value);
+    int (*update)(BVConfigFileContext *s, BVConfigObjectType type, const char *key, void *nvalue);
+    int (*delete)(BVConfigObjectType *s, BVConfigObjectType type, const char *key);
+    int (*create)(BVConfigObjectType *s, BVConfigObjectType type, const char *after, const char *key, void *value);
 } BVConfigFile;
 
 int bv_config_file_register(BVConfigFile * config_file);
@@ -98,6 +108,18 @@ void bv_config_file_context_free(BVConfigFileContext * s);
 int bv_config_file_open(BVConfigFileContext **s, const char *url, BVConfigFile *config, BVDictionary **options);
 
 int bv_config_file_close(BVConfigFileContext **s);
+
+int bv_config_file_goto_section(BVConfigFileContext *s, BVConfigSection *section);
+
+int bv_config_file_create_section(BVConfigSection *s, BVConfigSection *section);
+
+int bv_config_file_delete_section(BVConfigSection *s, BVConfigSection *section);
+
+int bv_config_file_read_string(BVConfigFileContext *s, const char *key, char *value);
+
+int bv_config_file_read_int(BVConfigFileContext *s, const char *key, int *value);
+
+int bv_config_file_read_double(BVConfigFileContext *s, const char *key, double *value);
 
 #ifdef __cplusplus
 }
