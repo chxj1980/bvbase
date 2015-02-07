@@ -21,14 +21,40 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#include <libbvutil/bvstring.h>
+
 #include "bvconfig.h"
 
-struct LocalConfigContext {
+typedef struct _LocalContext {
+    const BVClass *bv_class;
+}LocalContext;
 
+static int local_probe(BVConfigContext *h, BVProbeData *p)
+{
+    if (bv_strstart(p->filename, "local:", NULL))
+        return BV_PROBE_SCORE_MAX;
+    return 0;
+}
+
+
+#define OFFSET(x) offsetof(LocalContext, x)
+#define DEC BV_OPT_FLAG_DECODING_PARAM
+static const BVOption options[] = {
+    { NULL }
+};
+
+static const BVClass local_class = {
+    .class_name     = "local config",
+    .item_name      = bv_default_item_name,
+    .option         = options,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       = BV_CLASS_CATEGORY_CONFIG,
 };
 
 BVConfig bv_local_config = {
-    .name = "local",
-    .type = BV_CONFIG_TYPE_LOCAL,
-    .priv_data_size = sizeof(struct LocalConfigContext),
+    .name           = "local",
+    .type           = BV_CONFIG_TYPE_LOCAL,
+    .priv_data_size = sizeof(LocalContext),
+    .priv_class     = &local_class,
+    .config_probe   = local_probe,
 };

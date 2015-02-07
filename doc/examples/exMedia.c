@@ -46,6 +46,7 @@ int main(int argc, const char *argv[])
 #if 1
     bv_dict_set(&opn, "user", "admin", 0);
     bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "Profile_1", 0);
     bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
     bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
@@ -55,7 +56,7 @@ int main(int argc, const char *argv[])
 #endif
 
     //sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
-    sprintf(filename, "%s", "bvfs://tmp/00_20120412_031132_");
+    sprintf(filename, "%s", "bvfs://00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
     if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");

@@ -110,11 +110,8 @@ static int bv_onvif_service_uri(OnvifContext *onvifctx)
     if (response.Capabilities->Imaging) {
         onvifctx->imaging_url = bv_strdup(response.Capabilities->Imaging->XAddr);
     }
-    if (response.Capabilities->Extension) {
-        if (response.Capabilities->Extension->DeviceIO) {
-            onvifctx->deviceio_url = bv_strdup(response.Capabilities->Extension->DeviceIO->XAddr);
-        }
-    
+    if (response.Capabilities->Extension && response.Capabilities->Extension->DeviceIO) {
+        onvifctx->deviceio_url = bv_strdup(response.Capabilities->Extension->DeviceIO->XAddr);
     }
     return 0;
 }
@@ -1119,11 +1116,11 @@ static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  ONVIF_TMO}, INT_MIN, INT_MAX, DEC},
     {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"media_url", "user password", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"ptz_url", "user password", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"device_url", "user password", OFFSET(device_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"deviceio_url", "user password", OFFSET(deviceio_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"imaging_url", "user password", OFFSET(imaging_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"media_url", "media url", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"ptz_url", "", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"device_url", "", OFFSET(device_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"deviceio_url", "", OFFSET(deviceio_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"imaging_url", "", OFFSET(imaging_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 
