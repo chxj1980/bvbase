@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "$0 x86/dm6446/dm365/hi3515/hi3535"
+    echo "$0 x86/x64/dm6446/dm365/hi3515/hi3535"
 	exit 1
 }
 
@@ -59,6 +59,12 @@ enable_his3515()
 	EXTLFLAGS+="-L$BVBASE_DIR/hissdk/his3515/lib "
 }
 
+enable_x86()
+{
+	EXTCFLAGS+="-m32 "
+	EXTLFLAGS+="-m32 "
+}
+
 case $1 in
     dm6446)
         CROSS_COMPILE=arm_v5t_le-
@@ -82,7 +88,10 @@ case $1 in
 		HOST=arm-hisiv100nptl-linux
 		;;
     x86)
+		enable_x86
         ;;
+	x64)
+		;;
 	*)
 		usage
 		;;
