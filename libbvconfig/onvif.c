@@ -21,6 +21,8 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "onvif.c"
+
 #include <libbvutil/bvstring.h>
 
 #include <wsseapi.h>
@@ -393,17 +395,17 @@ static int save_video_encoder(BVVideoEncoder *video_encoder, struct tt__VideoEnc
     if (VideoEncoderConfiguration->RateControl) {
         video_encoder->codec_context.time_base = (BVRational) {1, VideoEncoderConfiguration->RateControl->FrameRateLimit};
         video_encoder->codec_context.bit_rate = VideoEncoderConfiguration->RateControl->BitrateLimit;
+        video_encoder->codec_context.gop_size = VideoEncoderConfiguration->RateControl->EncodingInterval;
     }
     if (video_encoder->codec_context.codec_id == BV_CODEC_ID_H264 && VideoEncoderConfiguration->H264) {
         video_encoder->codec_context.gop_size = VideoEncoderConfiguration->H264->GovLength;
         video_encoder->codec_context.profile = onvif_h264_profile(VideoEncoderConfiguration->H264->H264Profile);
+    } else if (video_encoder->codec_context.codec_id == BV_CODEC_ID_MPEG && VideoEncoderConfiguration->MPEG4){
+        video_encoder->codec_context.gop_size = VideoEncoderConfiguration->MPEG4->GovLength;
+        video_encoder->codec_context.profile = onvif_mpeg_profile(VideoEncoderConfiguration->MPEG4->Mpeg4Profile);
     } else {
-        if (VideoEncoderConfiguration->MPEG4) {
-            video_encoder->codec_context.gop_size = VideoEncoderConfiguration->MPEG4->GovLength;
-            video_encoder->codec_context.profile = onvif_mpeg_profile(VideoEncoderConfiguration->MPEG4->Mpeg4Profile);
-        }
+        bv_log(NULL, BV_LOG_ERROR, "video codec type error %s %d\n", __FILE__, __LINE__);
     }
-    video_encoder->codec_context.gop_size = VideoEncoderConfiguration->RateControl->EncodingInterval;
     return 0;
 }
 
