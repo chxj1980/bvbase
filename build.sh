@@ -103,7 +103,7 @@ enable_onvifc
 
 enable_ffmpeg
 
-#enable_jansson
+enable_jansson
 
 export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc

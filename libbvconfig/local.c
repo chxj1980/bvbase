@@ -36,7 +36,6 @@ static int local_probe(BVConfigContext *h, BVProbeData *p)
     return 0;
 }
 
-
 #define OFFSET(x) offsetof(LocalContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {

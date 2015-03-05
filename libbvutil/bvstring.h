@@ -311,6 +311,8 @@ const char *bv_dirname(char *path);
  */
 int bv_match_name(const char *name, const char *names);
 
+int bv_match_ext(const char *name, const char *extensions);
+
 enum BVEscapeMode {
     BV_ESCAPE_MODE_AUTO,      ///< Use auto-selected escaping mode.
     BV_ESCAPE_MODE_BACKSLASH, ///< Use backslash escaping.

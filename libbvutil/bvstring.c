@@ -419,6 +419,33 @@ int bv_match_name(const char *name, const char *names)
     return !bv_strcasecmp(name, names);
 }
 
+int bv_match_ext(const char *name, const char *extensions)
+{
+    const char *ext, *p;
+    char ext1[32], *q;
+
+    if (!name)
+        return 0;
+
+    ext = strrchr(name, '.');
+    if (ext) {
+        ext++;
+        p = extensions;
+        for (;;) {
+            q = ext1;
+            while (*p != '\0' && *p != ','  && q - ext1 < sizeof(ext1) - 1)
+                *q++ = *p++;
+            *q = '\0';
+            if (!bv_strcasecmp(ext1, ext))
+                return 1;
+            if (*p == '\0')
+                break;
+            p++;
+        }
+    }
+    return 0;
+}
+
 int bv_utf8_decode(int32_t *codep, const uint8_t **bufp, const uint8_t *buf_end,
                    unsigned int flags)
 {
