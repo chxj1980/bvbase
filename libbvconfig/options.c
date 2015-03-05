@@ -117,6 +117,8 @@ void bv_config_file_context_free(BVConfigFileContext * cfgctx)
     if (cfgctx->cfile && cfgctx->cfile->priv_class && cfgctx->priv_data)
         bv_opt_free(cfgctx->priv_data);
     bv_freep(&cfgctx->priv_data);
+    bv_config_object_decref(cfgctx, cfgctx->root);
+    bv_free(cfgctx->root);
     bv_free(cfgctx);
     return;
 }

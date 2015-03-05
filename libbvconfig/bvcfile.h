@@ -41,56 +41,62 @@ enum BVConfigFileType {
 };
 
 typedef enum BVConfigObjectType {
-    BV_CONFIG_OBJTYPE_OBJECT,
-    BV_CONFIG_OBJTYPE_ARRAY,
+    BV_CONFIG_OBJTYPE_NONE,
+    BV_CONFIG_OBJTYPE_GROUP,    /*{ }*/
+    BV_CONFIG_OBJTYPE_ARRAY,    /*[ ] root.sss[1].name */
     BV_CONFIG_OBJTYPE_STRING,
     BV_CONFIG_OBJTYPE_INTEGER,
     BV_CONFIG_OBJTYPE_FLOAT,
-    BV_CONFIG_OBJTYPE_TRUE,
-    BV_CONFIG_OBJTYPE_FALSE,
-    BV_CONFIG_OBJTYPE_NULL
+    BV_CONFIG_OBJTYPE_BOOL,
+    BV_CONFIG_OBJTYPE_NULL,
+    BV_CONFIG_OBJTYPE_UNKNOWN
 } BVConfigObjectType;
 
-typedef enum {
-    BV_SECTION_ID_NONE = -1,
-    BV_SECTION_ID_ROOT,
-} BVSectionID;
-
-#define BV_CONFIG_SECTION_FLAGS_IS_WRAPPER              1 ///< the section only contains other sections, but has no data at its own level
-#define BV_CONFIG_SECTION_FLAGS_IS_ARRAY                2 ///< the section contains an array of elements of the same type
-#define BV_CONFIG_SECTION_FLAGS_HAS_VARIABLE_FIELDS     4 ///< the section may contain a variable number of fields with variable keys.
-                                                          ///  For these sections the element_name field is mandatory.
-
-typedef struct _BVConfigSection {
-    int id;
-    const char *name;
+typedef struct _BVConfigObject {
+    BVConfigObjectType type;
     int flags;
-} BVConfigSection;
+    char *name;
+    struct _BVConfigObject *parent;
+    union {
+        int    ival;
+        double fval;
+        char * sval;
+        struct _BVConfigArray *aval;
+    } value;
+//    void *value;
+    void *priv_data;
+} BVConfigObject;
+
+typedef struct _BVConfigArray {
+    int nb_elements;
+    BVConfigObject **elements;
+} BVConfigArray;
 
 typedef struct _BVConfigFileContext {
     const BVClass *bv_class;
     struct _BVConfigFile *cfile;
+    BVConfigObject *root;
     void *priv_data;
     char filename[1024];
-    BVConfigSection *section;
 } BVConfigFileContext;
 
 typedef struct _BVConfigFile {
     const char *name;
+    const char *extensions;
     enum BVConfigFileType type;
     const BVClass *priv_class;
     int priv_data_size;
     struct _BVConfigFile *next;
-    int (*init)(BVConfigFileContext *s);
-    int (*uninit)(BVConfigFileContext *s);
-    int (*goto_section)(BVConfigFileContext *s, BVConfigSection *section);
-    int (*create_section)(BVConfigSection *s, BVConfigSection *section);
-    int (*delete_section)(BVConfigSection *s, BVConfigSection *section);
-    int (*read)(BVConfigFileContext *s, BVConfigObjectType type, const char *key, void *value);
-    int (*write)(BVConfigFileContext *s, BVConfigObjectType type,  const char *key, void *value);
-    int (*update)(BVConfigFileContext *s, BVConfigObjectType type, const char *key, void *nvalue);
-    int (*delete)(BVConfigObjectType *s, BVConfigObjectType type, const char *key);
-    int (*create)(BVConfigObjectType *s, BVConfigObjectType type, const char *after, const char *key, void *value);
+    int (*file_open)(BVConfigFileContext *s);
+    int (*file_close)(BVConfigFileContext *s);
+    int (*file_dump)(BVConfigFileContext *s, const char *filename);
+    int (*decref)(BVConfigFileContext *s, BVConfigObject *obj);
+//    BVConfigObject *(*lookup)(BVConfigFileContext *s, const char *path);
+    BVConfigObject *(*lookup_from)(BVConfigFileContext *s, BVConfigObject *obj, const char *path);
+    int (*get_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
+    int (*set_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
+    int (*remove)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
+    BVConfigObject *(*add)(BVConfigFileContext *s, BVConfigObject *parent, const char *key, BVConfigObjectType type);
 } BVConfigFile;
 
 int bv_config_file_register(BVConfigFile * config_file);
@@ -107,19 +113,23 @@ void bv_config_file_context_free(BVConfigFileContext * s);
 
 int bv_config_file_open(BVConfigFileContext **s, const char *url, BVConfigFile *config, BVDictionary **options);
 
+int bv_config_file_dump(BVConfigFileContext *s, const char *filename);
+
 int bv_config_file_close(BVConfigFileContext **s);
 
-int bv_config_file_goto_section(BVConfigFileContext *s, BVConfigSection *section);
+BVConfigObject *bv_config_file_lookup(BVConfigFileContext *s, const char *path);
 
-int bv_config_file_create_section(BVConfigSection *s, BVConfigSection *section);
+BVConfigObject *bv_config_file_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path);
 
-int bv_config_file_delete_section(BVConfigSection *s, BVConfigSection *section);
+int bv_config_object_decref(BVConfigFileContext *s, BVConfigObject *obj);
 
-int bv_config_file_read_string(BVConfigFileContext *s, const char *key, char *value);
+int bv_config_object_get_value(BVConfigFileContext *s, BVConfigObject *obj, void *value);
 
-int bv_config_file_read_int(BVConfigFileContext *s, const char *key, int *value);
+int bv_config_object_set_value(BVConfigFileContext *s, BVConfigObject *obj, void *value);
 
-int bv_config_file_read_double(BVConfigFileContext *s, const char *key, double *value);
+int bv_config_object_remove(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
+
+BVConfigObject *bv_config_object_add(BVConfigFileContext *s, BVConfigObject *parent, const char *key, BVConfigObjectType type);
 
 #ifdef __cplusplus
 }
