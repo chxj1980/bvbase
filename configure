@@ -2404,6 +2404,7 @@ nvenc_encoder_deps="nvenc"
 
 onvif_ptz_device_deps="libonvifc"
 onvif_dev_device_deps="libonvifc"
+disk_dev_device_deps="libbvfs"
 onvif_config_deps="libonvifc"
 json_cfile_deps="libjansson"
 onvifave_indev_deps="libonvifc libavformat"

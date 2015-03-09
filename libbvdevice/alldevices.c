@@ -44,4 +44,5 @@ void bv_device_register_all(void)
     //REGISTER_DEVICE(PTZ, ptz);
     REGISTER_DEVICE(ONVIF_DEV, onvif_dev);
     REGISTER_DEVICE(ONVIF_PTZ, onvif_ptz);
+    REGISTER_DEVICE(DISK_DEV,  disk_dev);
 }
