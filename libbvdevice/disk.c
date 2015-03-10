@@ -24,6 +24,7 @@
 #line 25 "disk.c"
 
 #include <bvfs.h>
+#include <libbvutil/bvstring.h>
 
 #include "bvdevice.h"
 
@@ -48,17 +49,62 @@ static int disk_device_probe(BVDeviceContext *h, const char *args)
 
 static int disk_device_close(BVDeviceContext *h)
 {
+    bvfs_uninit();
     return 0;
 }
 
 static int disk_format(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    return 0;
+    BVDiskDevice *disk = (BVDiskDevice *)pkt_in->data;
+
+    return bvfs_format_disk(disk->index,disk->type);
 }
 
 static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    return 0;
+    DiskDeviceContext *diskctx = h->priv_data;
+    int ret = 0;
+    int i;
+    int temp_num = diskctx->max_files;
+    BVFS_FILE_INFO *bvfile_info = NULL;
+    BVFileInfo *file_info = NULL;
+    
+    BVSearchFileConditions *cond = (BVSearchFileConditions *)pkt_in->data;
+    
+    file_info = (BVFileInfo *)bv_mallocz(diskctx->max_files * sizeof(BVFileInfo));
+    if (!file_info) {
+        bv_log(h, BV_LOG_ERROR, "bvfile_info calloc error\n");
+        return BVERROR(ENOMEM);
+    }
+    bvfile_info = (BVFS_FILE_INFO *)bv_mallocz(diskctx->max_files * sizeof(BVFS_FILE_INFO));
+    if (!bvfile_info) {
+        bv_log(h, BV_LOG_ERROR, "file_info calloc error\n");
+        bv_free(file_info);
+        return BVERROR(ENOMEM);
+    }
+    
+    ret = bvfs_search_file(cond->channel_id, cond->start_time, cond->end_time,
+            &temp_num, bvfile_info, cond->file_type, cond->storage_type);
+    if (ret < 0) {
+        bv_log(h, BV_LOG_ERROR, "search file  error\n");
+    }
+    for (i = 0; i < temp_num; i++) {
+        bv_strlcpy(file_info[i].name, bvfile_info[i].file_name, sizeof(file_info[i].name));
+        file_info[i].start_time = bvfile_info[i].start_time;
+        file_info[i].end_time = bvfile_info[i].end_time;
+        file_info[i].channel_id = bvfile_info[i].channel_id;
+        file_info[i].file_type = bvfile_info[i].file_type;
+        file_info[i].disk_id = bvfile_info[i].disk_id;
+        file_info[i].storage_type = bvfile_info[i].storage_type;
+        file_info[i].file_size = bvfile_info[i].file_size;
+    }
+    
+    pkt_out->data = (void *)file_info;
+    pkt_out->size = temp_num;
+    bv_free(bvfile_info);
+    bvfile_info = NULL;
+    
+    return ret;
 }
 
 static int disk_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
