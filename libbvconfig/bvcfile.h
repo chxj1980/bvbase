@@ -57,6 +57,7 @@ typedef struct _BVConfigObject {
     int flags;
     char *name;
     struct _BVConfigObject *parent;
+#if 0
     union {
         int    ival;
         double fval;
@@ -64,6 +65,7 @@ typedef struct _BVConfigObject {
         struct _BVConfigArray *aval;
     } value;
 //    void *value;
+#endif
     void *priv_data;
 } BVConfigObject;
 
@@ -93,6 +95,8 @@ typedef struct _BVConfigFile {
     int (*decref)(BVConfigFileContext *s, BVConfigObject *obj);
 //    BVConfigObject *(*lookup)(BVConfigFileContext *s, const char *path);
     BVConfigObject *(*lookup_from)(BVConfigFileContext *s, BVConfigObject *obj, const char *path);
+    BVConfigObject *(*get_element)(BVConfigFileContext *s, BVConfigObject *parent, int index);
+    BVConfigObject *(*get_member)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
     int (*get_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
     int (*set_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
     int (*remove)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
@@ -120,6 +124,10 @@ int bv_config_file_close(BVConfigFileContext **s);
 BVConfigObject *bv_config_file_lookup(BVConfigFileContext *s, const char *path);
 
 BVConfigObject *bv_config_file_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path);
+
+BVConfigObject *bv_config_get_element(BVConfigFileContext *s, BVConfigObject *parent, int index);
+
+BVConfigObject *bv_config_get_member(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
 
 int bv_config_object_decref(BVConfigFileContext *s, BVConfigObject *obj);
 

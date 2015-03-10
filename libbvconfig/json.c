@@ -34,14 +34,40 @@ typedef struct _JsonConfigFileContext {
     int fd;
 }JsonConfigFileContext;
 
+static BVConfigObjectType json_type_objtype(json_type type)
+{
+    int i;
+    struct {
+        json_type type;
+        BVConfigObjectType bvtype;
+    } types[] = {
+        { JSON_OBJECT, BV_CONFIG_OBJTYPE_GROUP },
+        { JSON_ARRAY,  BV_CONFIG_OBJTYPE_ARRAY },
+        { JSON_STRING, BV_CONFIG_OBJTYPE_STRING},
+        { JSON_INTEGER, BV_CONFIG_OBJTYPE_INTEGER},
+        { JSON_REAL, BV_CONFIG_OBJTYPE_FLOAT},
+        { JSON_TRUE, BV_CONFIG_OBJTYPE_BOOL},
+        { JSON_FALSE, BV_CONFIG_OBJTYPE_BOOL},
+        { JSON_NULL, BV_CONFIG_OBJTYPE_NULL},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(types); i++) {
+        if (types[i].type == type)
+            return types[i].bvtype;
+    }
+    return BV_CONFIG_FILE_TYPE_NONE;
+}
+
 static int save_root_tree(BVConfigFileContext *s)
 {
     JsonConfigFileContext *json = s->priv_data;
     s->root = bv_mallocz(sizeof(BVConfigObject));
     if (!s->root) {
         json_decref(json->root);
+        json->root = NULL;
         return BVERROR(ENOMEM);
     }
+    s->root->parent = NULL;
+    s->root->type = json_type_objtype(json_typeof(json->root));
     s->root->priv_data =json->root;
     //递归
     return 0;
@@ -83,25 +109,30 @@ static int jansson_file_dump(BVConfigFileContext *s, const char *filename)
 
 static int jansson_file_close(BVConfigFileContext *s)
 {
+    JsonConfigFileContext *json = s->priv_data;
     int ret = 0;
     if (jansson_file_dump(s, NULL) < 0) {
         bv_log(s, BV_LOG_ERROR, "close file error\n");
         ret = BVERROR(EIO);
     }
-//    json_decref(json->root);
+    if (json->root)
+        json_decref(json->root);
     return ret;
 }
 
 static int jansson_decref(BVConfigFileContext *s, BVConfigObject *obj)
 {
+#if 0
     json_t *t = obj->priv_data;
     if (!t)
         return 0;
     json_decref(t);
     obj->priv_data = NULL;
+#endif
     return 0;
 }
 
+#if 0
 static BVConfigObject *jansson_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path)
 {
     return NULL;
@@ -112,10 +143,91 @@ static BVConfigObject *jansson_lookup(BVConfigFileContext *s, const char *path)
     JsonConfigFileContext *json = s->priv_data;
     return NULL;
 }
+#endif
+static BVConfigObject *jansson_get_element(BVConfigFileContext *s, BVConfigObject *parent, int index)
+{
+    BVConfigObject *obj = NULL;
+    json_t *array = parent->priv_data;
+    json_t *elem = NULL;
+    if (!array)
+        return NULL;
+    elem = json_array_get(array, index);
+    if (!elem)
+        return NULL;
+    obj = bv_mallocz(sizeof(BVConfigObject));
+    if (!obj) {
+        return NULL;
+    }
+    obj->type = json_type_objtype(json_typeof(elem));
+    obj->priv_data = elem;
+    obj->parent = parent;
+    return obj;
+}
 
+static BVConfigObject *jansson_get_member(BVConfigFileContext *s, BVConfigObject *parent, const char *key)
+{
+    BVConfigObject *obj = NULL;
+    json_t *group = parent->priv_data;
+    json_t *member = NULL;
+    if (!group)
+        return NULL;
+    member = json_object_get(group, key);
+    if (!member)
+        return NULL;
+    obj = bv_mallocz(sizeof(BVConfigObject));
+    if (!obj)
+        return NULL;
+    obj->type = json_type_objtype(json_typeof(member));
+    obj->priv_data = member;
+    obj->parent = parent;
+    obj->name = bv_strdup(key);
+    return obj;
+}
+
+/**
+ *  FIXME 
+ *  Be Careful with get string value 
+ *  caller should have enough room for the result
+ */
 static int jansson_get_value(BVConfigFileContext *s, BVConfigObject *obj, void *value)
 {
-    return BVERROR(ENOSYS);
+    json_t *t = obj->priv_data;
+    switch (obj->type) {
+        case BV_CONFIG_OBJTYPE_STRING:
+            strcpy(value, json_string_value(t));    //FIXME
+            break;
+        case BV_CONFIG_OBJTYPE_FLOAT:
+            *(double *)value = json_real_value(t);
+            break;
+        case BV_CONFIG_OBJTYPE_BOOL:
+        case BV_CONFIG_OBJTYPE_INTEGER:
+            *(int64_t *)value = json_integer_value(t);
+            break;
+        default:
+            return -1;
+    }
+    return 0;
+}
+
+static int jansson_set_value(BVConfigFileContext *s, BVConfigObject *obj, void *value)
+{
+    json_t *t = obj->priv_data;
+    int ret = 0;
+    switch (obj->type) {
+        case BV_CONFIG_OBJTYPE_STRING:
+            ret = json_string_set(t, (const char *)value);
+            break;
+        case BV_CONFIG_OBJTYPE_FLOAT:
+            ret = json_real_set(t, *(double *)value);
+            break;
+        case BV_CONFIG_OBJTYPE_BOOL:
+        case BV_CONFIG_OBJTYPE_INTEGER:
+            ret = json_integer_set(t, *(json_int_t *)value);
+            break;
+        default:
+            ret = -1;
+    }
+    return ret;
 }
 
 #define OFFSET(x) offsetof(JsonConfigFileContext, x)
@@ -143,6 +255,9 @@ BVConfigFile bv_json_cfile = {
     .file_dump      = jansson_file_dump,
     .decref         = jansson_decref,
 //    .lookup         = jansson_lookup,
-    .lookup_from    = jansson_lookup_from,
+//    .lookup_from    = jansson_lookup_from,
+    .get_element    = jansson_get_element,
+    .get_member     = jansson_get_member,
     .get_value      = jansson_get_value,
+    .set_value      = jansson_set_value,
 };

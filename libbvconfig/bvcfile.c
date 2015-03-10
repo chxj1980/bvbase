@@ -28,6 +28,8 @@
 
 #include "bvcfile.h"
 
+#define PATH_TOKENS ":./"
+
 static int init_config_file(BVConfigFileContext *s, const char *url)
 {
     BVProbeData pd = { url, NULL, 0 };
@@ -117,6 +119,7 @@ int bv_config_file_dump(BVConfigFileContext *s, const char *filename)
         return BVERROR(ENOSYS);
     return s->cfile->file_dump(s, filename);
 }
+
 int bv_config_file_close(BVConfigFileContext **h)
 {
     BVConfigFileContext *s = *h;
@@ -129,13 +132,87 @@ int bv_config_file_close(BVConfigFileContext **h)
 
 int bv_config_object_decref(BVConfigFileContext *s, BVConfigObject *obj)
 {
-    bv_free(obj->name);
+    bv_freep(&obj->name);
     if (s->cfile->decref)
         s->cfile->decref(s, obj);
+    bv_free(obj);
     return 0;
+}
+
+int bv_config_object_get_value(BVConfigFileContext *s, BVConfigObject *obj, void *value)
+{
+    if (!s->cfile->get_value)
+        return  BVERROR(ENOSYS);
+    if ((obj->type == BV_CONFIG_OBJTYPE_GROUP || obj->type == BV_CONFIG_OBJTYPE_ARRAY)) {
+        bv_log(s, BV_LOG_ERROR, "BVConfigObject type  %d Should not get value\n", obj->type);
+        return BVERROR(EINVAL);
+    }
+    return s->cfile->get_value(s, obj, value);
+}
+
+int bv_config_object_set_value(BVConfigFileContext *s, BVConfigObject *obj, void *value)
+{
+    if (!s->cfile->set_value)
+        return  BVERROR(ENOSYS);
+    if ((obj->type == BV_CONFIG_OBJTYPE_GROUP || obj->type == BV_CONFIG_OBJTYPE_ARRAY)) {
+        bv_log(s, BV_LOG_ERROR, "BVConfigObject type  %d Should not get value\n", obj->type);
+        return BVERROR(EINVAL);
+    }
+    return s->cfile->set_value(s, obj, value);
+}
+
+BVConfigObject *bv_config_get_element(BVConfigFileContext *s, BVConfigObject *parent, int index)
+{
+    if (!s->cfile->get_element)
+        return NULL;
+    if ((parent->type != BV_CONFIG_OBJTYPE_GROUP) && (parent->type != BV_CONFIG_OBJTYPE_ARRAY))
+        return NULL;
+    bv_log(s, BV_LOG_DEBUG, "parent name %s index %d\n", parent->name, index);
+    return s->cfile->get_element(s, parent, index);
+}
+
+BVConfigObject *bv_config_get_member(BVConfigFileContext *s, BVConfigObject *parent, const char *key)
+{
+    char *p , *tmp;
+    BVConfigObject *obj = NULL;
+    if (!s->cfile->get_member || (parent->type != BV_CONFIG_OBJTYPE_GROUP))
+        return NULL;
+    tmp = p = bv_strdup(key);
+    if (!p)
+        return NULL;
+    while (!strchr(PATH_TOKENS, *p))
+        p ++;
+    *p = '\0';
+    bv_log(s, BV_LOG_DEBUG, "get parent name %s member tmp key %s\n", parent->name, tmp);
+    obj = s->cfile->get_member(s, parent, tmp);
+    bv_free(tmp);
+    return obj;
 }
 
 BVConfigObject *bv_config_file_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path)
 {
-    return NULL;
+    const char *p = path;
+    BVConfigObject *found;
+    BVConfigObject *tmp = obj;
+    for (; ; ) {
+        while (*p && strchr(PATH_TOKENS, *p))
+            p++;
+        if (!*p)
+            break;
+        if (*p == '[')
+            found = bv_config_get_element(s, tmp, atoi(++p));
+        else
+            found = bv_config_get_member(s, tmp, p);
+        if (!found) {
+            if (tmp != obj) 
+                bv_config_object_decref(s, tmp);
+            break;
+        }
+        if (tmp != obj) 
+            bv_config_object_decref(s, tmp);
+        tmp = found;
+        while (!strchr(PATH_TOKENS, *p))
+            p ++;
+    }
+    return (*p ? NULL : tmp);
 }

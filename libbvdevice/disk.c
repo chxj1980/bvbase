@@ -94,8 +94,8 @@ static const BVClass disk_class = {
     .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
-BVDevice bv_disk_device = {
-    .name           = "disk",
+BVDevice bv_disk_dev_device = {
+    .name           = "disk_dev",
     .type           = BV_DEVICE_TYPE_HRDSK,
     .priv_data_size = sizeof(DiskDeviceContext),
     .dev_open       = disk_device_open,
