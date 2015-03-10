@@ -34,6 +34,7 @@ extern "C"{
 #include <libbvutil/packet.h>
 
 #include <libbvconfig/common.h>
+#include <time.h>
 
 enum BVDeviceType {
     BV_DEVICE_TYPE_NONE = -1,
