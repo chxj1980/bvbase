@@ -42,12 +42,12 @@ int main(int argc, const char *argv[])
     
     device = bv_device_find_device(BV_DEVICE_TYPE_HRDSK);
     
-	if (!device) {
+    if (!device) {
         bv_log(NULL, BV_LOG_ERROR, "Not Find This device\n");
         return BVERROR(EINVAL);
     }
     
-    if ((ret = bv_device_open(&device_context,device,NULL,NULL))) {
+    if ((ret = bv_device_open(&device_context, device, NULL, NULL))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);
@@ -80,7 +80,7 @@ int main(int argc, const char *argv[])
         bv_log(device_context, BV_LOG_INFO, "storage_type:%d\n",info->storage_type);
         bv_log(device_context, BV_LOG_INFO, "file_size:%ld\n",info->file_size);
     }
-    free(pkt_out.data);//记得释放内存哦^_^
+    bv_free(pkt_out.data);//记得释放内存哦^_^
 
     BVDiskDevice disk;
 	disk.index =0;
@@ -89,6 +89,8 @@ int main(int argc, const char *argv[])
 
     //when test format open it
     //	bv_device_control(device_context,BV_DEV_MESSAGE_TYPE_FORMAT_DISK,&pkt_in, NULL);
+    
+    bv_device_close(&device_context);
     return 0;
 }
 
