@@ -34,6 +34,10 @@ extern "C"{
 #include <libbvutil/packet.h>
 
 #include <libbvconfig/common.h>
+#include <time.h>
+
+#define  MAX_SEARCH_NUM (1024)
+
 
 enum BVDeviceType {
     BV_DEVICE_TYPE_NONE = -1,
@@ -74,6 +78,7 @@ enum BVDeviceMessageType {
     BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET,
 
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
+    BV_DEV_MESSAGE_TYPE_SEARCH_FILE,
 
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
@@ -95,6 +100,31 @@ typedef struct _BVMobileDevice {
     char pswd[64];
     int  timeout;
 } BVMobileDevice;
+
+typedef struct _BVDiskDevice {
+    int index;
+    int type;
+    char name[128];
+} BVDiskDevice;
+
+typedef struct _BVSearchFileConditions {
+    time_t start_time;
+    time_t end_time;
+    uint8_t channel_id;
+    uint8_t file_type;
+    uint32_t storage_type;
+} BVSearchFileConditions;
+
+typedef struct _BVFileInfo {
+    char name[255];
+    time_t start_time;
+    time_t end_time;
+    uint8_t channel_id;
+    uint8_t file_type;
+    uint8_t disk_id;
+    uint32_t storage_type;
+    uint64_t file_size;
+} BVFileInfo;
 
 typedef struct _BVDeviceContext {
     const BVClass *bv_class;

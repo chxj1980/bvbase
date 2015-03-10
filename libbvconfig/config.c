@@ -21,11 +21,11 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#line 25 "bvcfile.c"
+
 #include <libbvutil/bvstring.h>
 
 #include "bvconfig.h"
-
-static const char *FILE_NAME = "config.c";
 
 static int init_config(BVConfigContext *s, const char *url)
 {
@@ -59,7 +59,7 @@ int bv_config_open(BVConfigContext **h, const char *url, BVConfig *config, BVDic
     if (!s && !(s = bv_config_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 

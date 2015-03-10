@@ -29,3 +29,4 @@ libconfig
 
 BVConfig 结构体表示配置文件的容器
 BVConfigFile 表示配置文件io用来屏蔽配置文件的类型，例如json，xml等等
+参考了libconfig jansson 库的设计和实现

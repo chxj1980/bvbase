@@ -202,12 +202,12 @@ static const BVClass onvif_class = {
 };
 
 BVDevice bv_onvif_dev_device = {
-    .name = "onvif_dev",
-    .type = BV_DEVICE_TYPE_ONVIF_DEVICE,
+    .name           = "onvif_dev",
+    .type           = BV_DEVICE_TYPE_ONVIF_DEVICE,
     .priv_data_size = sizeof(OnvifDeviceContext),
-    .dev_open = onvif_device_open,
-    .dev_probe = onvif_device_probe,
-    .dev_close = onvif_device_close,
-    .dev_scan = onvif_device_scan,
-    .priv_class = &onvif_class,
+    .dev_open       = onvif_device_open,
+    .dev_probe      = onvif_device_probe,
+    .dev_close      = onvif_device_close,
+    .dev_scan       = onvif_device_scan,
+    .priv_class     = &onvif_class,
 };

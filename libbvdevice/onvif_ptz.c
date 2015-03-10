@@ -366,7 +366,6 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
 
 static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
     int i = 0;
     struct {
         enum BVDeviceMessageType type;
@@ -383,7 +382,7 @@ static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, 
           return ptz_control[i].control(h, pkt_in, pkt_out); 
     }
     bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
-    return ret;
+    return BVERROR(ENOSYS);
 }
 
 static int onvif_ptz_close(BVDeviceContext*h)
