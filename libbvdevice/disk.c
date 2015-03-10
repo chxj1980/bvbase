@@ -29,6 +29,7 @@
 #include "bvdevice.h"
 
 typedef struct DiskDeviceContext {
+    const BVClass *bv_class;
     int max_files;
 } DiskDeviceContext;
 
@@ -87,6 +88,7 @@ static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, B
             &temp_num, bvfile_info, cond->file_type, cond->storage_type);
     if (ret < 0) {
         bv_log(h, BV_LOG_ERROR, "search file  error\n");
+        temp_num = 0;
     }
     for (i = 0; i < temp_num; i++) {
         bv_strlcpy(file_info[i].name, bvfile_info[i].file_name, sizeof(file_info[i].name));

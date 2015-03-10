@@ -78,7 +78,7 @@ int main(int argc, const char *argv[])
         bv_log(device_context, BV_LOG_INFO, "file_type:%d\n",info->file_type);
         bv_log(device_context, BV_LOG_INFO, "disk_id:%d\n",info->disk_id);
         bv_log(device_context, BV_LOG_INFO, "storage_type:%d\n",info->storage_type);
-        bv_log(device_context, BV_LOG_INFO, "file_size:%ld\n",info->file_size);
+        bv_log(device_context, BV_LOG_INFO, "file_size:%llu\n",info->file_size);
     }
     bv_free(pkt_out.data);//记得释放内存哦^_^
 
