@@ -53,12 +53,55 @@ static int disk_device_close(BVDeviceContext *h)
 
 static int disk_format(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    return 0;
+    BVDiskDevice *disk = (BVDiskDevice *)pkt_in->data;
+
+    return bvfs_format_disk(disk->index,disk->type);
 }
 
 static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    return 0;
+    int ret = 0;
+    int i;
+    int temp_num = MAX_SEARCH_NUM+1;
+    BVFS_FILE_INFO *bvfile_info=NULL;
+    BVFileInfo *file_info=NULL;
+    
+    BVSearchFileConditions *cond = (BVSearchFileConditions *)pkt_in->data;
+
+    file_info=(BVFileInfo *)calloc(MAX_SEARCH_NUM+1,sizeof(BVFileInfo));
+    if(!file_info){
+		bv_log(h, BV_LOG_ERROR, "bvfile_info calloc error\n");
+		free(file_info);
+		return -1;
+    }
+    bvfile_info=(BVFS_FILE_INFO *)calloc(MAX_SEARCH_NUM+1,sizeof(BVFS_FILE_INFO));
+    if(!bvfile_info){
+		bv_log(h, BV_LOG_ERROR, "file_info calloc error\n");
+		free(bvfile_info);
+		return -1;
+    }
+    
+    ret = bvfs_search_file(cond->channel_id,cond->start_time,cond->end_time,
+			&temp_num,bvfile_info,cond->file_type,cond->storage_type);
+    if(ret < 0){
+		bv_log(h, BV_LOG_ERROR, "search file  error\n");
+    }
+    for(i=0;i<temp_num;i++){
+		strcpy(file_info[i].name,bvfile_info[i].file_name);
+		file_info[i].start_time = bvfile_info[i].start_time;
+		file_info[i].end_time = bvfile_info[i].end_time;
+		file_info[i].channel_id = bvfile_info[i].channel_id;
+		file_info[i].file_type = bvfile_info[i].file_type;
+		file_info[i].disk_id = bvfile_info[i].disk_id;
+		file_info[i].storage_type = bvfile_info[i].storage_type;
+		file_info[i].file_size = bvfile_info[i].file_size;
+	}
+    pkt_out->data = (void *)file_info;
+    pkt_out->size = temp_num;
+    free(bvfile_info);
+    bvfile_info = NULL;
+
+    return ret;
 }
 
 static int disk_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -94,8 +137,8 @@ static const BVClass disk_class = {
     .category       = BV_CLASS_CATEGORY_DEVICE,
 };
 
-BVDevice bv_disk_device = {
-    .name           = "disk",
+BVDevice bv_disk_dev_device = {
+    .name           = "disk_dev",
     .type           = BV_DEVICE_TYPE_HRDSK,
     .priv_data_size = sizeof(DiskDeviceContext),
     .dev_open       = disk_device_open,

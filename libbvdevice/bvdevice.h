@@ -34,6 +34,10 @@ extern "C"{
 #include <libbvutil/packet.h>
 
 #include <libbvconfig/common.h>
+#include <time.h>
+
+#define  MAX_SEARCH_NUM (1024)
+
 
 enum BVDeviceType {
     BV_DEVICE_TYPE_NONE = -1,

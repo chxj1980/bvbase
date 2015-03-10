@@ -42,11 +42,11 @@ LDFLAGS += -L$(BVBASE_DIR)/onvif/$(PLANTFORM)/lib -lonvifc
 LDFLAGS += -L$(BVBASE_DIR)/jansson/$(PLANTFORM)/lib -ljansson
 LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto  
 
-LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig -lbvprotocol
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig -lbvprotocol 
 
 LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs 
 
-EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl  exDisk
 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
