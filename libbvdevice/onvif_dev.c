@@ -39,6 +39,7 @@ typedef struct OnvifDeviceContext {
     BVClass *bv_class;
     struct soap *soap;
     int timeout;
+    int max_ipcs;
 } OnvifDeviceContext;
 
 static struct soap *bv_soap_new(int timeout)
@@ -178,6 +179,38 @@ static int onvif_device_probe(BVDeviceContext *h, const char *args)
     }
     return 0;
 }
+static int onvif_search_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    int ret = 0, max_ret = devctx->max_ipcs;
+    BVMobileDevice *device = bv_mallocz(sizeof(BVMobileDevice) * devctx->max_ipcs);
+    if (!device) {
+        return BVERROR(ENOMEM);
+    }
+
+    ret = onvif_device_scan(h, device, &max_ret);
+    pkt_out->data = (void *)device;
+    pkt_out->size = max_ret;
+    return ret;
+}
+
+static int onvif_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    int i = 0;
+    struct {
+        enum BVDeviceMessageType type;
+        int (*control)(BVDeviceContext *h, const BVControlPacket *, BVControlPacket *);
+    } onvif_control[] = {
+        { BV_DEV_MESSAGE_TYPE_SEARCH_IPC, onvif_search_ipc},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(onvif_control); i++) {
+        if (onvif_control[i].type == type)
+           return onvif_control[i].control(h, pkt_in, pkt_out); 
+    }
+    bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
+    return BVERROR(ENOSYS);
+
+}
 
 static int onvif_device_close(BVDeviceContext *h)
 {
@@ -190,24 +223,25 @@ static int onvif_device_close(BVDeviceContext *h)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+    {"max_ipcs", "", OFFSET(max_ipcs), BV_OPT_TYPE_INT, {.i64 =  128}, INT_MIN, INT_MAX, DEC},
     {NULL}
 };
 
 static const BVClass onvif_class = {
-    .class_name     = "onvif device",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE,
+    .class_name         = "onvif device",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_dev_device = {
-    .name           = "onvif_dev",
-    .type           = BV_DEVICE_TYPE_ONVIF_DEVICE,
-    .priv_data_size = sizeof(OnvifDeviceContext),
-    .dev_open       = onvif_device_open,
-    .dev_probe      = onvif_device_probe,
-    .dev_close      = onvif_device_close,
-    .dev_scan       = onvif_device_scan,
-    .priv_class     = &onvif_class,
+    .name               = "onvif_dev",
+    .type               = BV_DEVICE_TYPE_ONVIF_DEVICE,
+    .priv_data_size     = sizeof(OnvifDeviceContext),
+    .dev_open           = onvif_device_open,
+    .dev_probe          = onvif_device_probe,
+    .dev_close          = onvif_device_close,
+    .dev_control        = onvif_device_control,
+    .priv_class         = &onvif_class,
 };

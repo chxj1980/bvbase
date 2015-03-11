@@ -57,22 +57,6 @@ typedef struct OnvifContext {
     struct SOAP_ENV__Header soap_header;
 } OnvifContext;
 
-#define OFFSET(x) offsetof(OnvifContext, x)
-#define DEC BV_OPT_FLAG_DECODING_PARAM
-static const BVOption options[] = {
-    {"vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
-    {"video_rate", "", OFFSET(video_rate), BV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC},
-    {"size", "set video size", OFFSET(width), BV_OPT_TYPE_IMAGE_SIZE, {.str = "hd720"}, 0, 0, DEC},
-    {"media_url", "", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"timeout", "", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = -5000}, INT_MIN, INT_MAX, DEC},
-
-    {NULL}
-};
-
 static int onvif_probe(BVMediaContext *s, BVProbeData *p)
 {
     if (bv_strstart(p->filename, "onvifave:", NULL))
@@ -419,17 +403,33 @@ static bv_cold int onvif_read_close(BVMediaContext * s)
     return 0;
 }
 
-static bv_cold int onvif_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+static bv_cold int onvif_media_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     return 0;
 }
 
+#define OFFSET(x) offsetof(OnvifContext, x)
+#define DEC BV_OPT_FLAG_DECODING_PARAM
+static const BVOption options[] = {
+    {"vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
+    {"video_rate", "", OFFSET(video_rate), BV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC},
+    {"size", "set video size", OFFSET(width), BV_OPT_TYPE_IMAGE_SIZE, {.str = "hd720"}, 0, 0, DEC},
+    {"media_url", "", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"timeout", "", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = -5000}, INT_MIN, INT_MAX, DEC},
+
+    {NULL}
+};
+
 static const BVClass onvif_class = {
-    .class_name = "onvifave indev",
-    .item_name = bv_default_item_name,
-    .option = options,
-    .version = LIBBVUTIL_VERSION_INT,
-    .category = BV_CLASS_CATEGORY_DEMUXER,
+    .class_name         = "onvifave indev",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEMUXER,
 };
 
 BVInputMedia bv_onvifave_demuxer = {
@@ -439,7 +439,7 @@ BVInputMedia bv_onvifave_demuxer = {
     .read_header        = onvif_read_header,
     .read_packet        = onvif_read_packet,
     .read_close         = onvif_read_close,
-    .control_message    = onvif_control,
+    .media_control      = onvif_media_control,
     .flags              = BV_MEDIA_FLAGS_NOFILE,
     .priv_class         = &onvif_class,
 };

@@ -42,6 +42,11 @@ struct _BVMediaContext;
 
 #define BV_MEDIA_FLAGS_NOSTREAMS    0x1000
 
+enum BVMediaMessageType {
+    BV_MEDIA_MESSAGE_TYPE_NONE = -1,
+    BV_MEDIA_MESSAGE_TYPE_UNKNOW
+};
+
 typedef struct _BVInputMedia {
     const char *name;
     const char *extensions;
@@ -54,7 +59,7 @@ typedef struct _BVInputMedia {
     int (*read_header)(struct _BVMediaContext *h);
     int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*read_close)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
+    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 } BVInputMedia;
 
 typedef struct _BVOutputMedia {
@@ -68,7 +73,7 @@ typedef struct _BVOutputMedia {
     int (*write_header)(struct _BVMediaContext *h);
     int (*write_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*write_trailer)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
+    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *in, BVControlPacket *out);
 } BVOutputMedia;
 
 typedef struct _BVStream {
@@ -128,7 +133,7 @@ int bv_output_media_write_trailer(BVMediaContext *s);
 
 int bv_output_media_close(BVMediaContext **fmt);
 
-int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+int bv_media_context_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 #ifdef __cplusplus
 }
 #endif

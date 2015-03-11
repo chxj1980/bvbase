@@ -135,20 +135,20 @@ static const BVOption options[] = {
 };
 
 static const BVClass disk_class = {
-    .class_name     = "disk device",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE,
+    .class_name         = "disk device",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_disk_dev_device = {
-    .name           = "disk_dev",
-    .type           = BV_DEVICE_TYPE_HRDSK,
-    .priv_data_size = sizeof(DiskDeviceContext),
-    .dev_open       = disk_device_open,
-    .dev_probe      = disk_device_probe,
-    .dev_close      = disk_device_close,
-    .dev_control    = disk_device_control,
-    .priv_class     = &disk_class,
+    .name               = "disk_dev",
+    .type               = BV_DEVICE_TYPE_HRDSK,
+    .priv_data_size     = sizeof(DiskDeviceContext),
+    .dev_open           = disk_device_open,
+    .dev_probe          = disk_device_probe,
+    .dev_close          = disk_device_close,
+    .dev_control        = disk_device_control,
+    .priv_class         = &disk_class,
 };

@@ -46,7 +46,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&opn, "user", "admin", 0);
     bv_dict_set(&opn, "passwd", "12345", 0);
     bv_dict_set(&opn, "token", "mainStream/Profile_1/PTZ/PTZToken/PTZNODETOKEN", 0);
-    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.149:80/onvif/device_service", &opn))) {
+    if ((ret = bv_device_open(&device_context, "onvif_ptz://192.168.6.149:80/onvif/device_service", NULL, &opn))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);

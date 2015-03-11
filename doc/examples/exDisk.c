@@ -47,7 +47,7 @@ int main(int argc, const char *argv[])
         return BVERROR(EINVAL);
     }
     
-    if ((ret = bv_device_open(&device_context, device, NULL, NULL))) {
+    if ((ret = bv_device_open(&device_context, NULL, device, NULL))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);
