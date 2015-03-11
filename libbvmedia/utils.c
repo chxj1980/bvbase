@@ -118,14 +118,14 @@ void bv_stream_free(BVMediaContext *s, BVStream *st)
     bv_freep(&s->streams[ --s->nb_streams ]);
 }
 
-int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+int bv_media_context_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    if (s->imedia && s->imedia->control_message) {
-        return s->imedia->control_message(s, type, pkt_in, pkt_out); 
+    if (s->imedia && s->imedia->media_control) {
+        return s->imedia->media_control(s, type, pkt_in, pkt_out); 
     }
 
-    if (s->omedia && s->omedia->control_message) {
-        return s->omedia->control_message(s, type, pkt_in, pkt_out);
+    if (s->omedia && s->omedia->media_control) {
+        return s->omedia->media_control(s, type, pkt_in, pkt_out);
     }
     return BVERROR(ENOSYS);
 }

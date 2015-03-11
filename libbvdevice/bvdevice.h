@@ -57,18 +57,6 @@ enum BVDeviceMessageType {
 
     //PTZ Message Type
     BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE,
-#if 0
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT,
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_IN,
-    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_OUT,
-#endif
     BV_DEV_MESSAGE_TYPE_PTZ_STOP,
     BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET,
     BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET,
@@ -76,7 +64,8 @@ enum BVDeviceMessageType {
 
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
     BV_DEV_MESSAGE_TYPE_SEARCH_FILE,
-
+    
+    BV_DEV_MESSAGE_TYPE_SEARCH_IPC,
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
@@ -142,7 +131,6 @@ typedef struct _BVDevice {
     int priv_data_size;
     int flags;
     struct _BVDevice *next;
-    int     (*dev_scan)( BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
     int     (*dev_open)( BVDeviceContext *h);
     int     (*dev_read)( BVDeviceContext *h, unsigned char *buf, size_t size);
     int     (*dev_write)(BVDeviceContext *h, const unsigned char *buf, size_t size);
@@ -169,8 +157,8 @@ void bv_device_context_free(BVDeviceContext *devctx);
  * @Synopsis        open a device
  *
  * @Param h         *h can be NULL if not the internal will malloc memory
- * @Param dev       device handle can be NULL ,But Not Support Now FIXME
  * @Param url       device url 
+ * @Param dev       device handle can be NULL 
  * @Param options   device private field
  *                  BVDictionary *options = NULL;
  *                  bv_dict_set(&options, "baud_rate", "51200", 0);
@@ -180,9 +168,7 @@ void bv_device_context_free(BVDeviceContext *devctx);
  *
  * @Returns         <0 fail ==0 success
  */
-int bv_device_open(BVDeviceContext **h, BVDevice *dev, const char *url, BVDictionary **options);
-
-int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
+int bv_device_open(BVDeviceContext **h, const char *url, BVDevice *dev, BVDictionary **options);
 
 int bv_device_read(BVDeviceContext *h, void *buf, size_t size);
 

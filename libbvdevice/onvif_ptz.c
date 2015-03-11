@@ -406,20 +406,20 @@ static const BVOption options[] = {
 };
 
 static const BVClass onvif_class = {
-    .class_name     = "onvif ptz device",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE,
+    .class_name         = "onvif ptz device",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_ptz_device = {
-    .name = "onvif_ptz",
-    .type = BV_DEVICE_TYPE_ONVIF_PTZ,
-    .priv_data_size = sizeof(OnvifPTZContext),
-    .dev_open = onvif_ptz_open,
-    .dev_probe = onvif_ptz_probe,
-    .dev_control = onvif_ptz_control,
-    .dev_close = onvif_ptz_close,
-    .priv_class = &onvif_class,
+    .name               = "onvif_ptz",
+    .type               = BV_DEVICE_TYPE_ONVIF_PTZ,
+    .priv_data_size     = sizeof(OnvifPTZContext),
+    .dev_open           = onvif_ptz_open,
+    .dev_probe          = onvif_ptz_probe,
+    .dev_control        = onvif_ptz_control,
+    .dev_close          = onvif_ptz_close,
+    .priv_class         = &onvif_class,
 };

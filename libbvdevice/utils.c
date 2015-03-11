@@ -104,7 +104,7 @@ static int init_device(BVDeviceContext *s, const char *url)
     return 0;
 }
 
-int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDictionary **options)
+int bv_device_open(BVDeviceContext ** h, const char *url, BVDevice *dev, BVDictionary **options)
 {
     BVDictionary *tmp = NULL;
     BVDeviceContext *s = *h;
@@ -167,13 +167,6 @@ fail:
     bv_device_context_free(s);
     *h = NULL;
     return ret;
-}
-
-int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret)
-{
-    if (!h->device || !h->device->dev_scan)
-        return BVERROR(ENOSYS);
-    return h->device->dev_scan(h, device, max_ret);
 }
 
 int bv_device_read(BVDeviceContext * h, void *buf, size_t size)

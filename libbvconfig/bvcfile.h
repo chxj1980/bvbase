@@ -93,8 +93,6 @@ typedef struct _BVConfigFile {
     int (*file_close)(BVConfigFileContext *s);
     int (*file_dump)(BVConfigFileContext *s, const char *filename);
     int (*decref)(BVConfigFileContext *s, BVConfigObject *obj);
-//    BVConfigObject *(*lookup)(BVConfigFileContext *s, const char *path);
-    BVConfigObject *(*lookup_from)(BVConfigFileContext *s, BVConfigObject *obj, const char *path);
     BVConfigObject *(*get_element)(BVConfigFileContext *s, BVConfigObject *parent, int index);
     BVConfigObject *(*get_member)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
     int (*get_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);

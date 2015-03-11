@@ -31,6 +31,7 @@ extern "C"{
 #include <libbvutil/bvutil.h>
 #include <libbvutil/opt.h>
 #include <libbvutil/dict.h>
+#include <libbvutil/packet.h>
 
 /**
  * FIXME
@@ -44,13 +45,17 @@ typedef struct _BVSystemVODev {
     int index;      //index in BVSystemContext
 } BVSystemVODev;
 
+enum BVSystemMessageType {
+    BV_SYS_MESSAGE_TYPE_NONE = -1,
+    BV_SYS_MESSAGE_TYPE_UNKNOW
+};
+
 typedef struct _BVSystemContext {
     const BVClass *bv_class;
     struct _BVSystem *system;
     BVSystemVIDev **videv;
     int nb_videv;
     void *priv_data;
-    size_t priv_data_size;
 } BVSystemContext;
 
 enum BVSystemType {
@@ -66,6 +71,7 @@ typedef struct _BVSystem {
     struct _BVSystem *next;
     int (*sys_init)(BVSystemContext *sysctx);
     int (*sys_deinit)(BVSystemContext *sysctx);
+    int (*sys_control)(BVSystemContext *sysctx, enum BVSystemMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
     int (*sys_vienable)(BVSystemContext *sysctx, int index);
     int (*sys_vidisable)(BVSystemContext *sysctx, int index);
     int (*sys_voenable)(BVSystemContext *sysctx, int index);
