@@ -42,7 +42,7 @@ static const BVClass bv_system_context_class = {
     .item_name      = system_to_name,
     .option         = system_options,
     .version        = LIBBVUTIL_VERSION_INT,
-    .category       =   BV_CLASS_CATEGORY_SYSTEM,
+    .category       = BV_CLASS_CATEGORY_SYSTEM,
 };
 
 static void bv_system_context_get_default(BVSystemContext *system)

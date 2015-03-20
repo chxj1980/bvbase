@@ -63,9 +63,13 @@ void bv_media_register_all(void)
     if (initialized)
         return ;
     initialized = 1;
+    REGISTER_INDEV(HISAVI, hisavi);
     REGISTER_INDEV(HISAVE, hisave);
     REGISTER_INDEV(ONVIFAVE, onvifave);
     REGISTER_MUXER(DAV, dav);
+    REGISTER_DEMUXER(DAV, dav);
+    REGISTER_OUTDEV(HISAVO, hisavo);
+    REGISTER_OUTDEV(HISAVD, hisavd);
 #if BV_CONFIG_ONVIFAVE_INDEV
     av_register_all();
     avformat_network_init();

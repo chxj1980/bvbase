@@ -188,6 +188,12 @@ BVConfigObject *bv_config_get_member(BVConfigFileContext *s, BVConfigObject *par
     bv_free(tmp);
     return obj;
 }
+int bv_config_get_elements(BVConfigFileContext *s, BVConfigObject *parent)
+{
+    if (!s->cfile->get_elements || (parent->type != BV_CONFIG_OBJTYPE_ARRAY))
+        return -1;
+    return s->cfile->get_elements(s, parent);
+}
 
 BVConfigObject *bv_config_file_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path)
 {

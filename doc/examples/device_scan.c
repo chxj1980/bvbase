@@ -39,17 +39,20 @@ int main(int argc, const char *argv[])
         bv_dict_free(&opn);
         return BVERROR(EIO);
     }
-    bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_SEARCH_IPC, NULL, &pkt_out);
-    device = pkt_out.data;
-    int i = 0;
-    for (i = 0; i < pkt_out.size; i++) {
-       bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-       bv_log(devctx, BV_LOG_INFO, "server service url %s\n", device[i].url);
-       bv_log(devctx, BV_LOG_INFO, "server type %d\n", device[i].type);
-       bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+    if (bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_SEARCH_IPC, NULL, &pkt_out) < 0 ) {
+        bv_log(devctx, BV_LOG_ERROR, "device control error\n");
+    } else {
+        device = pkt_out.data;
+        int i = 0;
+        for (i = 0; i < pkt_out.size; i++) {
+           bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+           bv_log(devctx, BV_LOG_INFO, "server service url %s\n", device[i].url);
+           bv_log(devctx, BV_LOG_INFO, "server type %d\n", device[i].type);
+           bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+        }
+        //NOTICE free data
+        bv_free(pkt_out.data);
     }
-    //NOTICE free data
-    bv_free(pkt_out.data);
     bv_dict_free(&opn);
     bv_device_close(&devctx);
     return 0;

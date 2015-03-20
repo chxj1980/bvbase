@@ -21,11 +21,38 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#line 25 "mux.c"
+
 #include "bvmedia.h"
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
 
-static const char *FILE_NAME = "mux.c";
+BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename,
+                                const char *mime_type)
+{
+    BVOutputMedia *fmt = NULL, *fmt_found;
+    int score_max, score;
+
+    /* Find the proper file type. */
+    fmt_found = NULL;
+    score_max = 0;
+    while ((fmt = bv_output_media_next(fmt))) {
+        score = 0;
+        if (fmt->name && short_name && bv_match_name(short_name, fmt->name))
+            score += 100;
+        if (fmt->mime_type && mime_type && !strcmp(fmt->mime_type, mime_type))
+            score += 10;
+        if (filename && fmt->extensions &&
+            bv_match_ext(filename, fmt->extensions)) {
+            score += 5;
+        }
+        if (score > score_max) {
+            score_max = score;
+            fmt_found = fmt;
+        }
+    }
+    return fmt_found;
+}
 
 int bv_output_media_open(BVMediaContext **fmt, const char *url, const char *format, BVOutputMedia *media, BVDictionary **options)
 {
@@ -35,7 +62,7 @@ int bv_output_media_open(BVMediaContext **fmt, const char *url, const char *form
     if (!s && !(s = bv_media_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 

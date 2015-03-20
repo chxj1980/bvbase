@@ -21,11 +21,11 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "media.c"
+
 #include "bvmedia.h"
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
-
-static const char *FILE_NAME = "media.c";
 
 BVInputMedia *bv_input_media_find(const char *short_name)
 {
@@ -34,33 +34,6 @@ BVInputMedia *bv_input_media_find(const char *short_name)
         if (bv_match_name(short_name, fmt->name))
             return fmt;
     return NULL;
-}
-
-BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename,
-                                const char *mime_type)
-{
-    BVOutputMedia *fmt = NULL, *fmt_found;
-    int score_max, score;
-
-    /* Find the proper file type. */
-    fmt_found = NULL;
-    score_max = 0;
-    while ((fmt = bv_output_media_next(fmt))) {
-        score = 0;
-        if (fmt->name && short_name && bv_match_name(short_name, fmt->name))
-            score += 100;
-        if (fmt->mime_type && mime_type && !strcmp(fmt->mime_type, mime_type))
-            score += 10;
-        if (filename && fmt->extensions &&
-            bv_match_ext(filename, fmt->extensions)) {
-            score += 5;
-        }
-        if (score > score_max) {
-            score_max = score;
-            fmt_found = fmt;
-        }
-    }
-    return fmt_found;
 }
 
 static int init_imedia(BVMediaContext *s, const char *url)
@@ -99,7 +72,7 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     if (!s && !(s = bv_media_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 
@@ -176,9 +149,14 @@ int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const ch
 
 int bv_input_media_read(BVMediaContext *s, BVPacket *pkt)
 {
+    int ret = 0;
     if (!s->imedia || !s->imedia->read_packet)
         return BVERROR(ENOSYS);
-    return s->imedia->read_packet(s, pkt);
+    ret = s->imedia->read_packet(s, pkt);
+    if (ret == BVERROR(EAGAIN)) {
+        ret = 0;
+    }
+    return ret;
 }
 
 int bv_input_media_close(BVMediaContext **fmt)

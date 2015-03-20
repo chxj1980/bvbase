@@ -370,21 +370,18 @@ static int onvif_mpeg_profile(enum tt__Mpeg4Profile profile)
 }
 static int save_video_source(BVVideoSource *video_source, struct tt__VideoSourceConfiguration *VideoSourceConfiguration)
 {
-    video_source->type = BV_CONFIG_TYPE_ONVIF;
     video_source->bounds = (BVIntRectange){VideoSourceConfiguration->Bounds->x, VideoSourceConfiguration->Bounds->y, VideoSourceConfiguration->Bounds->width, VideoSourceConfiguration->Bounds->height};
     return 0;
 }
 
 static int save_audio_source(BVAudioSource *audio_source, struct tt__AudioSourceConfiguration *AudioSourceConfiguration)
 {
-    audio_source->type = BV_CONFIG_TYPE_ONVIF;
     audio_source->channels = 1;
     return 0;
 }
 
 static int save_video_encoder(BVVideoEncoder *video_encoder, struct tt__VideoEncoderConfiguration *VideoEncoderConfiguration)
 {
-    video_encoder->type = BV_CONFIG_TYPE_ONVIF;
     video_encoder->codec_context.codec_type = BV_MEDIA_TYPE_VIDEO;
     video_encoder->codec_context.codec_id = onvif_video_to_bvcodeid(VideoEncoderConfiguration->Encoding);
     if (VideoEncoderConfiguration->Resolution) {
@@ -411,7 +408,6 @@ static int save_video_encoder(BVVideoEncoder *video_encoder, struct tt__VideoEnc
 
 static int save_audio_encoder(BVAudioEncoder *audio_encoder, struct tt__AudioEncoderConfiguration *AudioEncoderConfiguration)
 {
-    audio_encoder->type = BV_CONFIG_TYPE_ONVIF;
     audio_encoder->codec_context.bit_rate = AudioEncoderConfiguration->Bitrate;
     audio_encoder->codec_context.sample_rate = AudioEncoderConfiguration->SampleRate;
     audio_encoder->codec_context.codec_id = onvif_audio_to_bvcodeid(AudioEncoderConfiguration->Encoding);
@@ -511,7 +507,6 @@ static int onvif_get_ptz_node(BVConfigContext *s, BVPTZDevice *config)
 
 static int save_ptz_device(BVPTZDevice *ptz_device, struct tt__PTZConfiguration *PTZConfiguration)
 {
-    ptz_device->type = BV_CONFIG_TYPE_ONVIF;
     ptz_device->pan_range.min = PTZConfiguration->PanTiltLimits->Range->XRange->Min;
     ptz_device->pan_range.max = PTZConfiguration->PanTiltLimits->Range->XRange->Max;
     ptz_device->tilt_range.min = PTZConfiguration->PanTiltLimits->Range->YRange->Min;
@@ -996,7 +991,6 @@ static int onvif_get_audio_encoder_options(BVConfigContext *h, int channel, int 
         bv_log(h, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
         return BVERROR(EINVAL);
     }
-    config->type = BV_CONFIG_TYPE_ONVIF;
     config->nb_options = response.Options->__sizeOptions;
     if (config->nb_options == 0) {
         return 0;

@@ -21,6 +21,7 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#include <libbvprotocol/bvio.h>
 #include <libbvprotocol/bvurl.h>
 #include <libbvutil/bvutil.h>
 #include <libbvutil/log.h>
@@ -28,6 +29,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
 
 int main(int argc, const char *argv[])
 {
@@ -36,11 +39,13 @@ int main(int argc, const char *argv[])
     char filename[128] = { 0 };
     time_t start_time = time(NULL);
     char buf[1024] ;
+    int size;
+    bv_log_set_level(BV_LOG_DEBUG);
     bv_protocol_register_all();
+#if 0
     bv_dict_set_int(&opn, "file_type", 1, 0);
     bv_dict_set_int(&opn, "storage_type", 2, 0);
     bv_dict_set_int(&opn, "channel_num", 2, 0);
-    bv_log_set_level(BV_LOG_DEBUG);
     sprintf(filename, "%s", "bvfs://00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
     if (bv_url_open(&s, filename, BV_IO_FLAG_WRITE, NULL, &opn)) {
@@ -54,9 +59,33 @@ int main(int argc, const char *argv[])
             goto closed;
         }
         usleep(100);
-    } 
+    }
+#endif 
+    sprintf(filename, "%s", "bvfs:///02_00/pic/00_20150317_131125.jpg");
+    if (bv_io_open(&s, filename, BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
+        bv_log(NULL, BV_LOG_ERROR, "open files error\n");
+        return -1;
+    }
+    int fd = open("a.jpg", O_RDWR|O_CREAT, 0755);
+    if (fd < 0) {
+        bv_log(s, BV_LOG_ERROR, "open file error\n");
+    }
+
+    while (!bv_io_feof(s)) {
+        if ((size = bv_io_read(s, buf, 1024)) <= 0) {
+            break;
+        } else {
+            bv_log(s, BV_LOG_ERROR, "read size %d\n", size);
+            if (fd >= 0) {
+                write(fd, buf, size); 
+            }
+        }
+    }
+    if (fd >= 0) {
+        close(fd);
+    }
 closed:
-    bv_dict_free(&opn);
-    bv_url_close(s);
+    //bv_dict_free(&opn);
+    bv_io_close(s);
     return 0;
 }

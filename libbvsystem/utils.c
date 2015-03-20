@@ -21,6 +21,8 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "utils.c"
+
 #include <libbvutil/bvstring.h>
 #include <libbvutil/atomic.h>
 
@@ -28,8 +30,6 @@
 
 static BVSystem *first_sys = NULL;
 static BVSystem **last_sys = &first_sys;
-
-static const char FILE_NAME[] = "utils.c";
 
 int bv_system_register(BVSystem * sys)
 {

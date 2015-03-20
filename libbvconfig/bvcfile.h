@@ -95,6 +95,7 @@ typedef struct _BVConfigFile {
     int (*decref)(BVConfigFileContext *s, BVConfigObject *obj);
     BVConfigObject *(*get_element)(BVConfigFileContext *s, BVConfigObject *parent, int index);
     BVConfigObject *(*get_member)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
+    int (*get_elements)(BVConfigFileContext *s, BVConfigObject *parent);
     int (*get_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
     int (*set_value)(BVConfigFileContext *s, BVConfigObject *obj, void *value);
     int (*remove)(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
@@ -126,6 +127,8 @@ BVConfigObject *bv_config_file_lookup_from(BVConfigFileContext *s, BVConfigObjec
 BVConfigObject *bv_config_get_element(BVConfigFileContext *s, BVConfigObject *parent, int index);
 
 BVConfigObject *bv_config_get_member(BVConfigFileContext *s, BVConfigObject *parent, const char *key);
+
+int bv_config_get_elements(BVConfigFileContext *s, BVConfigObject *parent);
 
 int bv_config_object_decref(BVConfigFileContext *s, BVConfigObject *obj);
 

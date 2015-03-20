@@ -189,6 +189,10 @@ static int onvif_search_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, B
     }
 
     ret = onvif_device_scan(h, device, &max_ret);
+    if (ret < 0) {
+        bv_free(device);
+        device = NULL;
+    }
     pkt_out->data = (void *)device;
     pkt_out->size = max_ret;
     return ret;
@@ -209,7 +213,6 @@ static int onvif_device_control(BVDeviceContext *h, enum BVDeviceMessageType typ
     }
     bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
     return BVERROR(ENOSYS);
-
 }
 
 static int onvif_device_close(BVDeviceContext *h)

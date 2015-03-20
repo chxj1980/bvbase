@@ -733,6 +733,42 @@ void bv_make_absolute_url(char *buf, int size, const char *base,
     bv_strlcat(buf, rel, size);
 }
 
+char *bv_touppers(const char *str)
+{
+    int i = 0;
+    int len = 0;
+    char *p = NULL;
+    if (!str)
+        return NULL;
+    len = strlen(str);
+    p = bv_malloc(len + 1);
+    if (!p)
+        return NULL;
+    for (i = 0; i < len; i++) {
+        p[i] = bv_toupper(str[i]);
+    }
+    p[i] = '\0';
+    return p;
+}
+
+char *bv_tolowers(const char *str)
+{
+    int i = 0;
+    int len = 0;
+    char *p = NULL;
+    if (!str)
+        return NULL;
+    len = strlen(str);
+    p = bv_malloc(len + 1);
+    if (!p)
+        return NULL;
+    for (i = 0; i < len; i++) {
+        p[i] = bv_tolower(str[i]);
+    }
+    p[i] = '\0';
+    return p;
+}
+
 #ifdef TEST
 
 int main(void)

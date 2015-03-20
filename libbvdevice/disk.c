@@ -91,7 +91,8 @@ static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, B
         temp_num = 0;
     }
     for (i = 0; i < temp_num; i++) {
-        bv_strlcpy(file_info[i].name, bvfile_info[i].file_name, sizeof(file_info[i].name));
+        //bv_strlcpy(file_info[i].name, bvfile_info[i].file_name, sizeof(file_info[i].name));
+        bv_sprintf(file_info[i].name, sizeof(file_info[i].name), "/%02d_%02d/%s", bvfile_info[i].disk_id, 0, bvfile_info[i].file_name);
         file_info[i].start_time = bvfile_info[i].start_time;
         file_info[i].end_time = bvfile_info[i].end_time;
         file_info[i].channel_id = bvfile_info[i].channel_id;

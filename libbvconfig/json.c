@@ -132,18 +132,6 @@ static int jansson_decref(BVConfigFileContext *s, BVConfigObject *obj)
     return 0;
 }
 
-#if 0
-static BVConfigObject *jansson_lookup_from(BVConfigFileContext *s, BVConfigObject *obj, const char *path)
-{
-    return NULL;
-}
-
-static BVConfigObject *jansson_lookup(BVConfigFileContext *s, const char *path)
-{
-    JsonConfigFileContext *json = s->priv_data;
-    return NULL;
-}
-#endif
 static BVConfigObject *jansson_get_element(BVConfigFileContext *s, BVConfigObject *parent, int index)
 {
     BVConfigObject *obj = NULL;
@@ -182,6 +170,14 @@ static BVConfigObject *jansson_get_member(BVConfigFileContext *s, BVConfigObject
     obj->parent = parent;
     obj->name = bv_strdup(key);
     return obj;
+}
+
+static int jansson_get_elements(BVConfigFileContext *s, BVConfigObject *parent)
+{
+    json_t *array = parent->priv_data;
+    if (!array)
+        return -1;
+    return json_array_size(array);
 }
 
 /**
@@ -237,25 +233,26 @@ static const BVOption options[] = {
 };
 
 static const BVClass jansson_class = {
-    .class_name     = "jsnsson config",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_CONFIG,
+    .class_name         = "jsnsson config",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_CONFIG,
 };
 
 BVConfigFile bv_json_cfile = {
-    .name           = "json",
-    .extensions     = "json",
-    .type           = BV_CONFIG_FILE_TYPE_JSON,
-    .priv_data_size = sizeof(JsonConfigFileContext),
-    .priv_class     = &jansson_class,
-    .file_open      = jansson_file_open,
-    .file_close     = jansson_file_close,
-    .file_dump      = jansson_file_dump,
-    .decref         = jansson_decref,
-    .get_element    = jansson_get_element,
-    .get_member     = jansson_get_member,
-    .get_value      = jansson_get_value,
-    .set_value      = jansson_set_value,
+    .name               = "json",
+    .extensions         = "json",
+    .type               = BV_CONFIG_FILE_TYPE_JSON,
+    .priv_data_size     = sizeof(JsonConfigFileContext),
+    .priv_class         = &jansson_class,
+    .file_open          = jansson_file_open,
+    .file_close         = jansson_file_close,
+    .file_dump          = jansson_file_dump,
+    .decref             = jansson_decref,
+    .get_element        = jansson_get_element,
+    .get_member         = jansson_get_member,
+    .get_elements       = jansson_get_elements,
+    .get_value          = jansson_get_value,
+    .set_value          = jansson_set_value,
 };
