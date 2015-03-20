@@ -65,6 +65,13 @@ typedef struct _BVConfig {
     int (*config_open)(BVConfigContext *s);
     int (*config_close)(BVConfigContext *s);
     int (*get_device_info)(BVConfigContext *s, BVDeviceInfo *devinfo);
+    int (*get_video_source_device)(BVConfigContext *s, int index, BVVideoSourceDevice *config);
+    int (*get_audio_source_device)(BVConfigContext *s, int index, BVAudioSourceDevice *config);
+    int (*get_video_output_device)(BVConfigContext *s, int index, BVVideoOutputDevice *config);
+    int (*get_audio_output_device)(BVConfigContext *s, int index, BVAudioOutputDevice *config);
+    int (*get_video_source)(BVConfigContext *s, int index, BVVideoSource *config);
+    int (*get_audio_source)(BVConfigContext *s, int index, BVAudioSource *config);
+    int (*get_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*get_profiles)(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
     int (*get_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
     int (*set_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
@@ -94,6 +101,20 @@ int bv_config_close(BVConfigContext **h);
 //////////////////////////////////////////////////////////////////////
 
 int bv_config_get_device_info(BVConfigContext *s, BVDeviceInfo *devinfo);
+
+int bv_config_get_video_source_device(BVConfigContext *s, int index, BVVideoSourceDevice *config);
+
+int bv_config_get_audio_source_device(BVConfigContext *s, int index, BVAudioSourceDevice *config);
+
+int bv_config_get_video_output_device(BVConfigContext *s, int index, BVVideoOutputDevice *config);
+
+int bv_config_get_audio_output_device(BVConfigContext *s, int index, BVAudioOutputDevice *config);
+
+int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *config);
+
+int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config);
+
+int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
 
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
 

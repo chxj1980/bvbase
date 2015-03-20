@@ -69,24 +69,6 @@ enum BVDeviceMessageType {
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
-enum BVMobileDeviceType {
-    BV_MOBILE_DEVICE_TYPE_NONE = 0,
-    BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
-    BV_MOBILE_DEVICE_TYPE_NVT = (1 << 1),
-    BV_MOBILE_DEVICE_TYPE_NVA = (1 << 2),
-    BV_MOBILE_DEVICE_TYPE_NVD = (1 << 3),
-
-    BV_MOBILE_DEVICE_TYPE_UNKNOWN,
-};
-
-typedef struct _BVMobileDevice {
-    enum BVMobileDeviceType type;
-    char url[1024];
-    char user[64];
-    char pswd[64];
-    int  timeout;
-} BVMobileDevice;
-
 typedef struct _BVDiskDevice {
     int index;
     int type;

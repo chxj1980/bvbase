@@ -202,6 +202,37 @@ typedef struct _BVAudioSource {
     void *any_attr;
 } BVAudioSource;
 
+enum BVMobileDeviceType {
+    BV_MOBILE_DEVICE_TYPE_NONE = 0,
+    BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
+    BV_MOBILE_DEVICE_TYPE_NVT = (1 << 1),
+    BV_MOBILE_DEVICE_TYPE_NVA = (1 << 2),
+    BV_MOBILE_DEVICE_TYPE_NVD = (1 << 3),
+
+    BV_MOBILE_DEVICE_TYPE_UNKNOWN,
+};
+
+typedef struct _BVMobileDevice {
+    enum BVMobileDeviceType type;
+    char url[1024];
+    char user[64];
+    char pswd[64];
+    int  timeout;
+} BVMobileDevice;
+
+enum BVMediaDeviceType {
+    BV_MEDIA_DEVICE_TYPE_NONE,
+    BV_MEDIA_DEVICE_TYPE_CVBS,
+    BV_MEDIA_DEVICE_TYPE_IPC,
+    BV_MEDIA_DEVICE_TYPE_UNKNOW,
+};
+
+typedef struct _BVMediaDevice {
+    char name[BV_MAX_NAME_LEN];
+    enum BVMediaDeviceType type; 
+    void *devinfo;
+} BVMediaDevice;
+
 typedef struct _BVVideoOption {
     enum BVCodecID codec_id;
     int nb_resolutions;
