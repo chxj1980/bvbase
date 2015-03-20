@@ -75,7 +75,6 @@ static void dump_video_encoder(BVVideoEncoder *encoder)
 {
     bv_log(NULL, BV_LOG_INFO, "dump video encoder start >>>>>>>>>>>>>>>>\n");
     bv_log(NULL, BV_LOG_INFO, "video token %s\n", encoder->token);
-    bv_log(NULL, BV_LOG_INFO, "video type %d\n", encoder->type);
     bv_log(NULL, BV_LOG_INFO, "video id %d\n", encoder->codec_context.codec_id);
     bv_log(NULL, BV_LOG_INFO, "video size %dx%d\n", encoder->codec_context.width, encoder->codec_context.height);
     bv_log(NULL, BV_LOG_INFO, "video framerate %d\n", encoder->codec_context.time_base.den / encoder->codec_context.time_base.num);
@@ -86,7 +85,6 @@ static void dump_audio_encoder(BVAudioEncoder *encoder)
 {
     bv_log(NULL, BV_LOG_INFO, "dump audio encoder start >>>>>>>>>>>>>>>>\n");
     bv_log(NULL, BV_LOG_INFO, "audio token %s\n", encoder->token);
-    bv_log(NULL, BV_LOG_INFO, "audio type %d\n", encoder->type);
     bv_log(NULL, BV_LOG_INFO, "audio id %d\n", encoder->codec_context.codec_id);
     bv_log(NULL, BV_LOG_INFO, "sample_rate %d\n", encoder->codec_context.sample_rate);
     bv_log(NULL, BV_LOG_INFO, "bitrate %d\n", encoder->codec_context.bit_rate);
@@ -188,7 +186,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&options, "passwd", "12345", 0);
     bv_dict_set(&options, "timeout", "5", 0);
     memset(&devinfo, 0, sizeof(devinfo));
-    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.150:80/onvif/device_service", NULL, &options)) < 0) {
+    if ((ret = bv_config_open(&config_context, "onvif_cfg://192.168.6.149:80/onvif/device_service", NULL, &options)) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error");
         bv_dict_free(&options);
         return BVERROR(EINVAL);

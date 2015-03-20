@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: options_table.h
+    > File Name: hisvmd.c
     > Author: albertfang
     > Mail: fang.qi@besovideo.com 
-    > Created Time: 2014年12月16日 星期二 11时00分38秒
+    > Created Time: 2015年03月13日 星期五 16时28分11秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -18,21 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) albert@BesoVideo, 2014
+ * Copyright (C) albert@BesoVideo, 2015
  */
 
-#ifndef BV_OPTIONS_TABLE_H
-#define BV_OPTIONS_TABLE_H
+#line 25 "hisvmd.c"
 
-#include <limits.h>
+/**
+ *  video move detect 视频移动侦测
+ *
+ */
 
-#include "bvsystem.h"
-
-#define OFFSET(X) offsetof(BVSystemContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
-
-static const BVOption system_options[] = {
-    { NULL }
+BVInputMedia bv_hisvmd_demuxer = {
+    .name               = "hisvmd",
+#if 0
+    .priv_data_size     = sizeof(HisAVEContext),
+    .read_probe         = his_probe,
+    .read_header        = his_read_header,
+    .read_packet        = his_read_packet,
+    .read_close         = his_read_close,
+    .media_control      = his_media_control,
+    .flags              = BV_MEDIA_FLAGS_NOFILE,
+    .priv_class         = &his_class,
+#endif
 };
-
-#endif /* end of include guard: BV_OPTIONS_TABLE_H */

@@ -271,6 +271,16 @@ static inline bv_const int bv_tolower(int c)
 }
 
 /**
+ * Remember to bv_free the result
+ */
+char *bv_touppers(const char *str);
+
+/**
+ * Remember to bv_free the result
+ */
+char *bv_tolowers(const char *str);
+
+/**
  * Locale-independent conversion of ASCII isxdigit.
  */
 bv_const int bv_isxdigit(int c);

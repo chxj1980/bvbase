@@ -21,12 +21,12 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "utils.c"
+
 #include <libbvutil/bvstring.h>
 #include <libbvutil/atomic.h>
 
 #include "bvdevice.h"
-
-static const char FILE_NAME[] = "utils.c";
 
 static BVDevice *first_dev = NULL;
 static BVDevice **last_dev = &first_dev;
@@ -112,7 +112,7 @@ int bv_device_open(BVDeviceContext ** h, const char *url, BVDevice *dev, BVDicti
     if (!s && !(s = bv_device_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 
@@ -135,7 +135,8 @@ int bv_device_open(BVDeviceContext ** h, const char *url, BVDevice *dev, BVDicti
     else
         ret = init_device(s, url);
     if (ret < 0) {
-        return BVERROR(ENOSYS);
+        ret = BVERROR(ENOSYS);
+        goto fail;
     }
     if (s->device->priv_data_size > 0) {
         s->priv_data = bv_mallocz(s->device->priv_data_size);

@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: options_table.h
+    > File Name: hisavl.c
     > Author: albertfang
     > Mail: fang.qi@besovideo.com 
-    > Created Time: 2014年12月16日 星期二 11时00分38秒
+    > Created Time: 2015年03月16日 星期一 09时18分41秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -18,21 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) albert@BesoVideo, 2014
+ * Copyright (C) albert@BesoVideo, 2015
  */
 
-#ifndef BV_OPTIONS_TABLE_H
-#define BV_OPTIONS_TABLE_H
+#line 25 "hisavl.c"
 
-#include <limits.h>
+/**
+ *  His3515 Audio Video Live
+ */
 
-#include "bvsystem.h"
 
-#define OFFSET(X) offsetof(BVSystemContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
-
-static const BVOption system_options[] = {
-    { NULL }
-};
-
-#endif /* end of include guard: BV_OPTIONS_TABLE_H */

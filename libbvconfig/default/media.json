@@ -1,160 +1,423 @@
 {
-    "certifications":[
-        [
-            {
-                "server:":"http://192.168.6.149:8089",
-                "user":"admin",
-                "passwd":"",
-                "data":"xxsfksdklfkls;d;dks;ddf",
-                "type":"md5"
-            },
-            {
-                "user":"default",
-                "pswd":"123456"
-            }
-        ]
-    ],
+ 	"audio_source_devices":[
+		{
+			"token":"0",
+			"channels":16,
+			"sample_format":16,
+			"sample_rate":8000,
+			"work_mode":"I2S_SLAVE"
+		},
+		{
+			"token":"1",
+			"channels":2,
+			"sample_format":16,
+			"sample_rate":8000,
+			"work_mode":"I2S_SLAVE"
+		}
+	],
+	"video_source_devices":[
+		{
+			"token":"0",
+			"interface":"BT656",
+			"work_mode":"4D1"
+		}
+	],
+	"audio_output_devices":[
+		{
+			"token":"0",
+			"channels":2,
+			"sample_format":16,
+			"sample_rate":8000,
+			"work_mode":"I2S_SLAVE",
+		}
+	],
+	"video_output_devices":[
+		{
+			"token":"2",
+			"interface":"CVBS",
+			"work_mode":"PAL",
+			"display":{"left":0, "top":0, "width":704, "height":576}
+		}	
+	]
     "imaging_setting":[
-        [
-            {
-                "type":"onvif",
-                "vision_control":[
-                    {
-                        "comment": "day",
-                        "luminance":128,
-                        "contrast":128,
-                        "hue":128,
-                        "satuature":128
-                    },
-                    {
-                        "comment": "night",
-                        "luminance":128,
-                        "contrast":128,
-                        "hue":128,
-                        "satuature":128
-                    }
-                ],
-                "exposure":{
-                    "mode":"auto",
-                    "gain":50,
-                    "time":40000
+        {
+            "vision_control":[
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128,
+					"sharpness":128
+                },
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128
+					"sharpness":128
                 }
+            ],
+            "exposure":{
+                "mode":"auto",
+                "gain":50,
+                "time":40000
             }
-        ]
+        },
+		{
+	        "vision_control":[
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128,
+					"sharpness":128
+                },
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128
+					"sharpness":128
+                }
+            ],
+            "exposure":{
+                "mode":"auto",
+                "gain":50,
+                "time":40000
+            }
+
+		},
+		{
+		    "vision_control":[
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128,
+					"sharpness":128
+                },
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128
+					"sharpness":128
+                }
+            ],
+            "exposure":{
+                "mode":"auto",
+                "gain":50,
+                "time":40000
+            }
+
+		},
+		{
+		    "vision_control":[
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128,
+					"sharpness":128
+                },
+                {
+                    "luminance":128,
+                    "contrast":128,
+                    "hue":128,
+                    "satuature":128
+					"sharpness":128
+                }
+            ],
+            "exposure":{
+                "mode":"auto",
+                "gain":50,
+                "time":40000
+            }
+		}
     ],
     "video_sources":[
-        [
-            {
-                "name":"VideoS_0001/0001",
-                "url":"onvifvi://onvif/media_services",
-                "type":0,
-                "framerate":25,
-                "day_to_nigth":"6:00",
-                "night_to_day":"18:00",
-                "capture_rect":{"left":0, "top":0, "width":1280, "height":720 }
-            }
-        ],
-        [
-            {
-                "name":"VideoS_0001/0001",
-                "url":"onvifvi://onvif/media_services",
-                "type":0,
-                "framerate":25,
-                "day_to_nigth":"6:00",
-                "night_to_day":"18:00",
-                "capture_rect":{"left":0, "top":0, "width":1280, "height":720 }
-            }
-        ]
-        [
-            {
-                "name":"VideoS_0001/0001",
-                "url":"onvifvi://onvif/media_services",
-                "type":0,
-                "framerate":25,
-                "day_to_nigth":"6:00",
-                "night_to_day":"18:00",
-                "capture_rect":{"left":0, "top":0, "width":1280, "height":720 }
-            }
-        ],
-        [
-            {
-                "name":"VideoS_0000/0000",
-                "url":"onvifvi://onvif/media_services",
-                "type":0,
-                "framerate":25,
-                "day_to_nigth":"6:00",
-                "night_to_day":"18:00",
-                "capture_rect":{"left":0, "top":0, "width":1280, "height":720 }
-            }
-        ]
+        {
+            "token":"0/0",
+            "framerate":25,
+            "day_to_nigth":"6:00",
+            "night_to_day":"18:00",
+            "capture_rect":{"left":0, "top":0, "width":704, "height":288}
+        },
+        {
+            "token":"0/1",
+            "framerate":25,
+            "day_to_nigth":"6:00",
+            "night_to_day":"18:00",
+            "capture_rect":{"left":0, "top":0, "width":704, "height":288 }
+        },
+        {
+            "token":"0/1",
+            "framerate":25,
+            "day_to_nigth":"6:00",
+            "night_to_day":"18:00",
+            "capture_rect":{"left":0, "top":0, "width":704, "height":288}
+        },
+        {
+            "token":"0/4",
+            "framerate":25,
+            "day_to_nigth":"6:00",
+            "night_to_day":"18:00",
+            "capture_rect":{"left":0, "top":0, "width":704, "height":288 }
+        }
     ],
     "audio_sources":[
-        [
-            {
-                "name":"AudioS_0001/0001",
-                "url":"onvifai://onvif/media_services",
-                "certifications":"00/00",
-                "channels":1
-            }
-        ],
-        [
-            {
-                "name":"AudioS_0001/0001",
-                "url":"onvifai://onvif/media_services",
-                "certifications":"00/00",
-                "channels":1
-            }
-        ],
-        [
-            {
-                "name":"AudioS_0001/0001",
-                "url":"onvifai://onvif/media_services",
-                "certifications":"00/00",
-                "channels":1
-            }
-        ],
-        [
-            {
-                "name":"AudioS_0001/0001",
-                "url":"onvifai://onvif/media_services",
-                "certifications":"00/00",
-                "channels":1
-            }
-        ]
+        {
+			"token":"0/0",
+            "channels":1,
+			"input_type":"MIC"
+        },
+        {
+			"token":"0/1",
+            "channels":1,
+			"input_type":"MIC"
+        },
+        {
+			"token":"0/2",
+            "channels":1,
+			"input_type":"MIC"
+        },
+        {
+			"token":"0/3",
+            "channels":1,
+			"input_type":"MIC"
+        },
+		{
+			"token":"1/0",
+            "channels":1,
+			"input_type":"LINE_IN"
+		}
     ],
+	"video_output":[
+		{
+			"token":"2/0",
+			"display":{"left":0, "top":0, "width":352, "height":288}
+		},
+		{
+			"token":"2/1",
+			"display":{"left":352, "top":0, "width":352, "height":288}
+		},
+		{
+			"token":"2/2",
+			"display":{"left":0, "top":288, "width":352, "height":288}
+		},
+		{
+			"token":"2/3",
+			"display":{"left":352, "top":288, "width":352, "height":288}
+		}
+	],
+	"audio_output":[
+		{
+			"token":"0/0",
+			"volume":80
+		},
+		{
+			"token":"0/1",
+			"volume":80
+		},
+		{
+			"token":"0/2",
+			"volume":80
+		},
+		{
+			"token":"0/3",
+			"volume":80
+		},
+		{
+			"token":"0/4",
+			"volume":80
+		}
+	],
     "video_encoder_options":[
         [
             {
-                "name":"VideoEO_0000/0000",
-                "comment":"Storage",
-                "type":"onvif",
+				"token":"0/0/0",
+                "quality":"[0..10]",
                 "options":[
                     {
-                        "codec_id":"H264",
-                        "quality":"[0..10]",
+                        "encoding":"H264",
                         "nb_resolutions":2,
-                        "resolutions":"[705x576 1280x960]"
-                    },
-                    {
-                        "codec_id":"JPEG",
-                        "quality":"[0..10]"
-                    } 
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+                    }
                 ]
             },
             {
-                "name":"VideoEO_0001/0000",
-                "comment":"Transforms",
-                "type":"locale"
-            }
-        ]  
+				"token":"0/0/6",
+                "quality":"[0..10]",
+				"options":[
+					{
+						"encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[312..1024]"
+					}
+				]
+            },
+			{
+				"token":"0/0/24",
+                "quality":"[0..10]",
+				"options":[
+			        {
+                        "encoding":"JPEG",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[1..10]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+					}
+				]
+			}
+        ],
+        [
+            {
+				"token":"0/1/1",
+                "quality":"[0..10]",
+                "options":[
+                    {
+                        "encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+                    }
+                ]
+            },
+            {
+				"token":"0/1/8",
+                "quality":"[0..10]",
+				"options":[
+					{
+						"encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[312..1024]"
+					}
+				]
+            },
+			{
+				"token":"0/1/25",
+                "quality":"[0..10]",
+				"options":[
+			        {
+                        "encoding":"JPEG",
+						"nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[1..10]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+					}
+				]
+			}
+        ],
+        [
+            {
+				"token":"0/2/2",
+                "quality":"[0..10]",
+                "options":[
+                    {
+                        "encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+                    }
+                ]
+            },
+            {
+				"token":"0/2/10",
+                "quality":"[0..10]",
+				"options":[
+					{
+						"encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[312..1024]"
+					}
+				]
+            },
+			{
+				"token":"0/0/26",
+                "quality":"[0..10]",
+				"options":[
+			        {
+                        "encoding":"JPEG",
+						"nb_resolutions":2,
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[1..10]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+					}
+				]
+			}
+        ],
+        [
+            {
+				"token":"0/3/3",
+                "quality":"[0..10]",
+                "options":[
+                    {
+                        "encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+                    }
+                ]
+            },
+            {
+				"token":"0/3/12",
+				"quality":"[0..10]",
+				"options":[
+					{
+						"encoding":"H264",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[4..30]",
+						"gop":"[30..120]",
+						"bitrate":"[312..1024]"
+					}
+				]
+            },
+			{
+				"token":"0/3/26",
+                "quality":"[0..10]",
+				"options":[
+			        {
+                        "encoding":"JPEG",
+                        "nb_resolutions":2,
+                        "resolutions":"(705x576 1280x960)",
+						"framerate":"[1..10]",
+						"gop":"[30..120]",
+						"bitrate":"[512..1024]"
+					}
+				]
+			}
+        ]
     ],
-    "Video_encoders":[
+    "video_encoders":[
         [
             {
-                "name":"VideoE_0000/0000",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/0/0",
                 "encoding":"H264",
-                "resolution":"720HD",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -163,10 +426,11 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0001/0001",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/0/6",
                 "encoding":"H264",
                 "resolution":"D1",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -175,9 +439,51 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0002/0002",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/0/24",
                 "encoding":"JPEG",
+                "resolution":"D1",
+				"width":704,
+				"height":576,
+                "quality":5,
+                "rate_control":"VBR",
+                "gop":100,
+                "profile_level":"baseline",
+                "frame_rate":25,
+                "bitrate":2048
+            }
+        ],
+        [
+            {
+				"token":"0/1/1",
+                "encoding":"H264",
+                "resolution":"720HD",
+				"width":704,
+				"height":576,
+                "quality":5,
+                "rate_control":"VBR",
+                "gop":100,
+                "profile_level":"baseline",
+                "frame_rate":25,
+                "bitrate":2048
+            },
+            {
+				"token":"0/1/8",
+                "encoding":"H264",
+                "resolution":"D1",
+				"width":704,
+				"height":576,
+                "quality":5,
+                "rate_control":"VBR",
+                "gop":100,
+                "profile_level":"baseline",
+                "frame_rate":25,
+                "bitrate":2048
+            },
+            {
+				"token":"0/1/25",
+                "encoding":"JPEG",
+				"width":704,
+				"height":576,
                 "resolution":"D1",
                 "quality":5,
                 "rate_control":"VBR",
@@ -189,10 +495,12 @@
         ],
         [
             {
-                "name":"VideoE_0000/0000",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/2/2",
                 "encoding":"H264",
                 "resolution":"720HD",
+
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -201,10 +509,11 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0001/0001",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/2/10",
                 "encoding":"H264",
                 "resolution":"D1",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -213,10 +522,10 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0002/0002",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/2/26",
                 "encoding":"JPEG",
-                "resolution":"D1",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -227,10 +536,10 @@
         ],
         [
             {
-                "name":"VideoE_0000/0000",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/3/3",
                 "encoding":"H264",
-                "resolution":"720HD",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -239,10 +548,10 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0001/0001",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/3/12",
                 "encoding":"H264",
-                "resolution":"D1",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -251,48 +560,10 @@
                 "bitrate":2048
             },
             {
-                "name":"VideoE_0002/0002",
-                "url":"onvifve://onvif/media_services",
+				"token":"0/3/27",
                 "encoding":"JPEG",
-                "resolution":"D1",
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            }
-        ],
-        [
-            {
-                "name":"VideoE_0000/0000",
-                "url":"onvifve://onvif/media_services",
-                "encoding":"H264",
-                "resolution":"720HD",
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-                "name":"VideoE_0001/0001",
-                "url":"onvifve://onvif/media_services",
-                "encoding":"H264",
-                "resolution":"D1",
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-                "name":"VideoE_0002/0002",
-                "url":"onvifve://onvif/media_services",
-                "encoding":"JPEG",
-                "resolution":"D1",
+				"width":704,
+				"height":576,
                 "quality":5,
                 "rate_control":"VBR",
                 "gop":100,
@@ -302,11 +573,133 @@
             }
         ]
     ],
+	"audio_encoder_options":[
+		[
+			{
+				"token":"0/0/0",
+				"options":[
+					{
+						"encoding":"G711A",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			},
+			{
+				"token":"0/0/6",
+				"options":[
+					{
+						"encoding":"G726",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			}
+		],
+		[
+			{
+				"token":"0/1/1",
+				"options":[
+					{
+						"encoding":"G711A",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			},
+			{
+				"token":"0/1/8",
+				"options":[
+					{
+						"encoding":"G726",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			}
+		],
+		[
+			{
+				"token":"0/2/2",
+				"options":[
+					{
+						"encoding":"G711A",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			},
+			{
+				"token":"0/2/10",
+				"options":[
+					{
+						"encoding":"G726",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			}
+		],
+		[
+			{
+				"token":"0/3/3",
+				"options":[
+					{
+						"encoding":"G711A",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			},
+			{
+				"token":"0/3/12",
+				"options":[
+					{
+						"encoding":"G726",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			}
+		],
+		[
+			{
+				"token":"1/0/4",
+				"options":[
+					{
+						"encoding":"G711A",
+						"bitrate":"(16000 32000)",
+						"sample_rate":"(8000)"
+					},
+				]
+			},
+		],
+
+	],
     "audio_encoders":[
         [
             {
-                "name":"AudioE_0000/0000",
-                "url":"onvifae://onvif/media_services",
+				"token":"0/0/0",
+                "encoding":"G711A",
+                "bitrate":32000,
+                "sample":8000
+            },
+            {
+				"token":"0/0/6",
+                "encoding":"G711A",
+                "bitrate":32000,
+                "sample":8000
+            },
+         ],
+        [
+            {
+				"token":"0/1/1",
+                "encoding":"G711A",
+                "bitrate":32000,
+                "sample":8000
+            },
+            {
+				"token":"0/1/8",
                 "encoding":"G711A",
                 "bitrate":32000,
                 "sample":8000
@@ -314,8 +707,13 @@
         ],
         [
             {
-                "name":"AudioE_0001/0001",
-                "url":"onvifae://onvif/media_services",
+				"token":"0/2/2"
+                "encoding":"G711A",
+                "bitrate":32000,
+                "sample":8000
+            },
+            {
+				"token":"0/2/10"
                 "encoding":"G711A",
                 "bitrate":32000,
                 "sample":8000
@@ -323,23 +721,60 @@
         ],
         [
             {
-                "name":"AudioE_0002/0002",
-                "url":"onvifae://onvif/media_services",
+				"token":"0/3/3"
                 "encoding":"G711A",
                 "bitrate":32000,
                 "sample":8000
-            }
+            },
+			{
+			
+				"token":"0/3/12"
+                "encoding":"G711A",
+                "bitrate":32000,
+                "sample":8000
+			}
         ],
-        [
-            {
-                "name":"AudioE_0003/0003",
-                "url":"onvifae://onvif/media_services",
+		[
+			{
+				"token":"1/0/4"
                 "encoding":"G711A",
                 "bitrate":32000,
                 "sample":8000
-            }
-        ]
+			}
+		]
     ],
+	"video_decoders":[
+		{
+			"token":"2/0/0",
+		},
+		{
+			"token":"2/1/1",
+		},
+		{
+			"token":"2/2/2",
+		},
+		{
+			"token":"2/3/3",
+		}
+	],
+	"audio_decoders":[
+		{
+			"token":"0/0/0",
+		},
+		{
+			"token":"0/1/1",
+		},
+		{
+			"token":"0/2/2",
+		},
+		{
+			"token":"0/3/3",
+		},
+		{
+			"token":"0/4/4",
+		}
+	],
+
     "OSD":[
         [
             {
@@ -429,45 +864,25 @@
             }
         ]
     ],
-    "profiles":[
-        [    
-            {
-                "name":"local_00_00/profile_0000/0000",
-                "certification":"00/00",
-                "video_source":"00_00",
-                "audio_source":"00_00",
-                "video_encoder":"00_01"
-            },
-            {
-                "name":"local_00_01/profile_0001/0000",
-                "certification":"00/00"
-            }
-        ],
-        [
-        
-        ]
-    ],
-    "channel":[
-        {
-            "name":"chn1",
-            "config":[
-                {
-                    "profile":"00_01",
-                    "osd":"00_00",
-                    "osd_type":7,
-                    "type":"storage"
-                },
-                {
-                    "profile":"00_00",
-                    "osd_type":7,
-                    "type":"Net"
-                },
-                {
-                    "profile":"00_02",
-                    "osd_type":7,
-                    "type":"SnapShot"
-                }
-            ]
-        }
-    ]
-}
+	"media_devices":[
+		{
+			"name":"IPC摄像头",
+			"type":"onvif",
+			"url":"http://192.168.6.149:80/onvif/device_service",
+			"name":"admin",
+			"passwd":"1245"
+		},
+		{
+			"name":"通道二",
+			"type":"cvbs",
+		},
+		{
+			"name":"通道三",
+			"type":"cvbs",
+		},
+		{
+			"name":"通道四",
+			"type":"cvbs",
+		}
+	]
+ }

@@ -7,6 +7,8 @@ PLANTFORM ?= x86
 
 ifeq ($(PLANTFORM), hi3515)
 CROSS_COMPILE_PRE = arm-hisi-linux-
+#LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi -l_VoiceEngine -l_amr_spc -l_amr_fipop -l_aec -l_aacdec -l_aacenc -lresampler
+LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi
 endif
 
 ifeq ($(PLANTFORM), hi3518)
@@ -28,31 +30,33 @@ CXX = $(CROSS_COMPILE_PRE)g++
 AR = $(CROSS_COMPILE_PRE)ar
 STRIP = $(CROSS_COMPILE_PRE)strip
 
-CFLAGS += -std=c99 -fomit-frame-pointer -lpthread -ldl -lrt
+CFLAGS += -std=c99 -fomit-frame-pointer 
 CFLAGS += -Wall -g
 
-CFLAGS += -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include 
-CFLAGS += -I$(BVBASE_DIR)/onvif/$(PLANTFORM)/include 
-CFLAGS += -I$(BVBASE_DIR)/openssl/$(PLANTFORM)/include 
+#CFLAGS += -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include 
+#CFLAGS += -I$(BVBASE_DIR)/onvif/$(PLANTFORM)/include 
+#CFLAGS += -I$(BVBASE_DIR)/openssl/$(PLANTFORM)/include 
 CFLAGS += -I$(BVBASE_DIR)/bvbase/$(PLANTFORM)/include
 CFLAGS += -I$(BVBASE_DIR)/bvfs/$(PLANTFORM)/include
 
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvsystem -lbvconfig -lbvprotocol -lbvutil 
 LDFLAGS += -L$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/lib -lavformat -lavcodec -lavutil 
 LDFLAGS += -L$(BVBASE_DIR)/onvif/$(PLANTFORM)/lib -lonvifc 
 LDFLAGS += -L$(BVBASE_DIR)/jansson/$(PLANTFORM)/lib -ljansson
 LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto  
 
-LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvutil -lbvconfig -lbvprotocol 
+LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs -lpthread 
 
-LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs 
-
-EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk a
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode
 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
 
 %.o:%.c
 	$(CC) -c $^ -o $@ $(CFLAGS)
+%:%.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 .phony: all clean-test clean
 
 all: $(OBJS) $(EXAMPLES)
@@ -60,4 +64,5 @@ all: $(OBJS) $(EXAMPLES)
 clean: 
 	$(RM) $(EXAMPLES) $(OBJS)
 install:
-	cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys2/usr/bin/
+	#cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys2/usr/bin/
+	cp $(EXAMPLES) /tftpboot/BVS-W4020-VC-E.filesys/usr/bin/

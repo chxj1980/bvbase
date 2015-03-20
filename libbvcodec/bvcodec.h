@@ -36,12 +36,16 @@ extern "C"{
 enum BVCodecID {
     BV_CODEC_ID_NONE = 0,
     //video
-    BV_CODEC_ID_H264 = 0x64,
+    BV_CODEC_ID_REWVIDEO = 0x10,
+    BV_CODEC_ID_H264,
     BV_CODEC_ID_MPEG,
     BV_CODEC_ID_JPEG,
 
     //Audio
-    BV_CODEC_ID_G711A = 0x258,
+    BV_CODEC_ID_PCM = 0x10000,  //非线性脉冲调制编码    无损非压缩编码
+    BV_CODEC_ID_LPCM,           //线性脉冲调制编码
+    BV_CODEC_ID_ADPCM,
+    BV_CODEC_ID_G711A,
     BV_CODEC_ID_G711U,
     BV_CODEC_ID_G726,
     BV_CODEC_ID_AAC,

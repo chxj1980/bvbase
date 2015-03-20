@@ -12,3 +12,4 @@ ifeq ($(BV_CONFIG_HIS3515), yes)
 endif
 
 OBJS-$(BV_CONFIG_DAV_MUXER)					+= davmux.o
+OBJS-$(BV_CONFIG_DAV_DEMUXER)				+= davdmx.o

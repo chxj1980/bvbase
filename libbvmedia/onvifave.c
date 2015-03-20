@@ -434,12 +434,12 @@ static const BVClass onvif_class = {
 
 BVInputMedia bv_onvifave_demuxer = {
     .name               = "onvifave",
+    .priv_class         = &onvif_class,
     .priv_data_size     = sizeof(OnvifContext),
+    .flags              = BV_MEDIA_FLAGS_NOFILE,
     .read_probe         = onvif_probe,
     .read_header        = onvif_read_header,
     .read_packet        = onvif_read_packet,
     .read_close         = onvif_read_close,
     .media_control      = onvif_media_control,
-    .flags              = BV_MEDIA_FLAGS_NOFILE,
-    .priv_class         = &onvif_class,
 };

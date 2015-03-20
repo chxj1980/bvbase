@@ -131,6 +131,69 @@ int bv_config_get_device_info(BVConfigContext *s, BVDeviceInfo *devinfo)
     return s->config->get_device_info(s, devinfo);
 }
 
+int bv_config_get_video_source_device(BVConfigContext *s, int index, BVVideoSourceDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_source_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_source_device(s, index, config);
+}
+
+int bv_config_get_audio_source_device(BVConfigContext *s, int index, BVAudioSourceDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_source_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_source_device(s, index, config);
+}
+
+int bv_config_get_video_output_device(BVConfigContext *s, int index, BVVideoOutputDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_output_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_output_device(s, index, config);
+}
+
+int bv_config_get_audio_output_device(BVConfigContext *s, int index, BVAudioOutputDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_output_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_output_device(s, index, config);
+}
+
+int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_source)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_source(s, index, config);
+}
+
+int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_source)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_source(s, index, config);
+}
+
+int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_media_device)
+        return BVERROR(ENOSYS);
+    return s->config->get_media_device(s, index, config);
+}
+
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num)
 {
     if (!s || !profiles ||!s->config)

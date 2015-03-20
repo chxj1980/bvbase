@@ -304,26 +304,26 @@ static int dav_write_trailer(BVMediaContext *s)
 #define OFFSET(x) offsetof(DavMuxContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
-    {"channel", "", OFFSET(channel), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 255, DEC},
+    { "channel", "", OFFSET(channel), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 255, DEC },
 
-    {NULL}
+    { NULL }
 };
 
 static const BVClass dav_class = {
-    .class_name = "dav muxer",
-    .item_name = bv_default_item_name,
-    .option = options,
-    .version = LIBBVUTIL_VERSION_INT,
-    .category = BV_CLASS_CATEGORY_MUXER,
+    .class_name         = "dav muxer",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_MUXER,
 };
 
 BVOutputMedia bv_dav_muxer = {
-    .name           = "dav",
-    .extensions     = "dav",
-    .mime_type      = "video/x-bsvideo",
-    .priv_data_size = sizeof(DavMuxContext),
-    .priv_class     = &dav_class,
-    .write_header   = dav_write_header,
-    .write_packet   = dav_write_packet,
-    .write_trailer  = dav_write_trailer,
+    .name               = "dav",
+    .extensions         = "dav",
+    .mime_type          = "video/x-bsvideo",
+    .priv_class         = &dav_class,
+    .priv_data_size     = sizeof(DavMuxContext),
+    .write_header       = dav_write_header,
+    .write_packet       = dav_write_packet,
+    .write_trailer      = dav_write_trailer,
 };
