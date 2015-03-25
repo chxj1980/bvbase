@@ -39,7 +39,7 @@ int main(int argc, const char *argv[])
     char value[128] = { 0 };
     int64_t lvalue;
     bv_config_register_all();
-    if (bv_config_file_open(&fc, "test.json", NULL, NULL) < 0) {
+    if (bv_config_file_open(&fc, argv[1], NULL, NULL) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open config error\n");
         return BVERROR(EINVAL);
     }

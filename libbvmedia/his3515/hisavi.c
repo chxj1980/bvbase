@@ -67,6 +67,7 @@ typedef struct HisAVIContext {
     int width;
     int height;
     int framerate;
+    enum BVPixelFormat pix_fmt;
     char *atoken;
     int aidev;
     int aichn;
@@ -74,6 +75,11 @@ typedef struct HisAVIContext {
     int sample_rate;
     int channels;
 } HisAVIContext;
+
+typedef struct IntTable {
+    int a;
+    int b;
+} IntTable;
 
 static int his_probe(BVMediaContext *s, BVProbeData *p)
 {
@@ -126,6 +132,20 @@ fail:
     return BVERROR(EIO);
 }
 
+static int get_video_pix_format(int pix_fmt)
+{
+    int i = 0;
+    IntTable pix_fmts[] = {
+        { BV_PIX_FMT_YUV420P, PIXEL_FORMAT_YUV_SEMIPLANAR_420},
+        { BV_PIX_FMT_YUV422P, PIXEL_FORMAT_YUV_SEMIPLANAR_422},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(pix_fmts); i++) {
+        if (pix_fmts[i].a == pix_fmt)
+           return pix_fmts[i].b; 
+    }
+    return PIXEL_FORMAT_YUV_SEMIPLANAR_420;
+}
+
 static int create_video_input_channel(BVMediaContext *s)
 {
     HisAVIContext *hisctx = s->priv_data;
@@ -136,22 +156,23 @@ static int create_video_input_channel(BVMediaContext *s)
         bv_log(s, BV_LOG_ERROR, "vtoken param error\n");
         return BVERROR(EINVAL);
     }
+    VideoInGetStd(hisctx->videv, hisctx->vichn, &mode);
+    if (mode == VIDEO_STD_NTSC) {
+        hisctx->framerate = 30;
+        hisctx->height = 240;
+    }
     //FIXME
     stChnAttr.bChromaResample = HI_FALSE;
     stChnAttr.bDownScale = HI_FALSE;
     stChnAttr.bHighPri = HI_FALSE;
     stChnAttr.enCapSel = VI_CAPSEL_BOTH;
-    stChnAttr.enViPixFormat = PIXEL_FORMAT_YUV_SEMIPLANAR_422;
+    stChnAttr.enViPixFormat = get_video_pix_format(hisctx->pix_fmt);
     stChnAttr.stCapRect.s32X = 2;
-    stChnAttr.stCapRect.s32Y = 0;
+    stChnAttr.stCapRect.s32Y = 2;
     stChnAttr.stCapRect.u32Height = hisctx->height;
     stChnAttr.stCapRect.u32Width = hisctx->width;
     s32Ret = HI_MPI_VI_SetChnAttr(hisctx->videv, hisctx->vichn, &stChnAttr);
     BREAK_WHEN_SDK_FAILED("set vichn error", s32Ret);
-    VideoInGetStd(hisctx->videv, hisctx->vichn, &mode);
-    if (mode == VIDEO_STD_NTSC) {
-        hisctx->framerate = 30;
-    }
     s32Ret = HI_MPI_VI_SetSrcFrameRate(hisctx->videv, hisctx->vichn, hisctx->framerate);
     BREAK_WHEN_SDK_FAILED("set vichn source frame rate error", s32Ret);
     s32Ret = HI_MPI_VI_SetFrameRate(hisctx->videv, hisctx->vichn, hisctx->framerate);
@@ -285,6 +306,7 @@ static const BVOption options[] = {
     { "width", "", OFFSET(width), BV_OPT_TYPE_INT, {.i64= 704}, -1, INT_MAX, DEC},
     { "height", "", OFFSET(height), BV_OPT_TYPE_INT, {.i64= 288}, -1, INT_MAX, DEC},
     { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 25}, 2, 25, DEC},
+    { "pix_fmt", "", OFFSET(pix_fmt), BV_OPT_TYPE_INT, {.i64 = BV_PIX_FMT_YUV420P}, BV_PIX_FMT_YUV420P, BV_PIX_FMT_YUV422P, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     { "sample_rate", "", OFFSET(sample_rate), BV_OPT_TYPE_INT, {.i64 = 8000}, -1, INT_MAX, DEC},

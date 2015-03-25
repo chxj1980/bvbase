@@ -56,7 +56,7 @@ enable_his3515()
 	EXENABLE+="--enable-his3515 "
 	EXTCFLAGS+="-I$BVBASE_DIR/hissdk/his3515/include "
 	#FIXME
-	EXTLFLAGS+="-L$BVBASE_DIR/hissdk/his3515/lib -lmpi -l_VoiceEngine -l_amr_spc -l_amr_fipop -l_aec -l_aacdec -l_aacenc -lresampler "
+	EXTLFLAGS+="-L$BVBASE_DIR/hissdk/his3515/lib -lmpi -lhiaudio "
 }
 
 enable_x86()

@@ -1302,12 +1302,14 @@ cp_if_changed(){
 # system-dependent things.
 
 COMPONENT_LIST="
+    bvparsers
     bvprotocols
     bvdevices
     bvindevs
     bvoutdevs
     bvmuxers
     bvdemuxers
+    bvdrivers
     bvsystems
     bvconfigs
     bvcfiles
@@ -2840,6 +2842,7 @@ find_things(){
 #PROTOCOL_LIST=$(find_things protocol PROTOCOL libavformat/allformats.c)
 #FILTER_LIST=$(find_things   filter   FILTER   libavfilter/allfilters.c)
 
+BVPARSER_LIST=$(find_things   parser    PARSER        libbvcodec/allcodecs.c)
 BVDEVICE_LIST=$(find_things   device    DEVICE        libbvdevice/alldevices.c)
 BVCONFIG_LIST=$(find_things   config    CONFIG        libbvconfig/allconfigs.c)
 BVCFILE_LIST=$(find_things    cfile     CFILE         libbvconfig/allconfigs.c)
@@ -2849,6 +2852,7 @@ BVINDEV_LIST=$(find_things    indev     INDEV         libbvmedia/allmedias.c)
 BVOUTDEV_LIST=$(find_things   outdev    OUTDEV        libbvmedia/allmedias.c)
 BVMUXER_LIST=$(find_things    muxer     _MUX          libbvmedia/allmedias.c)
 BVDEMUXER_LIST=$(find_things  demuxer   DEMUX         libbvmedia/allmedias.c)
+BVDRIVER_LIST=$(find_things   driver    DRIVER        libbvmedia/allmedias.c)
 BVPROTOCOL_LIST=$(find_things protocol  PROTOCOL      libbvprotocol/allprotocols.c)
 
 ALL_COMPONENTS="
@@ -2864,6 +2868,7 @@ ALL_COMPONENTS="
     $PARSER_LIST
     $PROTOCOL_LIST
 
+    $BVPARSER_LIST
     $BVDEVICE_LIST
     $BVCONFIG_LIST
     $BVCFILE_LIST
@@ -2873,6 +2878,7 @@ ALL_COMPONENTS="
     $BVOUTDEV_LIST
     $BVMUXER_LIST
     $BVDEMUXER_LIST
+    $BVDRIVER_LIST
     $BVPROTOCOL_LIST
 "
 
@@ -5568,7 +5574,7 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvoutdev bvmuxer bvdemuxer bvenc bvprotocol; do
+for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvoutdev bvmuxer bvdemuxer bvdriver bvenc bvparser bvprotocol; do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns

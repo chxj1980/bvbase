@@ -135,12 +135,16 @@ typedef struct _BVDateTime {
 
 typedef struct _BVVideoSourceDevice {
     char token[BV_MAX_NAME_LEN];
+    char chip[BV_MAX_NAME_LEN];
+    char dev[BV_MAX_NAME_LEN];
     char interface[BV_MAX_NAME_LEN];    //BT656 BT601 BT1120P BT1120I
     char work_mode[BV_MAX_NAME_LEN];     //for BT656 4D1 4HALFD1 2D1 
 } BVVideoSourceDevice;
 
 typedef struct _BVVideoOutputDevice {
     char token[BV_MAX_NAME_LEN];
+    char chip[BV_MAX_NAME_LEN];
+    char dev[BV_MAX_NAME_LEN];
     char interface[BV_MAX_NAME_LEN];    //CVBS HDMI
     char work_mode[BV_MAX_NAME_LEN];    //PAL NTSC AUTO
     BVIntRectange display;
@@ -148,6 +152,9 @@ typedef struct _BVVideoOutputDevice {
 
 typedef struct _BVAudioSourceDevice {
     char token[BV_MAX_NAME_LEN];
+    char chip[BV_MAX_NAME_LEN];
+    char dev[BV_MAX_NAME_LEN];
+    uint8_t channel_mode;
     uint8_t channel_counts;
     uint8_t sample_format;
     int sample_rate;
@@ -156,16 +163,18 @@ typedef struct _BVAudioSourceDevice {
 
 typedef struct _BVAudioOutputDevice {
     char token[BV_MAX_NAME_LEN];
+    char chip[BV_MAX_NAME_LEN];
+    char dev[BV_MAX_NAME_LEN];
+    uint8_t channel_mode;
     uint8_t channel_counts;
     uint8_t sample_format;
     int sample_rate;
     char work_mode[BV_MAX_NAME_LEN];     //I2S_SLAVE I2S_MASTER 
 } BVAudioOutputDevice;
 
-
 typedef struct _BVVideoCapture {
     BVImagingSettings imaging;
-    BVDateTime data_time;
+    BVDateTime date_time;
     void *any_attr;
 } BVVideoCapture;
 
@@ -301,32 +310,34 @@ typedef struct _BVEncodeChannelConfig {
     BVVideoEncoder *video_encoder;
 } BVEncodeChannelConfig;
 
-#if 0
-enum BVChannelType {
-    BV_CHANNEL_TYPE_STORAGE = 0,
-    BV_CHANNEL_TYPE_PREVIEW,
-    BV_CHANNEL_TYPE_PICTURE,
+typedef struct _BVDecodeChannelConfig {
+    BVAudioDecoder *audio_decoder;
+    BVVideoDecoder *video_decoder;
+} BVDecodeChannelConfig;
 
-    BV_CHANNEL_TYPE_UNKNOWN
-};
-enum BVChannelType {
-    BV_CHANNEL_TYPE_HISAVI,
-    BV_CHANNEL_TYPE_HISAVE,
-    BV_CHANNEL_TYPE_HISAVO,
-    BV_CHANNEL_TYPE_HISAVD,
-    BV_CHANNEL_TYPE_ONVIFAVI,
-    BV_CHANNEL_TYPE_ONVIFAVE,
-    BV_CHANNEL_TYPE_ONVIFAVO,
-    BV_CHANNEL_TYPE_ONVIFAVD,
-};
-#endif
+typedef struct _BVInputChannelConfig {
+    BVAudioSource *audio_source;
+    BVVideoSource *video_source;
+} BVSourceChannelConfig;
 
-typedef struct _BVChannel {
-    int index;
-    enum BVConfigType type;
-   // BVMediaProfile profile;
-    BVCertification *certification;
-} BVChannel;
+typedef struct _BVOutputChannelConfig {
+    BVAudioOutput *audio_output;
+    BVVideoOutput *video_output;
+} BVOutputChannelConfig;
+
+enum BVMediaChannelType {
+    BV_MEDIA_CHANNEL_TYPE_NONE,
+    BV_MEDIA_CHANNEL_TYPE_SOURCE,   //audio video source
+    BV_MEDIA_CHANNEL_TYPE_OUTPUT,   //audio video output 
+    BV_MEDIA_CHANNEL_TYPE_ENCODE,
+    BV_MEDIA_CHANNEL_TYPE_DECODE,
+    BV_MEDIA_CHANNEL_TYPE_UNKNOWN,
+};
+
+typedef struct _BVMediaChannel {
+    enum BVMediaChannelType type;
+    void *payload;
+} BVMediaChannel;
 
 typedef struct _BVDeviceInfo {
     char device_model[BV_MAX_NAME_LEN];            //设备型号

@@ -8,7 +8,7 @@ PLANTFORM ?= x86
 ifeq ($(PLANTFORM), hi3515)
 CROSS_COMPILE_PRE = arm-hisi-linux-
 #LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi -l_VoiceEngine -l_amr_spc -l_amr_fipop -l_aec -l_aacdec -l_aacenc -lresampler
-LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi
+LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi -lhiaudio
 endif
 
 ifeq ($(PLANTFORM), hi3518)
@@ -47,7 +47,7 @@ LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto
 
 LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs -lpthread 
 
-EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exDriver exFile
 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))

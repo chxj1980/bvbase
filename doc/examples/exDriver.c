@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: options_table.h
+    > File Name: exDriver.c
     > Author: albertfang
     > Mail: fang.qi@besovideo.com 
-    > Created Time: 2014年12月16日 星期二 11时00分38秒
+    > Created Time: 2015年03月24日 星期二 13时19分21秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -15,31 +15,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should hbve received a copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) albert@BesoVideo, 2014
+ * Copyright (C) albert@BesoVideo, 2015
  */
 
-#ifndef BV_OPTIONS_TABLE_H
-#define BV_OPTIONS_TABLE_H
+#include <libbvutil/bvutil.h>
+#include <libbvmedia/bvmedia.h>
 
-#include <limits.h>
-#include <libbvutil/opt.h>
+int main(int argc, const char *argv[])
+{
+    BVMediaDriverContext *ctx = NULL;
+    bv_log_set_level(BV_LOG_DEBUG);
 
-#include "bvmedia.h"
+    bv_media_register_all();
 
-#define OFFSET(X) offsetof(BVDeviceContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
-
-static const BVOption media_options[] = {
-
-    {NULL}
-};
-
-static const BVOption driver_options[] = {
-
-    {NULL}
-};
-
-#endif /* end of include guard: BV_OPTIONS_TABLE_H */
+    if (bv_media_driver_open(&ctx, "/dev/tw2865dev", "tw2866", NULL, NULL) < 0) {
+        bv_log(NULL, BV_LOG_ERROR, "open media driver error\n");
+        return BVERROR(EIO);
+    }
+    bv_log(ctx, BV_LOG_INFO, "run here %s %d %s \n", __FILE__, __LINE__, ctx->driver->name);
+    bv_media_driver_close(&ctx);
+    return 0;
+}

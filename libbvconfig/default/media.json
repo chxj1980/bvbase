@@ -1,888 +1,955 @@
 {
- 	"audio_source_devices":[
-		{
-			"token":"0",
-			"channels":16,
-			"sample_format":16,
-			"sample_rate":8000,
-			"work_mode":"I2S_SLAVE"
-		},
-		{
-			"token":"1",
-			"channels":2,
-			"sample_format":16,
-			"sample_rate":8000,
-			"work_mode":"I2S_SLAVE"
-		}
-	],
-	"video_source_devices":[
-		{
-			"token":"0",
-			"interface":"BT656",
-			"work_mode":"4D1"
-		}
-	],
-	"audio_output_devices":[
-		{
-			"token":"0",
-			"channels":2,
-			"sample_format":16,
-			"sample_rate":8000,
-			"work_mode":"I2S_SLAVE",
-		}
-	],
-	"video_output_devices":[
-		{
-			"token":"2",
-			"interface":"CVBS",
-			"work_mode":"PAL",
-			"display":{"left":0, "top":0, "width":704, "height":576}
-		}	
-	]
-    "imaging_setting":[
+    "audio_source_devices": [
         {
-            "vision_control":[
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128,
-					"sharpness":128
-                },
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128
-					"sharpness":128
-                }
-            ],
-            "exposure":{
-                "mode":"auto",
-                "gain":50,
-                "time":40000
-            }
-        },
-		{
-	        "vision_control":[
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128,
-					"sharpness":128
-                },
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128
-					"sharpness":128
-                }
-            ],
-            "exposure":{
-                "mode":"auto",
-                "gain":50,
-                "time":40000
-            }
-
-		},
-		{
-		    "vision_control":[
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128,
-					"sharpness":128
-                },
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128
-					"sharpness":128
-                }
-            ],
-            "exposure":{
-                "mode":"auto",
-                "gain":50,
-                "time":40000
-            }
-
-		},
-		{
-		    "vision_control":[
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128,
-					"sharpness":128
-                },
-                {
-                    "luminance":128,
-                    "contrast":128,
-                    "hue":128,
-                    "satuature":128
-					"sharpness":128
-                }
-            ],
-            "exposure":{
-                "mode":"auto",
-                "gain":50,
-                "time":40000
-            }
-		}
-    ],
-    "video_sources":[
-        {
-            "token":"0/0",
-            "framerate":25,
-            "day_to_nigth":"6:00",
-            "night_to_day":"18:00",
-            "capture_rect":{"left":0, "top":0, "width":704, "height":288}
+            "token": "0",
+            "chip": "tw2866",
+            "dev": "/dev/tw2865dev",
+            "channel_mode": 1,
+            "channels": 16,
+            "sample_format": 16,
+            "sample_rate": 8000,
+            "work_mode": "I2S_SLAVE"
         },
         {
-            "token":"0/1",
-            "framerate":25,
-            "day_to_nigth":"6:00",
-            "night_to_day":"18:00",
-            "capture_rect":{"left":0, "top":0, "width":704, "height":288 }
-        },
-        {
-            "token":"0/1",
-            "framerate":25,
-            "day_to_nigth":"6:00",
-            "night_to_day":"18:00",
-            "capture_rect":{"left":0, "top":0, "width":704, "height":288}
-        },
-        {
-            "token":"0/4",
-            "framerate":25,
-            "day_to_nigth":"6:00",
-            "night_to_day":"18:00",
-            "capture_rect":{"left":0, "top":0, "width":704, "height":288 }
+            "token": "1",
+            "chip": "tlv320aic23",
+            "dev": "/dev/tlv320aic23",
+            "channel_mode": 1,
+            "channels": 16,
+            "sample_format": 16,
+            "sample_rate": 8000,
+            "work_mode": "I2S_SLAVE"
         }
     ],
-    "audio_sources":[
+    "video_source_devices": [
         {
-			"token":"0/0",
-            "channels":1,
-			"input_type":"MIC"
-        },
+            "token": "0",
+            "chip": "tw2866",
+            "dev": "/dev/tw2865dev",
+            "interface": "BT656",
+            "work_mode": "4D1"
+        }
+    ],
+    "audio_output_devices": [
         {
-			"token":"0/1",
-            "channels":1,
-			"input_type":"MIC"
-        },
+            "token": "0",
+            "chip": "tlv320aic23",
+            "dev": "/dev/tlv320aic23",
+            "channel_mode": 1,
+            "channels": 2,
+            "sample_format": 16,
+            "sample_rate": 8000,
+            "work_mode": "I2S_SLAVE"
+        }
+    ],
+    "video_output_devices": [
         {
-			"token":"0/2",
-            "channels":1,
-			"input_type":"MIC"
-        },
+            "token": "2",
+            "chip": "tw2866",
+            "dev": "/dev/tw2865dev",
+            "interface": "CVBS",
+            "work_mode": "PAL",
+            "display": {
+                "left": 0,
+                "top": 0,
+                "width": 704,
+                "height": 576
+            }
+        }
+    ],
+    "imaging_setting": [
         {
-			"token":"0/3",
-            "channels":1,
-			"input_type":"MIC"
-        },
-		{
-			"token":"1/0",
-            "channels":1,
-			"input_type":"LINE_IN"
-		}
-    ],
-	"video_output":[
-		{
-			"token":"2/0",
-			"display":{"left":0, "top":0, "width":352, "height":288}
-		},
-		{
-			"token":"2/1",
-			"display":{"left":352, "top":0, "width":352, "height":288}
-		},
-		{
-			"token":"2/2",
-			"display":{"left":0, "top":288, "width":352, "height":288}
-		},
-		{
-			"token":"2/3",
-			"display":{"left":352, "top":288, "width":352, "height":288}
-		}
-	],
-	"audio_output":[
-		{
-			"token":"0/0",
-			"volume":80
-		},
-		{
-			"token":"0/1",
-			"volume":80
-		},
-		{
-			"token":"0/2",
-			"volume":80
-		},
-		{
-			"token":"0/3",
-			"volume":80
-		},
-		{
-			"token":"0/4",
-			"volume":80
-		}
-	],
-    "video_encoder_options":[
-        [
-            {
-				"token":"0/0/0",
-                "quality":"[0..10]",
-                "options":[
-                    {
-                        "encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-                    }
-                ]
-            },
-            {
-				"token":"0/0/6",
-                "quality":"[0..10]",
-				"options":[
-					{
-						"encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[312..1024]"
-					}
-				]
-            },
-			{
-				"token":"0/0/24",
-                "quality":"[0..10]",
-				"options":[
-			        {
-                        "encoding":"JPEG",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[1..10]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-					}
-				]
-			}
-        ],
-        [
-            {
-				"token":"0/1/1",
-                "quality":"[0..10]",
-                "options":[
-                    {
-                        "encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-                    }
-                ]
-            },
-            {
-				"token":"0/1/8",
-                "quality":"[0..10]",
-				"options":[
-					{
-						"encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[312..1024]"
-					}
-				]
-            },
-			{
-				"token":"0/1/25",
-                "quality":"[0..10]",
-				"options":[
-			        {
-                        "encoding":"JPEG",
-						"nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[1..10]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-					}
-				]
-			}
-        ],
-        [
-            {
-				"token":"0/2/2",
-                "quality":"[0..10]",
-                "options":[
-                    {
-                        "encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-                    }
-                ]
-            },
-            {
-				"token":"0/2/10",
-                "quality":"[0..10]",
-				"options":[
-					{
-						"encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[312..1024]"
-					}
-				]
-            },
-			{
-				"token":"0/0/26",
-                "quality":"[0..10]",
-				"options":[
-			        {
-                        "encoding":"JPEG",
-						"nb_resolutions":2,
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[1..10]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-					}
-				]
-			}
-        ],
-        [
-            {
-				"token":"0/3/3",
-                "quality":"[0..10]",
-                "options":[
-                    {
-                        "encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-                    }
-                ]
-            },
-            {
-				"token":"0/3/12",
-				"quality":"[0..10]",
-				"options":[
-					{
-						"encoding":"H264",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[4..30]",
-						"gop":"[30..120]",
-						"bitrate":"[312..1024]"
-					}
-				]
-            },
-			{
-				"token":"0/3/26",
-                "quality":"[0..10]",
-				"options":[
-			        {
-                        "encoding":"JPEG",
-                        "nb_resolutions":2,
-                        "resolutions":"(705x576 1280x960)",
-						"framerate":"[1..10]",
-						"gop":"[30..120]",
-						"bitrate":"[512..1024]"
-					}
-				]
-			}
-        ]
-    ],
-    "video_encoders":[
-        [
-            {
-				"token":"0/0/0",
-                "encoding":"H264",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/0/6",
-                "encoding":"H264",
-                "resolution":"D1",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/0/24",
-                "encoding":"JPEG",
-                "resolution":"D1",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            }
-        ],
-        [
-            {
-				"token":"0/1/1",
-                "encoding":"H264",
-                "resolution":"720HD",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/1/8",
-                "encoding":"H264",
-                "resolution":"D1",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/1/25",
-                "encoding":"JPEG",
-				"width":704,
-				"height":576,
-                "resolution":"D1",
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            }
-        ],
-        [
-            {
-				"token":"0/2/2",
-                "encoding":"H264",
-                "resolution":"720HD",
-
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/2/10",
-                "encoding":"H264",
-                "resolution":"D1",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/2/26",
-                "encoding":"JPEG",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            }
-        ],
-        [
-            {
-				"token":"0/3/3",
-                "encoding":"H264",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/3/12",
-                "encoding":"H264",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            },
-            {
-				"token":"0/3/27",
-                "encoding":"JPEG",
-				"width":704,
-				"height":576,
-                "quality":5,
-                "rate_control":"VBR",
-                "gop":100,
-                "profile_level":"baseline",
-                "frame_rate":25,
-                "bitrate":2048
-            }
-        ]
-    ],
-	"audio_encoder_options":[
-		[
-			{
-				"token":"0/0/0",
-				"options":[
-					{
-						"encoding":"G711A",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			},
-			{
-				"token":"0/0/6",
-				"options":[
-					{
-						"encoding":"G726",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			}
-		],
-		[
-			{
-				"token":"0/1/1",
-				"options":[
-					{
-						"encoding":"G711A",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			},
-			{
-				"token":"0/1/8",
-				"options":[
-					{
-						"encoding":"G726",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			}
-		],
-		[
-			{
-				"token":"0/2/2",
-				"options":[
-					{
-						"encoding":"G711A",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			},
-			{
-				"token":"0/2/10",
-				"options":[
-					{
-						"encoding":"G726",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			}
-		],
-		[
-			{
-				"token":"0/3/3",
-				"options":[
-					{
-						"encoding":"G711A",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			},
-			{
-				"token":"0/3/12",
-				"options":[
-					{
-						"encoding":"G726",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			}
-		],
-		[
-			{
-				"token":"1/0/4",
-				"options":[
-					{
-						"encoding":"G711A",
-						"bitrate":"(16000 32000)",
-						"sample_rate":"(8000)"
-					},
-				]
-			},
-		],
-
-	],
-    "audio_encoders":[
-        [
-            {
-				"token":"0/0/0",
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            },
-            {
-				"token":"0/0/6",
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            },
-         ],
-        [
-            {
-				"token":"0/1/1",
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            },
-            {
-				"token":"0/1/8",
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            }
-        ],
-        [
-            {
-				"token":"0/2/2"
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            },
-            {
-				"token":"0/2/10"
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            }
-        ],
-        [
-            {
-				"token":"0/3/3"
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-            },
-			{
-			
-				"token":"0/3/12"
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-			}
-        ],
-		[
-			{
-				"token":"1/0/4"
-                "encoding":"G711A",
-                "bitrate":32000,
-                "sample":8000
-			}
-		]
-    ],
-	"video_decoders":[
-		{
-			"token":"2/0/0",
-		},
-		{
-			"token":"2/1/1",
-		},
-		{
-			"token":"2/2/2",
-		},
-		{
-			"token":"2/3/3",
-		}
-	],
-	"audio_decoders":[
-		{
-			"token":"0/0/0",
-		},
-		{
-			"token":"0/1/1",
-		},
-		{
-			"token":"0/2/2",
-		},
-		{
-			"token":"0/3/3",
-		},
-		{
-			"token":"0/4/4",
-		}
-	],
-
-    "OSD":[
-        [
-            {
-                "name":"OSD_0000/0000",
-                "url":"onvifosd://onvif/media_services",
-                "font_file":"/tmp/font.ttf",
-                "config":[
-                    {
-                        "font_color":"white",
-                        "shadow_color":"NULL",
-                        "border_color":"black",
-                        "type":"TIME",
-                        "font_size":20,
-                        "border_size":2,
-                        "img_rect":{"left":20, "top":100, "width":400, "height":40 },
-                        "format":"YYYY-MX",
-                        "split":"/"
-                    },
-                    {
-                        "font_color":"white",
-                        "shadow_color":"NULL",
-                        "border_color":"black",
-                        "type":"STRING",
-                        "font_size":20,
-                        "border_size":2,
-                        "img_rect":{"left":20, "top":100, "width":400, "height":40 }
-                    }
-                ]
-            }
-        ],
-        [
-            {
-                "name":"OSD_0001/0000",
-                "url":"onvifosd://onvif/media_services",
-                "font_file":"/tmp/font.ttf",
-                "config":[
-                    {
-                        "font_color":"white",
-                        "shadow_color":"NULL",
-                        "border_color":"black",
-                        "type":"TIME",
-                        "font_size":20,
-                        "border_size":2,
-                        "img_rect":{"left":20, "top":100, "width":400, "height":40 },
-                        "format":"YYYY-MX",
-                        "split":"/"
-                    },
-                    {
-                        "font_color":"white",
-                        "shadow_color":"NULL",
-                        "border_color":"black",
-                        "type":"STRING",
-                        "font_size":20,
-                        "border_size":2,
-                        "img_rect":{"left":20, "top":100, "width":400, "height":40 }
-                    }
-                ]
-            }
-        ]
-    ],
-    "PTZDevice":[
-        [
-            {
-                "name":"PTZ_0000/0000",
-                "url":"onvif_ptz://onvif/ptz_services",
-                "pan_tile":"[-1..1]",
-                "zoom":"[-1..1]",
-                "protocol":"PELCO_P",
-                "rs232":{
-                    "data_bits":8,
-                    "baud_rate":115200,
-                    "stop_bit":1,
-                    "parity":0,
-                    "flow_control":0
+            "vision_control": [
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
                 },
-                "presets":[
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                }
+            ],
+            "exposure": {
+                "mode": "auto",
+                "gain": 50,
+                "time": 40000
+            }
+        },
+        {
+            "vision_control": [
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                },
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                }
+            ],
+            "exposure": {
+                "mode": "auto",
+                "gain": 50,
+                "time": 40000
+            }
+        },
+        {
+            "vision_control": [
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                },
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                }
+            ],
+            "exposure": {
+                "mode": "auto",
+                "gain": 50,
+                "time": 40000
+            }
+        },
+        {
+            "vision_control": [
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                },
+                {
+                    "luminance": 128,
+                    "contrast": 128,
+                    "hue": 128,
+                    "satuature": 128,
+                    "sharpness": 128
+                }
+            ],
+            "exposure": {
+                "mode": "auto",
+                "gain": 50,
+                "time": 40000
+            }
+        }
+    ],
+    "video_sources": [
+        {
+            "token": "0/0",
+            "framerate": 25,
+            "day_to_night": "6:00",
+            "night_to_day": "18:00",
+            "capture_rect": {
+                "left": 0,
+                "top": 0,
+                "width": 704,
+                "height": 288
+            }
+        },
+        {
+            "token": "0/1",
+            "framerate": 25,
+            "day_to_night": "6:00",
+            "night_to_day": "18:00",
+            "capture_rect": {
+                "left": 0,
+                "top": 0,
+                "width": 704,
+                "height": 288
+            }
+        },
+        {
+            "token": "0/1",
+            "framerate": 25,
+            "day_to_night": "6:00",
+            "night_to_day": "18:00",
+            "capture_rect": {
+                "left": 0,
+                "top": 0,
+                "width": 704,
+                "height": 288
+            }
+        },
+        {
+            "token": "0/4",
+            "framerate": 25,
+            "day_to_night": "6:00",
+            "night_to_day": "18:00",
+            "capture_rect": {
+                "left": 0,
+                "top": 0,
+                "width": 704,
+                "height": 288
+            }
+        }
+    ],
+    "audio_sources": [
+        {
+            "token": "0/0",
+            "channels": 1,
+            "input_type": "MIC"
+        },
+        {
+            "token": "0/1",
+            "channels": 1,
+            "input_type": "MIC"
+        },
+        {
+            "token": "0/2",
+            "channels": 1,
+            "input_type": "MIC"
+        },
+        {
+            "token": "0/3",
+            "channels": 1,
+            "input_type": "MIC"
+        },
+        {
+            "token": "1/0",
+            "channels": 1,
+            "input_type": "LINE_IN"
+        }
+    ],
+    "video_output": [
+        {
+            "token": "2/0",
+            "display": {
+                "left": 0,
+                "top": 0,
+                "width": 352,
+                "height": 288
+            }
+        },
+        {
+            "token": "2/1",
+            "display": {
+                "left": 352,
+                "top": 0,
+                "width": 352,
+                "height": 288
+            }
+        },
+        {
+            "token": "2/2",
+            "display": {
+                "left": 0,
+                "top": 288,
+                "width": 352,
+                "height": 288
+            }
+        },
+        {
+            "token": "2/3",
+            "display": {
+                "left": 352,
+                "top": 288,
+                "width": 352,
+                "height": 288
+            }
+        }
+    ],
+    "audio_output": [
+        {
+            "token": "0/0",
+            "volume": 80
+        },
+        {
+            "token": "0/1",
+            "volume": 80
+        },
+        {
+            "token": "0/2",
+            "volume": 80
+        },
+        {
+            "token": "0/3",
+            "volume": 80
+        },
+        {
+            "token": "0/4",
+            "volume": 80
+        }
+    ],
+    "video_encoder_options": [
+        [
+            {
+                "token": "0/0/0",
+                "quality": "[0..10]",
+                "options": [
                     {
-                    
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
                     }
-                ],
-                "home":0,
-                "preset_tours":[
+                ]
+            },
+            {
+                "token": "0/0/6",
+                "quality": "[0..10]",
+                "options": [
                     {
-                    
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[312..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/0/24",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "JPEG",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[1..10]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/1/1",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/1/8",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[312..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/1/25",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "JPEG",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[1..10]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/2/2",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/2/10",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[312..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/0/26",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "JPEG",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[1..10]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/3/3",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/3/12",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "H264",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[4..30]",
+                        "gop": "[30..120]",
+                        "bitrate": "[312..1024]"
+                    }
+                ]
+            },
+            {
+                "token": "0/3/26",
+                "quality": "[0..10]",
+                "options": [
+                    {
+                        "encoding": "JPEG",
+                        "nb_resolutions": 2,
+                        "resolutions": "(705x576 1280x960)",
+                        "framerate": "[1..10]",
+                        "gop": "[30..120]",
+                        "bitrate": "[512..1024]"
                     }
                 ]
             }
         ]
     ],
-	"media_devices":[
-		{
-			"name":"IPC摄像头",
-			"type":"onvif",
-			"url":"http://192.168.6.149:80/onvif/device_service",
-			"name":"admin",
-			"passwd":"1245"
-		},
-		{
-			"name":"通道二",
-			"type":"cvbs",
-		},
-		{
-			"name":"通道三",
-			"type":"cvbs",
-		},
-		{
-			"name":"通道四",
-			"type":"cvbs",
-		}
-	]
- }
+    "video_encoders": [
+        [
+            {
+                "token": "0/0/0",
+                "encoding": "H264",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/0/6",
+                "encoding": "H264",
+                "resolution": "D1",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/0/24",
+                "encoding": "JPEG",
+                "resolution": "D1",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            }
+        ],
+        [
+            {
+                "token": "0/1/1",
+                "encoding": "H264",
+                "resolution": "720HD",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/1/8",
+                "encoding": "H264",
+                "resolution": "D1",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/1/25",
+                "encoding": "JPEG",
+                "width": 704,
+                "height": 576,
+                "resolution": "D1",
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            }
+        ],
+        [
+            {
+                "token": "0/2/2",
+                "encoding": "H264",
+                "resolution": "720HD",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/2/10",
+                "encoding": "H264",
+                "resolution": "D1",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/2/26",
+                "encoding": "JPEG",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            }
+        ],
+        [
+            {
+                "token": "0/3/3",
+                "encoding": "H264",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/3/12",
+                "encoding": "H264",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 2048
+            },
+            {
+                "token": "0/3/27",
+                "encoding": "H264",
+                "width": 704,
+                "height": 576,
+                "quality": 5,
+                "rate_control": "VBR",
+                "gop": 100,
+                "profile_level": "baseline",
+                "frame_rate": 25,
+                "bitrate": 999
+            }
+        ]
+    ],
+    "audio_encoder_options": [
+        [
+            {
+                "token": "0/0/0",
+                "options": [
+                    {
+                        "encoding": "G711A",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            },
+            {
+                "token": "0/0/6",
+                "options": [
+                    {
+                        "encoding": "G726",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/1/1",
+                "options": [
+                    {
+                        "encoding": "G711A",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            },
+            {
+                "token": "0/1/8",
+                "options": [
+                    {
+                        "encoding": "G726",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/2/2",
+                "options": [
+                    {
+                        "encoding": "G711A",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            },
+            {
+                "token": "0/2/10",
+                "options": [
+                    {
+                        "encoding": "G726",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "0/3/3",
+                "options": [
+                    {
+                        "encoding": "G711A",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            },
+            {
+                "token": "0/3/12",
+                "options": [
+                    {
+                        "encoding": "G726",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "token": "1/0/4",
+                "options": [
+                    {
+                        "encoding": "G711A",
+                        "bitrate": "(16000 32000)",
+                        "sample_rate": "(8000)"
+                    }
+                ]
+            }
+        ]
+    ],
+    "audio_encoders": [
+        [
+            {
+                "token": "0/0/0",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 6000
+            },
+            {
+                "token": "0/0/6",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            }
+        ],
+        [
+            {
+                "token": "0/1/1",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            },
+            {
+                "token": "0/1/8",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            }
+        ],
+        [
+            {
+                "token": "0/2/2",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            },
+            {
+                "token": "0/2/10",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            }
+        ],
+        [
+            {
+                "token": "0/3/3",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            },
+            {
+                "token": "0/3/12",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            }
+        ],
+        [
+            {
+                "token": "1/0/4",
+                "encoding": "G711A",
+                "bitrate": 32000,
+                "sample": 8000
+            }
+        ]
+    ],
+    "video_decoders": [
+        {
+            "token": "2/0/0"
+        },
+        {
+            "token": "2/1/1"
+        },
+        {
+            "token": "2/2/2"
+        },
+        {
+            "token": "2/3/3"
+        }
+    ],
+    "audio_decoders": [
+        {
+            "token": "0/0/0"
+        },
+        {
+            "token": "0/1/1"
+        },
+        {
+            "token": "0/2/2"
+        },
+        {
+            "token": "0/3/3"
+        },
+        {
+            "token": "0/4/4"
+        }
+    ],
+    "OSD": [
+        [
+            {
+                "name": "OSD_0000/0000",
+                "url": "onvifosd://onvif/media_services",
+                "font_file": "/tmp/font.ttf",
+                "config": [
+                    {
+                        "font_color": "white",
+                        "shadow_color": "NULL",
+                        "border_color": "black",
+                        "type": "TIME",
+                        "font_size": 20,
+                        "border_size": 2,
+                        "img_rect": {
+                            "left": 20,
+                            "top": 100,
+                            "width": 400,
+                            "height": 40
+                        },
+                        "format": "YYYY-MX",
+                        "split": "/"
+                    },
+                    {
+                        "font_color": "white",
+                        "shadow_color": "NULL",
+                        "border_color": "black",
+                        "type": "STRING",
+                        "font_size": 20,
+                        "border_size": 2,
+                        "img_rect": {
+                            "left": 20,
+                            "top": 100,
+                            "width": 400,
+                            "height": 40
+                        }
+                    }
+                ]
+            }
+        ],
+        [
+            {
+                "name": "OSD_0001/0000",
+                "url": "onvifosd://onvif/media_services",
+                "font_file": "/tmp/font.ttf",
+                "config": [
+                    {
+                        "font_color": "white",
+                        "shadow_color": "NULL",
+                        "border_color": "black",
+                        "type": "TIME",
+                        "font_size": 20,
+                        "border_size": 2,
+                        "img_rect": {
+                            "left": 20,
+                            "top": 100,
+                            "width": 400,
+                            "height": 40
+                        },
+                        "format": "YYYY-MX",
+                        "split": "/"
+                    },
+                    {
+                        "font_color": "white",
+                        "shadow_color": "NULL",
+                        "border_color": "black",
+                        "type": "STRING",
+                        "font_size": 20,
+                        "border_size": 2,
+                        "img_rect": {
+                            "left": 20,
+                            "top": 100,
+                            "width": 400,
+                            "height": 40
+                        }
+                    }
+                ]
+            }
+        ]
+    ],
+    "PTZDevice": [
+        [
+            {
+                "name": "PTZ_0000/0000",
+                "url": "onvif_ptz://onvif/ptz_services",
+                "pan_tile": "[-1..1]",
+                "zoom": "[-1..1]",
+                "protocol": "PELCO_P",
+                "rs232": {
+                    "data_bits": 8,
+                    "baud_rate": 115200,
+                    "stop_bit": 1,
+                    "parity": 0,
+                    "flow_control": 0
+                },
+                "presets": [
+                    {}
+                ],
+                "home": 0,
+                "preset_tours": [
+                    {}
+                ]
+            }
+        ]
+    ],
+    "media_devices": [
+        {
+            "name": "通道二",
+            "user": "admin",
+            "type": "onvif",
+            "url": "http://192.168.6.149:80/onvif/device_service",
+            "passwd": "1245"
+        },
+        {
+            "name": "通道二",
+            "type": "cvbs"
+        },
+        {
+            "name": "通道三",
+            "type": "cvbs"
+        },
+        {
+            "name": "通道四",
+            "type": "cvbs"
+        }
+    ]
+}
