@@ -1,4 +1,4 @@
 LIBBVMEDIA_$MAJOR {
-        global: *; 
+        global: bv_*; 
         local: *;
 };

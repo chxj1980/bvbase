@@ -223,7 +223,7 @@ static int get_audio_sample_format(int sample_format)
     return AUDIO_BIT_WIDTH_16;
 }
 
-static int get_audio_channel_counts(int channel_count)
+static int get_audio_channel_mode(int channel_count)
 {
     int i = 0;
     IntTable channels[] = {
@@ -365,10 +365,10 @@ static int his3515_aidev_config(BVSystemContext *s, const BVControlPacket *pkt_i
     BREAK_WHEN_SDK_FAILED("Disable AiDev Error", s32Ret);
     stAIOAttr.enBitwidth = get_audio_sample_format(aidevice->sample_format);
     stAIOAttr.enSamplerate = get_audio_sample_rate(aidevice->sample_rate);
-    stAIOAttr.enSoundmode = get_audio_channel_counts(aidevice->channel_counts);
+    stAIOAttr.enSoundmode = get_audio_channel_mode(aidevice->channel_mode);
     stAIOAttr.enWorkmode = get_audio_work_mode(aidevice->work_mode);
-    stAIOAttr.u32ChnCnt = 16;
-    stAIOAttr.u32FrmNum = 25;
+    stAIOAttr.u32ChnCnt = aidevice->channel_counts;
+    stAIOAttr.u32FrmNum = 30;
     stAIOAttr.u32PtNumPerFrm = 320;
 
     AudioSampleSet(aidevice->sample_rate);
@@ -405,9 +405,9 @@ static int his3515_aodev_config(BVSystemContext *s, const BVControlPacket *pkt_i
 
     stAIOAttr.enBitwidth = get_audio_sample_format(aodevice->sample_format);
     stAIOAttr.enSamplerate = get_audio_sample_rate(aodevice->sample_rate);
-    stAIOAttr.enSoundmode = get_audio_channel_counts(aodevice->channel_counts);
+    stAIOAttr.enSoundmode = get_audio_channel_mode(aodevice->channel_mode);
     stAIOAttr.enWorkmode = get_audio_work_mode(aodevice->work_mode);
-    stAIOAttr.u32ChnCnt = 4;
+    stAIOAttr.u32ChnCnt = aodevice->channel_counts;
     stAIOAttr.u32FrmNum = 25;
     stAIOAttr.u32PtNumPerFrm = 320;
 

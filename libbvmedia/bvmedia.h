@@ -64,6 +64,15 @@ enum BVMediaMessageType {
     BV_MEDIA_MESSAGE_TYPE_UNKNOW
 };
 
+enum BVMediaDriverMessageType {
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_NONE = -1,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_IN_IMAGING,
+};
+
 typedef struct _BVInputMedia {
     const char *name;
     const char *extensions;
@@ -109,8 +118,40 @@ typedef struct _BVMediaContext {
     char filename[1024];
     int nb_streams;
     BVStream **streams;
-//    BVChannel *channel;
 } BVMediaContext;
+
+enum BVMediaDriverType {
+    BV_MEDIA_DRIVER_TYPE_NONE = 0,
+    BV_MEDIA_DRIVER_TYPE_VIDEO = 1,
+    BV_MEDIA_DRIVER_TYPE_AUDIO = 2,
+    BV_MEDIA_DRIVER_TYPE_UNKNOWN,
+};
+
+enum BVMediaDriverID {
+    BV_MEDIA_DRIVER_ID_NONE,
+    BV_MEDIA_DRIVER_ID_TW2866,
+    BV_MEDIA_DRIVER_ID_TLV320,
+    BV_MEDIA_DRIVER_ID_UNKNOWN,
+};
+
+typedef struct _BVMediaDriverContext {
+    const BVClass *bv_class;
+    struct _BVMediaDriver *driver;
+    void *priv_data;
+    char filename[1024];
+} BVMediaDriverContext;
+
+typedef struct _BVMediaDriver {
+    const char *name;
+    enum BVMediaDriverID id;
+    enum BVMediaDriverType type;
+    const BVClass *priv_class;
+    int priv_data_size;
+    struct _BVMediaDriver *next;
+    int (*driver_open)(BVMediaDriverContext *s);
+    int (*driver_control)(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+    int (*driver_close)(BVMediaDriverContext *s);
+} BVMediaDriver;
 
 void bv_input_media_register(BVInputMedia *ifmt);
 
@@ -128,7 +169,7 @@ BVMediaContext *bv_media_context_alloc(void);
 
 void bv_media_context_free(BVMediaContext * devctx);
 
-int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
+int bv_input_media_open(BVMediaContext **fmt, const BVMediaChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
 
 BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c);
 
@@ -151,6 +192,24 @@ int bv_output_media_write_trailer(BVMediaContext *s);
 int bv_output_media_close(BVMediaContext **fmt);
 
 int bv_media_context_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
+/**
+ *  BVMediaDriver 
+ */
+void bv_media_driver_register(BVMediaDriver *driver);
+
+BVMediaDriver *bv_media_driver_next(const BVMediaDriver *driver);
+
+BVMediaDriverContext *bv_media_driver_context_alloc(void);
+
+void bv_media_driver_context_free(BVMediaDriverContext *s);
+
+int bv_media_driver_open(BVMediaDriverContext **s, const char *url, const char *short_name, BVMediaDriver *driver, BVDictionary **options);
+
+int bv_media_driver_close(BVMediaDriverContext **s);
+
+int bv_media_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
 #ifdef __cplusplus
 }
 #endif

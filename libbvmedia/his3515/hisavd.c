@@ -66,11 +66,13 @@ typedef struct HisAVDContext {
     int vodev;
     int vochn;
     int vdchn;
+    int vpacked;
 
     int aindex;
     int aodev;
     int aochn;
     int adchn;
+    int apacked;
 } HisAVDContext;
 
 static int destroy_video_decode_channel(BVMediaContext *s)
@@ -111,7 +113,10 @@ static int create_video_decode_channel(BVMediaContext *s, BVStream *stream)
     switch (stream->codec->codec_id) {
         case BV_CODEC_ID_H264:
         {
-            stH264Attr.enMode = H264D_MODE_FRAME;
+            stH264Attr.enMode = H264D_MODE_STREAM;
+            if (hisctx->vpacked) {
+                stH264Attr.enMode = H264D_MODE_FRAME;
+            }
             stH264Attr.u32PicWidth  = stream->codec->width;
             stH264Attr.u32PicHeight = stream->codec->height;
             stH264Attr.u32Priority = 0;
@@ -222,7 +227,10 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
             return BVERROR(EINVAL);
         }
     }
-    stChnAttr.enMode = ADEC_MODE_PACK;
+    stChnAttr.enMode = ADEC_MODE_STREAM;
+    if (hisctx->apacked) {
+        stChnAttr.enMode = ADEC_MODE_PACK;
+    }
     stChnAttr.u32BufSize = 30;
   
     s32Ret = HI_MPI_ADEC_CreateChn(hisctx->adchn, &stChnAttr);
@@ -343,8 +351,10 @@ static int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, co
 static const BVOption options[] = {
     { "vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64 = -1}, -1, 128, DEC},
+    { "vpacked", "", OFFSET(vpacked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 1, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64 = -1}, -1, 128, DEC},
+    { "apacked", "", OFFSET(apacked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 1, DEC},
     {NULL}
 };
 
