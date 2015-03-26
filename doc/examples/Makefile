@@ -47,7 +47,7 @@ LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto
 
 LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs -lpthread 
 
-EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exDriver exFile
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exDriver exFile exEncode 
 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))

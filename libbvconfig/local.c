@@ -46,16 +46,16 @@ static int local_probe(BVConfigContext *h, BVProbeData *p)
 }
 
 //url like: test.json.
-static int local_open(BVConfigContext *h, const char *url)
+static int local_open(BVConfigContext *h)
 {
     int ret = 0;
     BVDictionary *opn = NULL;
     LocalContext *localctx = h->priv_data;
+#if 0
     if (!url) {
         bv_log(h, BV_LOG_ERROR, "file name must set\n");
         return BVERROR(EINVAL);
     }
-#if 0
     if ((ret = bv_config_file_open(&h->pdb, url, NULL, &opn)) < 0) {
         bv_log(h, BV_LOG_ERROR, "open config error\n");
         return BVERROR(EINVAL);

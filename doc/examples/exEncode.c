@@ -41,6 +41,8 @@ int main(int argc, const char *argv[])
     BVVideoSourceDevice videv;
     BVVideoOutputDevice vodev;
 
+    pthread_t snapshot_t;
+
     BVAudioSourceDevice aidev;
     BVAudioOutputDevice aodev;
     bv_media_register_all();
@@ -155,72 +157,30 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
 
-    bv_dict_set(&opn, "atoken", "0/0", 0);
-    BVMediaContext *avoctx = NULL; 
-    if (bv_output_media_open(&avoctx, NULL, "hisavo", NULL, &opn) < 0) {
-        bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
-        bv_dict_free(&opn);
-        return 0;
-    }
-    BVStream *st = bv_stream_new(avoctx, NULL);
-    st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
-    st->codec->sample_rate = 8000;
-    st->time_base = (BVRational){1, 1000000};
-    st->codec->codec_id = BV_CODEC_ID_G726;
-    st->codec->channels = 1;
-
-    if (bv_output_media_write_header(avoctx, NULL) < 0) {
-        bv_log(avoctx, BV_LOG_ERROR, "write header error\n");
-        goto close;
+    BVMediaContext *avectx1 = NULL; 
+    bv_dict_set(&opn, "atoken", "1/0/0", 0);
+    bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G726, 0);
+    if (bv_input_media_open(&avectx1, NULL, "hisave://", NULL, &opn) < 0) {
+        bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
 
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    BVMediaContext *avdctx = NULL; 
+    int i = 0;
+    BVPacket pkt;
     BVIOContext *ioctx = NULL;
-    if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
+    if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_WRITE, NULL, NULL) < 0 ) {
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
-
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    bv_dict_set(&opn, "atoken", "0/0/1", 0);
-    bv_dict_set(&opn, "apacked", 1, 0);
-    if (bv_output_media_open(&avdctx, NULL, "hisavd", NULL, &opn) < 0) {
-        bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
-        bv_dict_free(&opn);
-        return 0;
-    }
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    st = bv_stream_new(avdctx, NULL);
-    st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
-    st->codec->sample_rate = 8000;
-    st->codec->codec_id = BV_CODEC_ID_G726;
-    st->codec->channels = 1;
-
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    if (bv_output_media_write_header(avdctx, NULL) < 0) {
-        bv_log(avoctx, BV_LOG_ERROR, "write header error\n");
-        goto close;
-    }
-
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    char data[200];
-    int size = 200;
-    int rsize = 0;
-
-    BVPacket apkt;
-    apkt.stream_index = 0;
-  printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    while (1) {
-        if ((rsize = bv_io_read(ioctx, data, size)) <= 0) {
-            break;
+     while ( i < 1000 ) {
+         bv_packet_init(&pkt);
+        if (bv_input_media_read(avectx1, &pkt) > 0 ) {
+                    bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
+                    bv_io_write(ioctx, pkt.data, pkt.size);
+                bv_packet_free(&pkt);
+                i ++;
+            }
         }
-        apkt.pts = bv_gettime();
-        apkt.data = data;
-        apkt.size = rsize;
-        bv_output_media_write(avdctx, &apkt);
-        bv_usleep(10000);
-    }
-close:
+
+    bv_io_close(ioctx);
     return 0;
 }
