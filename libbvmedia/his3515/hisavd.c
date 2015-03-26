@@ -73,7 +73,16 @@ typedef struct HisAVDContext {
     int aochn;
     int adchn;
     int apacked;
+    int abuf_size;
+    uint8_t *abuf;
+    uint8_t *abuf_ptr;
+    uint8_t *abuf_end;
 } HisAVDContext;
+
+typedef struct IntTable {
+    int a,b;
+    int c;
+} IntTable;
 
 static int destroy_video_decode_channel(BVMediaContext *s)
 {
@@ -156,9 +165,27 @@ fail:
     return BVERROR(EIO);
 }
 
+static int get_sample_format_size(enum BVSampleFormat fmt)
+{
+    int i = 0;
+    IntTable fmts[] = {
+        {BV_SAMPLE_FMT_U8, BV_SAMPLE_FMT_U8, 8},
+        {BV_SAMPLE_FMT_S16, BV_SAMPLE_FMT_S16P, 16},
+        {BV_SAMPLE_FMT_S32, BV_SAMPLE_FMT_S32P, 32},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(fmts); i++) {
+        if ((fmts[i].a == fmt) || (fmts[i].b == fmt))
+           return fmts[i].c; 
+    }
+    return 16;
+}
+
 static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
 {
     HisAVDContext *hisctx = s->priv_data;
+    BVCodecContext *codec = stream->codec;
+    int framerate = 25;
+    int sample_fmt = 16;
     ADEC_CHN_ATTR_S stChnAttr;
     
     ADEC_ATTR_LPCM_S stLpcmAttr;
@@ -209,6 +236,7 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
             stG726Attr.enG726bps = MEDIA_G726_32K;
             stChnAttr.enType = PT_G726;
             stChnAttr.pValue = &stG726Attr;
+            break;
         }
         case BV_CODEC_ID_ADPCM:
         {
@@ -219,6 +247,8 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
         }
         case BV_CODEC_ID_AAC:
         {
+            stChnAttr.enType = PT_AAC;
+            stChnAttr.pValue = &stAACAttr;
             break;
         }
         default:
@@ -231,7 +261,7 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
     if (hisctx->apacked) {
         stChnAttr.enMode = ADEC_MODE_PACK;
     }
-    stChnAttr.u32BufSize = 30;
+    stChnAttr.u32BufSize = 25;
   
     s32Ret = HI_MPI_ADEC_CreateChn(hisctx->adchn, &stChnAttr);
     BREAK_WHEN_SDK_FAILED("create adec channel error", s32Ret);
@@ -239,6 +269,23 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
     s32Ret = HI_MPI_AO_BindAdec(hisctx->aodev, hisctx->aochn, hisctx->adchn);
     BREAK_WHEN_SDK_FAILED("bind adec channel error", s32Ret);
 
+    sample_fmt = get_sample_format_size(codec->sample_fmt);
+    if (!codec->time_base.den || !codec->time_base.num) {
+        bv_log(s, BV_LOG_ERROR, "codec time base error using default 25\n");
+    } else {
+        framerate = codec->time_base.den / codec->time_base.num;
+    }
+    if (codec->codec_id == BV_CODEC_ID_LPCM) {
+        hisctx->abuf_size = codec->sample_rate * sample_fmt * codec->channels / (framerate * 8);
+    } else {
+        hisctx->abuf_size = 200;
+    }
+    hisctx->abuf = bv_mallocz(hisctx->abuf_size);
+    if (!hisctx->abuf) {
+        bv_log(s, BV_LOG_ERROR, "alloc audio buf size error\n");
+    }
+    hisctx->abuf_ptr = hisctx->abuf;
+    hisctx->abuf_end = hisctx->abuf + hisctx->abuf_size;
     bv_log(s, BV_LOG_DEBUG, "create audio decode channel %s success\n", hisctx->atoken);
     return 0;
 fail:
@@ -298,20 +345,64 @@ fail:
     return BVERROR(EIO);
 }
 
-static int write_audio_packet(BVMediaContext *s, BVPacket *pkt)
+static int write_audio_packet_internal(BVMediaContext *s, uint8_t *data, int size)
 {
     HisAVDContext *hisctx = s->priv_data;
     AUDIO_STREAM_S stStream;
     HI_S32 s32Ret = HI_FAILURE;
-
+    if (size <= 0) {
+        return 0;
+    }
     BBCLEAR_STRUCT(stStream);
-    stStream.u32Len = pkt->size;
-    stStream.u64TimeStamp = pkt->pts;
-    stStream.pStream = pkt->data;
+    if (s->streams[hisctx->aindex]->codec->codec_id != BV_CODEC_ID_LPCM) {
+        HI_S16 HiAudioHead[2] = {0x01<<8, 0};//海思音频流头
+        HiAudioHead[1] = size / sizeof(HI_S16);
+        stStream.u32Len = 4;
+        stStream.u64TimeStamp = 0;
+        stStream.pStream = (uint8_t *)HiAudioHead;
+        stStream.u32Seq = 0;
+
+        s32Ret = HI_MPI_ADEC_SendStream(hisctx->adchn, &stStream, HI_IO_BLOCK);
+        BREAK_WHEN_SDK_FAILED("send audio stream header error", s32Ret);
+        bv_log(s, BV_LOG_DEBUG, "write audio stream header ok\n");
+    }
+    BBCLEAR_STRUCT(stStream);
+    stStream.u32Len = size;
+    stStream.u64TimeStamp = 0;
+    stStream.pStream = data;
     stStream.u32Seq = 0;
 
     s32Ret = HI_MPI_ADEC_SendStream(hisctx->adchn, &stStream, HI_IO_BLOCK);
     BREAK_WHEN_SDK_FAILED("send audio stream error", s32Ret);
+    return size;
+fail:
+    return BVERROR(EIO);
+}
+
+static int write_audio_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    HisAVDContext *hisctx = s->priv_data;
+    int size = pkt->size;
+    uint8_t *buffer = pkt->data;
+    if (hisctx->apacked) {
+        return write_audio_packet_internal(s, buffer, size);
+    }
+
+    while (size > 0) {
+        int len = BBMIN(hisctx->abuf_end - hisctx->abuf_ptr, size);
+        memcpy(hisctx->abuf_ptr, buffer, len);
+        hisctx->abuf_ptr += len;
+
+        if (hisctx->abuf_ptr  >= hisctx->abuf_end) {
+            if (write_audio_packet_internal(s, hisctx->abuf, hisctx->abuf_ptr - hisctx->abuf) < 0) {
+                bv_log(s, BV_LOG_ERROR, "write audio stream error\n");
+                goto fail;
+            }
+            hisctx->abuf_ptr = hisctx->abuf;
+        }
+        buffer += len;
+        size -= len;
+    }
     bv_log(s, BV_LOG_DEBUG, "write audio stream ok\n");
     return pkt->size;
 fail:
@@ -336,6 +427,9 @@ static int his_write_trailer(BVMediaContext *s)
         destroy_video_decode_channel(s);
     }
     if (hisctx->aindex != -1) {
+        if (!hisctx->apacked) {
+            write_audio_packet_internal(s, hisctx->abuf, hisctx->abuf_ptr - hisctx->abuf);
+        }
         destroy_audio_decode_channel(s);
     }
     return 0;
@@ -354,7 +448,7 @@ static const BVOption options[] = {
     { "vpacked", "", OFFSET(vpacked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 1, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64 = -1}, -1, 128, DEC},
-    { "apacked", "", OFFSET(apacked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 1, DEC},
+    { "apacked", "", OFFSET(apacked), BV_OPT_TYPE_INT, {.i64 = 1}, -1, 128, DEC},
     {NULL}
 };
 

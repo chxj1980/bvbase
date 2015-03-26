@@ -160,7 +160,7 @@ static int create_audio_encode_channel(BVMediaContext *s)
         case BV_CODEC_ID_LPCM:
         {
             stChnAttr.enType = PT_LPCM;
-            stChnAttr.pValue = &stG726Attr;
+            stChnAttr.pValue = &stLpcmAttr;
             break;
         }
         case BV_CODEC_ID_G711A:
@@ -430,8 +430,13 @@ static int read_audio_packet(BVMediaContext *s, BVPacket *pkt)
         HI_MPI_AENC_ReleaseStream(hisctx->aechn, &stStream);
         return BVERROR(ENOMEM);
     }
-    memcpy(pkt->data, stStream.pStream, stStream.u32Len);
-    pkt->size = stStream.u32Len;
+    if (hisctx->acodec_id != BV_CODEC_ID_LPCM) {
+        memcpy(pkt->data, stStream.pStream + 4, stStream.u32Len - 4);
+        pkt->size = stStream.u32Len - 4;
+    } else {
+        memcpy(pkt->data, stStream.pStream, stStream.u32Len);
+        pkt->size = stStream.u32Len;
+    }
     pkt->pts = stStream.u64TimeStamp;
     pkt->dts = pkt->pts;
     pkt->flags |= BV_PKT_FLAG_KEY;

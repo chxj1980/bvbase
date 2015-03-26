@@ -47,7 +47,7 @@ int main(int argc, const char *argv[])
     bv_protocol_register_all();
 
 
-    bv_log_set_level(BV_LOG_DEBUG);
+    bv_log_set_level(BV_LOG_INFO);
     bv_system_register_all();
     sys = bv_system_find_system(BV_SYSTEM_TYPE_HIS3515);
     if (!sys) {
@@ -115,6 +115,7 @@ int main(int argc, const char *argv[])
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AOMDEV, &pkt_in, NULL) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "aodev config error\n");
     }
+
     BVMediaContext *avictx = NULL; 
     BVMediaContext *avictx1 = NULL; 
     BVMediaContext *avictx2 = NULL; 
@@ -174,7 +175,6 @@ int main(int argc, const char *argv[])
         goto close;
     }
 
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
     BVMediaContext *avdctx = NULL; 
     BVIOContext *ioctx = NULL;
     if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
@@ -182,35 +182,33 @@ printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__)
         return -1;
     }
 
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
+    bv_dict_free(&opn);
     bv_dict_set(&opn, "atoken", "0/0/1", 0);
-    bv_dict_set(&opn, "apacked", 1, 0);
+    bv_dict_set_int(&opn, "apacked", 0, 0);
     if (bv_output_media_open(&avdctx, NULL, "hisavd", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
         bv_dict_free(&opn);
         return 0;
     }
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
     st = bv_stream_new(avdctx, NULL);
     st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     st->codec->sample_rate = 8000;
     st->codec->codec_id = BV_CODEC_ID_G726;
+    st->codec->time_base = (BVRational) {1, 25};
+    st->codec->sample_fmt = BV_SAMPLE_FMT_S16;
     st->codec->channels = 1;
 
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    if (bv_output_media_write_header(avdctx, NULL) < 0) {
+    if (bv_output_media_write_header(avdctx, &opn) < 0) {
         bv_log(avoctx, BV_LOG_ERROR, "write header error\n");
         goto close;
     }
 
-printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
-    char data[200];
-    int size = 200;
+    char data[800];
+    int size = sizeof(data);
     int rsize = 0;
 
     BVPacket apkt;
     apkt.stream_index = 0;
-  printf("run here >>>>> FILE %s func %s LINE %d\n", __FILE__, __func__, __LINE__);
     while (1) {
         if ((rsize = bv_io_read(ioctx, data, size)) <= 0) {
             break;

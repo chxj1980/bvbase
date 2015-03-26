@@ -171,7 +171,7 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
-     while ( i < 1000 ) {
+     while ( i < 1000) {
          bv_packet_init(&pkt);
         if (bv_input_media_read(avectx1, &pkt) > 0 ) {
                     bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
