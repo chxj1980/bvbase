@@ -203,7 +203,7 @@ int main(int argc, const char *argv[])
         goto close;
     }
 
-    char data[800];
+    char data[4096];
     int size = sizeof(data);
     int rsize = 0;
 

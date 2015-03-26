@@ -185,6 +185,7 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
     HisAVDContext *hisctx = s->priv_data;
     BVCodecContext *codec = stream->codec;
     int framerate = 25;
+    int buf_size = 320;
     int sample_fmt = 16;
     ADEC_CHN_ATTR_S stChnAttr;
     
@@ -275,10 +276,16 @@ static int create_audio_decode_channel(BVMediaContext *s, BVStream *stream)
     } else {
         framerate = codec->time_base.den / codec->time_base.num;
     }
+    if (!framerate) {
+        framerate = 25;
+    }
+    buf_size = codec->sample_rate * sample_fmt * codec->channels / (framerate * 8);
     if (codec->codec_id == BV_CODEC_ID_LPCM) {
-        hisctx->abuf_size = codec->sample_rate * sample_fmt * codec->channels / (framerate * 8);
+        hisctx->abuf_size = buf_size;
+    } else if (codec->codec_id == BV_CODEC_ID_G726){
+        hisctx->abuf_size = buf_size / 4;
     } else {
-        hisctx->abuf_size = 200;
+        hisctx->abuf_size = buf_size / 2;
     }
     hisctx->abuf = bv_mallocz(hisctx->abuf_size);
     if (!hisctx->abuf) {
@@ -431,6 +438,7 @@ static int his_write_trailer(BVMediaContext *s)
             write_audio_packet_internal(s, hisctx->abuf, hisctx->abuf_ptr - hisctx->abuf);
         }
         destroy_audio_decode_channel(s);
+        bv_free(hisctx->abuf);
     }
     return 0;
 }

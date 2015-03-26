@@ -159,7 +159,7 @@ int main(int argc, const char *argv[])
 
     BVMediaContext *avectx1 = NULL; 
     bv_dict_set(&opn, "atoken", "1/0/0", 0);
-    bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G726, 0);
+    bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G711A, 0);
     if (bv_input_media_open(&avectx1, NULL, "hisave://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -167,7 +167,7 @@ int main(int argc, const char *argv[])
     int i = 0;
     BVPacket pkt;
     BVIOContext *ioctx = NULL;
-    if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_WRITE, NULL, NULL) < 0 ) {
+    if (bv_io_open(&ioctx, "/tmp/xx.g711", BV_IO_FLAG_WRITE, NULL, NULL) < 0 ) {
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
