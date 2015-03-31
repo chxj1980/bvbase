@@ -66,6 +66,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "bitrate %d\n", video_encoder.codec_context.bit_rate);
 
+#if 0
     if (bv_config_get_audio_encoder(config_ctx, 0, 0, &audio_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio encoder error\n");
     }
@@ -92,6 +93,7 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "url %s\n", ((BVMobileDevice *)(media_dev.devinfo))->url);
     bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
+    bv_free(media_dev.devinfo);
 
     if (bv_config_get_video_source_device(config_ctx, 0, &vs_dev) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video source devices error\n");
@@ -124,6 +126,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "channels %d\n", as.channels);
     bv_log(config_ctx, BV_LOG_INFO, "input_type %d\n", as.input_type);
 
+#endif
     bv_log(config_ctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>end\n");
     bv_config_file_close(&config_ctx->pdb);
     bv_config_close(&config_ctx);

@@ -26,6 +26,7 @@
 #include <libbvsystem/bvsystem.h>
 #include <libbvconfig/common.h>
 #include <libbvutil/bvstring.h>
+#include <libbvutil/time.h>
 
 //FIXME c99 not support asm
 #define asm __asm__
@@ -425,6 +426,17 @@ fail:
     return BVERROR(EINVAL);
 }
 
+static int his3515_sync_pts(BVSystemContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    HI_S32 s32Ret = HI_FAILURE;
+    int64_t cur_pts = bv_gettime_relative();
+    s32Ret = HI_MPI_SYS_SyncPts(cur_pts);
+    BREAK_WHEN_SDK_FAILED("sync pts error", s32Ret);
+    return 0;
+fail:
+    return BVERROR(EIO);
+}
+
 static int his3515_system_control(BVSystemContext *s, enum BVSystemMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int i = 0;
@@ -432,6 +444,7 @@ static int his3515_system_control(BVSystemContext *s, enum BVSystemMessageType t
         enum BVSystemMessageType type;
         int (*control)(BVSystemContext *h, const BVControlPacket *, BVControlPacket *);
     } system_control[] = {
+        { BV_SYS_MESSAGE_TYPE_SYNPTS, his3515_sync_pts},
         { BV_SYS_MESSAGE_TYPE_VIUDEV, his3515_videv_config},
         { BV_SYS_MESSAGE_TYPE_VOUDEV, his3515_vodev_config},
         { BV_SYS_MESSAGE_TYPE_AIMDEV, his3515_aidev_config},

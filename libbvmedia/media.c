@@ -119,13 +119,13 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
         ret = BVERROR(ENOSYS); 
         goto fail;
     }
-    *fmt = s;
 
     bv_dict_free(&tmp);
     ret = s->imedia->read_header(s);
     if (ret) {
         goto fail;
     }
+    *fmt = s;
     return 0;
 fail:
     bv_dict_free(&tmp);

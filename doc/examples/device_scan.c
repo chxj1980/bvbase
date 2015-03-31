@@ -30,10 +30,12 @@ int main(int argc, const char *argv[])
 {
     BVDeviceContext *devctx = NULL; 
     BVMobileDevice *device = NULL ;
+    BVMobileDevice ipc;
     BVDictionary *opn = NULL;
+    BVControlPacket pkt_in;
     BVControlPacket pkt_out;
     bv_device_register_all();
-    bv_dict_set(&opn, "timeout", "5", 0);
+    bv_dict_set(&opn, "timeout", "1", 0);
     if (bv_device_open(&devctx, "onvif_dev://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error \n");
         bv_dict_free(&opn);
@@ -53,6 +55,15 @@ int main(int argc, const char *argv[])
         //NOTICE free data
         bv_free(pkt_out.data);
     }
+    /**
+     *  detect ipc whether on line
+     *  return 0 online otherwise off line
+     */
+    bv_sprintf(ipc.url, sizeof(ipc.url), "http://192.168.6.149:80/onvif/device_service");
+    ipc.timeout = 1;
+    pkt_in.data = (void *)&ipc;
+    bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_DETECT_IPC, &pkt_in, NULL);
+
     bv_dict_free(&opn);
     bv_device_close(&devctx);
     return 0;

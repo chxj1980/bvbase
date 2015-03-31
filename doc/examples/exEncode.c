@@ -41,8 +41,6 @@ int main(int argc, const char *argv[])
     BVVideoSourceDevice videv;
     BVVideoOutputDevice vodev;
 
-    pthread_t snapshot_t;
-
     BVAudioSourceDevice aidev;
     BVAudioOutputDevice aodev;
     bv_media_register_all();

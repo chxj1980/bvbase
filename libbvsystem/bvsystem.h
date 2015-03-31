@@ -48,6 +48,7 @@ typedef struct _BVSystemVODev {
 enum BVSystemMessageType {
     BV_SYS_MESSAGE_TYPE_NONE = -1,
     BV_SYS_MESSAGE_TYPE_REBOOT,
+    BV_SYS_MESSAGE_TYPE_SYNPTS,     //sync system pts
     BV_SYS_MESSAGE_TYPE_VIUDEV,     //video input unit device
     BV_SYS_MESSAGE_TYPE_VOUDEV,     //video output unit device
     BV_SYS_MESSAGE_TYPE_AIMDEV,     //audio input mode
