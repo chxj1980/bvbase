@@ -8,6 +8,7 @@
             "channels": 16,
             "sample_format": 16,
             "sample_rate": 8000,
+            "sample_points":320,
             "work_mode": "I2S_SLAVE"
         },
         {
@@ -64,14 +65,14 @@
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 },
                 {
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 }
             ],
@@ -87,14 +88,14 @@
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 },
                 {
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 }
             ],
@@ -110,14 +111,14 @@
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 },
                 {
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 }
             ],
@@ -133,14 +134,14 @@
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 },
                 {
                     "luminance": 128,
                     "contrast": 128,
                     "hue": 128,
-                    "satuature": 128,
+                    "saturation": 128,
                     "sharpness": 128
                 }
             ],

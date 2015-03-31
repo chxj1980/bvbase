@@ -99,12 +99,12 @@ int bv_config_open(BVConfigContext **h, const char *url, BVConfig *config, BVDic
         ret = BVERROR(ENOSYS); 
         goto fail;
     }
-    *h = s;
 
     bv_dict_free(&tmp);
     if((ret = s->config->config_open(s)) < 0) {
         goto fail;
     }
+    *h = s;
     return 0;
 fail:
     bv_dict_free(&tmp);

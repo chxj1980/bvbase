@@ -28,8 +28,10 @@
 
 typedef struct H264ParserContext {
     const BVClass *bv_class;
-    uint8_t *buf;
-    uint32_t buf_size;
+    uint8_t *buffer;
+    uint8_t *buffer_ptr;
+    uint8_t *buffer_end;
+    uint32_t buffer_size;
     uint32_t size;
     uint8_t *sps[MAX_SPS_COUNT];
     uint8_t *pps[MAX_PPS_COUNT];
@@ -40,12 +42,14 @@ typedef struct H264ParserContext {
 static int h264_parser_init(BVCodecParserContext *s)
 {
     H264ParserContext *p = s->priv_data;
-    p->buf_size = MAX_MBPAIR_SIZE;
+    p->buffer_size = MAX_MBPAIR_SIZE;
     bv_log(s, BV_LOG_DEBUG, "h264_parser_init\n");
-    if (!(p->buf = bv_mallocz(p->buf_size))) {
-        bv_log(s, BV_LOG_ERROR, "malloc H264 parser buf error\n");
+    if (!(p->buffer = bv_mallocz(p->buffer_size))) {
+        bv_log(s, BV_LOG_ERROR, "malloc H264 parser buffer error\n");
         return BVERROR(ENOMEM);
     }
+    p->buffer_ptr = p->buffer;
+    p->buffer_end = p->buffer + p->buffer_size;
     p->size = 0;
     return 0;
 }
@@ -53,8 +57,8 @@ static int h264_parser_init(BVCodecParserContext *s)
 static int h264_parser_exit(BVCodecParserContext *s)
 {
     H264ParserContext *p = s->priv_data;
-    if (p->buf) {
-        bv_free(p->buf);
+    if (p->buffer) {
+        bv_free(p->buffer);
     }
     bv_log(s, BV_LOG_DEBUG, "h264_parser_exit\n");
     return 0;
@@ -68,7 +72,7 @@ static int h264_find_start_code(const uint8_t *data, int size)
     for (i = 0; i < size - 4; i++) {
         if ((data[i] == 0) && (data[i + 1] == 0) && (data[i + 2] == 0) && (data[i + 3] == 1)) {
             return i;
-        } 
+        }
     }
     return -1;
 }
