@@ -6,6 +6,7 @@
             "dev": "/dev/tw2865dev",
             "channel_mode": 1,
             "channels": 16,
+            "audio_sources":4,
             "sample_format": 16,
             "sample_rate": 8000,
             "sample_points":320,
@@ -17,8 +18,10 @@
             "dev": "/dev/tlv320aic23",
             "channel_mode": 1,
             "channels": 16,
+            "audio_sources":1,
             "sample_format": 16,
             "sample_rate": 8000,
+            "sample_points":320,
             "work_mode": "I2S_SLAVE"
         }
     ],
@@ -27,6 +30,7 @@
             "token": "0",
             "chip": "tw2866",
             "dev": "/dev/tw2865dev",
+            "video_sources":4,
             "interface": "BT656",
             "work_mode": "4D1"
         }
@@ -38,8 +42,10 @@
             "dev": "/dev/tlv320aic23",
             "channel_mode": 1,
             "channels": 2,
+            "audio_outputs":2,
             "sample_format": 16,
             "sample_rate": 8000,
+            "sample_points":320,
             "work_mode": "I2S_SLAVE"
         }
     ],
@@ -48,6 +54,7 @@
             "token": "2",
             "chip": "tw2866",
             "dev": "/dev/tw2865dev",
+            "video_outputs":4,
             "interface": "CVBS",
             "work_mode": "PAL",
             "display": {
@@ -276,18 +283,6 @@
             "token": "0/1",
             "volume": 80
         },
-        {
-            "token": "0/2",
-            "volume": 80
-        },
-        {
-            "token": "0/3",
-            "volume": 80
-        },
-        {
-            "token": "0/4",
-            "volume": 80
-        }
     ],
     "video_encoder_options": [
         [

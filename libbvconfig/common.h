@@ -137,6 +137,7 @@ typedef struct _BVVideoSourceDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
+    uint8_t video_sources;
     char interface[BV_MAX_NAME_LEN];    //BT656 BT601 BT1120P BT1120I
     char work_mode[BV_MAX_NAME_LEN];     //for BT656 4D1 4HALFD1 2D1 
 } BVVideoSourceDevice;
@@ -145,6 +146,7 @@ typedef struct _BVVideoOutputDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
+    uint8_t video_outputs;
     char interface[BV_MAX_NAME_LEN];    //CVBS HDMI
     char work_mode[BV_MAX_NAME_LEN];    //PAL NTSC AUTO
     BVIntRectange display;
@@ -156,8 +158,11 @@ typedef struct _BVAudioSourceDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
+    uint8_t audio_sources;
     uint8_t sample_format;
     int sample_rate;
+    int sample_points;
+
     char work_mode[BV_MAX_NAME_LEN];     //I2S_SALVE I2S_MASTER 
 } BVAudioSourceDevice;
 
@@ -167,8 +172,10 @@ typedef struct _BVAudioOutputDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
+    uint8_t audio_outputs;
     uint8_t sample_format;
     int sample_rate;
+    int sample_points;
     char work_mode[BV_MAX_NAME_LEN];     //I2S_SLAVE I2S_MASTER 
 } BVAudioOutputDevice;
 
