@@ -45,6 +45,11 @@ int main(int argc, const char *argv[])
         bv_log(config_ctx, BV_LOG_ERROR, "open config file error\n");
         return BVERROR(EINVAL);
     }
+
+    /**
+     *  FIXME
+     *  system.json
+     */
 #if 0
     if (bv_config_get_device_info(config_ctx, &devinfo) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get device info error\n");
@@ -52,6 +57,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "id %s\n", devinfo.device_id);
     bv_log(config_ctx, BV_LOG_INFO, "hardware_model %s\n", devinfo.hardware_model);
 #endif
+
     if (bv_config_get_video_encoder(config_ctx, 3, 2, &video_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video encoder error\n");
     }
@@ -66,7 +72,6 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "bitrate %d\n", video_encoder.codec_context.bit_rate);
 
-#if 0
     if (bv_config_get_audio_encoder(config_ctx, 0, 0, &audio_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio encoder error\n");
     }
@@ -95,6 +100,23 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
     bv_free(media_dev.devinfo);
 
+    media_dev.devinfo = bv_mallocz(sizeof(BVMobileDevice));
+    if (!media_dev.devinfo) {
+        bv_log(config_ctx, BV_LOG_ERROR, ">>>>>>>>>>malloc failed\n");
+    }
+    strncpy(((BVMobileDevice *)(media_dev.devinfo))->pswd, "12345", sizeof(((BVMobileDevice *)(media_dev.devinfo))->pswd));
+    strncpy(((BVMobileDevice *)(media_dev.devinfo))->user, "admin", sizeof(((BVMobileDevice *)(media_dev.devinfo))->user));
+    strncpy(((BVMobileDevice *)(media_dev.devinfo))->url, "http://192.168.6.149:80/onvif/device_service", 
+                        sizeof(((BVMobileDevice *)(media_dev.devinfo))->url));
+    if (bv_config_set_media_device(config_ctx, 0, &media_dev) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "set media devie error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "passwd %s\n", ((BVMobileDevice *)(media_dev.devinfo))->pswd);
+    bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
+    if (media_dev.devinfo) {
+        bv_free(media_dev.devinfo);
+    }
+
     if (bv_config_get_video_source_device(config_ctx, 0, &vs_dev) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video source devices error\n");
     }
@@ -119,6 +141,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "framerate %f\n", vs.framerate);
     bv_log(config_ctx, BV_LOG_INFO, "width %d height %d\n", vs.bounds.width, vs.bounds.height);
     bv_log(config_ctx, BV_LOG_INFO, "day_capture hour %d minute %d second %d\n", vs.day_capture.date_time.hour, vs.day_capture.date_time.minute, vs.day_capture.date_time.second);
+    bv_log(config_ctx, BV_LOG_INFO, "day_capture hour %d minute %d second %d\n", vs.day_capture.date_time.hour, vs.day_capture.date_time.minute, vs.day_capture.date_time.second);
 
     if (bv_config_get_audio_source(config_ctx, 0, &as) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio source error\n");
@@ -126,7 +149,6 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "channels %d\n", as.channels);
     bv_log(config_ctx, BV_LOG_INFO, "input_type %d\n", as.input_type);
 
-#endif
     bv_log(config_ctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>end\n");
     bv_config_file_close(&config_ctx->pdb);
     bv_config_close(&config_ctx);

@@ -243,9 +243,20 @@ enum BVMediaDeviceType {
     BV_MEDIA_DEVICE_TYPE_UNKNOW,
 };
 
+enum BVMediaStreamType {
+    BV_MEDIA_STREAM_TYPE_NONE = 0,
+    BV_MEDIA_STREAM_TYPE_BRD_VIDEO = 1,
+    BV_MEDIA_STREAM_TYPE_BRD_AUDIO = 2,
+    BV_MEDIA_STREAM_TYPE_IPC_VIDEO = 4,
+    BV_MEDIA_STREAM_TYPE_IPC_AUDIO = 8,
+};
+
 typedef struct _BVMediaDevice {
     char name[BV_MAX_NAME_LEN];
-    enum BVMediaDeviceType type; 
+    enum BVMediaStreamType video_type;
+    enum BVMediaStreamType audio_type; 
+    uint8_t video_channel;
+    uint8_t audio_channel;
     void *devinfo;
 } BVMediaDevice;
 
