@@ -57,7 +57,7 @@ BVMediaContext *bv_media_context_alloc(void)
 {
     BVMediaContext *s = bv_mallocz(sizeof(BVMediaContext));
     if (!s) {
-        bv_log(NULL, BV_LOG_ERROR, "malloc BVMediaContext error");
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVMediaContext error\n");
         return NULL;
     }
     bv_media_context_get_default(s);
@@ -85,3 +85,47 @@ void bv_media_context_free(BVMediaContext * s)
     return; 
 }
 
+static const char * driver_to_name(void *ptr)
+{
+    BVMediaDriverContext *dc = (BVMediaDriverContext *)ptr;
+    if (dc->driver->name)
+        return dc->driver->name;
+    return "NULL";
+}
+static const BVClass bv_media_driver_context_class = {
+    .class_name     = "BVMediaDriverContext",
+    .item_name      = driver_to_name,
+    .option         = driver_options,
+    .version        = LIBBVUTIL_VERSION_INT,
+    .category       = BV_CLASS_CATEGORY_DEVICE,
+};
+
+static void bv_media_driver_context_get_default(BVMediaDriverContext *driver)
+{
+    driver->bv_class = &bv_media_driver_context_class;
+    bv_opt_set_defaults(driver);
+}
+
+BVMediaDriverContext *bv_media_driver_context_alloc(void)
+{
+    BVMediaDriverContext *s = bv_mallocz(sizeof(BVMediaDriverContext));
+    if (!s) {
+        bv_log(NULL, BV_LOG_ERROR, "malloc BVMediaDriverContext error\n");
+        return NULL;
+    }
+    bv_media_driver_context_get_default(s);
+    return s;
+}
+
+void bv_media_driver_context_free(BVMediaDriverContext *s)
+{
+    if (!s) 
+        return;
+    bv_opt_free(s);
+    if (s->driver && s->driver->priv_class && s->priv_data)
+        bv_opt_free(s->priv_data);
+
+    bv_freep(&s->priv_data);
+    bv_free(s);
+    return; 
+}

@@ -1,6 +1,6 @@
 include $(SUBDIR)../config.mak
 
-NAME = bvutil
+NAME    = bvutil
 
 HEADERS = adler32.h                                                     \
           aes.h                                                         \

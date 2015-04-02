@@ -271,6 +271,16 @@ static inline bv_const int bv_tolower(int c)
 }
 
 /**
+ * Remember to bv_free the result
+ */
+char *bv_touppers(const char *str);
+
+/**
+ * Remember to bv_free the result
+ */
+char *bv_tolowers(const char *str);
+
+/**
  * Locale-independent conversion of ASCII isxdigit.
  */
 bv_const int bv_isxdigit(int c);
@@ -310,6 +320,8 @@ const char *bv_dirname(char *path);
  * @return 1 on match, 0 otherwise.
  */
 int bv_match_name(const char *name, const char *names);
+
+int bv_match_ext(const char *name, const char *extensions);
 
 enum BVEscapeMode {
     BV_ESCAPE_MODE_AUTO,      ///< Use auto-selected escaping mode.

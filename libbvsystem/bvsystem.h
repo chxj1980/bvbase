@@ -31,6 +31,7 @@ extern "C"{
 #include <libbvutil/bvutil.h>
 #include <libbvutil/opt.h>
 #include <libbvutil/dict.h>
+#include <libbvutil/packet.h>
 
 /**
  * FIXME
@@ -44,18 +45,38 @@ typedef struct _BVSystemVODev {
     int index;      //index in BVSystemContext
 } BVSystemVODev;
 
+enum BVSystemMessageType {
+    BV_SYS_MESSAGE_TYPE_NONE = -1,
+    BV_SYS_MESSAGE_TYPE_REBOOT,
+    BV_SYS_MESSAGE_TYPE_SYNPTS,     //sync system pts
+    BV_SYS_MESSAGE_TYPE_VIUDEV,     //video input unit device
+    BV_SYS_MESSAGE_TYPE_VOUDEV,     //video output unit device
+    BV_SYS_MESSAGE_TYPE_AIMDEV,     //audio input mode
+    BV_SYS_MESSAGE_TYPE_AOMDEV,     //audio output mode
+    BV_SYS_MESSAGE_TYPE_SIODEV,     //sonic input ouput device
+    BV_SYS_MESSAGE_TYPE_CLSWDG,     //close watch dog
+    BV_SYS_MESSAGE_TYPE_SYSUGD,     //system upgrade
+    BV_SYS_MESSAGE_TYPE_DATUGD,     //data upgrade
+    BV_SYS_MESSAGE_TYPE_CFGUGD,     //config upgrade
+    BV_SYS_MESSAGE_TYPE_DATBKP,     //data backup
+    BV_SYS_MESSAGE_TYPE_CFGBKP,     //config backup
+    BV_SYS_MESSAGE_TYPE_STTIME,     //set time
+    BV_SYS_MESSAGE_TYPE_STZONE,     //set time zone
+
+    BV_SYS_MESSAGE_TYPE_UNKNOW
+};
+
 typedef struct _BVSystemContext {
     const BVClass *bv_class;
     struct _BVSystem *system;
-    BVSystemVIDev **videv;
-    int nb_videv;
     void *priv_data;
-    size_t priv_data_size;
 } BVSystemContext;
 
 enum BVSystemType {
     BV_SYSTEM_TYPE_NONE = 0,
+    BV_SYSTEM_TYPE_X86,
     BV_SYSTEM_TYPE_HIS3515,
+    BV_SYSTEM_TYPE_HIS3516,
 };
 
 typedef struct _BVSystem {
@@ -65,11 +86,8 @@ typedef struct _BVSystem {
     int priv_data_size;
     struct _BVSystem *next;
     int (*sys_init)(BVSystemContext *sysctx);
-    int (*sys_deinit)(BVSystemContext *sysctx);
-    int (*sys_vienable)(BVSystemContext *sysctx, int index);
-    int (*sys_vidisable)(BVSystemContext *sysctx, int index);
-    int (*sys_voenable)(BVSystemContext *sysctx, int index);
-    int (*sys_vodisable)(BVSystemContext *sysctx, int index);
+    int (*sys_exit)(BVSystemContext *sysctx);
+    int (*sys_control)(BVSystemContext *sysctx, enum BVSystemMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 } BVSystem;
 
 void bv_system_register_all(void);
@@ -84,7 +102,12 @@ BVSystemContext *bv_system_context_alloc(void);
 
 void bv_system_context_free(BVSystemContext * sysctx);
 
-int bv_system_new_videv(BVSystemContext *sysctx, BVSystemVIDev *vi);
+int bv_system_init(BVSystemContext **h, BVSystem *sys, BVDictionary **options);
+
+int bv_system_exit(BVSystemContext **h);
+
+int bv_system_control(BVSystemContext *h, enum BVSystemMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
 #ifdef __cplusplus
 }
 #endif

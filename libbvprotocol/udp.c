@@ -550,7 +550,7 @@ static int parse_source_list(char *buf, char **sources, int *num_sources,
 
 /* put it in UDP context */
 /* return non zero if error */
-static int udp_open(BVURLContext *h, const char *uri, int flags)
+static int udp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **options)
 {
     char hostname[1024], localaddr[1024] = "";
     int port, udp_fd = -1, tmp, bind_ret = -1, dscp = -1;
@@ -828,17 +828,17 @@ static int udp_open(BVURLContext *h, const char *uri, int flags)
     return BVERROR(EIO);
 }
 
-static int udplite_open(BVURLContext *h, const char *uri, int flags)
+static int udplite_open(BVURLContext *h, const char *uri, int flags, BVDictionary **options)
 {
     UDPContext *s = h->priv_data;
 
     // set default checksum coverage
     s->udplite_coverage = UDP_HEADER_SIZE;
 
-    return udp_open(h, uri, flags);
+    return udp_open(h, uri, flags, options);
 }
 
-static int udp_read(BVURLContext *h, void *buf, size_t size)
+static int udp_read(BVURLContext *h, uint8_t *buf, size_t size)
 {
     UDPContext *s = h->priv_data;
     int ret;
@@ -897,7 +897,7 @@ static int udp_read(BVURLContext *h, void *buf, size_t size)
     return ret < 0 ? bb_neterrno() : ret;
 }
 
-static int udp_write(BVURLContext *h, const void *buf, size_t size)
+static int udp_write(BVURLContext *h, const uint8_t *buf, size_t size)
 {
     UDPContext *s = h->priv_data;
     int ret;

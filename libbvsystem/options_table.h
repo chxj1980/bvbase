@@ -32,9 +32,7 @@
 #define E   BV_OPT_FLAG_ENCODING_PARAM
 
 static const BVOption system_options[] = {
-//    {"buffer_size", NULL, OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 4096}, 0, INT_MAX, E},
-
-    {NULL}
+    { NULL }
 };
 
 #endif /* end of include guard: BV_OPTIONS_TABLE_H */

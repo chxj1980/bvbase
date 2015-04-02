@@ -21,11 +21,38 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#line 25 "mux.c"
+
 #include "bvmedia.h"
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
 
-static const char *FILE_NAME = "mux.c";
+BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename,
+                                const char *mime_type)
+{
+    BVOutputMedia *fmt = NULL, *fmt_found;
+    int score_max, score;
+
+    /* Find the proper file type. */
+    fmt_found = NULL;
+    score_max = 0;
+    while ((fmt = bv_output_media_next(fmt))) {
+        score = 0;
+        if (fmt->name && short_name && bv_match_name(short_name, fmt->name))
+            score += 100;
+        if (fmt->mime_type && mime_type && !strcmp(fmt->mime_type, mime_type))
+            score += 10;
+        if (filename && fmt->extensions &&
+            bv_match_ext(filename, fmt->extensions)) {
+            score += 5;
+        }
+        if (score > score_max) {
+            score_max = score;
+            fmt_found = fmt;
+        }
+    }
+    return fmt_found;
+}
 
 int bv_output_media_open(BVMediaContext **fmt, const char *url, const char *format, BVOutputMedia *media, BVDictionary **options)
 {
@@ -35,7 +62,7 @@ int bv_output_media_open(BVMediaContext **fmt, const char *url, const char *form
     if (!s && !(s = bv_media_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 
@@ -157,7 +184,8 @@ fail:
 int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options)
 {
     int ret = 0;
-
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
     if (ret = init_muxer(s, options))
         return ret;
 
@@ -170,12 +198,63 @@ int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options)
     return 0;
 }
 
+static int check_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    if (!pkt)
+        return 0;
+    if (pkt->stream_index < 0 || pkt->stream_index >= s->nb_streams) {
+        bv_log(s, BV_LOG_ERROR, "Invalid Packet index %d\n", pkt->stream_index);
+        return BVERROR(EINVAL);
+    }
+    return 0;
+}
+
+static int write_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    return s->omedia->write_packet(s, pkt);
+}
+
 int bv_output_media_write(BVMediaContext *s, BVPacket *pkt)
 {
-    return BVERROR(ENOSYS);
+    int ret;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    if (!s->omedia->write_packet)
+        return BVERROR(ENOSYS);
+    ret = check_packet(s, pkt);
+    if (ret < 0)
+        return ret;
+    if (!pkt) {
+        //NULL Packet
+    }
+    ret = write_packet(s, pkt);
+    return ret;
+}
+
+static int write_trailer(BVMediaContext *s)
+{
+    return s->omedia->write_trailer(s);
+}
+
+int bv_output_media_write_trailer(BVMediaContext *s)
+{
+    int ret;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    if (!s->omedia->write_trailer)
+        return BVERROR(ENOSYS);
+    ret = write_trailer(s);
+    if (s->pb)
+        bv_io_flush(s->pb);
+    return ret;
 }
 
 int bv_output_media_close(BVMediaContext **fmt)
 {
-    return BVERROR(ENOSYS);
+    BVMediaContext *s = *fmt;
+    if (!s || !s->omedia)
+        return BVERROR(EINVAL);
+    bv_media_context_free(s);
+    *fmt = NULL;
+    return 0;
 }

@@ -34,6 +34,7 @@ extern "C"{
 #include <libbvutil/packet.h>
 
 #include <libbvconfig/common.h>
+#include <time.h>
 
 enum BVDeviceType {
     BV_DEVICE_TYPE_NONE = -1,
@@ -56,45 +57,43 @@ enum BVDeviceMessageType {
 
     //PTZ Message Type
     BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE,
-#if 0
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT,
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_DOWN,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT,
-    BV_DEV_MESSAGE_TYPE_PTZ_RIGHT_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_LEFT_UP,
-    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_IN,
-    BV_DEV_MESSAGE_TYPE_PTZ_ZOOM_OUT,
-#endif
     BV_DEV_MESSAGE_TYPE_PTZ_STOP,
     BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET,
     BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET,
     BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET,
 
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
-
+    BV_DEV_MESSAGE_TYPE_SEARCH_FILE,
+    
+    BV_DEV_MESSAGE_TYPE_SEARCH_IPC,
+    BV_DEV_MESSAGE_TYPE_DETECT_IPC,     //检测IPC设备是否在线
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
-enum BVMobileDeviceType {
-    BV_MOBILE_DEVICE_TYPE_NONE = 0,
-    BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
-    BV_MOBILE_DEVICE_TYPE_NVT = (1 << 1),
-    BV_MOBILE_DEVICE_TYPE_NVA = (1 << 2),
-    BV_MOBILE_DEVICE_TYPE_NVD = (1 << 3),
+typedef struct _BVDiskDevice {
+    int index;
+    int type;
+    char name[128];
+} BVDiskDevice;
 
-    BV_MOBILE_DEVICE_TYPE_UNKNOWN,
-};
+typedef struct _BVSearchFileConditions {
+    time_t start_time;
+    time_t end_time;
+    uint8_t channel_id;
+    uint8_t file_type;
+    uint32_t storage_type;
+} BVSearchFileConditions;
 
-typedef struct _BVMobileDevice {
-    enum BVMobileDeviceType type;
-    char url[1024];
-    char user[64];
-    char pswd[64];
-    int  timeout;
-} BVMobileDevice;
+typedef struct _BVFileInfo {
+    char name[255];
+    time_t start_time;
+    time_t end_time;
+    uint8_t channel_id;
+    uint8_t file_type;
+    uint8_t disk_id;
+    uint32_t storage_type;
+    uint64_t file_size;
+} BVFileInfo;
 
 typedef struct _BVDeviceContext {
     const BVClass *bv_class;
@@ -115,7 +114,6 @@ typedef struct _BVDevice {
     int priv_data_size;
     int flags;
     struct _BVDevice *next;
-    int     (*dev_scan)( BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
     int     (*dev_open)( BVDeviceContext *h);
     int     (*dev_read)( BVDeviceContext *h, unsigned char *buf, size_t size);
     int     (*dev_write)(BVDeviceContext *h, const unsigned char *buf, size_t size);
@@ -142,8 +140,8 @@ void bv_device_context_free(BVDeviceContext *devctx);
  * @Synopsis        open a device
  *
  * @Param h         *h can be NULL if not the internal will malloc memory
- * @Param dev       device handle can be NULL ,But Not Support Now FIXME
  * @Param url       device url 
+ * @Param dev       device handle can be NULL 
  * @Param options   device private field
  *                  BVDictionary *options = NULL;
  *                  bv_dict_set(&options, "baud_rate", "51200", 0);
@@ -153,9 +151,7 @@ void bv_device_context_free(BVDeviceContext *devctx);
  *
  * @Returns         <0 fail ==0 success
  */
-int bv_device_open(BVDeviceContext **h, BVDevice *dev, const char *url, BVDictionary **options);
-
-int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret);
+int bv_device_open(BVDeviceContext **h, const char *url, BVDevice *dev, BVDictionary **options);
 
 int bv_device_read(BVDeviceContext *h, void *buf, size_t size);
 

@@ -113,6 +113,10 @@ char *bv_strsub(const char *haystack, const char *needle, int sub)
 size_t bv_strlcpy(char *dst, const char *src, size_t size)
 {
     size_t len = 0;
+    if (!src) {
+        dst[0] = '\0';
+        return len;
+    }
     while (++len < size && *src)
         *dst++ = *src++;
     if (len <= size)
@@ -415,6 +419,33 @@ int bv_match_name(const char *name, const char *names)
     return !bv_strcasecmp(name, names);
 }
 
+int bv_match_ext(const char *name, const char *extensions)
+{
+    const char *ext, *p;
+    char ext1[32], *q;
+
+    if (!name)
+        return 0;
+
+    ext = strrchr(name, '.');
+    if (ext) {
+        ext++;
+        p = extensions;
+        for (;;) {
+            q = ext1;
+            while (*p != '\0' && *p != ','  && q - ext1 < sizeof(ext1) - 1)
+                *q++ = *p++;
+            *q = '\0';
+            if (!bv_strcasecmp(ext1, ext))
+                return 1;
+            if (*p == '\0')
+                break;
+            p++;
+        }
+    }
+    return 0;
+}
+
 int bv_utf8_decode(int32_t *codep, const uint8_t **bufp, const uint8_t *buf_end,
                    unsigned int flags)
 {
@@ -700,6 +731,42 @@ void bv_make_absolute_url(char *buf, int size, const char *base,
         rel += 3;
     }
     bv_strlcat(buf, rel, size);
+}
+
+char *bv_touppers(const char *str)
+{
+    int i = 0;
+    int len = 0;
+    char *p = NULL;
+    if (!str)
+        return NULL;
+    len = strlen(str);
+    p = bv_malloc(len + 1);
+    if (!p)
+        return NULL;
+    for (i = 0; i < len; i++) {
+        p[i] = bv_toupper(str[i]);
+    }
+    p[i] = '\0';
+    return p;
+}
+
+char *bv_tolowers(const char *str)
+{
+    int i = 0;
+    int len = 0;
+    char *p = NULL;
+    if (!str)
+        return NULL;
+    len = strlen(str);
+    p = bv_malloc(len + 1);
+    if (!p)
+        return NULL;
+    for (i = 0; i < len; i++) {
+        p[i] = bv_tolower(str[i]);
+    }
+    p[i] = '\0';
+    return p;
 }
 
 #ifdef TEST

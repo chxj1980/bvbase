@@ -42,6 +42,37 @@ struct _BVMediaContext;
 
 #define BV_MEDIA_FLAGS_NOSTREAMS    0x1000
 
+enum BVMediaMessageType {
+    BV_MEDIA_MESSAGE_TYPE_NONE = -1,
+    BV_MEDIA_MESSAGE_TYPE_AUDIO_MUTE,           //静音
+    BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME,         //音量调节
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_HIDE,           //隐藏视频
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_SHOW,           //显示视频
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_STOP,           //停止视频
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_PAUSE,          //暂停视频
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_FSFWD,          //fast forward 视频快进
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_REWND,          //rewind 视频快退
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_UPCFG,          //更改视频编解码动态属性
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_IMAGE,          //视频图像设置
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_RSKFM,          //request key frame 请求关键帧
+    BV_MEDIA_MESSAGE_TYPE_OSD_CREATE,           //创建OSD叠加
+    BV_MEDIA_MESSAGE_TYPE_OSD_DESTROY,          //销毁OSD
+    BV_MEDIA_MESSAGE_TYPE_OSD_HIDE,             //隐藏OSD
+    BV_MEDIA_MESSAGE_TYPE_OSD_SHOW,             //显示OSD
+    BV_MEDIA_MESSAGE_TYPE_OSD_UPDATE,           //更新OSD数据
+    BV_MEDIA_MESSAGE_TYPE_OSD_UPCFG,            //更新OSD配置
+    BV_MEDIA_MESSAGE_TYPE_UNKNOW
+};
+
+enum BVMediaDriverMessageType {
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_NONE = -1,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_IN_IMAGING,
+};
+
 typedef struct _BVInputMedia {
     const char *name;
     const char *extensions;
@@ -54,7 +85,7 @@ typedef struct _BVInputMedia {
     int (*read_header)(struct _BVMediaContext *h);
     int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*read_close)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
+    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 } BVInputMedia;
 
 typedef struct _BVOutputMedia {
@@ -68,7 +99,7 @@ typedef struct _BVOutputMedia {
     int (*write_header)(struct _BVMediaContext *h);
     int (*write_packet)(struct _BVMediaContext *h, BVPacket *pkt);
     int (*write_trailer)(struct _BVMediaContext *h);
-    int (*control_message)(struct _BVMediaContext *h, int type, const BVControlPacket *in, BVControlPacket *out);
+    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *in, BVControlPacket *out);
 } BVOutputMedia;
 
 typedef struct _BVStream {
@@ -87,8 +118,40 @@ typedef struct _BVMediaContext {
     char filename[1024];
     int nb_streams;
     BVStream **streams;
-//    BVChannel *channel;
 } BVMediaContext;
+
+enum BVMediaDriverType {
+    BV_MEDIA_DRIVER_TYPE_NONE = 0,
+    BV_MEDIA_DRIVER_TYPE_VIDEO = 1,
+    BV_MEDIA_DRIVER_TYPE_AUDIO = 2,
+    BV_MEDIA_DRIVER_TYPE_UNKNOWN,
+};
+
+enum BVMediaDriverID {
+    BV_MEDIA_DRIVER_ID_NONE,
+    BV_MEDIA_DRIVER_ID_TW2866,
+    BV_MEDIA_DRIVER_ID_TLV320,
+    BV_MEDIA_DRIVER_ID_UNKNOWN,
+};
+
+typedef struct _BVMediaDriverContext {
+    const BVClass *bv_class;
+    struct _BVMediaDriver *driver;
+    void *priv_data;
+    char filename[1024];
+} BVMediaDriverContext;
+
+typedef struct _BVMediaDriver {
+    const char *name;
+    enum BVMediaDriverID id;
+    enum BVMediaDriverType type;
+    const BVClass *priv_class;
+    int priv_data_size;
+    struct _BVMediaDriver *next;
+    int (*driver_open)(BVMediaDriverContext *s);
+    int (*driver_control)(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+    int (*driver_close)(BVMediaDriverContext *s);
+} BVMediaDriver;
 
 void bv_input_media_register(BVInputMedia *ifmt);
 
@@ -106,7 +169,7 @@ BVMediaContext *bv_media_context_alloc(void);
 
 void bv_media_context_free(BVMediaContext * devctx);
 
-int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
+int bv_input_media_open(BVMediaContext **fmt, const BVMediaChannel *channel, const char *url, BVInputMedia *media, BVDictionary **options);
 
 BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c);
 
@@ -124,9 +187,29 @@ int bv_output_media_write_header(BVMediaContext *s, BVDictionary **options);
 
 int bv_output_media_write(BVMediaContext *s, BVPacket *pkt);
 
+int bv_output_media_write_trailer(BVMediaContext *s);
+
 int bv_output_media_close(BVMediaContext **fmt);
 
-int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+int bv_media_context_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
+/**
+ *  BVMediaDriver 
+ */
+void bv_media_driver_register(BVMediaDriver *driver);
+
+BVMediaDriver *bv_media_driver_next(const BVMediaDriver *driver);
+
+BVMediaDriverContext *bv_media_driver_context_alloc(void);
+
+void bv_media_driver_context_free(BVMediaDriverContext *s);
+
+int bv_media_driver_open(BVMediaDriverContext **s, const char *url, const char *short_name, BVMediaDriver *driver, BVDictionary **options);
+
+int bv_media_driver_close(BVMediaDriverContext **s);
+
+int bv_media_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
 #ifdef __cplusplus
 }
 #endif

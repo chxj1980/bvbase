@@ -21,6 +21,8 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "onvif.c"
+
 #include <libbvutil/bvstring.h>
 
 #include <wsseapi.h>
@@ -110,11 +112,8 @@ static int bv_onvif_service_uri(OnvifContext *onvifctx)
     if (response.Capabilities->Imaging) {
         onvifctx->imaging_url = bv_strdup(response.Capabilities->Imaging->XAddr);
     }
-    if (response.Capabilities->Extension) {
-        if (response.Capabilities->Extension->DeviceIO) {
-            onvifctx->deviceio_url = bv_strdup(response.Capabilities->Extension->DeviceIO->XAddr);
-        }
-    
+    if (response.Capabilities->Extension && response.Capabilities->Extension->DeviceIO) {
+        onvifctx->deviceio_url = bv_strdup(response.Capabilities->Extension->DeviceIO->XAddr);
     }
     return 0;
 }
@@ -205,15 +204,43 @@ static int bv_onvif_get_device_io(OnvifContext *onvifctx, BVDeviceInfo *devinfo)
 {
     int retval = SOAP_OK;
     struct soap *soap = onvifctx->soap;
-#if 1
+
     struct _tmd__GetServiceCapabilities tmd__GetServiceCapabilities;
     struct _tmd__GetServiceCapabilitiesResponse tmd__GetServiceCapabilitiesResponse;
-    MEMSET_STRUCT(tmd__GetServiceCapabilities);
-    MEMSET_STRUCT(tmd__GetServiceCapabilitiesResponse);
+    struct _tds__GetCapabilities request;
+    struct _tds__GetCapabilitiesResponse response;
+    enum tt__CapabilityCategory category = tt__CapabilityCategory__All;
+  
     if (onvifctx->deviceio_url == NULL) {
         bv_log(onvifctx, BV_LOG_ERROR, "deviceio_url is NULL\n");
-        return BVERROR(ENOSYS);
+
+        MEMSET_STRUCT(request);
+        MEMSET_STRUCT(response);
+        request.__sizeCategory = 1;
+        request.Category = &category;
+
+        retval = soap_call___tds__GetCapabilities(soap, onvifctx->device_url, NULL, &request, &response);
+        if(retval != SOAP_OK) {
+            bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error\n");
+            bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+            return retval;
+        }
+        if (!response.Capabilities->Extension || !response.Capabilities->Extension->DeviceIO) {
+            bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error >>>");
+            return BVERROR(ENOSYS);
+        }
+        devinfo->video_sources = response.Capabilities->Extension->DeviceIO->VideoSources;
+        devinfo->audio_sources = response.Capabilities->Extension->DeviceIO->AudioSources;
+        devinfo->video_outputs = response.Capabilities->Extension->DeviceIO->VideoOutputs;
+        devinfo->audio_outputs = response.Capabilities->Extension->DeviceIO->AudioOutputs;
+        devinfo->relay_outputs = response.Capabilities->Extension->DeviceIO->RelayOutputs;
+        //TODO
+        //devinfo->serial_ports  = response.Capabilities->Device->;
+        return 0;
     }
+
+    MEMSET_STRUCT(tmd__GetServiceCapabilities);
+    MEMSET_STRUCT(tmd__GetServiceCapabilitiesResponse);
     retval = soap_call___tmd__GetServiceCapabilities(soap, onvifctx->deviceio_url, NULL, &tmd__GetServiceCapabilities, &tmd__GetServiceCapabilitiesResponse);
     if(retval != SOAP_OK) {
         bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error");
@@ -226,27 +253,6 @@ static int bv_onvif_get_device_io(OnvifContext *onvifctx, BVDeviceInfo *devinfo)
     devinfo->audio_outputs = tmd__GetServiceCapabilitiesResponse.Capabilities->AudioOutputs;
     devinfo->relay_outputs = tmd__GetServiceCapabilitiesResponse.Capabilities->RelayOutputs;
     devinfo->serial_ports  = tmd__GetServiceCapabilitiesResponse.Capabilities->SerialPorts;
-#else
-    struct _tds__GetCapabilities request;
-    struct _tds__GetCapabilitiesResponse response;
-    enum tt__CapabilityCategory category = tt__CapabilityCategory__All;
-    MEMSET_STRUCT(request);
-    MEMSET_STRUCT(response);
-    request.__sizeCategory = 1;
-    request.Category = &category;
-
-    retval = soap_call___tds__GetCapabilities(soap, onvifctx->device_url, NULL, &request, &response);
-    if(retval != SOAP_OK) {
-        bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error");
-        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
-        return retval;
-    }
-    if (!response.Capabilities->Extension || !response.Capabilities->Extension->DeviceIO) {
-        bv_log(NULL, BV_LOG_ERROR, "get DeviceIO Capabilities error >>>");
-        return BVERROR(ENOSYS);
-    }
-    devinfo->video_sources = response.Capabilities->Extension->DeviceIO->VideoSources;
-#endif
     return 0;
 }
 
@@ -364,21 +370,18 @@ static int onvif_mpeg_profile(enum tt__Mpeg4Profile profile)
 }
 static int save_video_source(BVVideoSource *video_source, struct tt__VideoSourceConfiguration *VideoSourceConfiguration)
 {
-    video_source->type = BV_CONFIG_TYPE_ONVIF;
     video_source->bounds = (BVIntRectange){VideoSourceConfiguration->Bounds->x, VideoSourceConfiguration->Bounds->y, VideoSourceConfiguration->Bounds->width, VideoSourceConfiguration->Bounds->height};
     return 0;
 }
 
 static int save_audio_source(BVAudioSource *audio_source, struct tt__AudioSourceConfiguration *AudioSourceConfiguration)
 {
-    audio_source->type = BV_CONFIG_TYPE_ONVIF;
     audio_source->channels = 1;
     return 0;
 }
 
 static int save_video_encoder(BVVideoEncoder *video_encoder, struct tt__VideoEncoderConfiguration *VideoEncoderConfiguration)
 {
-    video_encoder->type = BV_CONFIG_TYPE_ONVIF;
     video_encoder->codec_context.codec_type = BV_MEDIA_TYPE_VIDEO;
     video_encoder->codec_context.codec_id = onvif_video_to_bvcodeid(VideoEncoderConfiguration->Encoding);
     if (VideoEncoderConfiguration->Resolution) {
@@ -389,28 +392,127 @@ static int save_video_encoder(BVVideoEncoder *video_encoder, struct tt__VideoEnc
     if (VideoEncoderConfiguration->RateControl) {
         video_encoder->codec_context.time_base = (BVRational) {1, VideoEncoderConfiguration->RateControl->FrameRateLimit};
         video_encoder->codec_context.bit_rate = VideoEncoderConfiguration->RateControl->BitrateLimit;
+        video_encoder->codec_context.gop_size = VideoEncoderConfiguration->RateControl->EncodingInterval;
     }
     if (video_encoder->codec_context.codec_id == BV_CODEC_ID_H264 && VideoEncoderConfiguration->H264) {
         video_encoder->codec_context.gop_size = VideoEncoderConfiguration->H264->GovLength;
         video_encoder->codec_context.profile = onvif_h264_profile(VideoEncoderConfiguration->H264->H264Profile);
+    } else if (video_encoder->codec_context.codec_id == BV_CODEC_ID_MPEG && VideoEncoderConfiguration->MPEG4){
+        video_encoder->codec_context.gop_size = VideoEncoderConfiguration->MPEG4->GovLength;
+        video_encoder->codec_context.profile = onvif_mpeg_profile(VideoEncoderConfiguration->MPEG4->Mpeg4Profile);
     } else {
-        if (VideoEncoderConfiguration->MPEG4) {
-            video_encoder->codec_context.gop_size = VideoEncoderConfiguration->MPEG4->GovLength;
-            video_encoder->codec_context.profile = onvif_mpeg_profile(VideoEncoderConfiguration->MPEG4->Mpeg4Profile);
-        }
+        bv_log(NULL, BV_LOG_ERROR, "video codec type error %s %d\n", __FILE__, __LINE__);
     }
-    video_encoder->codec_context.gop_size = VideoEncoderConfiguration->RateControl->EncodingInterval;
     return 0;
 }
 
 static int save_audio_encoder(BVAudioEncoder *audio_encoder, struct tt__AudioEncoderConfiguration *AudioEncoderConfiguration)
 {
-    audio_encoder->type = BV_CONFIG_TYPE_ONVIF;
     audio_encoder->codec_context.bit_rate = AudioEncoderConfiguration->Bitrate;
     audio_encoder->codec_context.sample_rate = AudioEncoderConfiguration->SampleRate;
     audio_encoder->codec_context.codec_id = onvif_audio_to_bvcodeid(AudioEncoderConfiguration->Encoding);
     audio_encoder->codec_context.channels = 1;
     audio_encoder->codec_context.codec_type = BV_MEDIA_TYPE_AUDIO;
+    return 0;
+}
+
+static int onvif_get_ptz_presets(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    int retval, i;
+    char *p, *q;
+    char *url = NULL;
+    char profile_token[32] = { 0 };
+    size_t size;
+    struct soap *soap = onvifctx->soap;
+    struct _tptz__GetPresets request;
+    struct _tptz__GetPresetsResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return BVERROR(ENOSYS);
+    }
+    p = bv_strsub(config->token, "/", 1);
+    q = bv_strsub(config->token, "/", 2);
+    if (!p || !q) {
+        retval = BVERROR(EINVAL);
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return retval;
+    }
+    size = sizeof(profile_token);
+    size = size > q - p ? q - p : size;
+    bv_strlcpy(profile_token, p, size);     //notify bv_strlcpy() copy (size - 1) characters
+    request.ProfileToken = profile_token;
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+
+    retval = soap_call___tptz__GetPresets(soap, url, NULL, &request, &response);
+    if (retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv ptz presets error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return BVERROR(EIO);
+    }
+    config->nb_presets = response.__sizePreset;
+    if (config->nb_presets > 0)
+        config->presets = bv_malloc_array(config->nb_presets, sizeof(BVPTZPreset));
+    for (i = 0; i < response.__sizePreset; i++) {
+        config->presets[i].index = i;
+        bv_strlcpy(config->presets[i].name, response.Preset[i].Name, sizeof(config->presets[i].name));
+        bv_strlcpy(config->presets[i].token, response.Preset[i].token, sizeof(config->presets[i].token));
+        if (response.Preset[i].PTZPosition) {
+            config->presets[i].flags = 1;
+        }
+    }
+    return 0;
+}
+
+static int onvif_get_ptz_node(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    struct soap *soap = onvifctx->soap;
+    char *p, *url;
+    int retval;
+    struct _tptz__GetNode request; 
+    struct _tptz__GetNodeResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return BVERROR(ENOSYS);
+    }
+    p = bv_strsub(config->token, "/", 4);
+    if (!p) {
+        retval = BVERROR(EINVAL);
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return retval;
+    }
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+    request.NodeToken = p;
+    retval = soap_call___tptz__GetNode(soap, url, NULL, &request, &response);
+    if (retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv ptz node error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return BVERROR(EIO);
+    }
+    config->max_preset = response.PTZNode->MaximumNumberOfPresets;
+    return 0;
+}
+
+static int save_ptz_device(BVPTZDevice *ptz_device, struct tt__PTZConfiguration *PTZConfiguration)
+{
+    ptz_device->pan_range.min = PTZConfiguration->PanTiltLimits->Range->XRange->Min;
+    ptz_device->pan_range.max = PTZConfiguration->PanTiltLimits->Range->XRange->Max;
+    ptz_device->tilt_range.min = PTZConfiguration->PanTiltLimits->Range->YRange->Min;
+    ptz_device->tilt_range.max = PTZConfiguration->PanTiltLimits->Range->YRange->Max;
+    ptz_device->zoom_range.min = PTZConfiguration->ZoomLimits->Range->XRange->Min;
+    ptz_device->zoom_range.max = PTZConfiguration->ZoomLimits->Range->XRange->Max;
     return 0;
 }
 
@@ -420,6 +522,7 @@ static int save_profile(BVConfigContext *h, BVMediaProfile *profile, struct tt__
     BVAudioSource *audio_source = NULL;
     BVVideoEncoder *video_encoder = NULL;
     BVAudioEncoder *audio_encoder = NULL;
+    BVPTZDevice    *ptz_device    = NULL;
     bv_sprintf(profile->token, sizeof(profile->token), "%s/%s", Profile->Name, Profile->token);
     if (Profile->VideoSourceConfiguration) {
        profile->video_source = bv_mallocz(sizeof(*profile->video_source));
@@ -450,7 +553,12 @@ static int save_profile(BVConfigContext *h, BVMediaProfile *profile, struct tt__
     }
 
     if (Profile->PTZConfiguration) {
-        //FIXME NotSupport
+        profile->ptz_device = bv_mallocz(sizeof(*profile->ptz_device));
+        ptz_device = profile->ptz_device;
+        bv_sprintf(ptz_device->token, sizeof(ptz_device->token), "%s/%s/%s/%s", profile->token, Profile->PTZConfiguration->Name, Profile->PTZConfiguration->token, Profile->PTZConfiguration->NodeToken);
+        save_ptz_device(ptz_device, Profile->PTZConfiguration);
+        onvif_get_ptz_node(h, ptz_device);
+        onvif_get_ptz_presets(h, ptz_device);
     }
     return 0;
 }
@@ -883,7 +991,6 @@ static int onvif_get_audio_encoder_options(BVConfigContext *h, int channel, int 
         bv_log(h, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
         return BVERROR(EINVAL);
     }
-    config->type = BV_CONFIG_TYPE_ONVIF;
     config->nb_options = response.Options->__sizeOptions;
     if (config->nb_options == 0) {
         return 0;
@@ -929,17 +1036,87 @@ fail:
     return BVERROR(ENOMEM);
 }
 
+static struct tt__PTZConfiguration * get_ptz_device(BVConfigContext *s, BVPTZDevice *config)
+{
+    OnvifContext *onvifctx = s->priv_data;
+    struct soap *soap = onvifctx->soap;
+    int retval, size;
+    char *p, *q, *url;
+    char profile_token[32] = { 0 };
+    struct _tptz__GetConfiguration request;
+    struct _tptz__GetConfigurationResponse response;
+    if (onvifctx->ptz_url)
+        url = onvifctx->ptz_url;
+    else
+        url = onvifctx->media_url;
+    if (!url) {
+        bv_log(s, BV_LOG_ERROR, "service url is NULL\n");
+        return NULL;
+    }
+    p = bv_strsub(config->token, "/", 3);
+    q = bv_strsub(config->token, "/", 4);
+    if (!p || !q) {
+        bv_log(s, BV_LOG_ERROR, "config token is error\n");
+        return NULL;
+    }
+    size = sizeof(profile_token);
+    size = size > q - p ? q - p : size;
+    bv_strlcpy(profile_token, p, size);     //notify bv_strlcpy() copy (size - 1) characters
+    request.PTZConfigurationToken = profile_token;
+
+    if (onvifctx->user && onvifctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", onvifctx->user, onvifctx->passwd);
+    }
+    retval = soap_call___tptz__GetConfiguration(soap, url, NULL, &request, &response);
+    if(retval != SOAP_OK) {
+        bv_log(NULL, BV_LOG_ERROR, "get ptz device encoder error");
+        bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+        return NULL;
+    }
+    return response.PTZConfiguration;
+}
+
+static int onvif_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)
+{
+    struct tt__PTZConfiguration *PTZConfiguration = NULL; 
+    PTZConfiguration = get_ptz_device(s, config);
+    if (!PTZConfiguration) {
+        return BVERROR(EINVAL);
+    }
+    save_ptz_device(config, PTZConfiguration);
+    if (onvif_get_ptz_node(s, config) < 0) {
+        return BVERROR(EINVAL);
+    }
+    if (onvif_get_ptz_presets(s, config) < 0) {
+        return BVERROR(EINVAL);
+    }
+    return 0;
+}
+
+/**
+ *  onvif device we should not save ptz preset information
+ *  just return OK
+ */
+static int onvif_save_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    return 0;
+}
+
+static int onvif_dele_ptz_preset(BVConfigContext *s, int channel, int index, BVPTZPreset *preset)
+{
+    return 0;
+}
 #define OFFSET(x) offsetof(OnvifContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  ONVIF_TMO}, INT_MIN, INT_MAX, DEC},
     {"user", "user name", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "user password", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"media_url", "user password", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"ptz_url", "user password", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"device_url", "user password", OFFSET(device_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"deviceio_url", "user password", OFFSET(deviceio_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
-    {"imaging_url", "user password", OFFSET(imaging_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"media_url", "media url", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"ptz_url", "", OFFSET(ptz_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"device_url", "", OFFSET(device_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"deviceio_url", "", OFFSET(deviceio_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"imaging_url", "", OFFSET(imaging_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 
@@ -968,4 +1145,7 @@ BVConfig bv_onvif_config = {
     .get_audio_encoder  = onvif_get_audio_encoder,
     .set_audio_encoder  = onvif_set_audio_encoder,
     .get_audio_encoder_options = onvif_get_audio_encoder_options,
+    .get_ptz_device     = onvif_get_ptz_device,
+    .save_ptz_preset    = onvif_save_ptz_preset,
+    .dele_ptz_preset    = onvif_dele_ptz_preset,
 };

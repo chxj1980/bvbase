@@ -26,6 +26,7 @@
 #include <libbvutil/opt.h>
 #include <libbvutil/log.h>
 #include <libbvconfig/common.h>
+#include <unistd.h>
 
 int main(int argc, const char *argv[])
 {
@@ -43,9 +44,9 @@ int main(int argc, const char *argv[])
         return BVERROR(EINVAL);
     }
     bv_dict_set(&opn, "user", "admin", 0);
-//    bv_dict_set(&opn, "passwd", "12345", 0);
-    bv_dict_set(&opn, "token", "MainStream", 0);
-    if ((ret = bv_device_open(&device_context, NULL, "onvif_ptz://192.168.6.134:8899/onvif/device_service", &opn))) {
+    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "mainStream/Profile_1/PTZ/PTZToken/PTZNODETOKEN", 0);
+    if ((ret = bv_device_open(&device_context, "onvif_ptz://192.168.6.149:80/onvif/device_service", NULL, &opn))) {
         bv_log(NULL, BV_LOG_ERROR, "open device error %d\n", ret);
         bv_dict_free(&opn);
         return BVERROR(EIO);
@@ -56,6 +57,7 @@ int main(int argc, const char *argv[])
     BVPTZStop stop;
     stop.pan_tilt = true;
     stop.zoom = true;
+#if 1
 #if 1
     //Left
     continuous_move.velocity.pan_tilt.x = -0.5f;
@@ -152,6 +154,31 @@ int main(int argc, const char *argv[])
     pkt_in.data = &stop;
     bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
     sleep(1);
+#endif
+    //Zoom in
+    continuous_move.velocity.pan_tilt.x = 0;
+    continuous_move.velocity.pan_tilt.y = 0;
+    continuous_move.velocity.zoom.x = 0.2f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+    
+    //Zoom out
+    continuous_move.velocity.pan_tilt.x = 0;
+    continuous_move.velocity.pan_tilt.y = 0;
+    continuous_move.velocity.zoom.x = -0.2f;
+    continuous_move.duration = 3000LL;
+    pkt_in.data = &continuous_move;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, &pkt_in, NULL);
+    usleep(300000);
+    pkt_in.data = &stop;
+    bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_PTZ_STOP, &pkt_in, NULL);
+    sleep(1);
+
 #else
     BVPTZPreset preset;
     strcpy(preset.name, "PTZPreset_0000");

@@ -24,35 +24,43 @@
 #include "bvmedia.h"
 #include <config.h>
 
-#define REGISTER_OUTDEV(X, x)                                           \
-    {                                                                   \
+#define REGISTER_OUTDEV(X, x)                                          \
+    {                                                                  \
         extern BVOutputMedia bv_##x##_muxer;                           \
-        if (BV_CONFIG_##X##_OUTDEV)                                        \
+        if (BV_CONFIG_##X##_OUTDEV)                                    \
             bv_output_media_register(&bv_##x##_muxer);                 \
     }
 
-#define REGISTER_INDEV(X, x)                                            \
-    {                                                                   \
+#define REGISTER_INDEV(X, x)                                           \
+    {                                                                  \
         extern BVInputMedia bv_##x##_demuxer;                          \
-        if (BV_CONFIG_##X##_INDEV)                                         \
+        if (BV_CONFIG_##X##_INDEV)                                     \
             bv_input_media_register(&bv_##x##_demuxer);                \
     }
 
 #define REGISTER_INOUTDEV(X, x) REGISTER_OUTDEV(X, x); REGISTER_INDEV(X, x)
 
 #define REGISTER_MUXER(X, x)                                           \
-    {                                                                   \
+    {                                                                  \
         extern BVOutputMedia bv_##x##_muxer;                           \
-        if (BV_CONFIG_##X##_MUXER)                                        \
+        if (BV_CONFIG_##X##_MUXER)                                     \
             bv_output_media_register(&bv_##x##_muxer);                 \
     }
 
-#define REGISTER_DEMUXER(X, x)                                            \
-    {                                                                   \
+#define REGISTER_DEMUXER(X, x)                                         \
+    {                                                                  \
         extern BVInputMedia bv_##x##_demuxer;                          \
-        if (BV_CONFIG_##X##_DEMUXER)                                         \
+        if (BV_CONFIG_##X##_DEMUXER)                                   \
             bv_input_media_register(&bv_##x##_demuxer);                \
     }
+
+#define REGISTER_DRIVER(X, x)                                         \
+    {                                                                 \
+        extern BVMediaDriver bv_##x##_driver;                         \
+        if (BV_CONFIG_##X##_DRIVER)                                   \
+            bv_media_driver_register(&bv_##x##_driver);               \
+    }
+
 
 #if BV_CONFIG_ONVIFAVE_INDEV
 #include <libavformat/avformat.h>
@@ -63,11 +71,17 @@ void bv_media_register_all(void)
     if (initialized)
         return ;
     initialized = 1;
-    //REGISTER_INDEV(HISAVE, hisave);
+    REGISTER_INDEV(HISAVI, hisavi);
+    REGISTER_INDEV(HISAVE, hisave);
     REGISTER_INDEV(ONVIFAVE, onvifave);
     REGISTER_MUXER(DAV, dav);
+    REGISTER_DEMUXER(DAV, dav);
+    REGISTER_OUTDEV(HISAVO, hisavo);
+    REGISTER_OUTDEV(HISAVD, hisavd);
 #if BV_CONFIG_ONVIFAVE_INDEV
     av_register_all();
     avformat_network_init();
 #endif
+
+    REGISTER_DRIVER(TW2866, tw2866);
 }

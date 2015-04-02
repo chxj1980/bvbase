@@ -70,6 +70,8 @@
 #define BV_ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
 #define BBALIGN(x, a) (((x)+(a)-1)&~((a)-1))
 
+#define BBCLEAR_STRUCT(a) (memset(&(a), 0, sizeof(a)))
+
 /* misc math functions */
 
 /**

@@ -35,6 +35,8 @@ typedef struct OnvifPTZContext {
     char svrurl[1024];
     char *token;
     char *ptz_url;
+    char profile_name[32];
+    char profile_token[32];
     struct soap *soap;
 } OnvifPTZContext;
 
@@ -105,12 +107,29 @@ static int bv_onvif_service_uri(OnvifPTZContext *onvif_ptz)
 static int onvif_ptz_open(BVDeviceContext *h)
 {
     OnvifPTZContext *onvif_ptz = h->priv_data;
-    char *p;
-    bv_log(onvif_ptz, BV_LOG_ERROR, "onvif ptz open\n");
+    char *p, *q;
+    int size;
     if (h->url[0] == '\0') {
         bv_log(onvif_ptz, BV_LOG_ERROR, "url is NULL\n");
-        return -1;
+        return BVERROR(EINVAL);
     }
+    if (!onvif_ptz->token) {
+        bv_log(onvif_ptz, BV_LOG_ERROR, "onvif ptz token is NULL\n");
+        return BVERROR(EINVAL);
+    }
+    p = bv_strsub(onvif_ptz->token, "/", 1);
+    q = bv_strsub(onvif_ptz->token, "/", 2);
+    if (!p) {
+        bv_log(h, BV_LOG_ERROR, "onvif_ptz token error\n");
+        return BVERROR(EINVAL);
+    }
+    size = sizeof(onvif_ptz->profile_name);
+    size = size > p - onvif_ptz->token ? p - onvif_ptz->token : size;
+    bv_strlcpy(onvif_ptz->profile_name, onvif_ptz->token, p - onvif_ptz->token);
+    size = sizeof(onvif_ptz->profile_token);
+    size = size > q - p ? q - p : size;
+    bv_strlcpy(onvif_ptz->profile_token, p, size);
+
     p = bv_sreplace(h->url, "onvif_ptz", "http");
     if (!p) {
         return BVERROR(ENOMEM);
@@ -158,7 +177,7 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *
     MEMSET_STRUCT(Velocity);
     MEMSET_STRUCT(PanTilt);
     MEMSET_STRUCT(Zoom);
-    tptz__ContinuousMove.ProfileToken = onvif_ptz->token;
+    tptz__ContinuousMove.ProfileToken = onvif_ptz->profile_token;
     tptz__ContinuousMove.Velocity = &Velocity;
     tptz__ContinuousMove.Timeout = &continuous_move->duration;
     Velocity.PanTilt = &PanTilt;
@@ -209,7 +228,7 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVC
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
     }
 
-    tptz__Stop.ProfileToken = onvif_ptz->token;
+    tptz__Stop.ProfileToken = onvif_ptz->profile_token;
     tptz__Stop.PanTilt = (enum xsd__boolean *)&stop->pan_tilt;
     tptz__Stop.Zoom = (enum xsd__boolean *)&stop->zoom;
 
@@ -242,7 +261,7 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_i
         return BVERROR(ENOSYS);
     }
     soap_default_SOAP_ENV__Header(soap, &header);
-    tptz__SetPreset.ProfileToken = onvif_ptz->token;
+    tptz__SetPreset.ProfileToken = onvif_ptz->profile_token;
     tptz__SetPreset.PresetName = preset->name;
     tptz__SetPreset.PresetToken = preset->token;
     if (onvif_ptz->user && onvif_ptz->passwd) {
@@ -285,7 +304,7 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
         return BVERROR(ENOSYS);
     }
     soap_default_SOAP_ENV__Header(soap, &header);
-    tptz__GotoPreset.ProfileToken = onvif_ptz->token;
+    tptz__GotoPreset.ProfileToken = onvif_ptz->profile_token;
     tptz__GotoPreset.PresetToken = goto_preset->token;
     tptz__GotoPreset.Speed = &Speed;
     if (onvif_ptz->user && onvif_ptz->passwd) {
@@ -329,7 +348,7 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
     }
 
     soap_default_SOAP_ENV__Header(soap, &header);
-    tptz__RemovePreset.ProfileToken = onvif_ptz->token;
+    tptz__RemovePreset.ProfileToken = onvif_ptz->profile_token;
     tptz__RemovePreset.PresetToken = preset->token;
     if (onvif_ptz->user && onvif_ptz->passwd) {
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
@@ -347,7 +366,6 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
 
 static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-    int ret = -1;
     int i = 0;
     struct {
         enum BVDeviceMessageType type;
@@ -364,7 +382,7 @@ static int onvif_ptz_control(BVDeviceContext *h, enum BVDeviceMessageType type, 
           return ptz_control[i].control(h, pkt_in, pkt_out); 
     }
     bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
-    return ret;
+    return BVERROR(ENOSYS);
 }
 
 static int onvif_ptz_close(BVDeviceContext*h)
@@ -388,20 +406,20 @@ static const BVOption options[] = {
 };
 
 static const BVClass onvif_class = {
-    .class_name     = "onvif ptz device",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE,
+    .class_name         = "onvif ptz device",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_ptz_device = {
-    .name = "onvif_ptz",
-    .type = BV_DEVICE_TYPE_ONVIF_PTZ,
-    .priv_data_size = sizeof(OnvifPTZContext),
-    .dev_open = onvif_ptz_open,
-    .dev_probe = onvif_ptz_probe,
-    .dev_control = onvif_ptz_control,
-    .dev_close = onvif_ptz_close,
-    .priv_class = &onvif_class,
+    .name               = "onvif_ptz",
+    .type               = BV_DEVICE_TYPE_ONVIF_PTZ,
+    .priv_data_size     = sizeof(OnvifPTZContext),
+    .dev_open           = onvif_ptz_open,
+    .dev_probe          = onvif_ptz_probe,
+    .dev_control        = onvif_ptz_control,
+    .dev_close          = onvif_ptz_close,
+    .priv_class         = &onvif_class,
 };

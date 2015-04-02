@@ -37,4 +37,9 @@ static const BVOption media_options[] = {
     {NULL}
 };
 
+static const BVOption driver_options[] = {
+
+    {NULL}
+};
+
 #endif /* end of include guard: BV_OPTIONS_TABLE_H */

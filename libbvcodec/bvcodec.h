@@ -36,12 +36,16 @@ extern "C"{
 enum BVCodecID {
     BV_CODEC_ID_NONE = 0,
     //video
-    BV_CODEC_ID_H264 = 0x64,
+    BV_CODEC_ID_REWVIDEO = 0x10,
+    BV_CODEC_ID_H264,
     BV_CODEC_ID_MPEG,
     BV_CODEC_ID_JPEG,
 
     //Audio
-    BV_CODEC_ID_G711A = 0x258,
+    BV_CODEC_ID_PCM = 0x10000,  //非线性脉冲调制编码    无损非压缩编码
+    BV_CODEC_ID_LPCM,           //线性脉冲调制编码
+    BV_CODEC_ID_ADPCM,
+    BV_CODEC_ID_G711A,
     BV_CODEC_ID_G711U,
     BV_CODEC_ID_G726,
     BV_CODEC_ID_AAC,
@@ -147,6 +151,7 @@ typedef struct _BVCodec {
 
 typedef struct _BVCodecContext {
     const BVClass *bv_class;
+    struct _BVCodecParserContext *parser;
     const BVCodec *codec;
     void *priv_data;
     enum BVMediaType codec_type;    //BV_MEDIA_TYPE_XXX
@@ -169,9 +174,42 @@ typedef struct _BVCodecContext {
     int profile;
 } BVCodecContext;
 
+typedef struct _BVCodecParserContext {
+    const BVClass *bv_class;
+    BVCodecContext *codec;
+    struct _BVCodecParser  *parser;
+    void *priv_data;
+} BVCodecParserContext;
+
+typedef struct _BVCodecParser {
+    enum BVCodecID codec_ids[5];
+    int priv_data_size;
+    struct _BVCodecParser *next;
+    int (*parser_init)(BVCodecParserContext *s);
+    int (*parser_exit)(BVCodecParserContext *s);
+    int (*parser_parse)(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size);
+} BVCodecParser;
+
+
+void bv_codec_register_all(void);
+
 BVCodecContext * bv_codec_context_alloc(const BVCodec *c);
 
 void bv_codec_context_free(BVCodecContext * codec);
+
+void bv_codec_parser_register(BVCodecParser *parser);
+
+BVCodecParser *bv_codec_parser_next(const BVCodecParser *p);
+
+BVCodecParserContext *bv_codec_parser_alloc(void);
+
+void bv_codec_parser_free(BVCodecParserContext *s);
+
+BVCodecParserContext *bv_codec_parser_init(enum BVCodecID codec_id);
+
+int bv_codec_parser_exit(BVCodecParserContext *s);
+
+int bv_codec_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size);
 
 #ifdef __cplusplus
 }

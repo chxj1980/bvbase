@@ -29,24 +29,40 @@
 int main(int argc, const char *argv[])
 {
     BVDeviceContext *devctx = NULL; 
-    BVMobileDevice device[20] = { 0 };
-    int max_ret = 20;
+    BVMobileDevice *device = NULL ;
+    BVMobileDevice ipc;
     BVDictionary *opn = NULL;
+    BVControlPacket pkt_in;
+    BVControlPacket pkt_out;
     bv_device_register_all();
-    bv_dict_set(&opn, "timeout", "5", 0);
-    if (bv_device_open(&devctx, NULL, "onvif_dev://", &opn) < 0) {
+    bv_dict_set(&opn, "timeout", "1", 0);
+    if (bv_device_open(&devctx, "onvif_dev://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error \n");
         bv_dict_free(&opn);
         return BVERROR(EIO);
     }
-    bv_device_scan(devctx, device, &max_ret);
-    int i = 0;
-    for (i = 0; i < max_ret; i++) {
-       bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-       bv_log(devctx, BV_LOG_INFO, "server service url %s\n", device[i].url);
-       bv_log(devctx, BV_LOG_INFO, "server type %d\n", device[i].type);
-       bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+    if (bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_SEARCH_IPC, NULL, &pkt_out) < 0 ) {
+        bv_log(devctx, BV_LOG_ERROR, "device control error\n");
+    } else {
+        device = pkt_out.data;
+        int i = 0;
+        for (i = 0; i < pkt_out.size; i++) {
+           bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+           bv_log(devctx, BV_LOG_INFO, "server service url %s\n", device[i].url);
+           bv_log(devctx, BV_LOG_INFO, "server type %d\n", device[i].type);
+           bv_log(devctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+        }
+        //NOTICE free data
+        bv_free(pkt_out.data);
     }
+    /**
+     *  detect ipc whether on line
+     *  return 0 online otherwise off line
+     */
+    bv_sprintf(ipc.url, sizeof(ipc.url), "http://192.168.6.149:80/onvif/device_service");
+    ipc.timeout = 1;
+    pkt_in.data = (void *)&ipc;
+    bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_DETECT_IPC, &pkt_in, NULL);
 
     bv_dict_free(&opn);
     bv_device_close(&devctx);

@@ -32,6 +32,9 @@ static BVInputMedia **last_ifmt = &first_ifmt;
 static BVOutputMedia *first_ofmt = NULL;
 static BVOutputMedia **last_ofmt = &first_ofmt;
 
+static BVMediaDriver *first_driver = NULL;
+static BVMediaDriver **last_driver = &first_driver;
+
 void bv_input_media_register(BVInputMedia *ifmt)
 {
     BVInputMedia **p = last_ifmt;
@@ -51,6 +54,15 @@ void bv_output_media_register(BVOutputMedia *media)
     last_ofmt = &media->next;
 }
 
+void bv_media_driver_register(BVMediaDriver *driver)
+{
+    BVMediaDriver **p = last_driver;
+    driver->next = NULL;
+    while(*p || bvpriv_atomic_ptr_cas((void * volatile *)p, NULL, driver))
+        p = &(*p)->next;
+    last_driver = &driver->next;
+}
+
 BVInputMedia * bv_input_media_next(BVInputMedia *ifmt)
 {
     if (ifmt)
@@ -65,6 +77,14 @@ BVOutputMedia *bv_output_media_next(const BVOutputMedia *f)
         return f->next;
     else
         return first_ofmt;
+}
+
+BVMediaDriver *bv_media_driver_next(const BVMediaDriver *driver)
+{
+    if (driver)
+        return driver->next;
+    else
+       return first_driver; 
 }
 
 BVStream * bv_stream_new(BVMediaContext *s, const BVCodec *c)
@@ -118,7 +138,14 @@ void bv_stream_free(BVMediaContext *s, BVStream *st)
     bv_freep(&s->streams[ --s->nb_streams ]);
 }
 
-int bv_media_context_control(BVMediaContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+int bv_media_context_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
+    if (s->imedia && s->imedia->media_control) {
+        return s->imedia->media_control(s, type, pkt_in, pkt_out); 
+    }
+
+    if (s->omedia && s->omedia->media_control) {
+        return s->omedia->media_control(s, type, pkt_in, pkt_out);
+    }
     return BVERROR(ENOSYS);
 }

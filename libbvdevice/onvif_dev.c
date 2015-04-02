@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "bvdevice.h"
+#include <libbvutil/bvstring.h>
 
 #define ONVIF_NVT "NetWorkVideoTransmitter"
 #define ONVIF_NVS "NetWorkVideoStorage"
@@ -39,6 +40,7 @@ typedef struct OnvifDeviceContext {
     BVClass *bv_class;
     struct soap *soap;
     int timeout;
+    int max_ipcs;
 } OnvifDeviceContext;
 
 static struct soap *bv_soap_new(int timeout)
@@ -178,6 +180,94 @@ static int onvif_device_probe(BVDeviceContext *h, const char *args)
     }
     return 0;
 }
+static int onvif_search_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    int ret = 0, max_ret = devctx->max_ipcs;
+    BVMobileDevice *device = bv_mallocz(sizeof(BVMobileDevice) * devctx->max_ipcs);
+    if (!device) {
+        return BVERROR(ENOMEM);
+    }
+
+    ret = onvif_device_scan(h, device, &max_ret);
+    if (ret < 0) {
+        bv_free(device);
+        device = NULL;
+    }
+    pkt_out->data = (void *)device;
+    pkt_out->size = max_ret;
+    return ret;
+}
+
+static int onvif_detect_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    BVMobileDevice *device = pkt_in->data;
+    int retval = SOAP_OK;
+    wsdd__ProbeType req;
+    struct __wsdd__ProbeMatches resp;
+    wsdd__ScopesType sScope;
+    struct SOAP_ENV__Header header;
+    struct soap *soap;
+    char hostname[1024], proto[10];
+    char auth[1024], path[1024], soap_endpoint[1024];
+    int port, timeout = 1;
+
+    bv_url_split(proto, sizeof(proto), auth, sizeof(auth),
+                 hostname, sizeof(hostname), &port,
+                 path, sizeof(path), device->url);
+    bv_log(h, BV_LOG_DEBUG, "url %s proto %s auth %s hostname %s port %d path %s\n",
+            device->url, proto, auth, hostname, port, path);
+    port = 3702;    //FIXME
+    bv_sprintf(soap_endpoint, sizeof(soap_endpoint), "soap.udp://%s:%d", hostname, port);
+    timeout = BBMAX(timeout, device->timeout);
+    soap = bv_soap_new(timeout);
+
+    soap_default_SOAP_ENV__Header(soap, &header);
+
+    header.wsa__MessageID = (char *)soap_wsa_rand_uuid(soap);
+    header.wsa__To = (char *) "urn:schemas-xmlsoap-org:ws:2005:04:discovery";
+    header.wsa__Action = (char *) "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
+    soap->header = &header;
+
+    soap_default_wsdd__ScopesType(soap, &sScope);
+    sScope.__item = (char *)"";
+    soap_default_wsdd__ProbeType(soap, &req);
+    req.Scopes = &sScope;
+    req.Types = (char *)"";                //"dn:NetworkVideoTransmitter";
+    retval = soap_send___wsdd__Probe(soap, soap_endpoint, NULL, &req);
+    if (retval == SOAP_OK) {
+        retval = soap_recv___wsdd__ProbeMatches(soap, &resp);
+        if (retval != SOAP_OK) {
+            bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error,
+                *soap_faultcode(soap), *soap_faultstring(soap));
+            retval = BVERROR(EIO);
+        }
+    }else{
+        bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error,
+            *soap_faultcode(soap), *soap_faultstring(soap));
+        retval = BVERROR(EIO);
+    }
+    bv_soap_free(soap);
+    return retval;
+}
+
+static int onvif_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    int i = 0;
+    struct {
+        enum BVDeviceMessageType type;
+        int (*control)(BVDeviceContext *h, const BVControlPacket *, BVControlPacket *);
+    } onvif_control[] = {
+        { BV_DEV_MESSAGE_TYPE_SEARCH_IPC, onvif_search_ipc},
+        { BV_DEV_MESSAGE_TYPE_DETECT_IPC, onvif_detect_ipc},
+    };
+    for (i = 0; i < BV_ARRAY_ELEMS(onvif_control); i++) {
+        if (onvif_control[i].type == type)
+           return onvif_control[i].control(h, pkt_in, pkt_out); 
+    }
+    bv_log(h, BV_LOG_ERROR, "Not Support This command \n");
+    return BVERROR(ENOSYS);
+}
 
 static int onvif_device_close(BVDeviceContext *h)
 {
@@ -190,24 +280,25 @@ static int onvif_device_close(BVDeviceContext *h)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
+    {"max_ipcs", "", OFFSET(max_ipcs), BV_OPT_TYPE_INT, {.i64 =  128}, INT_MIN, INT_MAX, DEC},
     {NULL}
 };
 
 static const BVClass onvif_class = {
-    .class_name     = "onvif device",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_DEVICE,
+    .class_name         = "onvif device",
+    .item_name          = bv_default_item_name,
+    .option             = options,
+    .version            = LIBBVUTIL_VERSION_INT,
+    .category           = BV_CLASS_CATEGORY_DEVICE,
 };
 
 BVDevice bv_onvif_dev_device = {
-    .name = "onvif_dev",
-    .type = BV_DEVICE_TYPE_ONVIF_DEVICE,
-    .priv_data_size = sizeof(OnvifDeviceContext),
-    .dev_open = onvif_device_open,
-    .dev_probe = onvif_device_probe,
-    .dev_close = onvif_device_close,
-    .dev_scan = onvif_device_scan,
-    .priv_class = &onvif_class,
+    .name               = "onvif_dev",
+    .type               = BV_DEVICE_TYPE_ONVIF_DEVICE,
+    .priv_data_size     = sizeof(OnvifDeviceContext),
+    .dev_open           = onvif_device_open,
+    .dev_probe          = onvif_device_probe,
+    .dev_close          = onvif_device_close,
+    .dev_control        = onvif_device_control,
+    .priv_class         = &onvif_class,
 };

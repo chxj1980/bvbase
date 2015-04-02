@@ -23,7 +23,5 @@
 /.config
 /.version
 /config.*
-/include/*
-/lib/*
-
+.svn
 

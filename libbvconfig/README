@@ -28,4 +28,5 @@ libconfig
 为使用不同的配置参数来源(文件获取， onvif获取等等)，配置文件的获取采用和bvmeida中的结构相似的方法。
 
 BVConfig 结构体表示配置文件的容器
-BVConfigIO 表示配置文件io用来屏蔽配置文件的类型，例如json，xml等等
+BVConfigFile 表示配置文件io用来屏蔽配置文件的类型，例如json，xml等等
+参考了libconfig jansson 库的设计和实现

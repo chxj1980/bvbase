@@ -21,11 +21,11 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "media.c"
+
 #include "bvmedia.h"
 #include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
-
-static const char *FILE_NAME = "media.c";
 
 BVInputMedia *bv_input_media_find(const char *short_name)
 {
@@ -34,60 +34,6 @@ BVInputMedia *bv_input_media_find(const char *short_name)
         if (bv_match_name(short_name, fmt->name))
             return fmt;
     return NULL;
-}
-
-static int bv_match_ext(const char *filename, const char *extensions)
-{
-    const char *ext, *p;
-    char ext1[32], *q;
-
-    if (!filename)
-        return 0;
-
-    ext = strrchr(filename, '.');
-    if (ext) {
-        ext++;
-        p = extensions;
-        for (;;) {
-            q = ext1;
-            while (*p != '\0' && *p != ','  && q - ext1 < sizeof(ext1) - 1)
-                *q++ = *p++;
-            *q = '\0';
-            if (!bv_strcasecmp(ext1, ext))
-                return 1;
-            if (*p == '\0')
-                break;
-            p++;
-        }
-    }
-    return 0;
-}
-
-BVOutputMedia *bv_output_media_guess(const char *short_name, const char *filename,
-                                const char *mime_type)
-{
-    BVOutputMedia *fmt = NULL, *fmt_found;
-    int score_max, score;
-
-    /* Find the proper file type. */
-    fmt_found = NULL;
-    score_max = 0;
-    while ((fmt = bv_output_media_next(fmt))) {
-        score = 0;
-        if (fmt->name && short_name && bv_match_name(short_name, fmt->name))
-            score += 100;
-        if (fmt->mime_type && mime_type && !strcmp(fmt->mime_type, mime_type))
-            score += 10;
-        if (filename && fmt->extensions &&
-            bv_match_ext(filename, fmt->extensions)) {
-            score += 5;
-        }
-        if (score > score_max) {
-            score_max = score;
-            fmt_found = fmt;
-        }
-    }
-    return fmt_found;
 }
 
 static int init_imedia(BVMediaContext *s, const char *url)
@@ -126,7 +72,7 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
     if (!s && !(s = bv_media_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 
@@ -173,13 +119,13 @@ static int input_media_open_internal(BVMediaContext **fmt, const char *url, BVIn
         ret = BVERROR(ENOSYS); 
         goto fail;
     }
-    *fmt = s;
 
     bv_dict_free(&tmp);
     ret = s->imedia->read_header(s);
     if (ret) {
         goto fail;
     }
+    *fmt = s;
     return 0;
 fail:
     bv_dict_free(&tmp);
@@ -187,7 +133,7 @@ fail:
     return ret;
 }
 
-int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const char *url,
+int bv_input_media_open(BVMediaContext **fmt, const BVMediaChannel *channel, const char *url,
         BVInputMedia *media, BVDictionary **options)
 {
     int ret;
@@ -203,9 +149,14 @@ int bv_input_media_open(BVMediaContext **fmt, const BVChannel *channel, const ch
 
 int bv_input_media_read(BVMediaContext *s, BVPacket *pkt)
 {
+    int ret = 0;
     if (!s->imedia || !s->imedia->read_packet)
         return BVERROR(ENOSYS);
-    return s->imedia->read_packet(s, pkt);
+    ret = s->imedia->read_packet(s, pkt);
+    if (ret == BVERROR(EAGAIN)) {
+        ret = 0;
+    }
+    return ret;
 }
 
 int bv_input_media_close(BVMediaContext **fmt)
@@ -216,5 +167,109 @@ int bv_input_media_close(BVMediaContext **fmt)
     bv_media_context_free(s);
     *fmt = NULL;
     return 0;
+}
+
+static BVMediaDriver *bv_media_driver_guess(const char *short_name)
+{
+    BVMediaDriver *driver = NULL, *driver_found;
+    int score_max, score;
+    driver_found = NULL;
+    score_max = 0;
+    while ((driver = bv_media_driver_next(driver))) {
+        score = 0;
+        if (driver->name && bv_match_name(short_name, driver->name)) {
+            score += 100;
+        }
+        if (score > score_max) {
+            score_max = score;
+            driver_found = driver;
+        }
+    }
+    return driver_found;
+}
+
+int bv_media_driver_open(BVMediaDriverContext **s, const char *url, const char *short_name, BVMediaDriver *driver, BVDictionary **options)
+{
+    BVDictionary *tmp = NULL;
+    BVMediaDriverContext *driver_context = *s;
+    int ret = 0;
+    if (!driver_context && !(driver_context = bv_media_driver_context_alloc()))
+        return BVERROR(ENOMEM);
+    if (!driver_context->bv_class) {
+        bv_log(driver_context, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
+        return BVERROR(EINVAL);
+    }
+    if (options)
+        bv_dict_copy(&tmp, *options, 0);
+    if (bv_opt_set_dict(driver_context, &tmp) < 0)
+        goto fail;
+    if (!driver) {
+        if (!short_name)
+            goto fail;
+        driver = bv_media_driver_guess(short_name);
+    }
+    if (!driver){
+        ret = BVERROR(EINVAL);
+        goto fail;
+    }
+    driver_context->driver = driver;
+    if (driver_context->driver->priv_data_size > 0) {
+        driver_context->priv_data = bv_mallocz(driver_context->driver->priv_data_size);
+        if (!driver_context->priv_data) {
+            ret = BVERROR(ENOMEM);
+            goto fail;
+        }
+        if (driver_context->driver->priv_class) {
+            *(const BVClass **) driver_context->priv_data = driver_context->driver->priv_class;
+            bv_opt_set_defaults(driver_context->priv_data);
+            if ((ret = bv_opt_set_dict(driver_context->priv_data, &tmp)) < 0) {
+                bv_log(driver_context, BV_LOG_ERROR, "set dict error\n");
+                ret = BVERROR(EINVAL);
+                goto fail;
+            }
+        }
+    }
+    if (url)
+        bv_strlcpy(driver_context->filename, url, sizeof(driver_context->filename));
+    if (!driver_context->driver->driver_open) {
+        ret = BVERROR(ENOSYS);
+        goto fail;
+    }
+    if (driver_context->driver->driver_open(driver_context) < 0) {
+        ret = BVERROR(EIO);
+        goto fail;
+    }
+    *s = driver_context;
+    bv_dict_free(&tmp);
+    return 0;
+fail:
+    bv_dict_free(&tmp);
+    bv_media_driver_context_free(driver_context);
+    return ret;
+}
+
+int bv_media_driver_close(BVMediaDriverContext **s)
+{
+    BVMediaDriverContext *h = *s;
+    if (!h) {
+        return BVERROR(EINVAL);
+    }
+    if (h->driver && h->driver->driver_close) {
+        h->driver->driver_close(h);
+    }
+    bv_media_driver_context_free(h);
+    *s = NULL;
+    return 0;
+}
+
+int bv_media_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    if (!s) {
+        return BVERROR(EINVAL);
+    }
+    if (!s->driver || !s->driver->driver_control) {
+        return BVERROR(ENOSYS);
+    }
+    return s->driver->driver_control(s, type, pkt_in, pkt_out);
 }
 

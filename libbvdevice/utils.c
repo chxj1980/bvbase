@@ -21,12 +21,12 @@
  * Copyright (C) albert@BesoVideo, 2014
  */
 
+#line 25 "utils.c"
+
 #include <libbvutil/bvstring.h>
 #include <libbvutil/atomic.h>
 
 #include "bvdevice.h"
-
-static const char FILE_NAME[] = "utils.c";
 
 static BVDevice *first_dev = NULL;
 static BVDevice **last_dev = &first_dev;
@@ -104,7 +104,7 @@ static int init_device(BVDeviceContext *s, const char *url)
     return 0;
 }
 
-int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDictionary **options)
+int bv_device_open(BVDeviceContext ** h, const char *url, BVDevice *dev, BVDictionary **options)
 {
     BVDictionary *tmp = NULL;
     BVDeviceContext *s = *h;
@@ -112,7 +112,7 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     if (!s && !(s = bv_device_context_alloc()))
         return BVERROR(ENOMEM);
     if (!s->bv_class) {
-        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", FILE_NAME, __LINE__);
+        bv_log(s, BV_LOG_ERROR, "Impossible run here %s %d\n", __FILE__, __LINE__);
         return BVERROR(EINVAL);
     }
 
@@ -135,7 +135,8 @@ int bv_device_open(BVDeviceContext ** h, BVDevice *dev, const char *url, BVDicti
     else
         ret = init_device(s, url);
     if (ret < 0) {
-        return BVERROR(ENOSYS);
+        ret = BVERROR(ENOSYS);
+        goto fail;
     }
     if (s->device->priv_data_size > 0) {
         s->priv_data = bv_mallocz(s->device->priv_data_size);
@@ -167,13 +168,6 @@ fail:
     bv_device_context_free(s);
     *h = NULL;
     return ret;
-}
-
-int bv_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *max_ret)
-{
-    if (!h->device || !h->device->dev_scan)
-        return BVERROR(ENOSYS);
-    return h->device->dev_scan(h, device, max_ret);
 }
 
 int bv_device_read(BVDeviceContext * h, void *buf, size_t size)

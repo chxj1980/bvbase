@@ -1,12 +1,69 @@
 #!/bin/bash
 
+usage()
+{
+    echo "$0 x86/x64/dm6446/dm365/hi3515/hi3535"
+	exit 1
+}
+
 if [ $# != 1 ]; then
-    echo "$0 x86/dm6446/dm365/hi3515/hi3535"
-    exit
+	usage
 fi
 
 BVBASE_DIR=$(pwd)/3rdparty/binary
 NAME=bvbase
+
+ARCH=$1
+#export PKG_CONFIG_PATH=$BVBASE_DIR/freetype/$1/lib/pkgconfig
+
+enable_bvfs()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/bvfs/$ARCH/lib:
+	EXENABLE+="--enable-libbvfs "
+	EXTCFLAGS+="-I$BVBASE_DIR/bvfs/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/bvfs/$ARCH/lib -lbvfs "
+}
+
+enable_onvifc()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/onvif/$ARCH/lib:$BVBASE_DIR/openssl/$ARCH/lib:
+	EXENABLE+="--enable-libonvifc "
+	EXTCFLAGS+="-I$BVBASE_DIR/onvif/$ARCH/include -I$BVBASE_DIR/openssl/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/onvif/$ARCH/lib -lonvifc -L$BVBASE_DIR/openssl/$ARCH/lib -lssl -lcrypto "
+}
+
+enable_ffmpeg()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/ffmpeg/$ARCH/lib:
+	EXENABLE+="--enable-libavformat "
+	EXTCFLAGS+="-I$BVBASE_DIR/ffmpeg/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/ffmpeg/$ARCH/lib -lavformat -lavcodec -lavutil "
+}
+
+enable_jansson()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/jansson/$ARCH/lib:
+	EXENABLE+="--enable-libjansson "
+	EXTCFLAGS+="-I$BVBASE_DIR/jansson/$ARCH/include "
+	EXTLFLAGS+="-L$BVBASE_DIR/jansson/$ARCH/lib -ljansson "
+}
+
+enable_his3515()
+{
+	CROSS_COMPILE=arm-hisi-linux-
+	HOST=arm-hisi-linux
+	EXTRA="--cpu=arm926ej-s --arch=armv5te"
+	EXENABLE+="--enable-his3515 "
+	EXTCFLAGS+="-I$BVBASE_DIR/hissdk/his3515/include "
+	#FIXME
+	EXTLFLAGS+="-L$BVBASE_DIR/hissdk/his3515/lib -lmpi -lhiaudio "
+}
+
+enable_x86()
+{
+	EXTCFLAGS+="-m32 "
+	EXTLFLAGS+="-m32 "
+}
 
 case $1 in
     dm6446)
@@ -18,9 +75,7 @@ case $1 in
 		HOST=arm-none-linux-gnueabi
 		;;
 	hi3515)
-		CROSS_COMPILE=arm-hisi-linux-
-		HOST=arm-hisi-linux
-		EXTRA="--cpu=arm926ej-s --arch=armv5te"
+		enable_his3515
 		;;
 	hi3518)
 		CROSS_COMPILE=arm-hisiv100nptl-linux-
@@ -32,19 +87,25 @@ case $1 in
 		CROSS_COMPILE=arm-hisiv100nptl-linux-
 		HOST=arm-hisiv100nptl-linux
 		;;
-       x86)
+    x86)
+		enable_x86
         ;;
+	x64)
+		;;
+	*)
+		usage
+		;;
 esac
 
-#export PKG_CONFIG_PATH=$BVBASE_DIR/freetype/$1/lib/pkgconfig
+enable_bvfs
 
+enable_onvifc
 
-EXTCFLAGS="-I$BVBASE_DIR/ffmpeg/$1/include -I$BVBASE_DIR/onvif/$1/include -I$BVBASE_DIR/openssl/$1/include"
-EXTLFLAGS="-L$BVBASE_DIR/ffmpeg/$1/lib -lavformat -lavcodec -lavutil -L$BVBASE_DIR/onvif/$1/lib -lonvifc -L$BVBASE_DIR/openssl/$1/lib -lssl -lcrypto"
+enable_ffmpeg
 
-export LD_LIBRARY_PATH=$BVBASE_DIR/ffmpeg/$1/lib:$BVBASE_DIR/onvif/$1/lib:$BVBASE_DIR/openssl/$1/lib
-EXENABLE="--enable-libavformat --enable-libonvifc "
+enable_jansson
 
+export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc
 if [ "$1" != "x86" ];then
 	./configure --prefix=$BVBASE_DIR/$NAME/$1 --enable-cross-compile --disable-doc --disable-debug --disable-manpages \

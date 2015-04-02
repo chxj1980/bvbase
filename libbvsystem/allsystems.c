@@ -39,5 +39,6 @@ void bv_system_register_all(void)
         return;
     initialized = 1;
 
+    REGISTER_SYSTEM(X86, x86);
     REGISTER_SYSTEM(HIS3515, his3515);
 }

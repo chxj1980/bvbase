@@ -60,7 +60,7 @@ static const BVClass file_class = {
     .version    = LIBBVUTIL_VERSION_INT,
 };
 
-static int file_read(BVURLContext *h, void *buf, size_t size)
+static int file_read(BVURLContext *h, uint8_t *buf, size_t size)
 {
     FileContext *c = h->priv_data;
     int r;
@@ -69,7 +69,7 @@ static int file_read(BVURLContext *h, void *buf, size_t size)
     return (-1 == r)?BVERROR(errno):r;
 }
 
-static int file_write(BVURLContext *h, const void *buf, size_t size)
+static int file_write(BVURLContext *h, const uint8_t *buf, size_t size)
 {
     FileContext *c = h->priv_data;
     int r;
@@ -113,7 +113,7 @@ static int file_check(BVURLContext *h, int mask)
     return ret;
 }
 
-static int file_open(BVURLContext *h, const char *filename, int flags)
+static int file_open(BVURLContext *h, const char *filename, int flags, BVDictionary **options)
 {
     FileContext *c = h->priv_data;
     int access;
@@ -141,7 +141,7 @@ static int file_open(BVURLContext *h, const char *filename, int flags)
         return BVERROR(errno);
     c->fd = fd;
 
-//    h->is_streamed = !fstat(fd, &st) && S_ISFIFO(st.st_mode);
+    h->is_streamed = !fstat(fd, &st) && S_ISFIFO(st.st_mode);
 
     return 0;
 }
@@ -151,13 +151,11 @@ static int64_t file_seek(BVURLContext *h, int64_t pos, int whence)
 {
     FileContext *c = h->priv_data;
     int64_t ret;
-#if 0
-    if (whence == BVSEEK_SIZE) {
+    if (whence == BV_SEEK_SIZE) {
         struct stat st;
         ret = fstat(c->fd, &st);
         return ret < 0 ? BVERROR(errno) : (S_ISFIFO(st.st_mode) ? 0 : st.st_size);
     }
-#endif
     ret = lseek(c->fd, pos, whence);
 
     return ret < 0 ? BVERROR(errno) : ret;
