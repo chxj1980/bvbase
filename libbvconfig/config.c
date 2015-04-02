@@ -21,7 +21,7 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
-#line 25 "bvcfile.c"
+#line 25 "config.c"
 
 #include <libbvutil/bvstring.h>
 
@@ -192,6 +192,15 @@ int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *con
     if (!s->config->get_media_device)
         return BVERROR(ENOSYS);
     return s->config->get_media_device(s, index, config);
+}
+
+int bv_config_set_media_device(BVConfigContext *s, int index, BVMediaDevice *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_media_device)
+        return BVERROR(ENOSYS);
+    return s->config->set_media_device(s, index, config);
 }
 
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num)

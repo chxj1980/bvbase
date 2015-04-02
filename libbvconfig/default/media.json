@@ -6,10 +6,10 @@
             "dev": "/dev/tw2865dev",
             "channel_mode": 1,
             "channels": 16,
-            "audio_sources":4,
+            "audio_sources": 4,
             "sample_format": 16,
             "sample_rate": 8000,
-            "sample_points":320,
+            "sample_points": 320,
             "work_mode": "I2S_SLAVE"
         },
         {
@@ -18,10 +18,10 @@
             "dev": "/dev/tlv320aic23",
             "channel_mode": 1,
             "channels": 16,
-            "audio_sources":1,
+            "audio_sources": 1,
             "sample_format": 16,
             "sample_rate": 8000,
-            "sample_points":320,
+            "sample_points": 320,
             "work_mode": "I2S_SLAVE"
         }
     ],
@@ -30,7 +30,7 @@
             "token": "0",
             "chip": "tw2866",
             "dev": "/dev/tw2865dev",
-            "video_sources":4,
+            "video_sources": 4,
             "interface": "BT656",
             "work_mode": "4D1"
         }
@@ -42,10 +42,10 @@
             "dev": "/dev/tlv320aic23",
             "channel_mode": 1,
             "channels": 2,
-            "audio_outputs":2,
+            "audio_outputs": 2,
             "sample_format": 16,
             "sample_rate": 8000,
-            "sample_points":320,
+            "sample_points": 320,
             "work_mode": "I2S_SLAVE"
         }
     ],
@@ -54,7 +54,7 @@
             "token": "2",
             "chip": "tw2866",
             "dev": "/dev/tw2865dev",
-            "video_outputs":4,
+            "video_outputs": 4,
             "interface": "CVBS",
             "work_mode": "PAL",
             "display": {
@@ -282,7 +282,7 @@
         {
             "token": "0/1",
             "volume": 80
-        },
+        }
     ],
     "video_encoder_options": [
         [
@@ -473,7 +473,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -486,7 +486,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -499,7 +499,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             }
         ],
@@ -514,7 +514,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -527,7 +527,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -540,7 +540,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             }
         ],
@@ -555,7 +555,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -568,7 +568,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -580,7 +580,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             }
         ],
@@ -594,7 +594,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -606,7 +606,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 2048
             },
             {
@@ -618,7 +618,7 @@
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
-                "frame_rate": 25,
+                "framerate": 25,
                 "bitrate": 999
             }
         ]
@@ -731,13 +731,13 @@
                 "token": "0/0/0",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 6000
+                "sample_rate": 8000
             },
             {
                 "token": "0/0/6",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             }
         ],
         [
@@ -745,13 +745,13 @@
                 "token": "0/1/1",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             },
             {
                 "token": "0/1/8",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             }
         ],
         [
@@ -759,13 +759,13 @@
                 "token": "0/2/2",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             },
             {
                 "token": "0/2/10",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             }
         ],
         [
@@ -773,13 +773,13 @@
                 "token": "0/3/3",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             },
             {
                 "token": "0/3/12",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             }
         ],
         [
@@ -787,7 +787,7 @@
                 "token": "1/0/4",
                 "encoding": "G711A",
                 "bitrate": 32000,
-                "sample": 8000
+                "sample_rate": 8000
             }
         ]
     ],
@@ -811,15 +811,6 @@
         },
         {
             "token": "0/1/1"
-        },
-        {
-            "token": "0/2/2"
-        },
-        {
-            "token": "0/3/3"
-        },
-        {
-            "token": "0/4/4"
         }
     ],
     "OSD": [
@@ -907,8 +898,9 @@
             {
                 "name": "PTZ_0000/0000",
                 "url": "onvif_ptz://onvif/ptz_services",
-                "pan_tile": "[-1..1]",
-                "zoom": "[-1..1]",
+                "pan": "[-1.0..1.0]",
+                "tilt": "[-1.0..1.0]",
+                "zoom": "[-1.0..1.0]",
                 "protocol": "PELCO_P",
                 "rs232": {
                     "data_bits": 8,
@@ -929,23 +921,54 @@
     ],
     "media_devices": [
         {
+            "name": "通道一",
+            "user": "admin",
+            "video_type": 4,
+            "audio_type": 2,
+            "video_channel": -1,
+            "audio_channel": 4,
+            "url": "http://192.168.6.149:80/onvif/device_service",
+            "passwd": "12345"
+        },
+        {
             "name": "通道二",
             "user": "admin",
-            "type": "onvif",
+            "video_type": 1,
+            "audio_type": 2,
+            "video_channel": 1,
+            "audio_channel": 1,
             "url": "http://192.168.6.149:80/onvif/device_service",
             "passwd": "1245"
         },
         {
-            "name": "通道二",
-            "type": "cvbs"
-        },
-        {
             "name": "通道三",
-            "type": "cvbs"
+            "user": "admin",
+            "video_type": 1,
+            "audio_type": 2,
+            "video_channel": 2,
+            "audio_channel": 2,
+            "url": "http://192.168.6.149:80/onvif/device_service",
+            "passwd": "1245"
         },
         {
             "name": "通道四",
-            "type": "cvbs"
+            "user": "admin",
+            "video_type": 1,
+            "audio_type": 2,
+            "video_channel": 3,
+            "audio_channel": 3,
+            "url": "http://192.168.6.149:80/onvif/device_service",
+            "passwd": "1245"
+        },
+        {
+            "name": "通道五",
+            "user": "admin",
+            "video_type": 0,
+            "audio_type": 2,
+            "video_channel": -1,
+            "audio_channel": 4,
+            "url": "http://192.168.6.149:80/onvif/device_service",
+            "passwd": "1245"
         }
     ]
 }
