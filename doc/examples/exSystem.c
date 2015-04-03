@@ -210,6 +210,7 @@ int main(int argc, const char *argv[])
 
     BVStream *st = NULL;
 
+    bv_codec_register_all();
     bv_media_register_all();
     bv_protocol_register_all();
 
@@ -263,6 +264,7 @@ int main(int argc, const char *argv[])
     }
 
 //编码通道的创建
+    int blocked = 1;
     bv_dict_set(&opn, "vtoken", "0/0/0", 0); 
     bv_dict_set(&opn, "atoken", "0/0/0", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
@@ -273,6 +275,7 @@ int main(int argc, const char *argv[])
     bv_dict_set_int(&opn, "framerate", 25, 0);
     bv_dict_set_int(&opn, "bit_rate", 4096, 0);
     bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_LPCM, 0);
+    bv_dict_set_int(&opn, "blocked", blocked, 0);
     if (bv_input_media_open(&avectx1, NULL, "hisave://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -356,18 +359,18 @@ int main(int argc, const char *argv[])
     }
 
     int flags = 0;
-    while ( 1 ) {
+    while ( i < 500 ) {
         if (bv_input_media_read(avectx1, &pkt) > 0 ) {
             flags = 1;
-            if (i < 1000) {
+            if (i < 400) {
                 if (avectx1->streams[pkt.stream_index]->codec->codec_type == BV_MEDIA_TYPE_VIDEO) {
                     bv_io_write(ioctx, pkt.data, pkt.size);
                 } else {
-                    bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
+                    //bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
                     bv_io_write(ioctx2, pkt.data, pkt.size);
                 }
             }
-            if ( i == 1000) {
+            if ( i == 400) {
                 bv_io_close(ioctx);
             }
             bv_packet_free(&pkt);
@@ -407,11 +410,21 @@ int main(int argc, const char *argv[])
             bv_packet_free(&pkt);
         }
 #endif
-     //   bv_usleep(100);
+        if (blocked == 0) {
+            bv_usleep(10000);
+        }
         if (flags)
             i ++;
     }
     bv_input_media_close(&avectx1);
+    bv_input_media_close(&avectx2);
+    bv_input_media_close(&avectx4);
+    bv_input_media_close(&avectx5);
+    bv_input_media_close(&avectx6);
+    bv_input_media_close(&avectx7);
+    bv_input_media_close(&avectx8);
+    bv_input_media_close(&avectx9);
+
     i = 0;
     bv_dict_set(&opn, "vtoken", "2/0", 0); 
     bv_dict_set(&opn, "atoken", "0/0", 0);
@@ -440,7 +453,7 @@ int main(int argc, const char *argv[])
 
     bv_dict_set(&opn, "vtoken", "2/0/1", 0); 
     bv_dict_set(&opn, "atoken", "0/0/1", 0);
-    bv_dict_set(&opn, "apacked", 1, 0);
+    bv_dict_set_int(&opn, "apacked", 1, 0);
     if (bv_output_media_open(&avdctx, NULL, "hisavd", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
         bv_dict_free(&opn);
@@ -487,12 +500,14 @@ int main(int argc, const char *argv[])
 
 close:
     bv_dict_free(&opn);
- //   bv_output_media_write_trailer(avoctx);
-//    bv_output_media_close(&avoctx);
+    bv_output_media_write_trailer(avoctx);
+    bv_output_media_close(&avoctx);
 
+#if 0
     while (1) {
         bv_usleep(100000);
     }
+#endif
     bv_system_exit(&sysctx);
     return 0;
 }
