@@ -163,6 +163,7 @@
         {
             "token": "0/0",
             "framerate": 25,
+            "video_source_device": 0,
             "day_to_night": "6:00",
             "night_to_day": "18:00",
             "capture_rect": {
@@ -175,6 +176,7 @@
         {
             "token": "0/1",
             "framerate": 25,
+            "video_source_device": 0,
             "day_to_night": "6:00",
             "night_to_day": "18:00",
             "capture_rect": {
@@ -187,6 +189,7 @@
         {
             "token": "0/1",
             "framerate": 25,
+            "video_source_device": 0,
             "day_to_night": "6:00",
             "night_to_day": "18:00",
             "capture_rect": {
@@ -199,6 +202,7 @@
         {
             "token": "0/4",
             "framerate": 25,
+            "video_source_device": 0,
             "day_to_night": "6:00",
             "night_to_day": "18:00",
             "capture_rect": {
@@ -213,26 +217,31 @@
         {
             "token": "0/0",
             "channels": 1,
+            "audio_source_device": 0,
             "input_type": "MIC"
         },
         {
             "token": "0/1",
             "channels": 1,
+            "audio_source_device": 0,
             "input_type": "MIC"
         },
         {
             "token": "0/2",
             "channels": 1,
+            "audio_source_device": 0,
             "input_type": "MIC"
         },
         {
             "token": "0/3",
             "channels": 1,
+            "audio_source_device": 0,
             "input_type": "MIC"
         },
         {
             "token": "1/0",
             "channels": 1,
+            "audio_source_device": 1,
             "input_type": "LINE_IN"
         }
     ],
@@ -293,10 +302,10 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             },
@@ -307,7 +316,7 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
                         "bitrate": "[312..1024]"
@@ -321,10 +330,10 @@
                     {
                         "encoding": "JPEG",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[1..10]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             }
@@ -337,10 +346,10 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             },
@@ -351,10 +360,10 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
-                        "bitrate": "[312..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             },
@@ -365,10 +374,10 @@
                     {
                         "encoding": "JPEG",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[1..10]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             }
@@ -381,10 +390,10 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             },
@@ -395,7 +404,7 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
                         "bitrate": "[312..1024]"
@@ -409,10 +418,10 @@
                     {
                         "encoding": "JPEG",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[1..10]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             }
@@ -425,10 +434,10 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             },
@@ -439,7 +448,7 @@
                     {
                         "encoding": "H264",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[4..30]",
                         "gop": "[30..120]",
                         "bitrate": "[312..1024]"
@@ -453,10 +462,10 @@
                     {
                         "encoding": "JPEG",
                         "nb_resolutions": 2,
-                        "resolutions": "(705x576 1280x960)",
+                        "resolutions": "(352x288 704x576)",
                         "framerate": "[1..10]",
                         "gop": "[30..120]",
-                        "bitrate": "[512..1024]"
+                        "bitrate": "[128..1024]"
                     }
                 ]
             }
@@ -474,12 +483,11 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/0/6",
                 "encoding": "H264",
-                "resolution": "D1",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -487,12 +495,11 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/0/24",
                 "encoding": "JPEG",
-                "resolution": "D1",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -500,14 +507,13 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             }
         ],
         [
             {
                 "token": "0/1/1",
                 "encoding": "H264",
-                "resolution": "720HD",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -515,12 +521,11 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/1/8",
                 "encoding": "H264",
-                "resolution": "D1",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -528,27 +533,25 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/1/25",
                 "encoding": "JPEG",
                 "width": 704,
                 "height": 576,
-                "resolution": "D1",
                 "quality": 5,
                 "rate_control": "VBR",
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             }
         ],
         [
             {
                 "token": "0/2/2",
                 "encoding": "H264",
-                "resolution": "720HD",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -556,12 +559,11 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/2/10",
                 "encoding": "H264",
-                "resolution": "D1",
                 "width": 704,
                 "height": 576,
                 "quality": 5,
@@ -569,7 +571,7 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/2/26",
@@ -581,7 +583,7 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             }
         ],
         [
@@ -595,7 +597,7 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/3/12",
@@ -607,7 +609,7 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 2048
+                "bitrate": 512
             },
             {
                 "token": "0/3/27",
@@ -619,14 +621,14 @@
                 "gop": 100,
                 "profile_level": "baseline",
                 "framerate": 25,
-                "bitrate": 999
+                "bitrate": 512
             }
         ]
     ],
     "audio_encoder_options": [
         [
             {
-                "token": "0/0/0",
+                "token": "1/0/0",
                 "options": [
                     {
                         "encoding": "G711A",
@@ -636,7 +638,7 @@
                 ]
             },
             {
-                "token": "0/0/6",
+                "token": "1/0/6",
                 "options": [
                     {
                         "encoding": "G726",
@@ -728,13 +730,13 @@
     "audio_encoders": [
         [
             {
-                "token": "0/0/0",
+                "token": "1/0/0",
                 "encoding": "G711A",
                 "bitrate": 32000,
                 "sample_rate": 8000
             },
             {
-                "token": "0/0/6",
+                "token": "1/0/6",
                 "encoding": "G711A",
                 "bitrate": 32000,
                 "sample_rate": 8000
@@ -925,8 +927,10 @@
             "user": "admin",
             "video_type": 4,
             "audio_type": 2,
+            "video_source": -1,
+            "audio_source": 4,
             "video_channel": -1,
-            "audio_channel": 4,
+            "audio_channel": 0,
             "url": "http://192.168.6.149:80/onvif/device_service",
             "passwd": "12345"
         },
@@ -935,6 +939,8 @@
             "user": "admin",
             "video_type": 1,
             "audio_type": 2,
+            "video_source": 1,
+            "audio_source": 1,
             "video_channel": 1,
             "audio_channel": 1,
             "url": "http://192.168.6.149:80/onvif/device_service",
@@ -945,6 +951,8 @@
             "user": "admin",
             "video_type": 1,
             "audio_type": 2,
+            "video_source": 2,
+            "audio_source": 2,
             "video_channel": 2,
             "audio_channel": 2,
             "url": "http://192.168.6.149:80/onvif/device_service",
@@ -955,6 +963,8 @@
             "user": "admin",
             "video_type": 1,
             "audio_type": 2,
+            "video_source": 3,
+            "audio_source": 3,
             "video_channel": 3,
             "audio_channel": 3,
             "url": "http://192.168.6.149:80/onvif/device_service",
@@ -965,6 +975,8 @@
             "user": "admin",
             "video_type": 0,
             "audio_type": 2,
+            "video_source": -1,
+            "audio_source": 4,
             "video_channel": -1,
             "audio_channel": 4,
             "url": "http://192.168.6.149:80/onvif/device_service",
