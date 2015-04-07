@@ -45,11 +45,11 @@ typedef struct _LocalContext {
             if (Z) {  \
                 bv_config_object_get_value(h->pdb, P, localctx->value);  \
                 bv_strlcpy(Z, localctx->value, sizeof(Z));  \
-                bv_log(h, BV_LOG_DEBUG, "get member type %d value %s\n", X->type, localctx->value);  \
+                bv_log(h, BV_LOG_DEBUG, "get member type %d value %s\n", P->type, localctx->value);  \
             } else {  \
                 bv_config_object_get_value(h->pdb, P, &localctx->lvalue);  \
                 N = localctx->lvalue;  \
-                bv_log(h, BV_LOG_DEBUG, "get member type %d value %lld\n", X->type, localctx->lvalue);  \
+                bv_log(h, BV_LOG_DEBUG, "get member type %d value %lld\n", P->type, localctx->lvalue);  \
             }  \
             bv_config_object_decref(h->pdb, P);   \
         }
@@ -63,11 +63,11 @@ typedef struct _LocalContext {
             if (Z) {  \
                 bv_strlcpy(localctx->value, Z, sizeof(Z));   \
                 bv_config_object_set_value(h->pdb, P, localctx->value);  \
-                bv_log(h, BV_LOG_DEBUG, "set member type %d value %s\n", X->type, localctx->value);  \
+                bv_log(h, BV_LOG_DEBUG, "set member type %d value %s\n", P->type, localctx->value);  \
             } else {  \
                 localctx->lvalue = N;  \
                 bv_config_object_set_value(h->pdb, P, &localctx->lvalue);  \
-                bv_log(h, BV_LOG_DEBUG, "set member type %d value %lld\n", X->type, localctx->lvalue);  \
+                bv_log(h, BV_LOG_DEBUG, "set member type %d value %lld\n", P->type, localctx->lvalue);  \
             }   \
             bv_config_object_decref(h->pdb, P);   \
         }
@@ -137,7 +137,8 @@ static int local_get_device_info(BVConfigContext *h, BVDeviceInfo *devinfo)
     GET_VALUE(obj, memb, "preset_count", NULL, devinfo->preset_count);
     GET_VALUE(obj, memb, "cruise_count", NULL, devinfo->cruise_count);
 
-    bv_config_object_decref(h->pdb, obj);
+    if (obj) 
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -158,12 +159,12 @@ static int local_get_video_encoder(BVConfigContext *h, int channel, int index, B
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem2, memb,"token", config->token, tmp);
@@ -197,9 +198,13 @@ static int local_get_video_encoder(BVConfigContext *h, int channel, int index, B
         config->codec_context.mode_id = BV_RC_MODE_ID_BUTT;
     }
 
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -220,12 +225,12 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     switch (config->codec_context.codec_id) {
@@ -287,20 +292,122 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
     }
     SET_VALUE(elem2, memb, "framerate", NULL, config->codec_context.time_base.den / config->codec_context.time_base.num);
 
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
+static int get_value_video_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVVideoOption *options)
+{
+    int i = 0;
+    int ret = 0;
+    char *ptr = NULL;
+    char *saveptr = NULL;
+    char string[512] = { 0 };
+    LocalContext *localctx = h->priv_data;
+
+    GET_VALUE(elem, memb, "framerate", localctx->value, tmp);
+    ret = sscanf(localctx->value, "[%lld..%lld]", &options->framerate_range.min, &options->framerate_range.max);
+    if (ret != 2) {
+        bv_log(h, BV_LOG_ERROR, "get member[framerate] value is invalid\n");
+    }
+
+    GET_VALUE(elem, memb, "gop", localctx->value, tmp);
+    ret = sscanf(localctx->value, "[%lld..%lld]", &options->gop_range.min, &options->gop_range.max);
+    if (ret != 2) {
+        bv_log(h, BV_LOG_ERROR, "get member[gop] value is invalid\n");
+    }
+
+    GET_VALUE(elem, memb, "bitrate", localctx->value, tmp);
+    ret = sscanf(localctx->value, "[%lld..%lld]", &options->bitrate_range.min, &options->bitrate_range.max);
+    if (ret != 2) {
+        bv_log(h, BV_LOG_ERROR, "get member[bitrate] value is invalid\n");
+    }
+    
+    GET_VALUE(elem, memb, "nb_resolutions", NULL, options->nb_resolutions);
+    if (options->nb_resolutions <= 0) {
+        bv_log(h, BV_LOG_ERROR, "member[nb_resolutions] value is invalid\n");
+        return BVERROR(EINVAL);
+    }
+    options->resolutions = bv_mallocz(sizeof(BVVideoResolution) * options->nb_resolutions);
+    if (!options->resolutions) {
+        bv_log(h, BV_LOG_ERROR, "malloc failed\n");
+        return BVERROR(EINVAL);
+    }
+    GET_VALUE(elem, memb, "resolutions", localctx->value, tmp);
+    ret = sscanf(localctx->value, "(%[^)])", string);
+    if (ret != 1) {
+        bv_log(h, BV_LOG_ERROR, "member[resolutions] format wrong: lack ()\n");
+        return BVERROR(EINVAL);
+    }
+    ptr = bv_strtok(string, " ", &saveptr);
+    if (!ptr) {
+        i = 1;
+        ret = sscanf(ptr, "%dx%d", &(options->resolutions)[0].width, &(options->resolutions)[0].height);
+        if (ret != 2) {
+            bv_log(h, BV_LOG_ERROR, "get member[resolutions] value is invalid\n");
+        }
+    } else {
+        for (i = 0; i < options->nb_resolutions; i++) {
+            ret = sscanf(ptr, "%dx%d", &(options->resolutions)[i].width, &(options->resolutions)[i].height);
+            if (ret != 2) {
+                bv_log(h, BV_LOG_ERROR, "get member[resolutions] value is invalid\n");
+            }
+            ptr = bv_strtok(NULL, " ", &saveptr);
+            if (!ptr)
+                break;
+        }
+    }
+    return 0;
+}
+
+static int get_encoding_video_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVVideoEncoderOption *config)
+{
+    LocalContext *localctx = h->priv_data; 
+
+    if (bv_strcasecmp(localctx->value, "H264") == 0) {
+        config->h264 = bv_mallocz(sizeof(BVVideoOption));
+        if (!config->h264) {
+            bv_log(h, BV_LOG_ERROR, "h264 malloc failed\n");
+            return BVERROR(EINVAL);
+        }
+        config->h264->codec_id = BV_CODEC_ID_H264;
+        get_value_video_encoder_options(h, elem, config->h264);
+    } else if (bv_strcasecmp(localctx->value, "MPEG") == 0) {
+        config->mpeg = bv_mallocz(sizeof(BVVideoOption));
+        if (!config->mpeg) {
+            bv_log(h, BV_LOG_ERROR, "mpeg malloc failed\n");
+            return BVERROR(EINVAL);
+        }
+        config->mpeg->codec_id = BV_CODEC_ID_MPEG;
+        get_value_video_encoder_options(h, elem, config->mpeg);
+    } else if (bv_strcasecmp(localctx->value, "JPEG") == 0) {
+        config->jpeg = bv_mallocz(sizeof(BVVideoOption));
+        if (!config->jpeg) {
+            bv_log(h, BV_LOG_ERROR, "jpeg malloc failed\n");
+            return BVERROR(EINVAL);
+        }
+        config->jpeg->codec_id = BV_CODEC_ID_JPEG;
+        get_value_video_encoder_options(h, elem, config->jpeg);
+    }
     return 0;
 }
 
 static int local_get_video_encoder_options(BVConfigContext *h, int channel, int index, BVVideoEncoderOption *config)
 {
+    int i = 0;
+    int max = 0;
     int ret = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
     BVConfigObject *elem2 = NULL;
-    BVConfigObject *elem3 = NULL;
     BVConfigObject *options = NULL;
+    BVConfigObject *elem3 = NULL;
     LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "video_encoder_options");
@@ -313,12 +420,12 @@ static int local_get_video_encoder_options(BVConfigContext *h, int channel, int 
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem2, memb, "token", config->token, tmp);
@@ -328,47 +435,189 @@ static int local_get_video_encoder_options(BVConfigContext *h, int channel, int 
         bv_log(h, BV_LOG_ERROR, "get member[quality] value is invalid\n");
     }
 
-    elem3 = bv_config_get_element(h->pdb, elem2, 0);
-    if (!elem3) {
-        bv_log(h, BV_LOG_ERROR, "get element[0] error\n");
-        return BVERROR(EINVAL);
+    options = bv_config_get_member(h->pdb, elem2, "options");
+    if (!options) {
+        bv_log(h, BV_LOG_ERROR, "get member[options] error\n");
+        goto error;
     }
-
+    max = bv_config_get_elements(h->pdb, options);
+    for (i = 0; i < max; i++) {
+        elem3 = bv_config_get_element(h->pdb, options, i);
+        if (!elem3) {
+            bv_log(h, BV_LOG_ERROR, "get element[%d] error\n", i);
+            break;
+        }
+        GET_VALUE(elem3, memb, "encoding", localctx->value, tmp);
+        get_encoding_video_encoder_options(h, elem3, config);
+        bv_config_object_decref(h->pdb, elem3);
+    }
     
-    bv_config_object_decref(h->pdb, options);
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (options)
+        bv_config_object_decref(h->pdb, options);
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
+static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVAudioEncoderOption *config)
+{
+    int i = 0;
+    int max = 0;
+    int ret = 0;
+    char *ptr = NULL;
+    char *saveptr = NULL;
+    char string[512] = { 0 };
+    char string2[512] = { 0 };
+    LocalContext *localctx = h->priv_data;
+
+    GET_VALUE(elem, memb, "encoding", localctx->value, tmp);
+    if (bv_strcasecmp(localctx->value, "G711A") == 0) {
+        config->options->codec_id = BV_CODEC_ID_G711A;
+    } else if (bv_strcasecmp(localctx->value, "G711U") == 0) {
+        config->options->codec_id = BV_CODEC_ID_G711U;
+    } else if (bv_strcasecmp(localctx->value, "G726") == 0) {
+        config->options->codec_id = BV_CODEC_ID_G726;
+    } else if (bv_strcasecmp(localctx->value, "AAC") == 0) {
+        config->options->codec_id = BV_CODEC_ID_AAC;
+    }
+
+    GET_VALUE(elem, memb, "bitrate", localctx->value, tmp);
+    ret = sscanf(localctx->value, "(%[^)])", string);
+    if (ret != 1) {
+        bv_log(h, BV_LOG_ERROR, "member[bitrate] format wrong: lack ()\n");
+        return BVERROR(EINVAL);
+    }
+    bv_strlcpy(string2, string, sizeof(string2));
+    ptr = bv_strtok(string, " ", &saveptr);
+    if (!ptr) {
+        max = 1;
+    } else {
+        do {
+            ++max;
+            ptr = bv_strtok(NULL, " ", &saveptr);
+            if (!ptr)
+                break;
+        } while(1);
+    }
+    config->options->bitrate_list.nb_int = max;
+    config->options->bitrate_list.items = bv_mallocz(sizeof(int64_t) * max);
+    ptr = bv_strtok(string2, " ", &saveptr);
+    if (!ptr) {
+        bv_log(h, BV_LOG_ERROR, "bitrate copy string is wrong\n");
+    } else {
+        for (i = 0; i < config->options->bitrate_list.nb_int; i++) {
+            ret = sscanf(ptr, "%lld", &config->options->bitrate_list.items[i]);
+            if (ret != 1) {
+                bv_log(h, BV_LOG_ERROR, "get member[bitrate] value is invalid\n");
+            }
+            ptr = bv_strtok(NULL, " ", &saveptr);
+            if (!ptr)
+                break;
+        }
+    }
+
+    max = 0;
+    GET_VALUE(elem, memb, "sample_rate", localctx->value, tmp);
+    ret = sscanf(localctx->value, "(%[^)])", string);
+    if (ret != 1) {
+        bv_log(h, BV_LOG_ERROR, "member[bitrate] format wrong: lack ()\n");
+        return BVERROR(EINVAL);
+    }
+    bv_strlcpy(string2, string, sizeof(string2));
+    ptr = bv_strtok(string, " ", &saveptr);
+    if (!ptr) {
+        max = 1;
+    } else {
+        do {
+            ++max;
+            ptr = bv_strtok(NULL, " ", &saveptr);
+            if (!ptr)
+                break;
+        } while(1);
+    }
+    config->options->sample_rate_list.nb_int = max;
+    config->options->sample_rate_list.items = bv_mallocz(sizeof(int64_t) * max);
+    ptr = bv_strtok(string2, " ", &saveptr);
+    if (!ptr) {
+        bv_log(h, BV_LOG_ERROR, "sample_rate copy string is wrong\n");
+    } else {
+        for (i = 0; i < config->options->sample_rate_list.nb_int; i++) {
+            ret = sscanf(ptr, "%lld", &config->options->sample_rate_list.items[i]);
+            if (ret != 1) {
+                bv_log(h, BV_LOG_ERROR, "get member[sample_rate] value is invalid\n");
+            }
+            ptr = bv_strtok(NULL, " ", &saveptr);
+            if (!ptr)
+                break;
+        }
+    }
+    return 0;
+}
+
+
 static int local_get_audio_encoder_options(BVConfigContext *h, int channel, int index, BVAudioEncoderOption *config)
 {
+    int i = 0;
+    int max = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
     BVConfigObject *elem2 = NULL;
+    BVConfigObject *options = NULL;
+    BVConfigObject *elem3 = NULL;
+    LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_encoder_options");
     if (!obj) {
         bv_log(h, BV_LOG_ERROR, "get member[audio_encoder_options] error\n");
         return BVERROR(EINVAL);
     } else {
-        bv_log(h, BV_LOG_ERROR, "get member[audio_encoder_options] type %d\n", obj->type);
+        bv_log(h, BV_LOG_DEBUG, "get member[audio_encoder_options] type %d\n", obj->type);
     }
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     } 
 
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+    GET_VALUE(elem2, memb, "token", config->token, tmp);
+
+    options = bv_config_get_member(h->pdb, elem2, "options");
+    if (!options) {
+        bv_log(h, BV_LOG_ERROR, "get member[options] error\n");
+        goto error;
+    }
+    max = bv_config_get_elements(h->pdb, options);
+    config->nb_options = max;
+    config->options = bv_mallocz(sizeof(BVAudioOption) * config->nb_options);
+    for (i = 0; i < max; i++) {
+        elem3 = bv_config_get_element(h->pdb, options, i);
+        if (!elem3) {
+            bv_log(h, BV_LOG_ERROR, "get element[%d] error\n", i);
+            break;
+        }
+        get_value_audio_encoder_options(h, elem3, config);
+        bv_config_object_decref(h->pdb, elem3);
+    }
+
+error:
+    if (options) 
+        bv_config_object_decref(h->pdb, options);
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -389,12 +638,12 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem2, memb, "token", config->token, tmp);
@@ -413,9 +662,13 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
         config->codec_context.codec_id = BV_CODEC_ID_AAC;
     }
 
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -436,12 +689,12 @@ static int local_set_audio_encoder(BVConfigContext *h, int channel, int index, B
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     switch (config->codec_context.codec_id) {
@@ -471,9 +724,13 @@ static int local_set_audio_encoder(BVConfigContext *h, int channel, int index, B
     SET_VALUE(elem2, memb, "bitrate", NULL, config->codec_context.bit_rate);
     SET_VALUE(elem2, memb, "sample_rate", NULL, config->codec_context.sample_rate);
 
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -496,12 +753,12 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     elem = bv_config_get_element(h->pdb, obj, channel);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[channel] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem2 = bv_config_get_element(h->pdb, elem, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem2, memb, "url", config->token, tmp);
@@ -539,7 +796,7 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     rs232 = bv_config_get_member(h->pdb, elem2, "rs232");
     if (!rs232) {
         bv_log(h, BV_LOG_ERROR, "get member[rs232] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     GET_VALUE(rs232, memb, "data_bits", NULL, config->rs485.data_bits);
     GET_VALUE(rs232, memb, "baud_rate", NULL, config->rs485.baud_rate);
@@ -547,10 +804,15 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     GET_VALUE(rs232, memb, "parity", NULL, config->rs485.parity);
     GET_VALUE(rs232, memb, "flow_control", NULL, config->rs485.flow_control);
 
-    bv_config_object_decref(h->pdb, rs232);
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (rs232)
+        bv_config_object_decref(h->pdb, rs232);
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -570,7 +832,7 @@ static int local_get_video_source_device(BVConfigContext *h, int index, BVVideoS
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
@@ -580,8 +842,11 @@ static int local_get_video_source_device(BVConfigContext *h, int index, BVVideoS
     GET_VALUE(elem, memb, "interface", config->interface, tmp);
     GET_VALUE(elem, memb, "work_mode", config->work_mode, tmp);
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -601,7 +866,7 @@ static int local_get_audio_source_device(BVConfigContext *h, int index, BVAudioS
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
@@ -615,8 +880,11 @@ static int local_get_audio_source_device(BVConfigContext *h, int index, BVAudioS
     GET_VALUE(elem, memb, "sample_rate", NULL, config->sample_rate);
     GET_VALUE(elem, memb, "sample_points", NULL, config->sample_points);
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -637,7 +905,7 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
@@ -650,16 +918,20 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     display = bv_config_get_member(h->pdb, elem, "display");
     if (!display) {
         bv_log(h, BV_LOG_ERROR, "get member[display] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     GET_VALUE(display, memb, "left", NULL, config->display.x);
     GET_VALUE(display, memb, "top", NULL, config->display.y);
     GET_VALUE(display, memb, "width", NULL, config->display.width);
     GET_VALUE(display, memb, "height", NULL, config->display.height);
 
-    bv_config_object_decref(h->pdb, display);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (display)
+        bv_config_object_decref(h->pdb, display);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -679,7 +951,7 @@ static int local_get_audio_output_device(BVConfigContext *h, int index, BVAudioO
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
@@ -693,8 +965,11 @@ static int local_get_audio_output_device(BVConfigContext *h, int index, BVAudioO
     GET_VALUE(elem, memb, "sample_rate", NULL, config->sample_rate);
     GET_VALUE(elem, memb, "sample_points", NULL, config->sample_points);
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -720,10 +995,11 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
+    GET_VALUE(elem, memb, "video_source_device", NULL, config->video_source_device);
     GET_VALUE(elem, memb, "framerate", NULL, config->framerate);
     GET_VALUE(elem, memb, "day_to_night", localctx->value, tmp);
     config->day_capture.date_time.second = 0;
@@ -742,7 +1018,7 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     capture = bv_config_get_member(h->pdb, elem, "capture_rect");
     if (!capture) {
         bv_log(h, BV_LOG_ERROR, "get member[capture_rect] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     GET_VALUE(capture, memb, "left", NULL, config->bounds.x);
     GET_VALUE(capture, memb, "top", NULL, config->bounds.y);
@@ -758,17 +1034,17 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     elem2 = bv_config_get_element(h->pdb, imaging, index);
     if (!elem2) {
         bv_log(h, BV_LOG_ERROR, "get member[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     vision = bv_config_get_member(h->pdb, elem2, "vision_control");
     if (!vision) {
         bv_log(h, BV_LOG_ERROR, "get member[vision_control] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     elem3 = bv_config_get_element(h->pdb, vision, 0);
     if (!elem3) {
         bv_log(h, BV_LOG_ERROR, "get element[0] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     GET_VALUE(elem3, memb, "luminance", NULL, config->day_capture.imaging.luminance);
     GET_VALUE(elem3, memb, "contrast", NULL, config->day_capture.imaging.contrast);
@@ -779,7 +1055,7 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     elem4 = bv_config_get_element(h->pdb, vision, 1);
     if (!elem4) {
         bv_log(h, BV_LOG_ERROR, "get element[1] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     GET_VALUE(elem4, memb, "luminance", NULL, config->night_capture.imaging.luminance);
     GET_VALUE(elem4, memb, "contrast", NULL, config->day_capture.imaging.contrast);
@@ -787,15 +1063,23 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     GET_VALUE(elem4, memb, "saturation", NULL, config->day_capture.imaging.saturation);
     GET_VALUE(elem4, memb, "sharpness", NULL, config->day_capture.imaging.sharpness);
 
-    
-    bv_config_object_decref(h->pdb, elem4);
-    bv_config_object_decref(h->pdb, elem3);
-    bv_config_object_decref(h->pdb, vision);
-    bv_config_object_decref(h->pdb, elem2);
-    bv_config_object_decref(h->pdb, imaging);
-    bv_config_object_decref(h->pdb, capture);
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem4)
+        bv_config_object_decref(h->pdb, elem4);
+    if (elem3)
+        bv_config_object_decref(h->pdb, elem3);
+    if (vision)
+        bv_config_object_decref(h->pdb, vision);
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (imaging)
+        bv_config_object_decref(h->pdb, imaging);
+    if (capture)
+        bv_config_object_decref(h->pdb, capture);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -814,10 +1098,11 @@ static int local_get_audio_source(BVConfigContext *h, int index, BVAudioSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
+    GET_VALUE(elem, memb, "audio_source_device", NULL, config->audio_source_device);
     GET_VALUE(elem, memb, "channels", NULL, config->channels);
     GET_VALUE(elem, memb, "input_type", localctx->value, tmp);
     if (bv_strcasecmp(localctx->value, "mic") == 0) {
@@ -826,8 +1111,11 @@ static int local_get_audio_source(BVConfigContext *h, int index, BVAudioSource *
         config->input_type = BV_AUDIO_INPUT_TYPE_LINE_IN;
     }
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -847,19 +1135,21 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
 
     GET_VALUE(elem, memb, "name", config->name, tmp);
     GET_VALUE(elem, memb, "video_type", NULL, config->video_type);
     GET_VALUE(elem, memb, "audio_type", NULL, config->audio_type);
+    GET_VALUE(elem, memb, "video_source", NULL, config->video_source);
+    GET_VALUE(elem, memb, "audio_source", NULL, config->audio_source);
     GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
     GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
     if (config->video_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
         config->devinfo = bv_mallocz(sizeof(BVMobileDevice));
         if (!config->devinfo) {
             bv_log(h, BV_LOG_ERROR, "malloc failed\n");
-            return BVERROR(EINVAL);
+            goto error;
         }
         GET_VALUE(elem, memb, "url", localctx->value, tmp);
         bv_strlcpy(((BVMobileDevice *)(config->devinfo))->url, localctx->value, sizeof(((BVMobileDevice *)(config->devinfo))->url));
@@ -875,8 +1165,11 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
         config->devinfo = NULL;
     }
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 
@@ -896,7 +1189,7 @@ static int local_set_media_device(BVConfigContext *h, int index, BVMediaDevice *
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
         bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
-        return BVERROR(EINVAL);
+        goto error;
     }
     
     SET_VALUE(elem, memb, "name", config->name, tmp);
@@ -911,8 +1204,11 @@ static int local_set_media_device(BVConfigContext *h, int index, BVMediaDevice *
         SET_VALUE(elem, memb, "url", localctx->value, tmp);
     }
 
-    bv_config_object_decref(h->pdb, elem);
-    bv_config_object_decref(h->pdb, obj);
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
     return 0;
 }
 

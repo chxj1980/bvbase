@@ -52,7 +52,7 @@ static int tw2866_driver_open(BVMediaDriverContext *s)
 static int audio_source_set_volume(BVMediaDriverContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     Tw2866Driver *driver = s->priv_data;
-    BVAduioSourceVolume *source_volume = pkt_in->data;
+    BVAudioSourceVolume *source_volume = pkt_in->data;
     tw286x_audio_in_volume  involume;
     int aidev, aichn;
     int ret = 0;

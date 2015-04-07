@@ -52,7 +52,7 @@ static int tlv320aic23_driver_open(BVMediaDriverContext *s)
 static int audio_source_set_volume(BVMediaDriverContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     Tlv320Aic23Driver *driver = s->priv_data;
-    BVAduioSourceVolume *source_volume = pkt_in->data;
+    BVAudioSourceVolume *source_volume = pkt_in->data;
     int cmd = AIC23IOC_S_AD_RIGHT_VOLUME;
     int aidev, aichn;
     int ret = 0;

@@ -187,6 +187,7 @@ typedef struct _BVVideoCapture {
 
 typedef struct _BVVideoSource {
     char token[BV_MAX_NAME_LEN];
+    uint8_t video_source_device;
     float framerate;
     BVIntRectange bounds;
     BVVideoResolution resolution;
@@ -212,16 +213,17 @@ enum BVAudioInputType {
 
 typedef struct _BVAudioSource {
     char token[BV_MAX_NAME_LEN];
+    uint8_t audio_source_device;
     int channels;
     int volume;
     enum BVAudioInputType input_type;
     void *any_attr;
 } BVAudioSource;
 
-typedef struct _BVAduioSourceVolume {
+typedef struct _BVAudioSourceVolume {
     char token[BV_MAX_NAME_LEN];
     int volume;     //0 - 100
-} BVAduioSourceVolume;
+} BVAudioSourceVolume;
 
 typedef struct _BVAudioOutputVolume {
     char token[BV_MAX_NAME_LEN];
@@ -278,6 +280,8 @@ typedef struct _BVMediaDevice {
     char name[BV_MAX_NAME_LEN];
     enum BVMediaStreamType video_type;
     enum BVMediaStreamType audio_type; 
+    uint8_t video_source;
+    uint8_t audio_source;
     uint8_t video_channel;
     uint8_t audio_channel;
     void *devinfo;
