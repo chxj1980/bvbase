@@ -40,6 +40,8 @@ typedef struct OnvifContext {
     char svrurl[1024];
     char *vtoken;
     char *atoken;
+    int vindex;
+    int aindex;
     char *user;
     char *passwd;
     enum BVCodecID vcodec_id;
@@ -125,13 +127,16 @@ static int set_avcodec_info(BVMediaContext *s, OnvifContext *onvifctx)
     AVStream *avst = NULL;
     for (i = 0; i < onvif->nb_streams; i++) {
         avst = onvif->streams[i];
-        bvst = bv_stream_new(s, NULL);
-        if (avst->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+        if (avst->codec->codec_type == AVMEDIA_TYPE_VIDEO && onvifctx->vtoken) {
+            bvst = bv_stream_new(s, NULL);
             set_video_info(bvst, avst);
-        } else if (avst->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            onvifctx->vindex = bvst->index;
+        } else if (avst->codec->codec_type == AVMEDIA_TYPE_AUDIO && onvifctx->atoken) {
+            bvst = bv_stream_new(s, NULL);
             set_audio_info(bvst, avst);
+            onvifctx->aindex = bvst->index;
         } else {
-            bv_log(s, BV_LOG_WARNING, "Unsupport CodecType\n");
+            bv_log(s, BV_LOG_WARNING, "Drop CodecType %d\n", avst->codec->codec_type);
         }
     }
     return 0;
@@ -364,7 +369,7 @@ fail:
     return ret;
 }
 
-static int copy_data(BVPacket *pkt, AVPacket *rpkt)
+static int copy_data(BVPacket *pkt, AVPacket *rpkt, int index)
 {
     if (bv_packet_new(pkt, rpkt->size) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "NoMem at %s %d\n", __FILE__, __LINE__);
@@ -376,13 +381,15 @@ static int copy_data(BVPacket *pkt, AVPacket *rpkt)
     pkt->dts = rpkt->dts;
     if (rpkt->flags & AV_PKT_FLAG_KEY)
         pkt->flags |= BV_PKT_FLAG_KEY;
-    pkt->stream_index = rpkt->stream_index;
+    pkt->stream_index = index;
     return 0;
 }
 static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
 {
     AVPacket rpkt;
     OnvifContext *onvifctx = s->priv_data;
+    AVStream *avstream = NULL;
+    int size = 0;
     if (onvifctx->onvif == NULL) {
         return BVERROR(EINVAL);
     }
@@ -390,9 +397,17 @@ static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
     if(av_read_frame(onvifctx->onvif, &rpkt) < 0) {
         return BVERROR(EIO);
     }
-    copy_data(pkt, &rpkt);
+    size = rpkt.size;
+    avstream = onvifctx->onvif->streams[rpkt.stream_index];
+    if ((avstream->codec->codec_type == AVMEDIA_TYPE_VIDEO) && (onvifctx->vindex != -1)) {
+        copy_data(pkt, &rpkt, onvifctx->vindex);
+    } else if ((avstream->codec->codec_type == AVMEDIA_TYPE_AUDIO) && (onvifctx->aindex != -1)) {
+        copy_data(pkt, &rpkt, onvifctx->aindex);
+    } else {
+        size = BVERROR(EAGAIN);
+    }
     av_free_packet(&rpkt);
-    return pkt->size;
+    return size;
 }
 
 static bv_cold int onvif_read_close(BVMediaContext * s)
@@ -412,7 +427,9 @@ static bv_cold int onvif_media_control(BVMediaContext *s, enum BVMediaMessageTyp
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     {"vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     {"atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},

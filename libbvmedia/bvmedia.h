@@ -66,11 +66,12 @@ enum BVMediaMessageType {
 
 enum BVMediaDriverMessageType {
     BV_MEDIA_DRIVER_MESSAGE_TYPE_NONE = -1,
-    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_VOLUME,
-    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_VOLUME,
-    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_IN_SAMPLE,
-    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUT_SAMPLE,
-    BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_IN_IMAGING,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_SOURCE_SET_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUTPUT_SET_VOLUME,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_SOURCE_SET_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUTPUT_SET_SAMPLE,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_SET_IMAGING,
+    BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_GET_FORMAT,   //NTSC PAL 
 };
 
 typedef struct _BVInputMedia {
@@ -209,6 +210,25 @@ int bv_media_driver_open(BVMediaDriverContext **s, const char *url, const char *
 int bv_media_driver_close(BVMediaDriverContext **s);
 
 int bv_media_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
+typedef struct _BVOSDConfig {
+    char fontfile[128];
+//    uint8_t text[1024];     //UTF-8
+    int     x, y;
+    int     width, height;
+    int     shadowx, shadowy;
+    uint8_t draw_box;       //draw box around text --- 0 1
+    uint8_t draw_border;
+    uint8_t draw_shadow;
+    uint8_t borderw;        //边框像素的大小
+    uint32_t fontsize;
+    char    fontcolor[32];  //white black ...#ADDD2F 0xADDD2F read@0.5 @alpha
+    char    shadowcolor[32];
+    char    boxcolor[32];
+    char    bordercolor[32];
+    enum BVPixelFormat src_fmt;  //输入格式  创建后不可更改
+    enum BVPixelFormat dst_fmt;  //输出格式  创建后不可更改
+} BVOSDConfig;
 
 #ifdef __cplusplus
 }

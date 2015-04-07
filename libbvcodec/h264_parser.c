@@ -64,49 +64,61 @@ static int h264_parser_exit(BVCodecParserContext *s)
     return 0;
 }
 
+static int h264_decode_sps_unit(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data, int size)
+{
+    bv_log(s, BV_LOG_DEBUG, "find sps info\n");
+    return 0;
+}
+
+static int h264_decode_pps_unit(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data, int size)
+{
+    bv_log(s, BV_LOG_DEBUG, "find pps info\n");
+    return 0;
+}
+
 static int h264_parser_nal_units(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size)
 {
     H264ParserContext *p = s->priv_data; 
     int nalu_type = 0;
     int nalu_size = 0;
+    int size = 0;
     const uint8_t *buffer = data_in;
     const uint8_t *buffer_end = data_in + data_in_size;
     const uint8_t *start = buffer;
     const uint8_t *end = buffer;
 
-    while (end <= buffer_end) {
-        if ((start[0] == 0) && (start[1] == 0 ) && (start[2] == 0) && (start[3] == 1)) {
-            end = start + 4;
-            nalu_type = start[4] & 0x1F;
-            if (nalu_type == NAL_SPS) {
-                bv_log(s, BV_LOG_DEBUG, "find sps info\n");
-            } else if (nalu_type == NAL_PPS) {
-                bv_log(s, BV_LOG_DEBUG, "find pps info\n");
-            } else if (nalu_type == NAL_SEI) {
-                bv_log(s, BV_LOG_DEBUG, "find sei info\n");
-            }else if (nalu_type == NAL_IDR_SLICE){
-                bv_log(s, BV_LOG_DEBUG, "find idr info\n");
-            } else {
-                bv_log(s, BV_LOG_WARNING, "Not Support NAL Type\n");
+    while (start < buffer_end - 4) {
+        if ((start[0] != 0) || (start[1] != 0 ) || (start[2] != 0) || (start[3] != 1)) {
+            start ++;
+            continue;
+        }
+        end = start + 4;
+        while (end < buffer_end - 4) {
+            if ((end[0] != 0) || (end[1] != 0) || (end[2] != 0) || (end[3] != 1)) {
+                end ++;
+                continue;
             }
-
-            while (end <= buffer_end) {
-                if ((end[0] == 0) && (end[1] == 0) && (end[2] == 0) && (end[3] == 1)) {
-                    int len = 0;
-                    nalu_size = end - start; 
-                    len = p->buffer_end - p->buffer_ptr;
-                    len = BBMIN(len, nalu_size);
-                    memcpy(p->buffer_ptr, start, len);
-                    p->buffer_ptr += len;
-                    start = end;
+            nalu_type = start[4] & 0x1F;
+            nalu_size = end - start; 
+            switch (nalu_type) {
+                case NAL_SPS:
+                {
+                    h264_decode_sps_unit(s, codec, start, nalu_size);
                     break;
-                } else {
-                    end ++;
+                }
+                case NAL_PPS:
+                {
+                    h264_decode_pps_unit(s, codec, start, nalu_size);
+                    break;
                 }
             }
-        } else {
-            start ++;
+            size = p->buffer_end - p->buffer_ptr;
+            size = BBMIN(size, nalu_size);
+            memcpy(p->buffer_ptr, start, size);
+            p->buffer_ptr += size;
+            break;
         }
+        start = end;
     }
 
     return 0;

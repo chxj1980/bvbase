@@ -218,6 +218,27 @@ typedef struct _BVAudioSource {
     void *any_attr;
 } BVAudioSource;
 
+typedef struct _BVAduioSourceVolume {
+    char token[BV_MAX_NAME_LEN];
+    int volume;     //0 - 100
+} BVAduioSourceVolume;
+
+typedef struct _BVAudioOutputVolume {
+    char token[BV_MAX_NAME_LEN];
+    int volume;     //0 - 100
+} BVAudioOutputVolume;
+
+typedef struct _BVVideoSourceImaging {
+    char token[BV_MAX_NAME_LEN];
+    BVImagingSettings imaging;
+} BVVideoSourceImaging;
+
+enum BVMediaVideoFormat {
+    BV_MEDIA_VIDEO_FORMAT_NONE = 0,
+    BV_MEDIA_VIDEO_FORMAT_PAL,
+    BV_MEDIA_VIDEO_FORMAT_NTSC,
+};
+
 enum BVMobileDeviceType {
     BV_MOBILE_DEVICE_TYPE_NONE = 0,
     BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
@@ -236,12 +257,14 @@ typedef struct _BVMobileDevice {
     int  timeout;
 } BVMobileDevice;
 
+#if 0
 enum BVMediaDeviceType {
     BV_MEDIA_DEVICE_TYPE_NONE,
     BV_MEDIA_DEVICE_TYPE_CVBS,
     BV_MEDIA_DEVICE_TYPE_IPC,
     BV_MEDIA_DEVICE_TYPE_UNKNOW,
 };
+#endif
 
 enum BVMediaStreamType {
     BV_MEDIA_STREAM_TYPE_NONE = 0,

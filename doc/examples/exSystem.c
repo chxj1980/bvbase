@@ -359,7 +359,7 @@ int main(int argc, const char *argv[])
     }
 
     int flags = 0;
-    while ( i < 500 ) {
+    while ( i < 500 + i) {
         if (bv_input_media_read(avectx1, &pkt) > 0 ) {
             flags = 1;
             if (i < 400) {

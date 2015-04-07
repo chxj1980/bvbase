@@ -393,7 +393,7 @@ static int get_video_extradata(BVMediaContext *s)
     int ret = 0;
     if (hisctx->vcodec_id != BV_CODEC_ID_H264)
         return 0;
-    parser = bv_codec_parser_init(BV_CODEC_ID_H264);
+    parser = bv_codec_parser_init(hisctx->vcodec_id);
     if (!parser) {
         return BVERROR(ENOSYS);
     }
@@ -401,7 +401,6 @@ static int get_video_extradata(BVMediaContext *s)
     while (1) {
         bv_packet_init(&packet);
         if(read_video_packet(s, &packet) < 0) {
-        //    bv_usleep(2000);
             continue;
         }
 
@@ -420,12 +419,15 @@ static int get_video_extradata(BVMediaContext *s)
         hisctx->packet = (BVPacket *)bv_mallocz(sizeof(BVPacket));
         if (!hisctx->packet) {
             bv_log(s, BV_LOG_ERROR, "alloc packet for extradata error\n");
+            bv_packet_free(&packet);
+            bv_codec_parser_exit(parser);
             return BVERROR(ENOMEM);
         }
         bv_packet_copy(hisctx->packet, &packet);
         bv_packet_free(&packet);
+        bv_log(s, BV_LOG_DEBUG, "extradata_size %d\n", codec->extradata_size);
     }
-    bv_codec_parser_exit(parser), &packet;
+    bv_codec_parser_exit(parser);
     return ret;
 }
 
