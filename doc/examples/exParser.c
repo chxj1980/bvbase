@@ -43,9 +43,21 @@ int main(int argc, const char *argv[])
         bv_codec_context_free(ctx);
     }
     uint8_t data_in[] = {0,0,0,1,0x67, 0x42, 0xe0, 0x1E, 0xDB, 0x02, 0, 0, 0, 1, 
-        0x68,0xce,0x32,0xa4,0,0,0,1,0x06,0xe5,0,0,0,1,0x65, 0xd8, 0x00, 0x02, 0x7c, 0x80};
+        0x68,0xce,0x32,0xa4,0, 0, 0, 1, 0x68,0xce,0x48,0x24,
+        0,0,0,1,0x06,0xe5,0,0,0,1,0x65, 0xd8, 0x00, 0x02, 0x7c, 0x80};
     int size = sizeof(data_in)/ sizeof(data_in[0]);
     bv_codec_parser_parse(parser, ctx, data_in, size, NULL, NULL);
+    int i = 0;
+    for (i = 0; i < size; i++) {
+        printf("%02x ", data_in[i]);
+    }
+    printf("\n");
+    if (ctx->extradata_size) {
+        for (i = 0; i < ctx->extradata_size; i++) {
+            printf("%02x ", ctx->extradata[i]);
+        }
+        printf("\n");
+    }
 
     bv_codec_parser_exit(parser);
 

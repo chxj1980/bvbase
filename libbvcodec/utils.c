@@ -119,7 +119,7 @@ int bv_codec_parser_exit(BVCodecParserContext *s)
     return 0;
 }
 
-int bv_codec_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size)
+int bv_codec_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int *data_out_size)
 {
     if (!s || !s->parser) {
         return BVERROR(EINVAL);

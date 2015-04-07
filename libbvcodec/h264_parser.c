@@ -64,59 +64,93 @@ static int h264_parser_exit(BVCodecParserContext *s)
     return 0;
 }
 
-static int h264_find_start_code(const uint8_t *data, int size)
+static int h264_decode_sps_unit(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data, int size)
 {
-    int i = 0;
-    if (size <= 4) 
-        return -1;
-    for (i = 0; i < size - 4; i++) {
-        if ((data[i] == 0) && (data[i + 1] == 0) && (data[i + 2] == 0) && (data[i + 3] == 1)) {
-            return i;
-        }
-    }
-    return -1;
+    bv_log(s, BV_LOG_DEBUG, "find sps info\n");
+    return 0;
 }
 
-static int h264_find_nal_end(const uint8_t *data, int size)
+static int h264_decode_pps_unit(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data, int size)
 {
+    bv_log(s, BV_LOG_DEBUG, "find pps info\n");
+    return 0;
+}
+
+static int h264_parser_nal_units(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size)
+{
+    H264ParserContext *p = s->priv_data; 
+    int nalu_type = 0;
+    int nalu_size = 0;
+    int size = 0;
+    const uint8_t *buffer = data_in;
+    const uint8_t *buffer_end = data_in + data_in_size;
+    const uint8_t *start = buffer;
+    const uint8_t *end = buffer;
+
+    while (start < buffer_end - 4) {
+        if ((start[0] != 0) || (start[1] != 0 ) || (start[2] != 0) || (start[3] != 1)) {
+            start ++;
+            continue;
+        }
+        end = start + 4;
+        while (end < buffer_end - 4) {
+            if ((end[0] != 0) || (end[1] != 0) || (end[2] != 0) || (end[3] != 1)) {
+                end ++;
+                continue;
+            }
+            nalu_type = start[4] & 0x1F;
+            nalu_size = end - start; 
+            switch (nalu_type) {
+                case NAL_SPS:
+                {
+                    h264_decode_sps_unit(s, codec, start, nalu_size);
+                    break;
+                }
+                case NAL_PPS:
+                {
+                    h264_decode_pps_unit(s, codec, start, nalu_size);
+                    break;
+                }
+            }
+            size = p->buffer_end - p->buffer_ptr;
+            size = BBMIN(size, nalu_size);
+            memcpy(p->buffer_ptr, start, size);
+            p->buffer_ptr += size;
+            break;
+        }
+        start = end;
+    }
+
     return 0;
 }
 /**
  *  FIXME
  *  RTP h264 组包
  */
-static int h264_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size)
+static int h264_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int *data_out_size)
 {
     H264ParserContext *p = s->priv_data;
-    int stata = 0;
-    int pos = 0;
-    int end_pos = 0;
-    int nalu_type = 0;
+    int size = 0;
     if (codec && codec->extradata) {
         //parse BVCodecContext extradata
         s->codec = codec;
     //    h264_decode_extradata_size(s, codec->extradata, codec->extradata_size);
     }
-    while (1) {
-        pos = h264_find_start_code(data_in + end_pos, data_in_size - end_pos);
-        if (pos < 0) {
-            bv_log(s, BV_LOG_ERROR, "find start code error\n");
-            break;
-        }
-        nalu_type = data_in[end_pos + pos + 4] & 0x1F;
-        if (nalu_type == NAL_SPS) {
-            bv_log(s, BV_LOG_INFO, "find sps info\n");
-        } else if (nalu_type == NAL_PPS) {
-            bv_log(s, BV_LOG_INFO, "find pps info\n");
-        } else if (nalu_type == NAL_SEI) {
-            bv_log(s, BV_LOG_INFO, "find sei info\n");
-        }
-        pos += 4;
-        end_pos += h264_find_start_code(data_in + end_pos + pos, data_in_size - end_pos - pos);
-        end_pos += pos;
+
+    if (h264_parser_nal_units(s, codec, data_in, data_in_size) < 0) {
+        return BVERROR(EIO);
     }
-    if (end_pos <= 0) {
-        return BVERROR(EINVAL);
+    if (p->buffer_ptr != p->buffer) {
+        if (codec->extradata)
+            bv_freep(&codec->extradata);
+        size = p->buffer_ptr - p->buffer;
+        codec->extradata = bv_mallocz(size);
+        if (codec->extradata) {
+            codec->extradata_size = size;
+            memcpy(codec->extradata, p->buffer, size);
+        } else {
+            return BVERROR(ENOMEM);
+        }
     }
     return 0;
 }

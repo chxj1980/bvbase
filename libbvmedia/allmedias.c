@@ -84,4 +84,5 @@ void bv_media_register_all(void)
 #endif
 
     REGISTER_DRIVER(TW2866, tw2866);
+    REGISTER_DRIVER(TLV320AIC23, tlv320aic23);
 }

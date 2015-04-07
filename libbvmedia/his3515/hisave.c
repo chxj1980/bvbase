@@ -29,6 +29,7 @@
 #include <libbvutil/bvstring.h>
 #include <libbvutil/log.h>
 #include <libbvutil/opt.h>
+#include <libbvutil/time.h>
 
 #include <libbvmedia/bvmedia.h>
 
@@ -386,10 +387,48 @@ static int read_video_packet(BVMediaContext *s, BVPacket *pkt);
 static int get_video_extradata(BVMediaContext *s)
 {
     HisAVEContext *hisctx = s->priv_data;
+    BVCodecParserContext *parser = NULL;
+    BVCodecContext *codec = s->streams[hisctx->vindex]->codec;
+    BVPacket packet;
+    int ret = 0;
     if (hisctx->vcodec_id != BV_CODEC_ID_H264)
         return 0;
+    parser = bv_codec_parser_init(hisctx->vcodec_id);
+    if (!parser) {
+        return BVERROR(ENOSYS);
+    }
     //get extradata from packet
-    return BVERROR(ENOSYS);
+    while (1) {
+        bv_packet_init(&packet);
+        if(read_video_packet(s, &packet) < 0) {
+            continue;
+        }
+
+        if (!(packet.flags & BV_PKT_FLAG_KEY)) {
+            bv_packet_free(&packet);
+            continue;
+        }
+        if (bv_codec_parser_parse(parser, codec,packet.data, packet.size, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "parser H264 extradata error\n");
+            bv_packet_free(&packet);
+            ret = BVERROR(EIO);
+        }
+        break;
+     }
+    if (ret == 0) {
+        hisctx->packet = (BVPacket *)bv_mallocz(sizeof(BVPacket));
+        if (!hisctx->packet) {
+            bv_log(s, BV_LOG_ERROR, "alloc packet for extradata error\n");
+            bv_packet_free(&packet);
+            bv_codec_parser_exit(parser);
+            return BVERROR(ENOMEM);
+        }
+        bv_packet_copy(hisctx->packet, &packet);
+        bv_packet_free(&packet);
+        bv_log(s, BV_LOG_DEBUG, "extradata_size %d\n", codec->extradata_size);
+    }
+    bv_codec_parser_exit(parser);
+    return ret;
 }
 
 static bv_cold int his_read_close(BVMediaContext *s);
@@ -410,7 +449,10 @@ static bv_cold int his_read_header(BVMediaContext *s)
         }
         add_video_encode_stream(s);
         if (hisctx->vcodec_id == BV_CODEC_ID_H264) {
-            get_video_extradata(s);
+            if (get_video_extradata(s) < 0) {
+                bv_log(s, BV_LOG_ERROR, "get video extradata error\n");
+                goto fail;
+            }
         }
     }
     return 0;
@@ -557,6 +599,13 @@ fail:
 static int read_video_packet(BVMediaContext *s, BVPacket *pkt)
 {
     HisAVEContext *hisctx = s->priv_data;
+    if (hisctx->packet) {
+        bv_packet_copy(pkt, hisctx->packet); 
+        bv_packet_free(hisctx->packet);
+        bv_freep(&hisctx->packet);
+        hisctx->packet = NULL;
+        return pkt->size;
+    }
     if (hisctx->vcodec_id == BV_CODEC_ID_H264) {
         return read_h264_video_packet(s, pkt);
     }
@@ -583,8 +632,8 @@ static bv_cold int his_read_packet(BVMediaContext *s, BVPacket *pkt)
     }
     BBCLEAR_STRUCT(tv);
     if (hisctx->blocked) {
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
+        tv.tv_sec = 0;
+        tv.tv_usec = 10000;
     }
     ret = select(BBMAX(hisctx->afd, hisctx->vfd) + 1, &fds, NULL, NULL, &tv);
     if (ret < 0) {
@@ -611,6 +660,10 @@ static bv_cold int his_read_close(BVMediaContext *s)
     HisAVEContext *hisctx = s->priv_data;
     if (hisctx->atoken) {
         destroy_audio_encode_channel(s);
+    }
+    if (hisctx->packet) {
+        bv_packet_free(hisctx->packet);
+        bv_freep(&hisctx->packet);
     }
     if (hisctx->vtoken) {
         destroy_video_encode_channel(s);
@@ -671,7 +724,7 @@ static const BVOption options[] = {
     { "abit_rate", "", OFFSET(abit_rate), BV_OPT_TYPE_INT, {.i64 = 32000}, 0, INT_MAX, DEC},
     { "sample_rate", "", OFFSET(sample_rate), BV_OPT_TYPE_INT, {.i64 = 8000}, 0, INT_MAX, DEC},
     { "channels", "", OFFSET(channels), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 2, DEC},
-    { "blocked", "", OFFSET(blocked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 2, DEC},
+    { "blocked", "", OFFSET(blocked), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 2, DEC},
     { NULL },
 };
 

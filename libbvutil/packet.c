@@ -64,6 +64,66 @@ int bv_packet_new(BVPacket *pkt, int size)
     return 0;
 }
 
+#define ALLOC_MALLOC(data, size) data = bv_malloc(size)
+#define ALLOC_BUF(data, size)                \
+do {                                         \
+    bv_buffer_realloc(&pkt->buf, size);      \
+    data = pkt->buf ? pkt->buf->data : NULL; \
+} while (0)
+
+#define DUP_DATA(dst, src, size, padding, ALLOC)                        \
+    do {                                                                \
+        void *data;                                                     \
+        if (padding) {                                                  \
+            if ((unsigned)(size) >                                      \
+                (unsigned)(size) + BV_INPUT_BUFFER_PADDING_SIZE)        \
+                goto failed_alloc;                                      \
+            ALLOC(data, size + BV_INPUT_BUFFER_PADDING_SIZE);           \
+        } else {                                                        \
+            ALLOC(data, size);                                          \
+        }                                                               \
+        if (!data)                                                      \
+            goto failed_alloc;                                          \
+        memcpy(data, src, size);                                        \
+        if (padding)                                                    \
+            memset((uint8_t *)data + size, 0,                           \
+                   BV_INPUT_BUFFER_PADDING_SIZE);                       \
+        dst = data;                                                     \
+    } while (0)
+
+static int copy_packet_data(BVPacket *pkt, const BVPacket *src, int dup)
+{
+    pkt->data      = NULL;
+   // pkt->side_data = NULL;
+    if (pkt->buf) {
+        BVBufferRef *ref = bv_buffer_ref(src->buf);
+        if (!ref)
+            return BVERROR(ENOMEM);
+        pkt->buf  = ref;
+        pkt->data = ref->data;
+    } else {
+        DUP_DATA(pkt->data, src->data, pkt->size, 1, ALLOC_BUF);
+    }
+#if 0
+    if (pkt->side_data_elems && dup)
+        pkt->side_data = src->side_data;
+    if (pkt->side_data_elems && !dup) {
+        return bv_copy_packet_side_data(pkt, src);
+    }
+#endif
+    return 0;
+
+failed_alloc:
+    bv_packet_free(pkt);
+    return BVERROR(ENOMEM);
+}
+
+int bv_packet_copy(BVPacket *dst, const BVPacket *src)
+{
+    *dst = *src;
+    return copy_packet_data(dst, src, 0);
+}
+
 void bv_packet_free(BVPacket *pkt)
 {
     if (!pkt)

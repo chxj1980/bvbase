@@ -72,6 +72,8 @@ int bv_packet_init(BVPacket *pkt);
 
 int bv_packet_new(BVPacket *pkt, int size);
 
+int bv_packet_copy(BVPacket *dst, const BVPacket *src);
+
 void bv_packet_free(BVPacket *pkt);
 #ifdef __cplusplus
 }
