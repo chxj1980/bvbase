@@ -47,8 +47,6 @@
 #include "mpi_ai.h"
 #include "mpi_ao.h"
 
-#include "drv.h"
-
 #define BREAK_WHEN_SDK_FAILED(comment, s32Ret) \
     do { \
         if (s32Ret != HI_SUCCESS) { \

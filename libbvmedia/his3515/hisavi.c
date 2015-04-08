@@ -315,7 +315,19 @@ static int video_set_imaging(BVMediaContext *s, const BVControlPacket *pkt_in, B
 {
     HisAVIContext *hisctx = s->priv_data;
     BVImagingSettings *imaging = pkt_in->data;
-    return BSCHSetConfig(hisctx->videv, hisctx->vichn, imaging->luminance, imaging->saturation, imaging->contrast, imaging->hue); 
+    BVVideoSourceImaging source_imaging;
+    BVControlPacket pkt;
+    int ret = 0;
+    bv_strlcpy(source_imaging.token, hisctx->vtoken, sizeof(source_imaging.token));
+    source_imaging.imaging = *imaging;
+    pkt.data = &source_imaging;
+    pkt.size = 1;
+
+    ret = bv_media_driver_control(hisctx->vdriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_SET_IMAGING, &pkt, NULL);
+    if (ret < 0) {
+        bv_log(s, BV_LOG_ERROR, "set video imaging error\n");
+    }
+    return ret; 
 }
 
 static bv_cold int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)

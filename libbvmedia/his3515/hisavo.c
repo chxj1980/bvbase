@@ -24,6 +24,8 @@
 #line 25 "hisavo.c"
 
 #include <libbvmedia/bvmedia.h>
+#include <libbvmedia/driver.h>
+#include <libbvutil/bvstring.h>
 
 //FIXME c99 not support asm
 #define asm __asm__
@@ -43,8 +45,6 @@
 #include "mpi_ai.h"
 #include "mpi_ao.h"
 
-#include "drv.h"
-
 /**
  *  His3515 Audio Video Output Device Channel
  */
@@ -59,8 +59,14 @@
 
 typedef struct HisAVOContext {
     const BVClass *bv_class;
+    BVMediaDriverContext *vdriver;
     char *vtoken;
+    char *vchip;
+    char *vdev;
+    BVMediaDriverContext *adriver;
     char *atoken;
+    char *achip;
+    char *adev;
     int vodev;
     int vochn;
     int vindex;
@@ -107,9 +113,13 @@ fail:
     return BVERROR(EINVAL);
 }
 
+static int audio_set_volume(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
 static int create_audio_output_channel(BVMediaContext *s, BVStream *stream)
 {
     HisAVOContext *hisctx = s->priv_data;
+    int volume = 80;
+    BVControlPacket pkt_in;
     HI_S32 s32Ret = HI_FAILURE;
     if (!hisctx->atoken) {
         bv_log(s, BV_LOG_ERROR, "must set atoken before create audio output channel\n");
@@ -119,7 +129,10 @@ static int create_audio_output_channel(BVMediaContext *s, BVStream *stream)
         bv_log(s, BV_LOG_ERROR, "atoken param error\n");
         return BVERROR(EINVAL);
     }
-    AudioOutVolumeSet(hisctx->aodev, hisctx->aochn, 80);
+    pkt_in.data = &volume;
+    pkt_in.size = 1;
+    audio_set_volume(s, &pkt_in, NULL);
+    //AudioOutVolumeSet(hisctx->aodev, hisctx->aochn, 80);
     s32Ret = HI_MPI_AO_EnableChn(hisctx->aodev, hisctx->aochn);
     BREAK_WHEN_SDK_FAILED("enable aochn error", s32Ret);
     bv_log(s, BV_LOG_DEBUG, "create audio output channel %s success\n", hisctx->atoken);
@@ -148,6 +161,11 @@ static int his_write_header(BVMediaContext *s)
             }
             hisctx->vindex = i;
         } else if (stream->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
+            if (bv_media_driver_open(&hisctx->adriver, hisctx->adev, hisctx->achip, NULL, NULL) < 0) {
+                bv_log(s, BV_LOG_ERROR, "open audio driver %s path %s error\n", hisctx->achip, hisctx->adev);
+                ret = BVERROR(EINVAL);
+                break;
+            }
             if (create_audio_output_channel(s, stream) < 0) {
                 bv_log(s, BV_LOG_ERROR, "create audio output channel error\n");
                 ret = BVERROR(EINVAL);
@@ -174,8 +192,21 @@ static int his_write_trailer(BVMediaContext *s)
 static int audio_set_volume(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     HisAVOContext *hisctx = s->priv_data;
+    BVControlPacket pkt;
+    BVAudioOutputVolume output_volume;
     int volume = *((int *)pkt_in->data);
-    return AudioOutVolumeSet(hisctx->aodev, hisctx->aochn, volume);
+    int ret = 0;
+
+    bv_strlcpy(output_volume.token, hisctx->atoken, sizeof(output_volume.token));
+    output_volume.volume = volume;
+    pkt.data = &output_volume;
+    pkt.size = 1;
+    ret = bv_media_driver_control(hisctx->adriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUTPUT_SET_VOLUME, &pkt, NULL); 
+    if (ret < 0) {
+        bv_log(s, BV_LOG_ERROR, "set audio output volume error\n");
+    }
+
+    return ret;
 }
 
 static int audio_set_mute(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
