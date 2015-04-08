@@ -220,25 +220,12 @@ typedef struct _BVAudioSource {
     void *any_attr;
 } BVAudioSource;
 
-typedef struct _BVAudioSourceVolume {
-    char token[BV_MAX_NAME_LEN];
-    int volume;     //0 - 100
-} BVAudioSourceVolume;
-
-typedef struct _BVAudioOutputVolume {
-    char token[BV_MAX_NAME_LEN];
-    int volume;     //0 - 100
-} BVAudioOutputVolume;
-
-typedef struct _BVVideoSourceImaging {
-    char token[BV_MAX_NAME_LEN];
-    BVImagingSettings imaging;
-} BVVideoSourceImaging;
-
-enum BVMediaVideoFormat {
-    BV_MEDIA_VIDEO_FORMAT_NONE = 0,
-    BV_MEDIA_VIDEO_FORMAT_PAL,
-    BV_MEDIA_VIDEO_FORMAT_NTSC,
+enum BVVideoFormat {
+    BV_VIDEO_FORMAT_NONE = -1,
+    BV_VIDEO_FORMAT_AUTIO,
+    BV_VIDEO_FORMAT_NTSC,
+    BV_VIDEO_FORMAT_PAL,
+    BV_VIDEO_FORMAT_UNKNOWN,
 };
 
 enum BVMobileDeviceType {

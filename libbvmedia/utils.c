@@ -25,6 +25,7 @@
 #include <libbvutil/bvassert.h>
 
 #include "bvmedia.h"
+#include "driver.h"
 
 static BVInputMedia *first_ifmt = NULL;
 static BVInputMedia **last_ifmt = &first_ifmt;

@@ -24,6 +24,7 @@
 #line 25 "his3515.c"
 
 #include <libbvsystem/bvsystem.h>
+#include <libbvmedia/driver.h>
 #include <libbvconfig/common.h>
 #include <libbvutil/bvstring.h>
 #include <libbvutil/time.h>
@@ -56,12 +57,16 @@
         } \
     }while(0)
 
+#define MAX_AUDIO_CHIPS (16)
+#define MAX_VIDEO_CHIPS (16)
+
 typedef struct His3515SystemContext {
     const BVClass *bv_class;
-    char *ad_chip;
+    BVMediaDriverContext *adriver[MAX_AUDIO_CHIPS];
+    BVMediaDriverContext *vdriver[MAX_AUDIO_CHIPS];
 } His3515SystemContext;
 
-static void his3515_exit()
+static void his3515_exit(void)
 {
     HI_MPI_SYS_Exit();
     HI_MPI_VB_Exit();
@@ -349,10 +354,11 @@ fail:
 
 static int his3515_aidev_config(BVSystemContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
-//    His3515SystemContext *hisctx = s->priv_data;
+    His3515SystemContext *hisctx = s->priv_data;
     HI_S32 s32Ret = HI_FAILURE;
     AIO_ATTR_S stAIOAttr;
     BVAudioSourceDevice *aidevice = (BVAudioSourceDevice *)pkt_in->data;
+    BVControlPacket pkt;
     int32_t aidev = 0;
 
     if (sscanf(aidevice->token, "%d", &aidev) != 1) {
@@ -370,9 +376,16 @@ static int his3515_aidev_config(BVSystemContext *s, const BVControlPacket *pkt_i
     stAIOAttr.enWorkmode = get_audio_work_mode(aidevice->work_mode);
     stAIOAttr.u32ChnCnt = aidevice->channel_counts;
     stAIOAttr.u32FrmNum = 30;
-    stAIOAttr.u32PtNumPerFrm = 320;
+    stAIOAttr.u32PtNumPerFrm = aidevice->sample_points;
 
-    AudioSampleSet(aidevice->sample_rate);
+    if (bv_media_driver_open(&hisctx->adriver[aidev], aidevice->dev, aidevice->chip, NULL, NULL) < 0) {
+        bv_log(s, BV_LOG_ERROR, "open audio driver error %s\n", aidevice->dev);
+    }
+    pkt.data = &aidevice->sample_rate;
+    pkt.size = 1;
+    bv_media_driver_control(hisctx->adriver[aidev], BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_SOURCE_SET_SAMPLE, &pkt, NULL);
+
+//    AudioSampleSet(aidevice->sample_rate);
 
     s32Ret = HI_MPI_AI_SetPubAttr(aidev, &stAIOAttr);
     BREAK_WHEN_SDK_FAILED("set aidev config error", s32Ret);
@@ -412,7 +425,7 @@ static int his3515_aodev_config(BVSystemContext *s, const BVControlPacket *pkt_i
     stAIOAttr.u32FrmNum = 25;
     stAIOAttr.u32PtNumPerFrm = 320;
 
-    AudioSampleSet(aodevice->sample_rate);
+    //AudioSampleSet(aodevice->sample_rate);
 
 	s32Ret = HI_MPI_AO_SetPubAttr(aodev, &stAIOAttr);
     BREAK_WHEN_SDK_FAILED("Set AoPubAttr Error", s32Ret);
@@ -468,7 +481,7 @@ static int his3515_system_exit(BVSystemContext *s)
 #define OFFSET(x) offsetof(His3515SystemContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
-    { "ad_chip", "", OFFSET(ad_chip), BV_OPT_TYPE_STRING, {.str = "/dev/tw2865dev"}, 0, 0, DEC},
+//    { "ad_chip", "", OFFSET(ad_chip), BV_OPT_TYPE_STRING, {.str = "/dev/tw2865dev"}, 0, 0, DEC},
     { NULL }
 };
 

@@ -22,6 +22,7 @@
  */
 
 #include "bvmedia.h"
+#include "driver.h"
 #include <config.h>
 
 #define REGISTER_OUTDEV(X, x)                                          \

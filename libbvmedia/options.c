@@ -22,6 +22,7 @@
  */
 
 #include "bvmedia.h"
+#include "driver.h"
 
 /**
  *  @file

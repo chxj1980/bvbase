@@ -4,7 +4,7 @@ NAME    = bvmedia
 
 HEADERS = bvmedia.h
 
-OBJS    = utils.o allmedias.o media.o options.o mux.o
+OBJS    = utils.o allmedias.o media.o driver.o options.o mux.o
 
 include $(SUBDIR)/drivers/Makefile
 
