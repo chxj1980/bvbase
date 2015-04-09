@@ -657,7 +657,6 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, memb, "token", config->token, tmp);
     GET_VALUE(elem2, memb, "bitrate", NULL, config->codec_context.bit_rate);
     GET_VALUE(elem2, memb, "sample_rate", NULL, config->codec_context.sample_rate);
-    GET_VALUE(elem2, memb, "sample_fmt", NULL, config->codec_context.sample_fmt);
 
     GET_VALUE(elem2, memb, "encoding", localctx->value, tmp);
     if (bv_strcasecmp(localctx->value, "G711A") == 0) {
@@ -1148,6 +1147,7 @@ static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
+    GET_VALUE(elem, memb, "video_output_device", NULL, config->video_output_device);
 
     display = bv_config_get_member(h->pdb, elem, "display");
     if (!display) {
@@ -1191,6 +1191,7 @@ static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
     GET_VALUE(elem, memb, "volume", NULL, config->volume);
+    GET_VALUE(elem, memb, "audio_output_device", NULL, config->audio_output_device);
 
 error:
     if (elem)
