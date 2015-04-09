@@ -412,7 +412,7 @@ typedef struct _BVDeviceInfo {
     uint8_t video_outputs;
     uint8_t audio_sources;
     uint8_t audio_outputs;
-    uint8_t relay_count;
+    uint8_t relay_outputs;
     uint8_t serial_ports;
     uint8_t alert_in_count;
     uint8_t alert_out_count;

@@ -25,7 +25,7 @@
         "alert_in_count":8,
         "alert_out_count":8,
         "storage_count":1,
-        "relay_count":3,
+        "relay_outputs":3,
         "ptz_count":4,
         "gps_count":1,
         "support_sms":0,
