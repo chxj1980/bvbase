@@ -1134,12 +1134,12 @@ static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *
     BVConfigObject *display = NULL;
     LocalContext *localctx = h->priv_data;
 
-    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_output");
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_outputs");
     if (!obj) {
-        bv_log(h, BV_LOG_ERROR, "get member[video_output] error\n");
+        bv_log(h, BV_LOG_ERROR, "get member[video_outputs] error\n");
         return BVERROR(EINVAL);
     } else {
-        bv_log(h, BV_LOG_DEBUG, "get member[video_output] type %d\n", obj->type);
+        bv_log(h, BV_LOG_DEBUG, "get member[video_outputs] type %d\n", obj->type);
     }
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
@@ -1176,12 +1176,12 @@ static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *
     BVConfigObject *elem = NULL;
     LocalContext *localctx = h->priv_data;
 
-    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_output");
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_outputs");
     if (!obj) {
-        bv_log(h, BV_LOG_ERROR, "get member[audio_output] error\n");
+        bv_log(h, BV_LOG_ERROR, "get member[audio_outputs] error\n");
         return BVERROR(EINVAL);
     } else {
-        bv_log(h, BV_LOG_DEBUG, "get member[audio_output] type %d\n", obj->type);
+        bv_log(h, BV_LOG_DEBUG, "get member[audio_outputs] type %d\n", obj->type);
     }
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
