@@ -279,6 +279,8 @@ typedef struct _BVMediaDevice {
     int8_t audio_source;
     int8_t video_channel;
     int8_t audio_channel;
+    int8_t storage_index;
+    int8_t transfer_index;
     void *devinfo;
 } BVMediaDevice;
 

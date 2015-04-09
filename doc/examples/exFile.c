@@ -20,6 +20,8 @@ int main(int argc, const char *argv[])
     BVAudioOutputDevice ao_dev;
     BVVideoSource       vs;
     BVAudioSource       as;
+    BVVideoOutput       vo;
+    BVAudioOutput       ao;
     BVVideoEncoderOption video_encoder_option;
     BVAudioEncoderOption audio_encoder_option;
     BVConfigContext *config_ctx = NULL;
@@ -37,6 +39,8 @@ int main(int argc, const char *argv[])
     memset(&ao_dev, 0, sizeof(ao_dev));
     memset(&vs, 0, sizeof(vs));
     memset(&as, 0, sizeof(as));
+    memset(&vo, 0, sizeof(vo));
+    memset(&ao, 0, sizeof(ao));
     memset(&video_encoder_option, 0, sizeof(video_encoder_option));
     memset(&audio_encoder_option, 0, sizeof(audio_encoder_option));
     bv_log_set_level(BV_LOG_DEBUG);
@@ -77,7 +81,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "bitrate %d\n", video_encoder.codec_context.bit_rate);
 
-    if (bv_config_get_audio_encoder(config_ctx, 0, 0, &audio_encoder) < 0) {
+    if (bv_config_get_audio_encoder(config_ctx, 2, 1, &audio_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio encoder error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", audio_encoder.codec_context.codec_id);
@@ -195,6 +199,17 @@ int main(int argc, const char *argv[])
         bv_free(audio_encoder_option.options);
     }
 
+    if (bv_config_get_video_output(config_ctx, 0, &vo) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get video output error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "token %s\n", vo.token);
+    bv_log(config_ctx, BV_LOG_INFO, "display %dx%d\n", vo.display.width, vo.display.height);
+
+    if (bv_config_get_audio_output(config_ctx, 0, &ao) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get audio output error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "token %s\n", ao.token);
+    bv_log(config_ctx, BV_LOG_INFO, "volume %d\n", ao.volume);
 
     bv_log(config_ctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>end\n");
     bv_config_file_close(&config_ctx->pdb);
