@@ -122,20 +122,28 @@ static int local_get_device_info(BVConfigContext *h, BVDeviceInfo *devinfo)
     GET_VALUE(obj, memb, "wifi_count", NULL, devinfo->wifi_count);
     GET_VALUE(obj, memb, "wireless_count", NULL, devinfo->wireless_count);
     GET_VALUE(obj, memb, "channel_count", NULL, devinfo->channel_count);
-    GET_VALUE(obj, memb, "video_in_count", NULL, devinfo->video_sources);
-    GET_VALUE(obj, memb, "video_out_count", NULL, devinfo->video_outputs);
-    GET_VALUE(obj, memb, "audio_in_count", NULL, devinfo->audio_sources);
-    GET_VALUE(obj, memb, "audio_out_count", NULL, devinfo->audio_outputs);
-    GET_VALUE(obj, memb, "serial_port_count", NULL, devinfo->serial_ports);
+    GET_VALUE(obj, memb, "video_source_devices", NULL, devinfo->video_source_devices);
+    GET_VALUE(obj, memb, "video_output_devices", NULL, devinfo->video_output_devices);
+    GET_VALUE(obj, memb, "audio_source_devices", NULL, devinfo->audio_source_devices);
+    GET_VALUE(obj, memb, "audio_output_devices", NULL, devinfo->audio_output_devices);
+    GET_VALUE(obj, memb, "video_source", NULL, devinfo->video_sources);
+    GET_VALUE(obj, memb, "video_outputs", NULL, devinfo->video_outputs);
+    GET_VALUE(obj, memb, "audio_sources", NULL, devinfo->audio_sources);
+    GET_VALUE(obj, memb, "audio_outputs", NULL, devinfo->audio_outputs);
+    GET_VALUE(obj, memb, "serial_ports", NULL, devinfo->serial_ports);
     GET_VALUE(obj, memb, "alert_in_count", NULL, devinfo->alert_in_count);
     GET_VALUE(obj, memb, "alert_out_count", NULL, devinfo->alert_out_count);
     GET_VALUE(obj, memb, "storage_count", NULL, devinfo->storage_count);
+    GET_VALUE(obj, memb, "relay_outputs", NULL, devinfo->relay_outputs);
     GET_VALUE(obj, memb, "ptz_count", NULL, devinfo->ptz_count);
     GET_VALUE(obj, memb, "gps_count", NULL, devinfo->gps_count);
     GET_VALUE(obj, memb, "support_sms", NULL, devinfo->support_sms);
     GET_VALUE(obj, memb, "support_call", NULL, devinfo->support_call);
     GET_VALUE(obj, memb, "preset_count", NULL, devinfo->preset_count);
     GET_VALUE(obj, memb, "cruise_count", NULL, devinfo->cruise_count);
+    GET_VALUE(obj, memb, "temperature_sensor", NULL, devinfo->temperature_count);
+    GET_VALUE(obj, memb, "voltage_count", NULL, devinfo->voltage_count);
+    GET_VALUE(obj, memb, "speed_count", NULL, devinfo->speed_count);
 
     if (obj) 
         bv_config_object_decref(h->pdb, obj);
@@ -1119,6 +1127,79 @@ error:
     return 0;
 }
 
+static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *config)
+{
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    BVConfigObject *display = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_output");
+    if (!obj) {
+        bv_log(h, BV_LOG_ERROR, "get member[video_output] error\n");
+        return BVERROR(EINVAL);
+    } else {
+        bv_log(h, BV_LOG_DEBUG, "get member[video_output] type %d\n", obj->type);
+    }
+    elem = bv_config_get_element(h->pdb, obj, index);
+    if (!elem) {
+        bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
+        goto error;
+    }
+
+    GET_VALUE(elem, memb, "token", config->token, tmp);
+
+    display = bv_config_get_member(h->pdb, elem, "display");
+    if (!display) {
+        bv_log(h, BV_LOG_ERROR, "get member[display] error\n");
+        goto error;
+    }
+    GET_VALUE(display, memb, "left", NULL, config->display.x);
+    GET_VALUE(display, memb, "top", NULL, config->display.y);
+    GET_VALUE(display, memb, "width", NULL, config->display.width);
+    GET_VALUE(display, memb, "height", NULL, config->display.height);
+
+
+error:
+    if (display)
+        bv_config_object_decref(h->pdb, display);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
+static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *config)
+{
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_output");
+    if (!obj) {
+        bv_log(h, BV_LOG_ERROR, "get member[audio_output] error\n");
+        return BVERROR(EINVAL);
+    } else {
+        bv_log(h, BV_LOG_DEBUG, "get member[audio_output] type %d\n", obj->type);
+    }
+    elem = bv_config_get_element(h->pdb, obj, index);
+    if (!elem) {
+        bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
+        goto error;
+    }
+
+    GET_VALUE(elem, memb, "token", config->token, tmp);
+    GET_VALUE(elem, memb, "volume", NULL, config->volume);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
 static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *config)
 {
     BVConfigObject *obj = NULL;
@@ -1145,6 +1226,8 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     GET_VALUE(elem, memb, "audio_source", NULL, config->audio_source);
     GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
     GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
+    GET_VALUE(elem, memb, "storage_index", NULL, config->storage_index);
+    GET_VALUE(elem, memb, "transfer_index", NULL, config->transfer_index);
     if (config->video_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
         config->devinfo = bv_mallocz(sizeof(BVMobileDevice));
         if (!config->devinfo) {
@@ -1251,4 +1334,6 @@ BVConfig bv_local_config = {
     .get_audio_output_device    = local_get_audio_output_device,
     .get_video_source           = local_get_video_source,
     .get_audio_source           = local_get_audio_source,
+    .get_video_output           = local_get_video_output,
+    .get_audio_output           = local_get_audio_output,
 };
