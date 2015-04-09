@@ -883,13 +883,13 @@ static int func_eval_expr(DrawTextContext *ctx, BVBPrint *bp,
 static int func_eval_expr_int_format(DrawTextContext *ctx, BVBPrint *bp,
                           char *fct, unsigned argc, char **argv, int tag)
 {
+#if 0
     DrawTextContext *s = ctx;
     double res;
     int intval;
     int ret;
     unsigned int positions = 0;
     char fmt_str[30] = "%";
-
     /*
      * argv[0] expression to be converted to `int`
      * argv[1] format: 'x', 'X', 'd' or 'u'
@@ -937,9 +937,9 @@ static int func_eval_expr_int_format(DrawTextContext *ctx, BVBPrint *bp,
 
     bv_bprintf(bp, fmt_str, intval);
 
+#endif
     return 0;
 }
-
 static const struct drawtext_function {
     const char *name;
     unsigned argc_min, argc_max;

@@ -51,6 +51,7 @@ enable_jansson()
 enable_freetype()
 {
 	LD_LIBRARY_PATH+=$BVBASE_DIR/freetype/$ARCH/lib:
+	EXENABLE+="--enable-libfreetype"
 	EXTCFLAGS+="-I$BVBASE_DIR/freetype/$ARCH/include/freetype2/ "
 	EXTLFLAGS+="-L$BVBASE_DIR/freetype/$ARCH/lib -lfreetype"
 }
@@ -112,7 +113,7 @@ enable_ffmpeg
 
 enable_jansson
 
-#enable_freetype
+enable_freetype
 
 export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc
