@@ -28,7 +28,7 @@
 
 #include "bvutil.h"
 
-typedef struct AVExpr AVExpr;
+typedef struct BVExpr BVExpr;
 
 /**
  * Parse and evaluate an expression.
@@ -57,9 +57,9 @@ int bv_expr_parse_and_eval(double *res, const char *s,
 /**
  * Parse an expression.
  *
- * @param expr a pointer where is put an AVExpr containing the parsed
+ * @param expr a pointer where is put an BVExpr containing the parsed
  * value in case of successful parsing, or NULL otherwise.
- * The pointed to AVExpr must be freed with bv_expr_free() by the user
+ * The pointed to BVExpr must be freed with bv_expr_free() by the user
  * when it is not needed anymore.
  * @param s expression as a zero terminated string, for example "1+2^3+5*5+sin(2/3)"
  * @param const_names NULL terminated array of zero terminated strings of constant identifiers, for example {"PI", "E", 0}
@@ -71,7 +71,7 @@ int bv_expr_parse_and_eval(double *res, const char *s,
  * @return >= 0 in case of success, a negative value corresponding to an
  * BVERROR code otherwise
  */
-int bv_expr_parse(AVExpr **expr, const char *s,
+int bv_expr_parse(BVExpr **expr, const char *s,
                   const char * const *const_names,
                   const char * const *func1_names, double (* const *funcs1)(void *, double),
                   const char * const *func2_names, double (* const *funcs2)(void *, double, double),
@@ -84,12 +84,12 @@ int bv_expr_parse(AVExpr **expr, const char *s,
  * @param opaque a pointer which will be passed to all functions from funcs1 and funcs2
  * @return the value of the expression
  */
-double bv_expr_eval(AVExpr *e, const double *const_values, void *opaque);
+double bv_expr_eval(BVExpr *e, const double *const_values, void *opaque);
 
 /**
  * Free a parsed expression previously created with bv_expr_parse().
  */
-void bv_expr_free(AVExpr *e);
+void bv_expr_free(BVExpr *e);
 
 /**
  * Parse the string in numstr and return its value as a double. If

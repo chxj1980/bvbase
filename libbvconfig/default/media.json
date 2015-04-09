@@ -245,9 +245,10 @@
             "input_type": "LINE_IN"
         }
     ],
-    "video_output": [
+    "video_outputs": [
         {
             "token": "2/0",
+            "video_output_device": 0,
             "display": {
                 "left": 0,
                 "top": 0,
@@ -257,6 +258,7 @@
         },
         {
             "token": "2/1",
+            "video_output_device": 0,
             "display": {
                 "left": 352,
                 "top": 0,
@@ -266,6 +268,7 @@
         },
         {
             "token": "2/2",
+            "video_output_device": 0,
             "display": {
                 "left": 0,
                 "top": 288,
@@ -275,6 +278,7 @@
         },
         {
             "token": "2/3",
+            "video_output_device": 0,
             "display": {
                 "left": 352,
                 "top": 288,
@@ -283,16 +287,44 @@
             }
         }
     ],
-    "audio_output": [
+    "audio_outputs": [
         {
             "token": "0/0",
+            "audio_output_device":0,
             "volume": 80
         },
         {
             "token": "0/1",
+            "audio_output_device":0,
             "volume": 80
         }
     ],
+	"media_live":[
+		{
+			"video_source":0,
+			"audio_source":-1,
+			"video_output":0,
+			"audio_output":-1,
+		},
+		{
+			"video_source":1,
+			"audio_source":-1,
+			"video_output":1,
+			"audio_output":-1,
+		},
+		{
+			"video_source":2,
+			"audio_source":-1,
+			"video_output":2,
+			"audio_output":-1,
+		},
+		{
+			"video_source":3,
+			"audio_source":-1,
+			"video_output":3,
+			"audio_output":-1,
+		}
+	],
     "video_encoder_options": [
         [
             {

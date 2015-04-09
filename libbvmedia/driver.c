@@ -23,6 +23,8 @@
 
 #line 25 "driver.c"
 
+#include <libbvutil/bvstring.h>
+
 #include "driver.h"
 
 static BVMediaDriver *bv_media_driver_guess(const char *short_name)

@@ -10,4 +10,4 @@ ifeq ($(BV_CONFIG_HIS3515), yes)
 -include $(SUBDIR)/his3515/Makefile
 endif
 
-OBJS-$(BV_CONFIG_X86_SYSTEM)		+= x86.o
+OBJS-$(BV_CONFIG_X86_SYSTEM)        += x86.o
