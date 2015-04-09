@@ -657,7 +657,6 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, memb, "token", config->token, tmp);
     GET_VALUE(elem2, memb, "bitrate", NULL, config->codec_context.bit_rate);
     GET_VALUE(elem2, memb, "sample_rate", NULL, config->codec_context.sample_rate);
-    GET_VALUE(elem2, memb, "sample_fmt", NULL, config->codec_context.sample_fmt);
 
     GET_VALUE(elem2, memb, "encoding", localctx->value, tmp);
     if (bv_strcasecmp(localctx->value, "G711A") == 0) {
@@ -1134,12 +1133,12 @@ static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *
     BVConfigObject *display = NULL;
     LocalContext *localctx = h->priv_data;
 
-    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_output");
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_outputs");
     if (!obj) {
-        bv_log(h, BV_LOG_ERROR, "get member[video_output] error\n");
+        bv_log(h, BV_LOG_ERROR, "get member[video_outputs] error\n");
         return BVERROR(EINVAL);
     } else {
-        bv_log(h, BV_LOG_DEBUG, "get member[video_output] type %d\n", obj->type);
+        bv_log(h, BV_LOG_DEBUG, "get member[video_outputs] type %d\n", obj->type);
     }
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
@@ -1148,6 +1147,7 @@ static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *
     }
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
+    GET_VALUE(elem, memb, "video_output_device", NULL, config->video_output_device);
 
     display = bv_config_get_member(h->pdb, elem, "display");
     if (!display) {
@@ -1176,12 +1176,12 @@ static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *
     BVConfigObject *elem = NULL;
     LocalContext *localctx = h->priv_data;
 
-    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_output");
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_outputs");
     if (!obj) {
-        bv_log(h, BV_LOG_ERROR, "get member[audio_output] error\n");
+        bv_log(h, BV_LOG_ERROR, "get member[audio_outputs] error\n");
         return BVERROR(EINVAL);
     } else {
-        bv_log(h, BV_LOG_DEBUG, "get member[audio_output] type %d\n", obj->type);
+        bv_log(h, BV_LOG_DEBUG, "get member[audio_outputs] type %d\n", obj->type);
     }
     elem = bv_config_get_element(h->pdb, obj, index);
     if (!elem) {
@@ -1191,6 +1191,7 @@ static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *
 
     GET_VALUE(elem, memb, "token", config->token, tmp);
     GET_VALUE(elem, memb, "volume", NULL, config->volume);
+    GET_VALUE(elem, memb, "audio_output_device", NULL, config->audio_output_device);
 
 error:
     if (elem)
