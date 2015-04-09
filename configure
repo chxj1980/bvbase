@@ -1219,6 +1219,7 @@ require_pkg_config(){
 require_libfreetype(){
     log require_libfreetype "$@"
     pkg="freetype2"
+	return
     check_cmd $pkg_config --exists --print-errors $pkg \
       || die "ERROR: $pkg not found"
     pkg_cflags=$($pkg_config --cflags $pkg_config_flags $pkg)

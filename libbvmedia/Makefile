@@ -15,3 +15,4 @@ endif
 
 OBJS-$(BV_CONFIG_DAV_MUXER)                 += davmux.o
 OBJS-$(BV_CONFIG_DAV_DEMUXER)               += davdmx.o
+OBJS-$(BV_CONFIG_LIBFREETYPE)               += drawtext.o
