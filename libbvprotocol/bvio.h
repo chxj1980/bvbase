@@ -90,6 +90,8 @@ int bv_io_read(BVIOContext *s, uint8_t *buffer, size_t size);
 
 int64_t bv_io_seek(BVIOContext *s, int64_t offset, int whence);
 
+int64_t bv_io_size(BVIOContext *s);
+
 int bv_io_control(BVIOContext *s, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 
 void bv_io_flush(BVIOContext *s);
