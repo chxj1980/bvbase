@@ -188,6 +188,8 @@ typedef struct _BVVideoCapture {
 typedef struct _BVVideoSource {
     char token[BV_MAX_NAME_LEN];
     uint8_t video_source_device;
+    uint8_t reserved;
+    uint16_t reserved2;
     float framerate;
     BVIntRectange bounds;
     BVVideoResolution resolution;
@@ -198,12 +200,17 @@ typedef struct _BVVideoSource {
 
 typedef struct _BVVideoOutput {
     char token[BV_MAX_NAME_LEN];
+    uint8_t video_output_device;
+    uint8_t reserved;
+    uint16_t reserved2;
     BVIntRectange display;
 } BVVideoOutput;
 
 typedef struct _BVAudioOutput {
     char token[BV_MAX_NAME_LEN];
-    int volume;
+    uint8_t audio_output_device;
+    uint8_t volume;
+    uint16_t reserved;
 } BVAudioOutput;
 
 enum BVAudioInputType {
@@ -214,8 +221,9 @@ enum BVAudioInputType {
 typedef struct _BVAudioSource {
     char token[BV_MAX_NAME_LEN];
     uint8_t audio_source_device;
-    int channels;
-    int volume;
+    uint8_t channels;
+    uint8_t volume;
+    uint8_t reserved;
     enum BVAudioInputType input_type;
     void *any_attr;
 } BVAudioSource;
@@ -267,10 +275,10 @@ typedef struct _BVMediaDevice {
     char name[BV_MAX_NAME_LEN];
     enum BVMediaStreamType video_type;
     enum BVMediaStreamType audio_type; 
-    uint8_t video_source;
-    uint8_t audio_source;
-    uint8_t video_channel;
-    uint8_t audio_channel;
+    int8_t video_source;
+    int8_t audio_source;
+    int8_t video_channel;
+    int8_t audio_channel;
     void *devinfo;
 } BVMediaDevice;
 
@@ -357,6 +365,14 @@ typedef struct _BVOutputChannelConfig {
     BVVideoOutput *video_output;
 } BVOutputChannelConfig;
 
+typedef struct _BVMediaLive {
+    int8_t video_source;
+    int8_t audio_source;
+    int8_t video_output;
+    int8_t audio_output;
+    BVSourceChannelConfig config;
+} BVMediaLive;
+
 enum BVMediaChannelType {
     BV_MEDIA_CHANNEL_TYPE_NONE,
     BV_MEDIA_CHANNEL_TYPE_SOURCE,   //audio video source
@@ -388,32 +404,34 @@ typedef struct _BVDeviceInfo {
     uint8_t wifi_count;
     uint8_t wireless_count;
     uint8_t channel_count;
-    uint8_t video_dev_count;
-    uint8_t audio_dev_count;
+    uint8_t video_source_devices;
+    uint8_t audio_source_devices;
+    uint8_t video_output_devices;
+    uint8_t audio_output_devices;
     uint8_t video_sources;
     uint8_t video_outputs;
     uint8_t audio_sources;
     uint8_t audio_outputs;
-    uint8_t relay_outputs;
+    uint8_t relay_count;
     uint8_t serial_ports;
     uint8_t alert_in_count;
     uint8_t alert_out_count;
+    uint8_t storage_count;
     uint8_t ptz_count;
     uint8_t gps_count;
-    uint8_t storage_count;
     uint8_t support_sms;
     uint8_t support_call;
     uint16_t preset_count;
     uint16_t cruise_count;
-    
+    uint8_t temperature_count;
+    uint8_t voltage_count;
+    uint8_t speed_count;
     void *any_attr;
 } BVDeviceInfo;
 
 typedef struct _BVDeviceExtInfo {
     uint8_t language;
-    uint8_t temprrature_count;
-    uint8_t voltage_count;
-    uint8_t spedd_count;
+
     void *any_attr;
 } BVDeviceExtInfo;
 

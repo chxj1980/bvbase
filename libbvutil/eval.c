@@ -140,7 +140,7 @@ static int strmatch(const char *s, const char *prefix)
     return !IS_IDENTIFIER_CHAR(s[i]);
 }
 
-struct AVExpr {
+struct BVExpr {
     enum {
         e_value, e_const, e_func0, e_func1, e_func2,
         e_squish, e_gauss, e_ld, e_isnan, e_isinf,
@@ -157,7 +157,7 @@ struct AVExpr {
         double (*func1)(void *, double);
         double (*func2)(void *, double, double);
     } a;
-    struct AVExpr *param[3];
+    struct BVExpr *param[3];
     double *var;
 };
 
@@ -166,7 +166,7 @@ static double etime(double v)
     return bv_gettime() * 0.000001;
 }
 
-static double eval_expr(Parser *p, AVExpr *e)
+static double eval_expr(Parser *p, BVExpr *e)
 {
     switch (e->type) {
         case e_value:  return e->value;
@@ -307,9 +307,9 @@ static double eval_expr(Parser *p, AVExpr *e)
     return NAN;
 }
 
-static int parse_expr(AVExpr **e, Parser *p);
+static int parse_expr(BVExpr **e, Parser *p);
 
-void bv_expr_free(AVExpr *e)
+void bv_expr_free(BVExpr *e)
 {
     if (!e) return;
     bv_expr_free(e->param[0]);
@@ -319,9 +319,9 @@ void bv_expr_free(AVExpr *e)
     bv_freep(&e);
 }
 
-static int parse_primary(AVExpr **e, Parser *p)
+static int parse_primary(BVExpr **e, Parser *p)
 {
-    AVExpr *d = bv_mallocz(sizeof(AVExpr));
+    BVExpr *d = bv_mallocz(sizeof(BVExpr));
     char *next = p->s, *s0 = p->s;
     int ret, i;
 
@@ -473,9 +473,9 @@ static int parse_primary(AVExpr **e, Parser *p)
     return 0;
 }
 
-static AVExpr *make_eval_expr(int type, int value, AVExpr *p0, AVExpr *p1)
+static BVExpr *make_eval_expr(int type, int value, BVExpr *p0, BVExpr *p1)
 {
-    AVExpr *e = bv_mallocz(sizeof(AVExpr));
+    BVExpr *e = bv_mallocz(sizeof(BVExpr));
     if (!e)
         return NULL;
     e->type     =type   ;
@@ -485,14 +485,14 @@ static AVExpr *make_eval_expr(int type, int value, AVExpr *p0, AVExpr *p1)
     return e;
 }
 
-static int parse_pow(AVExpr **e, Parser *p, int *sign)
+static int parse_pow(BVExpr **e, Parser *p, int *sign)
 {
     *sign= (*p->s == '+') - (*p->s == '-');
     p->s += *sign&1;
     return parse_primary(e, p);
 }
 
-static int parse_dB(AVExpr **e, Parser *p, int *sign)
+static int parse_dB(BVExpr **e, Parser *p, int *sign)
 {
     /* do not filter out the negative sign when parsing a dB value.
        for example, -3dB is not the same as -(3dB) */
@@ -507,10 +507,10 @@ static int parse_dB(AVExpr **e, Parser *p, int *sign)
     return parse_pow(e, p, sign);
 }
 
-static int parse_factor(AVExpr **e, Parser *p)
+static int parse_factor(BVExpr **e, Parser *p)
 {
     int sign, sign2, ret;
-    AVExpr *e0, *e1, *e2;
+    BVExpr *e0, *e1, *e2;
     if ((ret = parse_dB(&e0, p, &sign)) < 0)
         return ret;
     while(p->s[0]=='^'){
@@ -534,10 +534,10 @@ static int parse_factor(AVExpr **e, Parser *p)
     return 0;
 }
 
-static int parse_term(AVExpr **e, Parser *p)
+static int parse_term(BVExpr **e, Parser *p)
 {
     int ret;
-    AVExpr *e0, *e1, *e2;
+    BVExpr *e0, *e1, *e2;
     if ((ret = parse_factor(&e0, p)) < 0)
         return ret;
     while (p->s[0]=='*' || p->s[0]=='/') {
@@ -558,10 +558,10 @@ static int parse_term(AVExpr **e, Parser *p)
     return 0;
 }
 
-static int parse_subexpr(AVExpr **e, Parser *p)
+static int parse_subexpr(BVExpr **e, Parser *p)
 {
     int ret;
-    AVExpr *e0, *e1, *e2;
+    BVExpr *e0, *e1, *e2;
     if ((ret = parse_term(&e0, p)) < 0)
         return ret;
     while (*p->s == '+' || *p->s == '-') {
@@ -582,10 +582,10 @@ static int parse_subexpr(AVExpr **e, Parser *p)
     return 0;
 }
 
-static int parse_expr(AVExpr **e, Parser *p)
+static int parse_expr(BVExpr **e, Parser *p)
 {
     int ret;
-    AVExpr *e0, *e1, *e2;
+    BVExpr *e0, *e1, *e2;
     if (p->stack_index <= 0) //protect against stack overflows
         return BVERROR(EINVAL);
     p->stack_index--;
@@ -612,7 +612,7 @@ static int parse_expr(AVExpr **e, Parser *p)
     return 0;
 }
 
-static int verify_expr(AVExpr *e)
+static int verify_expr(BVExpr *e)
 {
     if (!e) return 0;
     switch (e->type) {
@@ -649,14 +649,14 @@ static int verify_expr(AVExpr *e)
     }
 }
 
-int bv_expr_parse(AVExpr **expr, const char *s,
+int bv_expr_parse(BVExpr **expr, const char *s,
                   const char * const *const_names,
                   const char * const *func1_names, double (* const *funcs1)(void *, double),
                   const char * const *func2_names, double (* const *funcs2)(void *, double, double),
                   int log_offset, void *log_ctx)
 {
     Parser p = { 0 };
-    AVExpr *e = NULL;
+    BVExpr *e = NULL;
     char *w = bv_malloc(strlen(s) + 1);
     char *wp = w;
     const char *s0 = s;
@@ -700,7 +700,7 @@ end:
     return ret;
 }
 
-double bv_expr_eval(AVExpr *e, const double *const_values, void *opaque)
+double bv_expr_eval(BVExpr *e, const double *const_values, void *opaque)
 {
     Parser p = { 0 };
     p.var= e->var;
@@ -716,7 +716,7 @@ int bv_expr_parse_and_eval(double *d, const char *s,
                            const char * const *func2_names, double (* const *funcs2)(void *, double, double),
                            void *opaque, int log_offset, void *log_ctx)
 {
-    AVExpr *e = NULL;
+    BVExpr *e = NULL;
     int ret = bv_expr_parse(&e, s, const_names, func1_names, funcs1, func2_names, funcs2, log_offset, log_ctx);
 
     if (ret < 0) {

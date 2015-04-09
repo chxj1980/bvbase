@@ -48,6 +48,13 @@ enable_jansson()
 	EXTLFLAGS+="-L$BVBASE_DIR/jansson/$ARCH/lib -ljansson "
 }
 
+enable_freetype()
+{
+	LD_LIBRARY_PATH+=$BVBASE_DIR/freetype/$ARCH/lib:
+	EXTCFLAGS+="-I$BVBASE_DIR/freetype/$ARCH/include/freetype2/ "
+	EXTLFLAGS+="-L$BVBASE_DIR/freetype/$ARCH/lib -lfreetype"
+}
+
 enable_his3515()
 {
 	CROSS_COMPILE=arm-hisi-linux-
@@ -104,6 +111,8 @@ enable_onvifc
 enable_ffmpeg
 
 enable_jansson
+
+enable_freetype
 
 export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc

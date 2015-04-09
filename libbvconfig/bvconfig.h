@@ -70,7 +70,9 @@ typedef struct _BVConfig {
     int (*get_video_output_device)(BVConfigContext *s, int index, BVVideoOutputDevice *config);
     int (*get_audio_output_device)(BVConfigContext *s, int index, BVAudioOutputDevice *config);
     int (*get_video_source)(BVConfigContext *s, int index, BVVideoSource *config);
+    int (*get_video_output)(BVConfigContext *s, int index, BVVideoOutput *config);
     int (*get_audio_source)(BVConfigContext *s, int index, BVAudioSource *config);
+    int (*get_audio_output)(BVConfigContext *s, int index, BVAudioOutput *config);
     int (*get_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*set_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*get_profiles)(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
@@ -111,7 +113,11 @@ int bv_config_get_audio_output_device(BVConfigContext *s, int index, BVAudioOutp
 
 int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *config);
 
+int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config);
+
 int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config);
+
+int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config);
 
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
 
