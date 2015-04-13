@@ -3,24 +3,24 @@
 
 BVBASE_DIR=$(shell pwd)/../../3rdparty/binary
 
-PLANTFORM ?= x86
+PLATFORM ?= x86
 
-ifeq ($(PLANTFORM), hi3515)
+ifeq ($(PLATFORM), hi3515)
 CROSS_COMPILE_PRE = arm-hisi-linux-
 #LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi -l_VoiceEngine -l_amr_spc -l_amr_fipop -l_aec -l_aacdec -l_aacenc -lresampler
 LDFLAGS += -L$(BVBASE_DIR)/hissdk/his3515/lib -lmpi -lhiaudio
 endif
 
-ifeq ($(PLANTFORM), hi3518)
+ifeq ($(PLATFORM), hi3518)
 CROSS_COMPILE_PRE = arm-hisiv100nptl-linux-
 endif
 
-ifeq ($(PLANTFORM), hi3535)
+ifeq ($(PLATFORM), hi3535)
 CROSS_COMPILE_PRE = arm-hisiv100nptl-linux-
 CFLAGS += -DPLATFORM_HI3535 -march=armv7-a -mcpu=cortex-a9
 endif
 
-ifeq ($(PLANTFORM), x86)
+ifeq ($(PLATFORM), x86)
 CFLAGS += -m32
 LDFLAGS += -m32
 endif
@@ -33,19 +33,19 @@ STRIP = $(CROSS_COMPILE_PRE)strip
 CFLAGS += -std=c99 -fomit-frame-pointer 
 CFLAGS += -Wall -g
 
-#CFLAGS += -I$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/include 
-#CFLAGS += -I$(BVBASE_DIR)/onvif/$(PLANTFORM)/include 
-#CFLAGS += -I$(BVBASE_DIR)/openssl/$(PLANTFORM)/include 
-CFLAGS += -I$(BVBASE_DIR)/bvbase/$(PLANTFORM)/include
-CFLAGS += -I$(BVBASE_DIR)/bvfs/$(PLANTFORM)/include
+#CFLAGS += -I$(BVBASE_DIR)/ffmpeg/$(PLATFORM)/include 
+#CFLAGS += -I$(BVBASE_DIR)/onvif/$(PLATFORM)/include 
+#CFLAGS += -I$(BVBASE_DIR)/openssl/$(PLATFORM)/include 
+CFLAGS += -I$(BVBASE_DIR)/bvbase/$(PLATFORM)/include
+CFLAGS += -I$(BVBASE_DIR)/bvfs/$(PLATFORM)/include
 
-LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLANTFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvsystem -lbvconfig -lbvprotocol -lbvutil 
-LDFLAGS += -L$(BVBASE_DIR)/ffmpeg/$(PLANTFORM)/lib -lavformat -lavcodec -lavutil 
-LDFLAGS += -L$(BVBASE_DIR)/onvif/$(PLANTFORM)/lib -lonvifc 
-LDFLAGS += -L$(BVBASE_DIR)/jansson/$(PLANTFORM)/lib -ljansson
-LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLANTFORM)/lib -lssl -lcrypto  
+LDFLAGS += -L$(BVBASE_DIR)/bvbase/$(PLATFORM)/lib -lbvdevice -lbvmedia -lbvcodec -lbvsystem -lbvconfig -lbvprotocol -lbvutil 
+LDFLAGS += -L$(BVBASE_DIR)/ffmpeg/$(PLATFORM)/lib -lavformat -lavcodec -lavutil 
+LDFLAGS += -L$(BVBASE_DIR)/onvif/$(PLATFORM)/lib -lonvifc 
+LDFLAGS += -L$(BVBASE_DIR)/jansson/$(PLATFORM)/lib -ljansson
+LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLATFORM)/lib -lssl -lcrypto  
 
-LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLANTFORM)/lib -lbvfs -lpthread 
+LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLATFORM)/lib -lbvfs -lpthread 
 
 EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exFile exEncode 
 

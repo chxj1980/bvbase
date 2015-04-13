@@ -137,7 +137,6 @@ typedef struct _BVVideoSourceDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t video_sources;
     char interface[BV_MAX_NAME_LEN];    //BT656 BT601 BT1120P BT1120I
     char work_mode[BV_MAX_NAME_LEN];     //for BT656 4D1 4HALFD1 2D1 
 } BVVideoSourceDevice;
@@ -146,7 +145,6 @@ typedef struct _BVVideoOutputDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t video_outputs;
     char interface[BV_MAX_NAME_LEN];    //CVBS HDMI
     char work_mode[BV_MAX_NAME_LEN];    //PAL NTSC AUTO
     BVIntRectange display;
@@ -158,8 +156,8 @@ typedef struct _BVAudioSourceDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
-    uint8_t audio_sources;
     uint8_t sample_format;
+    uint8_t reserved;
     int sample_rate;
     int sample_points;
 
@@ -172,8 +170,8 @@ typedef struct _BVAudioOutputDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
-    uint8_t audio_outputs;
     uint8_t sample_format;
+    uint8_t reserved;
     int sample_rate;
     int sample_points;
     char work_mode[BV_MAX_NAME_LEN];     //I2S_SLAVE I2S_MASTER 
@@ -271,16 +269,38 @@ enum BVMediaStreamType {
     BV_MEDIA_STREAM_TYPE_IPC_AUDIO = 8,
 };
 
-typedef struct _BVMediaDevice {
-    char name[BV_MAX_NAME_LEN];
-    enum BVMediaStreamType video_type;
-    enum BVMediaStreamType audio_type; 
+typedef struct _BVMediaDecoder {
+    int8_t video_output;
+    int8_t audio_output;
+    int8_t video_channel;
+    int8_t audio_channel;
+} BVMediaDecoder;
+
+typedef struct _BVMediaEncoder {
     int8_t video_source;
     int8_t audio_source;
     int8_t video_channel;
     int8_t audio_channel;
     int8_t storage_index;
     int8_t transfer_index;
+} BVMediaEncoder;
+
+typedef struct _BVTalkBack {
+    int8_t media_encoder_index;
+    int8_t media_decoder_index;
+    int16_t reserved;
+    BVMediaEncoder media_encoder;
+    BVMediaDecoder media_decoder;
+} BVTalkBack;
+
+typedef struct _BVMediaDevice {
+    char name[BV_MAX_NAME_LEN];
+    enum BVMediaStreamType video_encode_type;
+    enum BVMediaStreamType audio_encode_type; 
+    enum BVMediaStreamType video_decode_type;
+    enum BVMediaStreamType audio_decode_type; 
+    BVMediaEncoder media_encoder;
+    BVMediaEncoder media_decoder;
     void *devinfo;
 } BVMediaDevice;
 
@@ -414,6 +434,10 @@ typedef struct _BVDeviceInfo {
     uint8_t video_outputs;
     uint8_t audio_sources;
     uint8_t audio_outputs;
+    uint8_t media_devices;
+    uint8_t media_encoders;
+    uint8_t media_decoders;
+    uint8_t talkbacks;
     uint8_t relay_outputs;
     uint8_t serial_ports;
     uint8_t alert_in_count;
@@ -431,11 +455,10 @@ typedef struct _BVDeviceInfo {
     void *any_attr;
 } BVDeviceInfo;
 
-typedef struct _BVDeviceExtInfo {
+typedef struct _BVSystemInfo {
     uint8_t language;
-
-    void *any_attr;
-} BVDeviceExtInfo;
+    //FIXME timezone
+} BVSystemInfo;
 
 enum BVOSDTimeFormat {
     BV_OSD_TIME_FORMAT_INVALID = 0,//不叠加时间

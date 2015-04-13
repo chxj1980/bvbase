@@ -30,6 +30,34 @@ extern "C"{
 
 //FIXME
 
+typedef struct _BVDrawTextContext {
+    enum BVPixelFormat format;
+    int16_t index;
+    int16_t fontsize;
+    int     x, y;
+    int     width, height;
+    char    fontfile[128];
+    uint8_t draw_box;       //draw box around text --- 0 1
+    uint8_t draw_border;
+    uint8_t draw_shadow;
+    uint8_t borderw;        //边框像素的大小
+    char    fontcolor[32];  //white black ...#ADDD2F 0xADDD2F read@0.5 @alpha
+    char    shadowcolor[32];
+    char    boxcolor[32];
+    char    bordercolor[32];
+    void *priv_data;
+} BVDrawTextContext;
+
+int bv_draw_text_open(BVDrawTextContext *drawtext);
+
+/**
+ *  draw text content into frame data;
+ *  if (*frame) is NULL
+ *  alloc frame internal remeber to free it
+ */
+int bv_draw_text_process(BVDrawTextContext *drawtext, const char *text, BVFrame **frame);
+
+int bv_draw_text_close(BVDrawTextContext *drawtext);
 #ifdef __cplusplus
 }
 #endif

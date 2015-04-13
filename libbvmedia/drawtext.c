@@ -34,7 +34,14 @@
 #if BV_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+/**
+ *  FIXME His3515 gcc not 
+ *  support fenv.h
+ */
+#if !BV_CONFIG_HIS3515
 #include <fenv.h>
+#endif
 
 #define CONFIG_LIBFONTCONFIG 0
 
@@ -883,7 +890,7 @@ static int func_eval_expr(DrawTextContext *ctx, BVBPrint *bp,
 static int func_eval_expr_int_format(DrawTextContext *ctx, BVBPrint *bp,
                           char *fct, unsigned argc, char **argv, int tag)
 {
-#if 0
+#if !BV_CONFIG_HIS3515
     DrawTextContext *s = ctx;
     double res;
     int intval;
