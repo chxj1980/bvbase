@@ -75,6 +75,9 @@ typedef struct _BVConfig {
     int (*get_audio_output)(BVConfigContext *s, int index, BVAudioOutput *config);
     int (*get_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*set_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
+    int (*get_media_encoder)(BVConfigContext *s, int index, BVMediaEncoder *config);
+    int (*get_media_decoder)(BVConfigContext *s, int index, BVMediaDecoder *config);
+    int (*get_talkback)(BVConfigContext *s, int index, BVTalkBack *config);
     int (*get_profiles)(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
     int (*get_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
     int (*set_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
@@ -122,6 +125,12 @@ int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *con
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
 
 int bv_config_set_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
+
+int bv_config_get_media_encoder(BVConfigContext *s, int index, BVMediaEncoder *config);
+
+int bv_config_get_media_decoder(BVConfigContext *s, int index, BVMediaDecoder *config);
+
+int bv_config_get_talkback(BVConfigContext *s, int index, BVTalkBack *config);
 
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
 

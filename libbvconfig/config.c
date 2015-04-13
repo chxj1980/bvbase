@@ -221,6 +221,33 @@ int bv_config_set_media_device(BVConfigContext *s, int index, BVMediaDevice *con
     return s->config->set_media_device(s, index, config);
 }
 
+int bv_config_get_media_encoder(BVConfigContext *s, int index, BVMediaEncoder *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_media_encoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_media_encoder(s, index, config);
+}
+
+int bv_config_get_media_decoder(BVConfigContext *s, int index, BVMediaDecoder *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_media_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_media_decoder(s, index, config);
+}
+
+int bv_config_get_talkback(BVConfigContext *s, int index, BVTalkBack *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_talkback)
+        return BVERROR(ENOSYS);
+    return s->config->get_talkback(s, index, config);
+}
+
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num)
 {
     if (!s || !profiles ||!s->config)

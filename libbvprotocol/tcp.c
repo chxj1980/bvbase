@@ -44,9 +44,9 @@ typedef struct TCPContext {
 #define D BV_OPT_FLAG_DECODING_PARAM
 #define E BV_OPT_FLAG_ENCODING_PARAM
 static const BVOption options[] = {
-    { "listen",          "Listen for incoming connections",  OFFSET(listen),         BV_OPT_TYPE_INT, { .i64 = 0 },     0,       1,       .flags = D|E },
-    { "timeout",     "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout),     BV_OPT_TYPE_INT, { .i64 = -1 },         -1, INT_MAX, .flags = D|E },
-    { "listen_timeout",  "Connection awaiting timeout",      OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 },         -1, INT_MAX, .flags = D|E },
+    { "listen", "Listen for incoming connections",  OFFSET(listen), BV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, .flags = D|E },
+    { "timeout", "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
+    { "listen_timeout", "Connection awaiting timeout", OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
     { NULL }
 };
 

@@ -845,7 +845,6 @@ static int local_get_video_source_device(BVConfigContext *h, int index, BVVideoS
     GET_VALUE(elem, memb, "token", config->token, tmp);
     GET_VALUE(elem, memb, "chip", config->chip, tmp);
     GET_VALUE(elem, memb, "dev", config->dev, tmp);
-    GET_VALUE(elem, memb, "video_sources", NULL, config->video_sources);
     GET_VALUE(elem, memb, "interface", config->interface, tmp);
     GET_VALUE(elem, memb, "work_mode", config->work_mode, tmp);
 
@@ -882,7 +881,6 @@ static int local_get_audio_source_device(BVConfigContext *h, int index, BVAudioS
     GET_VALUE(elem, memb, "dev", config->dev, tmp);
     GET_VALUE(elem, memb, "channel_mode", NULL, config->channel_mode);
     GET_VALUE(elem, memb, "channels", NULL, config->channel_counts);
-    GET_VALUE(elem, memb, "audio_sources", NULL, config->audio_sources);
     GET_VALUE(elem, memb, "sample_format", NULL, config->sample_format);
     GET_VALUE(elem, memb, "sample_rate", NULL, config->sample_rate);
     GET_VALUE(elem, memb, "sample_points", NULL, config->sample_points);
@@ -918,7 +916,6 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     GET_VALUE(elem, memb, "token", config->token, tmp);
     GET_VALUE(elem, memb, "chip", config->chip, tmp);
     GET_VALUE(elem, memb, "dev", config->dev, tmp);
-    GET_VALUE(elem, memb, "video_outputs", NULL, config->video_outputs);
     GET_VALUE(elem, memb, "interface", config->interface, tmp);
     GET_VALUE(elem, memb, "work_mode", config->work_mode, tmp);
 
@@ -964,7 +961,6 @@ static int local_get_audio_output_device(BVConfigContext *h, int index, BVAudioO
     GET_VALUE(elem, memb, "token", config->token, tmp);
     GET_VALUE(elem, memb, "chip", config->chip, tmp);
     GET_VALUE(elem, memb, "dev", config->dev, tmp);
-    GET_VALUE(elem, memb, "audio_outputs", NULL, config->audio_outputs);
     GET_VALUE(elem, memb, "work_mode", config->work_mode, tmp);
     GET_VALUE(elem, memb, "channels_mode", NULL, config->channel_mode);
     GET_VALUE(elem, memb, "channels", NULL, config->channel_counts);
@@ -1221,15 +1217,17 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     }
 
     GET_VALUE(elem, memb, "name", config->name, tmp);
-    GET_VALUE(elem, memb, "video_type", NULL, config->video_type);
-    GET_VALUE(elem, memb, "audio_type", NULL, config->audio_type);
+    GET_VALUE(elem, memb, "video_encode_type", NULL, config->video_encode_type);
+    GET_VALUE(elem, memb, "audio_encode_type", NULL, config->audio_encode_type);
+#if 0
     GET_VALUE(elem, memb, "video_source", NULL, config->video_source);
     GET_VALUE(elem, memb, "audio_source", NULL, config->audio_source);
     GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
     GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
     GET_VALUE(elem, memb, "storage_index", NULL, config->storage_index);
     GET_VALUE(elem, memb, "transfer_index", NULL, config->transfer_index);
-    if (config->video_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
+#endif
+    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
         config->devinfo = bv_mallocz(sizeof(BVMobileDevice));
         if (!config->devinfo) {
             bv_log(h, BV_LOG_ERROR, "malloc failed\n");
@@ -1277,7 +1275,7 @@ static int local_set_media_device(BVConfigContext *h, int index, BVMediaDevice *
     }
     
     SET_VALUE(elem, memb, "name", config->name, tmp);
-    if (config->video_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
+    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
         bv_strlcpy(localctx->value, ((BVMobileDevice *)(config->devinfo))->user, sizeof(((BVMobileDevice *)(config->devinfo))->user));
         SET_VALUE(elem, memb, "user", localctx->value, tmp);
 
