@@ -1197,8 +1197,113 @@ error:
     return 0;
 }
 
+static int local_get_media_encoder(BVConfigContext *h, int index, BVMediaEncoder *config)
+{
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "media_encoders");
+    if (!obj) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_encoders] error\n");
+        return BVERROR(EINVAL);
+    } else {
+        bv_log(h, BV_LOG_DEBUG, "get member[media_encoders] type %d\n", obj->type);
+    }
+    elem = bv_config_get_element(h->pdb, obj, index);
+    if (!elem) {
+        bv_log(h, BV_LOG_ERROR, "get member[index] error\n");
+        goto error;
+    }
+
+    GET_VALUE(elem, memb, "video_source", NULL, config->video_source);
+    GET_VALUE(elem, memb, "audio_source", NULL, config->audio_source);
+    GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
+    GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
+    GET_VALUE(elem, memb, "storage_index", NULL, config->storage_index);
+    GET_VALUE(elem, memb, "transfer_index", NULL, config->transfer_index);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
+static int local_get_media_decoder(BVConfigContext *h, int index, BVMediaDecoder *config)
+{
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "media_decoders");
+    if (!obj) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_decoders] error\n");
+        return BVERROR(EINVAL);
+    } else {
+        bv_log(h, BV_LOG_DEBUG, "get member[media_decoders] type %d\n", obj->type);
+    }
+    elem = bv_config_get_element(h->pdb, obj, index);
+    if (!elem) {
+        bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
+        goto error;
+    }
+
+    GET_VALUE(elem, memb, "video_output", NULL, config->video_output);
+    GET_VALUE(elem, memb, "audio_output", NULL, config->audio_output);
+    GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
+    GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
+static int local_get_talkback(BVConfigContext *h, int index, BVTalkBack *config)
+{
+    int ret = 0;
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "talkbacks");
+    if (!obj) {
+        bv_log(h, BV_LOG_ERROR, "get member[talkbacks] error\n");
+        return BVERROR(EINVAL);
+    } else {
+        bv_log(h, BV_LOG_DEBUG, "get member[talkbacks] type %d\n", obj->type);
+    }
+    elem = bv_config_get_element(h->pdb, obj, index);
+    if (!elem) {
+        bv_log(h, BV_LOG_ERROR, "get element[index] error\n");
+        goto error;
+    }
+
+    GET_VALUE(elem, memb, "media_encoder", NULL, config->media_encoder_index);
+    GET_VALUE(elem, memb, "media_decoder", NULL, config->media_decoder_index);
+
+    if ((ret = local_get_media_encoder(h, config->media_encoder_index, &config->media_encoder)) < 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_encoders] in talk back error, return [%d]\n", ret);
+    }
+    if ((ret = local_get_media_decoder(h, config->media_decoder_index, &config->media_decoder)) < 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_decoders] in talk back error, return [%d]\n", ret);
+    }
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return 0;
+}
+
 static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *config)
 {
+    int ret = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
     LocalContext *localctx = h->priv_data;
@@ -1219,14 +1324,16 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     GET_VALUE(elem, memb, "name", config->name, tmp);
     GET_VALUE(elem, memb, "video_encode_type", NULL, config->video_encode_type);
     GET_VALUE(elem, memb, "audio_encode_type", NULL, config->audio_encode_type);
-#if 0
-    GET_VALUE(elem, memb, "video_source", NULL, config->video_source);
-    GET_VALUE(elem, memb, "audio_source", NULL, config->audio_source);
-    GET_VALUE(elem, memb, "video_channel", NULL, config->video_channel);
-    GET_VALUE(elem, memb, "audio_channel", NULL, config->audio_channel);
-    GET_VALUE(elem, memb, "storage_index", NULL, config->storage_index);
-    GET_VALUE(elem, memb, "transfer_index", NULL, config->transfer_index);
-#endif
+    GET_VALUE(elem, memb, "video_decode_type", NULL, config->video_decode_type);
+    GET_VALUE(elem, memb, "audio_decode_type", NULL, config->audio_decode_type);
+
+    if ((ret = local_get_media_encoder(h, index, &config->media_encoder)) < 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_encoders] in media device error, return [%d]\n", ret);
+    }
+    if ((ret = local_get_media_decoder(h, index, &config->media_decoder)) < 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[media_decoders] in media device error, return [%d]\n", ret);
+    }
+
     if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
         config->devinfo = bv_mallocz(sizeof(BVMobileDevice));
         if (!config->devinfo) {
@@ -1327,6 +1434,9 @@ BVConfig bv_local_config = {
     .get_ptz_device             = local_get_ptz_device,
     .get_media_device           = local_get_media_device,
     .set_media_device           = local_set_media_device,
+    .get_media_encoder          = local_get_media_encoder,
+    .get_media_decoder          = local_get_media_decoder,
+    .get_talkback               = local_get_talkback,
     .get_video_source_device    = local_get_video_source_device,
     .get_audio_source_device    = local_get_audio_source_device,
     .get_video_output_device    = local_get_video_output_device,

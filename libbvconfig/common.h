@@ -300,7 +300,7 @@ typedef struct _BVMediaDevice {
     enum BVMediaStreamType video_decode_type;
     enum BVMediaStreamType audio_decode_type; 
     BVMediaEncoder media_encoder;
-    BVMediaEncoder media_decoder;
+    BVMediaDecoder media_decoder;
     void *devinfo;
 } BVMediaDevice;
 

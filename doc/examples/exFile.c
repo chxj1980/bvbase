@@ -22,6 +22,9 @@ int main(int argc, const char *argv[])
     BVAudioSource       as;
     BVVideoOutput       vo;
     BVAudioOutput       ao;
+    BVMediaEncoder media_encoder;
+    BVMediaDecoder media_decoder;
+    BVTalkBack     talkback;
     BVVideoEncoderOption video_encoder_option;
     BVAudioEncoderOption audio_encoder_option;
     BVConfigContext *config_ctx = NULL;
@@ -41,6 +44,9 @@ int main(int argc, const char *argv[])
     memset(&as, 0, sizeof(as));
     memset(&vo, 0, sizeof(vo));
     memset(&ao, 0, sizeof(ao));
+    memset(&media_encoder, 0, sizeof(media_encoder));
+    memset(&media_decoder, 0, sizeof(media_decoder));
+    memset(&talkback, 0, sizeof(talkback));
     memset(&video_encoder_option, 0, sizeof(video_encoder_option));
     memset(&audio_encoder_option, 0, sizeof(audio_encoder_option));
     bv_log_set_level(BV_LOG_DEBUG);
@@ -102,9 +108,29 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "data_bits %d\n", ptz_device.rs485.data_bits);
     bv_log(config_ctx, BV_LOG_INFO, "pan min %f max %f\n", ptz_device.pan_range.min, ptz_device.pan_range.max);
 
+    if (bv_config_get_media_encoder(config_ctx, 0, &media_encoder) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get media encoder error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "video_source %d\n", media_encoder.video_source);
+    bv_log(config_ctx, BV_LOG_INFO, "audio_source %d\n", media_encoder.audio_source);
+
+    if (bv_config_get_media_decoder(config_ctx, 0, &media_decoder) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get media decoder error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "video_output %d\n", media_decoder.video_output);
+    bv_log(config_ctx, BV_LOG_INFO, "audio_output %d\n", media_decoder.audio_output);
+
+    if (bv_config_get_talkback(config_ctx, 0, &talkback) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get talk back error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "media_encoder_index %d\n", talkback.media_encoder_index);
+    bv_log(config_ctx, BV_LOG_INFO, "storage_index %d\n", talkback.media_encoder.storage_index);
+
     if (bv_config_get_media_device(config_ctx, 0, &media_dev) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get media device error\n");
     }
+    bv_log(config_ctx, BV_LOG_INFO, "video_source %d\n", media_dev.media_encoder.video_source);
+    bv_log(config_ctx, BV_LOG_INFO, "video_output %d\n", media_dev.media_decoder.video_output);
     bv_log(config_ctx, BV_LOG_INFO, "url %s\n", ((BVMobileDevice *)(media_dev.devinfo))->url);
     bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
     bv_free(media_dev.devinfo);
