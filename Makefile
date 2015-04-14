@@ -45,6 +45,7 @@ BVLIBS-$(BV_CONFIG_BVDEVICE)    += bvdevice
 BVLIBS-$(BV_CONFIG_BVCONFIG)    += bvconfig
 BVLIBS-$(BV_CONFIG_BVSERVER)    += bvserver
 BVLIBS-$(BV_CONFIG_BVSYSTEM)    += bvsystem
+BVLIBS-$(BV_CONFIG_BVFILTER)    += bvfilter
 BVLIBS-$(BV_CONFIG_BVMEDIA)     += bvmedia
 BVLIBS-$(BV_CONFIG_BVCODEC)     += bvcodec
 BVLIBS-$(BV_CONFIG_BVPROTOCOL)  += bvprotocol

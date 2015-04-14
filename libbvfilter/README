@@ -1,0 +1,4 @@
+libbvfilter
+音视频过滤库 参考了gstreamer libavfilter
+
+BVFilterPad BVFilterLink BVFilter BVFilterGraph
