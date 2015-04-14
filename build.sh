@@ -113,7 +113,7 @@ enable_ffmpeg
 
 enable_jansson
 
-enable_freetype
+#enable_freetype
 
 export LD_LIBRARY_PATH
 CC=${CROSS_COMPILE}gcc
