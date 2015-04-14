@@ -1041,7 +1041,7 @@
             "storage_index": 0,
             "transfer_index": 1
         }
-    ]
+    ],
     "media_decoders":[
         {
             "name":"解码器一",
