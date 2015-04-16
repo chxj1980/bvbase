@@ -29,6 +29,7 @@ extern "C"{
 #endif
 
 #include <libbvutil/bvutil.h>
+#include <libbvutil/packet.h>
 
 /**
  *  --------------downstream ------->
@@ -56,7 +57,6 @@ enum BVFilterState {
 };
 
 #if 0
-typedef struct _BVFilterBus BVFilterBus;
 typedef struct _BVFilterPad BVFilterPad;
 typedef struct _BVFilterLink BVFilterLink;
 typedef struct _BVFilter BVFilter;
@@ -64,6 +64,7 @@ typedef struct _BVFilterContext BVFilterContext;
 typedef struct _BVFilterGraph BVFilterGraph;
 #endif
 
+typedef struct _BVFilterBus BVFilterBus;
 /**
  *  Send Message control Filter
  */
@@ -73,23 +74,19 @@ enum BVFilterMessage {
     BV_FILTER_MESSAGE_PAUSE,
 };
 
-/**
- *  bus 中添加消息处理函数
- *  bv_filter_bus_add_watch();
- *  message quene
- *  pop memsage push message
- */
-typedef struct _BVFilterBus {
-    const char *name;
-    struct _BVFilterGraph *graph;
-    int32_t refcount;
-} BVFilterBus;
+typedef int (*BVFilterBusFunc) (const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 
 typedef struct _BVFilterLink {
-    struct _BVFilterContext *source;
-    struct _BVFilterContext *dest;
+    struct _BVFilterContext *srcctx;
+    struct _BVFilterContext *dstctx;
     struct _BVFilterPad *srcpad;
     struct _BVFilterPad *dstpad;
+    enum BVMediaType type;
+    int width;
+    int height;
+    int sample_rate;
+    int format;
+    BVRational time_base;
 } BVFilterLink;
 
 typedef struct _BVFilterPad {
@@ -101,6 +98,13 @@ typedef struct _BVFilterContext {
     const BVClass *bv_class;
     const uint32_t nb_sources;      //输入pad的个数
     const uint32_t nb_outputs;      //输出pad的个数
+    BVFilterPad *source_pads;
+    BVFilterPad *output_pads;
+    BVFilterLink **source_links;
+    BVFilterLink **output_links;
+    void *priv_data;
+    struct _BVFilterGraph *graph;
+    
 } BVFilterContext;
 
 typedef struct _BVFilter {
@@ -119,8 +123,25 @@ typedef struct _BVFilter {
 } BVFilter;
 
 typedef struct _BVFilterGraph {
-    /* data */
+    const char *name;
+    BVFilterBus *bus;
 } BVFilterGraph;
+
+BVFilterBus *bv_filter_bus_new(BVFilterGraph *graph);
+
+BVFilterBus *bv_filter_bus_ref(BVFilterGraph *graph);
+
+int bv_filter_bus_unref(BVFilterBus *bus);
+
+int bv_filter_bus_add_watch(BVFilterBus *bus, BVFilterContext *filter, const char *name, BVFilterBusFunc *func);
+
+int bv_filter_bus_del_watch(BVFilterBus *bus, const char *name);
+
+int bv_filter_bus_push_message(BVFilterBus *bus);
+
+int bv_filter_bus_pull_message(void);
+
+int bv_filter_bus_destroy(BVFilterGraph *graph);
 
 #ifdef __cplusplus
 }

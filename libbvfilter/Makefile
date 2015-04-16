@@ -5,7 +5,7 @@ NAME    = bvfilter
 HEADERS = bvfilter.h                                                    \
           version.h                                                     \
 
-OBJS    = bvfilter.o allfilters.o
+OBJS    = bvfilter.o allfilters.o bus.o
 
 
 # Windows resource file
