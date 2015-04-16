@@ -311,6 +311,24 @@ int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int ind
     return s->config->get_audio_encoder_options(s, channel, index, config);
 }
 
+int bv_config_get_video_decoder(BVConfigContext *s, int channel, int index, BVVideoDecoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_decoder(s, channel, index, config);
+}
+
+int bv_config_get_audio_decoder(BVConfigContext *s, int channel, int index, BVAudioDecoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_decoder(s, channel, index, config);
+}
+
 int bv_config_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)
 {
     if (!s || !config)
