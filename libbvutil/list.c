@@ -27,8 +27,7 @@
 #include "bvutil.h"
 
 typedef struct _BVListBuncket {
-    BVList *prev;
-    BVList *next;
+    BVList list;
     void *data;
 } BVListBuncket;
 
@@ -117,6 +116,26 @@ void *bv_list_get_data(BVList *list, BVList *node)
     if (!list || !node)
         return NULL;
     return ((BVListBuncket *)node)->data;
+}
+
+BVList *bv_list_push(BVList *list, void *data)
+{
+    if (!list || !data)
+        return NULL;
+    return bv_list_insert_after(list, list, data);
+}
+
+void *bv_list_pull(BVList *list)
+{
+    BVList *node = NULL;
+    void *data = NULL;
+    if (!list || list->prev == list)
+        return NULL;
+    node = list->prev;
+    data = ((BVListBuncket *)node)->data;
+    bv_list_delete(list, node);
+    bv_freep(&node);
+    return data;
 }
 
 int bv_list_delete(BVList *list, BVList *node)

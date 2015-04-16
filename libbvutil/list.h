@@ -55,6 +55,10 @@ BVList *bv_list_find(BVList *list, void *data, BVListCompareFunc func);
 
 void *bv_list_get_data(BVList *list, BVList *node);
 
+BVList *bv_list_push(BVList *list, void *data);
+
+void *bv_list_pull(BVList *list);
+
 int bv_list_delete(BVList *list, BVList *node);
 
 int bv_list_free(BVList *list, BVList *node, BVListFreeFunc func);

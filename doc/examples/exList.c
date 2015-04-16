@@ -71,7 +71,11 @@ int main(int argc, const char *argv[])
         t[i].age = i + 20;
         t[i].t = bv_mallocz(20);
         bv_sprintf(t[i].t, 20, "test_%d", i);
+#if 0
         node = bv_list_insert_after(list, node, &t[i]);
+#else
+        node = bv_list_push(list, &t[i]);
+#endif
         if (node == NULL) {
             bv_log(NULL, BV_LOG_ERROR, "append node error\n");
         }
@@ -103,6 +107,15 @@ int main(int argc, const char *argv[])
         Test *p = bv_list_get_data(list, node);
         bv_log(NULL, BV_LOG_ERROR, "data name %s age %d\n", p->name, p->age);
         bv_list_free(list, node, free_node);
+    }
+    size = bv_list_size(list);
+    bv_log(NULL, BV_LOG_ERROR, "list size %d\n", size);
+    for (i = 0; i < size; i++) {
+        Test *p = bv_list_pull(list);
+        if (p) {
+            bv_log(NULL, BV_LOG_ERROR, "data name %s age %d\n", p->name, p->age);
+            free_node(p);
+        }
     }
     size = bv_list_size(list);
     bv_log(NULL, BV_LOG_ERROR, "list size %d\n", size);
