@@ -31,6 +31,8 @@ typedef struct _BVListBuncket {
     void *data;
 } BVListBuncket;
 
+#define list_to_buncket(LIST) (BV_CONTAINER_OF(LIST, BVListBuncket,list))
+
 BVList *bv_list_alloc(void)
 {
     BVListBuncket *list_buncket  = bv_mallocz(sizeof(BVListBuncket));
@@ -38,7 +40,7 @@ BVList *bv_list_alloc(void)
         bv_log(NULL, BV_LOG_ERROR, "No Mem alloc list node error\n");
         return NULL;
     }
-    return (BVList *) list_buncket;
+    return (BVList *) &list_buncket->list;
 }
 
 int bv_list_init(BVList **list)
@@ -72,7 +74,7 @@ BVList *bv_list_insert_before(BVList *list, BVList *sibling, void *data)
     node = bv_list_alloc();
     if (!node)
         return NULL;
-    ((BVListBuncket *)node)->data = data;
+    list_to_buncket(node)->data = data;
     sibling->prev->next = node;
     node->prev = sibling->prev;
     node->next = sibling;
@@ -115,7 +117,7 @@ void *bv_list_get_data(BVList *list, BVList *node)
 {
     if (!list || !node)
         return NULL;
-    return ((BVListBuncket *)node)->data;
+    return list_to_buncket(node)->data;
 }
 
 BVList *bv_list_push(BVList *list, void *data)
@@ -128,13 +130,15 @@ BVList *bv_list_push(BVList *list, void *data)
 void *bv_list_pull(BVList *list)
 {
     BVList *node = NULL;
+    BVListBuncket *buncket = NULL;
     void *data = NULL;
     if (!list || list->prev == list)
         return NULL;
     node = list->prev;
-    data = ((BVListBuncket *)node)->data;
+    buncket = list_to_buncket(node);
+    data = buncket->data;
     bv_list_delete(list, node);
-    bv_freep(&node);
+    bv_freep(&buncket);
     return data;
 }
 
@@ -151,14 +155,16 @@ int bv_list_delete(BVList *list, BVList *node)
 
 int bv_list_free(BVList *list, BVList *node, BVListFreeFunc func)
 {
+    BVListBuncket *buncket = NULL;
     if (!list || !node)
         return BVERROR(EINVAL);
     if (node->prev || node->next)
         bv_list_delete(list, node);
+    buncket = list_to_buncket(node);
     if (func) {
-        func(((BVListBuncket *)node)->data);
+        func(buncket->data);
     }
-    bv_freep(&node);
+    bv_freep(&buncket);
     return 0;
 }
 
@@ -181,6 +187,7 @@ int bv_list_destroy(BVList **list, BVListFreeFunc func)
     BVList *llist = NULL;
     BVList *node = NULL;
     BVList *tmp = NULL;
+    BVListBuncket *buncket = NULL;
     if (!list || !*list)
         return BVERROR(EINVAL);
     llist = *list;
@@ -190,7 +197,8 @@ int bv_list_destroy(BVList **list, BVListFreeFunc func)
         bv_list_free(llist, node, func);
         node = tmp;
     }
-    bv_freep(list);
+    buncket = list_to_buncket(llist);
+    bv_freep(&buncket);
     *list = NULL;
     return 0;
 }

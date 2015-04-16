@@ -34,7 +34,7 @@
 
 int main(int argc, const char *argv[])
 {
-    BVURLContext *s = NULL; 
+    BVIOContext *s = NULL; 
     BVDictionary *opn = NULL;
     char filename[128] = { 0 };
     time_t start_time = time(NULL);

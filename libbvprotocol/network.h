@@ -78,7 +78,7 @@ extern int bb_network_inited_globally;
 int bb_network_init(void);
 void bb_network_close(void);
 
-void bb_tls_init(void);
+int bb_tls_init(void);
 void bb_tls_deinit(void);
 
 int bb_network_wait_fd(int fd, int write);

@@ -22,6 +22,7 @@
  */
 
 #include "bvurl.h"
+#include "internal.h"
 #include <config.h>
 
 #if BV_CONFIG_LIBBVFS
@@ -47,7 +48,14 @@ void bv_protocol_register_all(void)
     REGISTER_PROTOCOL(TCP, tcp);
     REGISTER_PROTOCOL(UDP, udp);
     REGISTER_PROTOCOL(BVFS, bvfs);
+    REGISTER_PROTOCOL(HTTP, http);
+    REGISTER_PROTOCOL(HTTPS, https);
+    REGISTER_PROTOCOL(HTTPPROXY, httpproxy);
 #if BV_CONFIG_LIBBVFS
     bvfs_init(1, 0);
+#endif
+
+#if BV_CONFIG_NETWORK
+    bv_network_init();
 #endif
 }

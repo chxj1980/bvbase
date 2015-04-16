@@ -65,7 +65,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
 #endif
 #endif
 
-void bb_tls_init(void)
+int bb_tls_init(void)
 {
     //avpriv_lock_avformat();
 #if BV_CONFIG_OPENSSL
@@ -95,6 +95,7 @@ void bb_tls_init(void)
     gnutls_global_init();
 #endif
     //avpriv_unlock_avformat();
+    return 0;
 }
 
 void bb_tls_deinit(void)
@@ -120,7 +121,7 @@ void bb_tls_deinit(void)
     //avpriv_unlock_avformat();
 }
 
-int bb_network_inited_globally;
+int bb_network_inited_globally = 1;
 
 int bb_network_init(void)
 {
@@ -131,7 +132,7 @@ int bb_network_init(void)
     if (!bb_network_inited_globally)
         bv_log(NULL, BV_LOG_WARNING, "Using network protocols without global "
                                      "network initialization. Please use "
-                                     "avformat_network_init(), this will "
+                                     "bb_network_init(), this will "
                                      "become mandatory later.\n");
 #if BV_HAVE_WINSOCK2_H
     if (WSAStartup(MAKEWORD(1,1), &wsaData))
