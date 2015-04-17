@@ -24,6 +24,8 @@
 #ifndef BV_CODEC_VERSION_H
 #define BV_CODEC_VERSION_H
 
+#include <libbvutil/version.h>
+
 #define LIBBVCODEC_VERSION_MAJOR 0
 #define LIBBVCODEC_VERSION_MINOR  0
 #define LIBBVCODEC_VERSION_MICRO 1

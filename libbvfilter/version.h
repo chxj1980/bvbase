@@ -24,6 +24,8 @@
 #ifndef BV_FILTER_VERSION_H
 #define BV_FILTER_VERSION_H
 
+#include <libbvutil/version.h>
+
 #define LIBBVFILTER_VERSION_MAJOR 0
 #define LIBBVFILTER_VERSION_MINOR  0
 #define LIBBVFILTER_VERSION_MICRO 1

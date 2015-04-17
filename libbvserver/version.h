@@ -24,6 +24,8 @@
 #ifndef BV_SERVER_VERSION_H
 #define BV_SERVER_VERSION_H
 
+#include <libbvutil/version.h>
+
 #define LIBBVSERVER_VERSION_MAJOR 0
 #define LIBBVSERVER_VERSION_MINOR  0
 #define LIBBVSERVER_VERSION_MICRO 1
