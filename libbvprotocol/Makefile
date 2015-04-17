@@ -4,7 +4,7 @@ NAME    = bvprotocol
 
 HEADERS = bvio.h bvurl.h
 
-OBJS    = os_support.o network.o bvurl.o allprotocols.o bvio.o internal.o
+OBJS    = bvurl.o allprotocols.o bvio.o internal.o
 
 
 OBJS-$(BV_CONFIG_FILE_PROTOCOL)          += file.o

@@ -54,8 +54,4 @@ void bv_protocol_register_all(void)
 #if BV_CONFIG_LIBBVFS
     bvfs_init(1, 0);
 #endif
-
-#if BV_CONFIG_NETWORK
-    bv_network_init();
-#endif
 }

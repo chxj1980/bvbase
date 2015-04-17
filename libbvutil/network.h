@@ -18,17 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef BV_PROTOCOL_NETWORK_H
-#define BV_PROTOCOL_NETWORK_H
+#ifndef BVUTIL_NETWORK_H
+#define BVUTIL_NETWORK_H
 
 #include <errno.h>
 #include <stdint.h>
 
 #include "config.h"
 #include "libbvutil/error.h"
+#include "libbvutil/bvutil.h"
 #include "os_support.h"
-#include "bvio.h"
-#include "bvurl.h"
 
 #if BV_HAVE_UNISTD_H
 #include <unistd.h>
@@ -54,14 +53,14 @@
 #define getsockopt(a, b, c, d, e) getsockopt(a, b, c, (char*) d, e)
 #define setsockopt(a, b, c, d, e) setsockopt(a, b, c, (const char*) d, e)
 
-int bb_neterrno(void);
+int bv_neterrno(void);
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
-#define bb_neterrno() BVERROR(errno)
+#define bv_neterrno() BVERROR(errno)
 #endif /* BV_HAVE_WINSOCK2_H */
 
 #if BV_HAVE_ARPA_INET_H
@@ -72,30 +71,23 @@ int bb_neterrno(void);
 #include <poll.h>
 #endif
 
-int bb_socket_nonblock(int socket, int enable);
+int bv_socket_nonblock(int socket, int enable);
 
-extern int bb_network_inited_globally;
-int bb_network_init(void);
-void bb_network_close(void);
-
-int bb_tls_init(void);
-void bb_tls_deinit(void);
-
-int bb_network_wait_fd(int fd, int write);
+int bv_network_wait_fd(int fd, int write);
 
 /**
- * This works similarly to bb_network_wait_fd, but waits up to 'timeout' microseconds
- * Uses bb_network_wait_fd in a loop
+ * This works similarly to bv_network_wait_fd, but waits up to 'timeout' microseconds
+ * Uses bv_network_wait_fd in a loop
  *
  * @fd Socket descriptor
  * @write Set 1 to wait for socket able to be read, 0 to be written
- * @timeout Timeout interval, in microseconds. Actual precision is 100000 mcs, due to bb_network_wait_fd usage
- * @param int_cb Interrupt callback, is checked before each bb_network_wait_fd call
+ * @timeout Timeout interval, in microseconds. Actual precision is 100000 mcs, due to bv_network_wait_fd usage
+ * @param int_cb Interrupt callback, is checked before each bv_network_wait_fd call
  * @return 0 if data can be read/written, BVERROR(ETIMEDOUT) if timeout expired, or negative error code
  */
-int bb_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterruptCB *int_cb);
+int bv_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterruptCB *cb);
 
-int bb_inet_aton (const char * str, struct in_addr * add);
+int bv_inet_aton (const char * str, struct in_addr * add);
 
 #if !BV_HAVE_STRUCT_SOCKADDR_STORAGE
 struct sockaddr_storage {
@@ -198,21 +190,21 @@ struct addrinfo {
 #endif
 
 #if !BV_HAVE_GETADDRINFO
-int bb_getaddrinfo(const char *node, const char *service,
+int bv_getaddrinfo(const char *node, const char *service,
                    const struct addrinfo *hints, struct addrinfo **res);
-void bb_freeaddrinfo(struct addrinfo *res);
-int bb_getnameinfo(const struct sockaddr *sa, int salen,
+void bv_freeaddrinfo(struct addrinfo *res);
+int bv_getnameinfo(const struct sockaddr *sa, int salen,
                    char *host, int hostlen,
                    char *serv, int servlen, int flags);
-#define getaddrinfo bb_getaddrinfo
-#define freeaddrinfo bb_freeaddrinfo
-#define getnameinfo bb_getnameinfo
+#define getaddrinfo bv_getaddrinfo
+#define freeaddrinfo bv_freeaddrinfo
+#define getnameinfo bv_getnameinfo
 #endif /* !BV_HAVE_GETADDRINFO */
 
 #if !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H
-const char *bb_gai_strerror(int ecode);
+const char *bv_gai_strerror(int ecode);
 #undef gai_strerror
-#define gai_strerror bb_gai_strerror
+#define gai_strerror bv_gai_strerror
 #endif /* !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H */
 
 #ifndef INADDR_LOOPBACK
@@ -234,7 +226,7 @@ const char *bb_gai_strerror(int ecode);
 #define IN6_IS_ADDR_MULTICAST(a) (((uint8_t *) (a))[0] == 0xff)
 #endif
 
-int bb_is_multicast_address(struct sockaddr *addr);
+int bv_is_multicast_address(struct sockaddr *addr);
 
 #define POLLING_TIME 100 /// Time in milliseconds between interrupt check
 
@@ -250,9 +242,9 @@ int bb_is_multicast_address(struct sockaddr *addr);
  * @return        A non-blocking file descriptor on success
  *                or an BVERROR on failure.
  */
-int bb_listen_bind(int fd, const struct sockaddr *addr,
+int bv_listen_bind(int fd, const struct sockaddr *addr,
                    socklen_t addrlen, int timeout,
-                   BVURLContext *h);
+                   BVIOInterruptCB *cb);
 
 /**
  * Connect to a file descriptor and poll for result.
@@ -269,12 +261,12 @@ int bb_listen_bind(int fd, const struct sockaddr *addr,
  *                 logged errors.
  * @return         0 on success, BVERROR on failure.
  */
-int bb_listen_connect(int fd, const struct sockaddr *addr,
+int bv_listen_connect(int fd, const struct sockaddr *addr,
                       socklen_t addrlen, int timeout,
-                      BVURLContext *h, int will_try_next);
+                      BVIOInterruptCB *cb, int will_try_next);
 
-int bb_http_match_no_proxy(const char *no_proxy, const char *hostname);
+int bv_http_match_no_proxy(const char *no_proxy, const char *hostname);
 
-int bb_socket(int domain, int type, int protocol);
+int bv_socket(int domain, int type, int protocol);
 
-#endif /* BV_PROTOCOL_NETWORK_H */
+#endif /* BVUTIL_NETWORK_H */

@@ -25,7 +25,6 @@
 #define _SVID_SOURCE
 
 #include "config.h"
-#include "bvurl.h"
 #include "os_support.h"
 
 #if BV_CONFIG_NETWORK
@@ -46,7 +45,7 @@
 #if !BV_HAVE_INET_ATON
 #include <stdlib.h>
 
-int bb_inet_aton(const char *str, struct in_addr *add)
+int bv_inet_aton(const char *str, struct in_addr *add)
 {
     unsigned int add1 = 0, add2 = 0, add3 = 0, add4 = 0;
 
@@ -61,14 +60,14 @@ int bb_inet_aton(const char *str, struct in_addr *add)
     return 1;
 }
 #else
-int bb_inet_aton(const char *str, struct in_addr *add)
+int bv_inet_aton(const char *str, struct in_addr *add)
 {
     return inet_aton(str, add);
 }
 #endif /* !BV_HAVE_INET_ATON */
 
 #if !BV_HAVE_GETADDRINFO
-int bb_getaddrinfo(const char *node, const char *service,
+int bv_getaddrinfo(const char *node, const char *service,
                    const struct addrinfo *hints, struct addrinfo **res)
 {
     struct hostent *h = NULL;
@@ -92,7 +91,7 @@ int bb_getaddrinfo(const char *node, const char *service,
     sin->sin_family = AF_INET;
 
     if (node) {
-        if (!bb_inet_aton(node, &sin->sin_addr)) {
+        if (!bv_inet_aton(node, &sin->sin_addr)) {
             if (hints && (hints->ai_flags & AI_NUMERICHOST)) {
                 bv_free(sin);
                 return EAI_FAIL;
@@ -146,7 +145,7 @@ int bb_getaddrinfo(const char *node, const char *service,
     return 0;
 }
 
-void bb_freeaddrinfo(struct addrinfo *res)
+void bv_freeaddrinfo(struct addrinfo *res)
 {
 #if BV_HAVE_WINSOCK2_H
     void (WSAAPI *win_freeaddrinfo)(struct addrinfo *res);
@@ -164,7 +163,7 @@ void bb_freeaddrinfo(struct addrinfo *res)
     bv_freep(&res);
 }
 
-int bb_getnameinfo(const struct sockaddr *sa, int salen,
+int bv_getnameinfo(const struct sockaddr *sa, int salen,
                    char *host, int hostlen,
                    char *serv, int servlen, int flags)
 {
@@ -222,7 +221,7 @@ int bb_getnameinfo(const struct sockaddr *sa, int salen,
 #endif /* !BV_HAVE_GETADDRINFO */
 
 #if !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H
-const char *bb_gai_strerror(int ecode)
+const char *bv_gai_strerror(int ecode)
 {
     switch (ecode) {
     case EAI_AGAIN:
@@ -252,7 +251,7 @@ const char *bb_gai_strerror(int ecode)
 }
 #endif /* !BV_HAVE_GETADDRINFO || BV_HAVE_WINSOCK2_H */
 
-int bb_socket_nonblock(int socket, int enable)
+int bv_socket_nonblock(int socket, int enable)
 {
 #if BV_HAVE_WINSOCK2_H
     u_long param = enable;
@@ -266,7 +265,7 @@ int bb_socket_nonblock(int socket, int enable)
 }
 
 #if !BV_HAVE_POLL_H
-int bb_poll(struct pollfd *fds, nfds_t numfds, int timeout)
+int bv_poll(struct pollfd *fds, nfds_t numfds, int timeout)
 {
     fd_set read_set;
     fd_set write_set;

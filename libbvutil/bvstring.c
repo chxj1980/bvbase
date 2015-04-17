@@ -30,6 +30,7 @@
 #include "bvassert.h"
 #include "bvstring.h"
 #include "bprint.h"
+#include "network.h"
 
 int bv_strstart(const char *str, const char *pfx, const char **ptr)
 {
@@ -615,8 +616,6 @@ void bv_url_split(char *proto,         int proto_size,
     }
 
 }
-
-#include <libbvprotocol/network.h>
 
 int bv_url_join(char *str, int size, const char *proto,
                 const char *authorization, const char *hostname,

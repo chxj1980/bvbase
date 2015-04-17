@@ -25,10 +25,7 @@
 #include "libbvutil/dict.h"
 #include "libbvutil/opt.h"
 #include "libbvutil/time.h"
-#include "os_support.h"
-#if BV_CONFIG_NETWORK
-#include "network.h"
-#endif
+#include "libbvutil/network.h"
 
 #include "bvio.h"
 #include "bvurl.h"
@@ -116,8 +113,10 @@ static int url_alloc_for_protocol(BVURLContext **puc, BVURLProtocol *up,
     int err;
 
 #if BV_CONFIG_NETWORK
-    if (up->flags & BV_URL_PROTOCOL_FLAG_NETWORK && !bb_network_init())
+    if (up->flags & BV_URL_PROTOCOL_FLAG_NETWORK && !bv_network_init()) {
+        bv_log(NULL, BV_LOG_ERROR, "up %s need network\n", up->name);
         return BVERROR(EIO);
+    }
 #endif
     if ((flags & BV_IO_FLAG_READ) && !up->url_read) {
         bv_log(NULL, BV_LOG_ERROR,
@@ -189,7 +188,7 @@ fail:
     bv_freep(&uc);
 #if BV_CONFIG_NETWORK
     if (up->flags & BV_URL_PROTOCOL_FLAG_NETWORK)
-        bb_network_close();
+        bv_network_close();
 #endif
     return err;
 }
@@ -371,7 +370,7 @@ int bv_url_closep(BVURLContext **hh)
         ret = h->prot->url_close(h);
 #if BV_CONFIG_NETWORK
     if (h->prot->flags & BV_URL_PROTOCOL_FLAG_NETWORK)
-        bb_network_close();
+        bv_network_close();
 #endif
     if (h->prot->priv_data_size) {
         if (h->prot->priv_class)
@@ -456,14 +455,6 @@ int bv_url_shutdown(BVURLContext *h, int flags)
     if (!h->prot->url_shutdown)
         return BVERROR(ENOSYS);
     return h->prot->url_shutdown(h, flags);
-}
-
-int bv_check_interrupt(BVIOInterruptCB *cb)
-{
-    int ret;
-    if (cb && cb->callback && (ret = cb->callback(cb->opaque)))
-        return ret;
-    return 0;
 }
 
 int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)

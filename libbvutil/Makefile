@@ -134,6 +134,8 @@ OBJS = adler32.o                                                        \
        xtea.o                                                           \
        packet.o                                                         \
        list.o                                                           \
+       network.o                                                        \
+       os_support.o                                                     \
 
 
 OBJS-$(BV_CONFIG_LZO)                      += lzo.o

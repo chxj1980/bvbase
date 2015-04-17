@@ -24,7 +24,6 @@
 #line 25 "internal.c"
 
 #include "internal.h"
-#include "network.h"
 
 void bb_parse_key_value(const char *str, bb_parse_key_val_cb callback_get_buf,
                         void *context)
@@ -181,18 +180,4 @@ int bb_hex_to_data(uint8_t *data, const char *p)
         }
     }
     return len;
-}
-
-int bv_network_init()
-{
-#if BV_CONFIG_NETWORK
-    int ret;
-    bb_network_inited_globally = 1;
-    if ((ret = bb_network_init()) < 0)
-        return ret;
-    if ((ret = bb_tls_init()) < 0)
-        return ret;
-#endif
-    return 0;
-
 }

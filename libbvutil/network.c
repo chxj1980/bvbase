@@ -20,7 +20,6 @@
 
 #include <fcntl.h>
 #include "network.h"
-#include "bvurl.h"
 #include "libbvutil/bvutil.h"
 #include "libbvutil/mem.h"
 #include "libbvutil/time.h"
@@ -65,9 +64,8 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
 #endif
 #endif
 
-int bb_tls_init(void)
+static int bb_tls_init(void)
 {
-    //avpriv_lock_avformat();
 #if BV_CONFIG_OPENSSL
     if (!openssl_init) {
         SSL_library_init();
@@ -94,13 +92,11 @@ int bb_tls_init(void)
 #endif
     gnutls_global_init();
 #endif
-    //avpriv_unlock_avformat();
     return 0;
 }
 
-void bb_tls_deinit(void)
+static void bb_tls_deinit(void)
 {
-    //avpriv_lock_avformat();
 #if BV_CONFIG_OPENSSL
     openssl_init--;
     if (!openssl_init) {
@@ -118,21 +114,20 @@ void bb_tls_deinit(void)
 #if BV_CONFIG_GNUTLS
     gnutls_global_deinit();
 #endif
-    //avpriv_unlock_avformat();
 }
 
-int bb_network_inited_globally = 1;
+int bv_network_inited_globally;
 
-int bb_network_init(void)
+static int bb_network_init(void)
 {
 #if BV_HAVE_WINSOCK2_H
     WSADATA wsaData;
 #endif
 
-    if (!bb_network_inited_globally)
+    if (!bv_network_inited_globally)
         bv_log(NULL, BV_LOG_WARNING, "Using network protocols without global "
                                      "network initialization. Please use "
-                                     "bb_network_init(), this will "
+                                     "bv_network_init(), this will "
                                      "become mandatory later.\n");
 #if BV_HAVE_WINSOCK2_H
     if (WSAStartup(MAKEWORD(1,1), &wsaData))
@@ -141,16 +136,56 @@ int bb_network_init(void)
     return 1;
 }
 
-int bb_network_wait_fd(int fd, int write)
+static void bb_network_close(void)
+{
+#if BV_HAVE_WINSOCK2_H
+    WSACleanup();
+#endif
+}
+
+int bv_network_init(void)
+{
+#if BV_CONFIG_NETWORK
+    int ret;
+    if (bv_network_inited_globally)
+        return bv_network_inited_globally;
+    bv_network_inited_globally = 1;
+    if ((ret = bb_network_init()) < 0)
+        return ret;
+    if ((ret = bb_tls_init()) < 0)
+        return ret;
+#endif
+    return 0;
+}
+
+int bv_network_close(void)
+{
+#if BV_CONFIG_NETWORK
+    bb_network_close();
+#endif
+    return 0;
+}
+
+int bv_network_deinit(void)
+{
+#if BV_CONFIG_NETWORK
+    bb_network_close();
+    bb_tls_deinit();
+    bv_network_inited_globally = 0;
+#endif
+    return 0;
+}
+
+int bv_network_wait_fd(int fd, int write)
 {
     int ev = write ? POLLOUT : POLLIN;
     struct pollfd p = { .fd = fd, .events = ev, .revents = 0 };
     int ret;
     ret = poll(&p, 1, 100);
-    return ret < 0 ? bb_neterrno() : p.revents & (ev | POLLERR | POLLHUP) ? 0 : BVERROR(EAGAIN);
+    return ret < 0 ? bv_neterrno() : p.revents & (ev | POLLERR | POLLHUP) ? 0 : BVERROR(EAGAIN);
 }
 
-int bb_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterruptCB *int_cb)
+int bv_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterruptCB *int_cb)
 {
     int ret;
     int64_t wait_start = 0;
@@ -158,7 +193,7 @@ int bb_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterrupt
     while (1) {
         if (bv_check_interrupt(int_cb))
             return BVERROR_EXIT;
-        ret = bb_network_wait_fd(fd, write);
+        ret = bv_network_wait_fd(fd, write);
         if (ret != BVERROR(EAGAIN))
             return ret;
         if (timeout > 0) {
@@ -170,15 +205,8 @@ int bb_network_wait_fd_timeout(int fd, int write, int64_t timeout, BVIOInterrupt
     }
 }
 
-void bb_network_close(void)
-{
 #if BV_HAVE_WINSOCK2_H
-    WSACleanup();
-#endif
-}
-
-#if BV_HAVE_WINSOCK2_H
-int bb_neterrno(void)
+int bv_neterrno(void)
 {
     int err = WSAGetLastError();
     switch (err) {
@@ -199,7 +227,7 @@ int bb_neterrno(void)
 }
 #endif
 
-int bb_is_multicast_address(struct sockaddr *addr)
+int bv_is_multicast_address(struct sockaddr *addr)
 {
     if (addr->sa_family == AF_INET) {
         return IN_MULTICAST(ntohl(((struct sockaddr_in *)addr)->sin_addr.s_addr));
@@ -213,7 +241,7 @@ int bb_is_multicast_address(struct sockaddr *addr)
     return 0;
 }
 
-static int bb_poll_interrupt(struct pollfd *p, nfds_t nfds, int timeout,
+static int bv_poll_interrupt(struct pollfd *p, nfds_t nfds, int timeout,
                              BVIOInterruptCB *cb)
 {
     int runs = timeout / POLLING_TIME;
@@ -234,7 +262,7 @@ static int bb_poll_interrupt(struct pollfd *p, nfds_t nfds, int timeout,
     return ret;
 }
 
-int bb_socket(int af, int type, int proto)
+int bv_socket(int af, int type, int proto)
 {
     int fd;
 
@@ -254,8 +282,8 @@ int bb_socket(int af, int type, int proto)
     return fd;
 }
 
-int bb_listen_bind(int fd, const struct sockaddr *addr,
-                   socklen_t addrlen, int timeout, BVURLContext *h)
+int bv_listen_bind(int fd, const struct sockaddr *addr,
+                   socklen_t addrlen, int timeout, BVIOInterruptCB *cb)
 {
     int ret;
     int reuse = 1;
@@ -265,19 +293,19 @@ int bb_listen_bind(int fd, const struct sockaddr *addr,
     }
     ret = bind(fd, addr, addrlen);
     if (ret)
-        return bb_neterrno();
+        return bv_neterrno();
 
     ret = listen(fd, 1);
     if (ret)
-        return bb_neterrno();
+        return bv_neterrno();
 
-    ret = bb_poll_interrupt(&lp, 1, timeout, &h->interrupt_callback);
+    ret = bv_poll_interrupt(&lp, 1, timeout, cb);
     if (ret < 0)
         return ret;
 
     ret = accept(fd, NULL, NULL);
     if (ret < 0)
-        return bb_neterrno();
+        return bv_neterrno();
 
 #if !BV_HAVE_CLOSESOCKET
 #define closesocket close
@@ -285,49 +313,49 @@ int bb_listen_bind(int fd, const struct sockaddr *addr,
     closesocket(fd);
     //close(fd);
 
-    if (bb_socket_nonblock(ret, 1) < 0)
-        bv_log(NULL, BV_LOG_DEBUG, "bb_socket_nonblock failed\n");
+    if (bv_socket_nonblock(ret, 1) < 0)
+        bv_log(NULL, BV_LOG_DEBUG, "bv_socket_nonblock failed\n");
 
     return ret;
 }
 
-int bb_listen_connect(int fd, const struct sockaddr *addr,
-                      socklen_t addrlen, int timeout, BVURLContext *h,
+int bv_listen_connect(int fd, const struct sockaddr *addr,
+                      socklen_t addrlen, int timeout, BVIOInterruptCB *cb,
                       int will_try_next)
 {
     struct pollfd p = {fd, POLLOUT, 0};
     int ret;
     socklen_t optlen;
 
-    if (bb_socket_nonblock(fd, 1) < 0)
-        bv_log(NULL, BV_LOG_DEBUG, "bb_socket_nonblock failed\n");
+    if (bv_socket_nonblock(fd, 1) < 0)
+        bv_log(NULL, BV_LOG_DEBUG, "bv_socket_nonblock failed\n");
 
     while ((ret = connect(fd, addr, addrlen))) {
-        ret = bb_neterrno();
+        ret = bv_neterrno();
         switch (ret) {
         case BVERROR(EINTR):
-            if (bv_check_interrupt(&h->interrupt_callback))
+            if (bv_check_interrupt(cb))
                 return BVERROR_EXIT;
             continue;
         case BVERROR(EINPROGRESS):
         case BVERROR(EAGAIN):
-            ret = bb_poll_interrupt(&p, 1, timeout, &h->interrupt_callback);
+            ret = bv_poll_interrupt(&p, 1, timeout, cb);
             if (ret < 0)
                 return ret;
             optlen = sizeof(ret);
             if (getsockopt (fd, SOL_SOCKET, SO_ERROR, &ret, &optlen))
-                ret = AVUNERROR(bb_neterrno());
+                ret = AVUNERROR(bv_neterrno());
             if (ret != 0) {
                 char errbuf[100];
                 ret = BVERROR(ret);
                 bv_strerror(ret, errbuf, sizeof(errbuf));
                 if (will_try_next)
-                    bv_log(h, BV_LOG_WARNING,
-                           "Connection to %s failed (%s), trying next address\n",
-                           h->filename, errbuf);
+                    bv_log(NULL, BV_LOG_WARNING,
+                           "Connection to failed (%s), trying next address\n",
+                           errbuf);
                 else
-                    bv_log(h, BV_LOG_ERROR, "Connection to %s failed: %s\n",
-                           h->filename, errbuf);
+                    bv_log(NULL, BV_LOG_ERROR, "Connection to failed: %s\n",
+                           errbuf);
             }
         default:
             return ret;
@@ -360,7 +388,7 @@ static int match_host_pattern(const char *pattern, const char *hostname)
     return 0;
 }
 
-int bb_http_match_no_proxy(const char *no_proxy, const char *hostname)
+int bv_http_match_no_proxy(const char *no_proxy, const char *hostname)
 {
     char *buf, *start;
     int ret = 0;

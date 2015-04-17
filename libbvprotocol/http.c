@@ -35,8 +35,8 @@
 #include "http.h"
 #include "httpauth.h"
 #include "internal.h"
-#include "network.h"
-#include "os_support.h"
+#include "libbvutil/network.h"
+#include "libbvutil/os_support.h"
 
 /* XXX: POST protocol is not completely implemented because ffmpeg uses
  * only a subset of it. */
@@ -165,7 +165,7 @@ static int http_open_cnx_internal(BVURLContext *h, BVDictionary **options)
     bv_url_join(hoststr, sizeof(hoststr), NULL, NULL, hostname, port, NULL);
 
     proxy_path = getenv("http_proxy");
-    use_proxy  = !bb_http_match_no_proxy(getenv("no_proxy"), hostname) &&
+    use_proxy  = !bv_http_match_no_proxy(getenv("no_proxy"), hostname) &&
                  proxy_path && bv_strstart(proxy_path, "http://", NULL);
 
     if (!strcmp(proto, "https")) {

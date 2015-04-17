@@ -61,11 +61,6 @@ typedef struct _BVIOContext {
     int error;
 } BVIOContext;
 
-typedef struct BVIOInterruptCB {
-    int (*callback)(void*);
-    void *opaque;
-} BVIOInterruptCB;
-
 #define BV_IO_FLAG_READ     1
 #define BV_IO_FLAG_WRITE    2
 #define BV_IO_FLAG_READ_WRITE   (BV_IO_FLAG_READ | BV_IO_FLAG_WRITE)

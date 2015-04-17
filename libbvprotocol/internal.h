@@ -72,8 +72,6 @@ int bb_hex_to_data(uint8_t *data, const char *p);
 
 char *bb_url_decode(const char *url);
 
-int bv_network_init(void);
-
 #ifdef __cplusplus
 }
 #endif
