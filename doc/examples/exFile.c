@@ -10,6 +10,8 @@ int main(int argc, const char *argv[])
     int ret = 0;
     BVVideoEncoder video_encoder;
     BVAudioEncoder audio_encoder;
+    BVVideoDecoder video_decoder;
+    BVAudioDecoder audio_decoder;
     BVPTZDevice ptz_device;
     BVDeviceInfo devinfo;
     BVMediaDevice media_dev;
@@ -47,6 +49,8 @@ int main(int argc, const char *argv[])
     memset(&media_encoder, 0, sizeof(media_encoder));
     memset(&media_decoder, 0, sizeof(media_decoder));
     memset(&talkback, 0, sizeof(talkback));
+    memset(&video_decoder, 0, sizeof(video_decoder));
+    memset(&audio_decoder, 0, sizeof(audio_decoder));
     memset(&video_encoder_option, 0, sizeof(video_encoder_option));
     memset(&audio_encoder_option, 0, sizeof(audio_encoder_option));
     bv_log_set_level(BV_LOG_DEBUG);
@@ -131,9 +135,11 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "video_source %d\n", media_dev.media_encoder.video_source);
     bv_log(config_ctx, BV_LOG_INFO, "video_output %d\n", media_dev.media_decoder.video_output);
-    bv_log(config_ctx, BV_LOG_INFO, "url %s\n", ((BVMobileDevice *)(media_dev.devinfo))->url);
-    bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
-    bv_free(media_dev.devinfo);
+    if (media_dev.devinfo) {
+        bv_log(config_ctx, BV_LOG_INFO, "url %s\n", ((BVMobileDevice *)(media_dev.devinfo))->url);
+        bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
+        bv_free(media_dev.devinfo);
+    }
 
     media_dev.devinfo = bv_mallocz(sizeof(BVMobileDevice));
     if (!media_dev.devinfo) {
@@ -236,6 +242,16 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "token %s\n", ao.token);
     bv_log(config_ctx, BV_LOG_INFO, "volume %d\n", ao.volume);
+
+    if (bv_config_get_video_decoder(config_ctx, 0, 0, &video_decoder) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get video decoder error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "token %s\n", video_decoder.token);
+
+    if (bv_config_get_audio_decoder(config_ctx, 0, 0, &audio_decoder) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "get audio decoder error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "token %s\n", audio_decoder.token);
 
     bv_log(config_ctx, BV_LOG_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>end\n");
     bv_config_file_close(&config_ctx->pdb);
