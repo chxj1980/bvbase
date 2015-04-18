@@ -90,6 +90,19 @@ int main(int argc, const char *argv[])
     //when test format open it
     //	bv_device_control(device_context,BV_DEV_MESSAGE_TYPE_FORMAT_DISK,&pkt_in, NULL);
     
+	disk.index =-1; //index -1  get all disk info
+	disk.type=0;
+    pkt_in.data = (void *)&disk;
+    if (bv_device_control(device_context, BV_DEV_MESSAGE_TYPE_GET_DISK_INFO, &pkt_in, &pkt_out) == 0) {
+        bv_log(device_context, BV_LOG_INFO, "get disk info size %d\n", pkt_out.size);
+        int i = 0;
+        BVDiskDeviceInfo *disk_info = pkt_out.data;
+        for (i = 0; i < pkt_out.size; i++) {
+            BVDiskDeviceInfo *tmp_info = disk_info + i;
+            bv_log(device_context, BV_LOG_INFO, "disk name %s\n", tmp_info->device.name);
+        }
+        bv_free(pkt_out.data);
+    }
     bv_device_close(&device_context);
     return 0;
 }

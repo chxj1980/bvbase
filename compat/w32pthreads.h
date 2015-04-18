@@ -70,14 +70,14 @@ typedef struct pthread_cond_t {
 #define WaitForSingleObject(a, b) WaitForSingleObjectEx(a, b, FALSE)
 #endif
 
-static av_unused unsigned __stdcall attribute_align_arg win32thread_worker(void *arg)
+static bv_unused unsigned __stdcall attribute_align_arg win32thread_worker(void *arg)
 {
     pthread_t *h = arg;
     h->ret = h->func(h->arg);
     return 0;
 }
 
-static av_unused int pthread_create(pthread_t *thread, const void *unused_attr,
+static bv_unused int pthread_create(pthread_t *thread, const void *unused_attr,
                                     void *(*start_routine)(void*), void *arg)
 {
     thread->func   = start_routine;
@@ -87,7 +87,7 @@ static av_unused int pthread_create(pthread_t *thread, const void *unused_attr,
     return !thread->handle;
 }
 
-static av_unused void pthread_join(pthread_t thread, void **value_ptr)
+static bv_unused void pthread_join(pthread_t thread, void **value_ptr)
 {
     DWORD ret = WaitForSingleObject(thread.handle, INFINITE);
     if (ret != WAIT_OBJECT_0)
@@ -166,7 +166,7 @@ static void (WINAPI *cond_signal)(pthread_cond_t *cond);
 static BOOL (WINAPI *cond_wait)(pthread_cond_t *cond, pthread_mutex_t *mutex,
                                 DWORD milliseconds);
 
-static av_unused int pthread_cond_init(pthread_cond_t *cond, const void *unused_attr)
+static bv_unused int pthread_cond_init(pthread_cond_t *cond, const void *unused_attr)
 {
     win32_cond_t *win32_cond = NULL;
     if (cond_init) {
@@ -175,7 +175,7 @@ static av_unused int pthread_cond_init(pthread_cond_t *cond, const void *unused_
     }
 
     /* non native condition variables */
-    win32_cond = av_mallocz(sizeof(win32_cond_t));
+    win32_cond = bv_mallocz(sizeof(win32_cond_t));
     if (!win32_cond)
         return ENOMEM;
     cond->Ptr = win32_cond;
@@ -191,7 +191,7 @@ static av_unused int pthread_cond_init(pthread_cond_t *cond, const void *unused_
     return 0;
 }
 
-static av_unused void pthread_cond_destroy(pthread_cond_t *cond)
+static bv_unused void pthread_cond_destroy(pthread_cond_t *cond)
 {
     win32_cond_t *win32_cond = cond->Ptr;
     /* native condition variables do not destroy */
@@ -203,11 +203,11 @@ static av_unused void pthread_cond_destroy(pthread_cond_t *cond)
     CloseHandle(win32_cond->waiters_done);
     pthread_mutex_destroy(&win32_cond->mtx_waiter_count);
     pthread_mutex_destroy(&win32_cond->mtx_broadcast);
-    av_freep(&win32_cond);
+    bv_freep(&win32_cond);
     cond->Ptr = NULL;
 }
 
-static av_unused void pthread_cond_broadcast(pthread_cond_t *cond)
+static bv_unused void pthread_cond_broadcast(pthread_cond_t *cond)
 {
     win32_cond_t *win32_cond = cond->Ptr;
     int have_waiter;
@@ -238,7 +238,7 @@ static av_unused void pthread_cond_broadcast(pthread_cond_t *cond)
     pthread_mutex_unlock(&win32_cond->mtx_broadcast);
 }
 
-static av_unused int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+static bv_unused int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
     win32_cond_t *win32_cond = cond->Ptr;
     int last_waiter;
@@ -270,7 +270,7 @@ static av_unused int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mu
     return pthread_mutex_lock(mutex);
 }
 
-static av_unused void pthread_cond_signal(pthread_cond_t *cond)
+static bv_unused void pthread_cond_signal(pthread_cond_t *cond)
 {
     win32_cond_t *win32_cond = cond->Ptr;
     int have_waiter;
@@ -296,7 +296,7 @@ static av_unused void pthread_cond_signal(pthread_cond_t *cond)
 }
 #endif
 
-static av_unused void w32thread_init(void)
+static bv_unused void w32thread_init(void)
 {
 #if _WIN32_WINNT < 0x0600
     HANDLE kernel_dll = GetModuleHandle(TEXT("kernel32.dll"));

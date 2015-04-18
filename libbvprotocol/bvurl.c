@@ -21,6 +21,8 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
+#line 25 "bvurl.c"
+
 #include "libbvutil/bvstring.h"
 #include "libbvutil/dict.h"
 #include "libbvutil/opt.h"
@@ -155,9 +157,9 @@ static int url_alloc_for_protocol(BVURLContext **puc, BVURLProtocol *up,
                 int ret= 0;
                 char *p= start;
                 char sep= *++p;
-                char *key, *val;
+                char *key = NULL, *val;
                 p++;
-                while(ret >= 0 && (key= strchr(p, sep)) && p<key && (val = strchr(key+1, sep))){
+                while(ret >= 0 && (key= strchr(p, sep)) && p < key && (val = strchr(key+1, sep))){
                     *val= *key= 0;
                     ret= bv_opt_set(uc->priv_data, p, key+1, 0);
                     if (ret == BVERROR_OPTION_NOT_FOUND)

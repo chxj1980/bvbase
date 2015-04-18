@@ -55,7 +55,7 @@ typedef struct OnvifContext {
     int snpsht;
     struct soap *soap;
     AVFormatContext *onvif;
-    AVIOContext *snapshot;
+    BVIOContext *snapshot;
     struct SOAP_ENV__Header soap_header;
 } OnvifContext;
 

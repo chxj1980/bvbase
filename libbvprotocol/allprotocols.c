@@ -52,6 +52,6 @@ void bv_protocol_register_all(void)
     REGISTER_PROTOCOL(HTTPS, https);
     REGISTER_PROTOCOL(HTTPPROXY, httpproxy);
 #if BV_CONFIG_LIBBVFS
-    bvfs_init(1, 0);
+//    bvfs_init(1, 0);
 #endif
 }
