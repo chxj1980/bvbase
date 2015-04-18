@@ -47,7 +47,7 @@ LDFLAGS += -L$(BVBASE_DIR)/openssl/$(PLATFORM)/lib -lssl -lcrypto
 
 LDFLAGS += -L$(BVBASE_DIR)/bvfs/$(PLATFORM)/lib -lbvfs -lpthread 
 
-EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exFile exEncode 
+EXAMPLES=  exDevice device_scan exMedia exConfig exUrl exCfile exDisk exSystem exDecode exParser exFile exEncode exList a
 
 
 OBJS=$(addsuffix .o,$(EXAMPLES))
@@ -64,5 +64,5 @@ all: $(OBJS) $(EXAMPLES)
 clean: 
 	$(RM) $(EXAMPLES) $(OBJS)
 install:
-	#cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys2/usr/bin/
-	cp $(EXAMPLES) /tftpboot/BVS-W4020-VC-E.filesys/usr/bin/
+	cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys/usr/bin/
+	#cp $(EXAMPLES) /tftpboot/BVS-W4020-VC-E.filesys/usr/bin/

@@ -211,6 +211,7 @@ static int onvif_detect_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, B
     char hostname[1024], proto[10];
     char auth[1024], path[1024], soap_endpoint[1024];
     int port, timeout = 1;
+    int status = BV_DEVICE_STATUS_IPC_OFF_LINE;
 
     bv_url_split(proto, sizeof(proto), auth, sizeof(auth),
                  hostname, sizeof(hostname), &port,
@@ -248,6 +249,14 @@ static int onvif_detect_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, B
         retval = BVERROR(EIO);
     }
     bv_soap_free(soap);
+    if (pkt_out) {
+        pkt_out->data = bv_mallocz(sizeof(int));
+        if (retval == 0) 
+            status = BV_DEVICE_STATUS_IPC_ON_LINE;
+        if (pkt_out->data) {
+            *(int *)pkt_out->data = status;
+        }
+    }
     return retval;
 }
 

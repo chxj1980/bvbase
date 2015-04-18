@@ -61,7 +61,8 @@ HEADERS = adler32.h                                                     \
           timestamp.h                                                   \
           version.h                                                     \
           xtea.h                                                        \
-		  packet.h                                                      \
+          packet.h                                                      \
+          list.h                                                        \
 
 
 HEADERS-$(BV_CONFIG_LZO)                   += lzo.h
@@ -69,9 +70,9 @@ HEADERS-$(BV_CONFIG_LZO)                   += lzo.h
 HEADERS-$(BV_CONFIG_OPENCL)                += opencl.h
 
 BV_ARCH_HEADERS = bswap.h                                                  \
-               intmath.h                                                \
-               intreadwrite.h                                           \
-               timer.h                                                  \
+                  intmath.h                                                \
+                  intreadwrite.h                                           \
+                  timer.h                                                  \
 
 BUILT_HEADERS = bbconfig.h                                              \
                 bbversion.h
@@ -131,7 +132,10 @@ OBJS = adler32.o                                                        \
        utils.o                                                          \
        xga_font_data.o                                                  \
        xtea.o                                                           \
-	   packet.o                                                         \
+       packet.o                                                         \
+       list.o                                                           \
+       network.o                                                        \
+       os_support.o                                                     \
 
 
 OBJS-$(BV_CONFIG_LZO)                      += lzo.o

@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef BV_PROTOCOL_OS_SUPPORT_H
-#define BV_PROTOCOL_OS_SUPPORT_H
+#ifndef BVUTIL_OS_SUPPORT_H
+#define BVUTIL_OS_SUPPORT_H
 
 /**
  * @file
@@ -134,8 +134,8 @@ struct pollfd {
 #endif
 
 
-int bb_poll(struct pollfd *fds, nfds_t numfds, int timeout);
-#define poll bb_poll
+int bv_poll(struct pollfd *fds, nfds_t numfds, int timeout);
+#define poll bv_poll
 #endif /* BV_HAVE_POLL_H */
 #endif /* BV_CONFIG_NETWORK */
 
@@ -234,4 +234,4 @@ fallback:
 
 #endif
 
-#endif /* BV_PROTOCOL_OS_SUPPORT_H */
+#endif /* BVUTIL_OS_SUPPORT_H */

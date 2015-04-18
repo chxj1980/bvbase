@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: version.h
+    > File Name: bus.c
     > Author: albertfang
     > Mail: fang.qi@besovideo.com 
-    > Created Time: 2015年04月14日 星期二 10时14分12秒
+    > Created Time: 2015年04月15日 星期三 15时18分28秒
  ************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -21,24 +21,29 @@
  * Copyright (C) albert@BesoVideo, 2015
  */
 
-#ifndef BV_FILTER_VERSION_H
-#define BV_FILTER_VERSION_H
+#line 25 "bus.c"
 
-#include <libbvutil/version.h>
+#include <libbvutil/list.h>
 
-#define LIBBVFILTER_VERSION_MAJOR 0
-#define LIBBVFILTER_VERSION_MINOR  0
-#define LIBBVFILTER_VERSION_MICRO 1
+#include "bvfilter.h"
 
-#define LIBFILTER_VERSION_INT BV_VERSION_INT(LIBBVFILTER_VERSION_MAJOR, \
-                                               LIBBVFILTER_VERSION_MINOR, \
-                                               LIBBVFILTER_VERSION_MICRO)
-#define LIBFILTER_VERSION     BV_VERSION(LIBBVFILTER_VERSION_MAJOR, \
-                                           LIBBVFILTER_VERSION_MINOR, \
-                                           LIBBVFILTER_VERSION_MICRO)
-#define LIBFILTER_BUILD       LIBBVFILTER_VERSION_INT
+typedef struct _BVFilterBusElement {
+    const char *name;
+    struct _BVFilterContext *filter;
+    BVFilterBusFunc *cb;
+} BVFilterBusElement;
 
-#define LIBFILTER_IDENT       "Lbvf" BV_STRINGIFY(LIBBVFILTER_VERSION)
+/**
+ *  bus 中添加消息处理函数
+ *  bv_filter_bus_add_watch();
+ *  message quene
+ *  pop memsage push message
+ */
+struct _BVFilterBus {
+    const char *name;
+    struct _BVFilterGraph *graph;
+    BVList *list;
+    int32_t refcount;
+};
 
 
-#endif /* end of include guard: BV_FILTER_VERSION_H */

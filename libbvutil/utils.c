@@ -84,6 +84,14 @@ const char *bv_get_media_type_string(enum BVMediaType media_type)
     }
 }
 
+int bv_check_interrupt(BVIOInterruptCB *cb)
+{
+    int ret;
+    if (cb && cb->callback && (ret = cb->callback(cb->opaque)))
+        return ret;
+    return 0;
+}
+
 char bv_get_picture_type_char(enum BVPictureType pict_type)
 {
     switch (pict_type) {

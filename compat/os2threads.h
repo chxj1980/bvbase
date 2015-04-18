@@ -58,14 +58,14 @@ static void thread_entry(void *arg)
 
     thread_arg->start_routine(thread_arg->arg);
 
-    av_free(thread_arg);
+    bv_free(thread_arg);
 }
 
-static av_always_inline int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void*), void *arg)
+static bv_always_inline int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void*), void *arg)
 {
     struct thread_arg *thread_arg;
 
-    thread_arg = av_mallocz(sizeof(struct thread_arg));
+    thread_arg = bv_mallocz(sizeof(struct thread_arg));
 
     thread_arg->start_routine = start_routine;
     thread_arg->arg = arg;
@@ -75,42 +75,42 @@ static av_always_inline int pthread_create(pthread_t *thread, const pthread_attr
     return 0;
 }
 
-static av_always_inline int pthread_join(pthread_t thread, void **value_ptr)
+static bv_always_inline int pthread_join(pthread_t thread, void **value_ptr)
 {
     DosWaitThread((PTID)&thread, DCWW_WAIT);
 
     return 0;
 }
 
-static av_always_inline int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
+static bv_always_inline int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 {
     DosCreateMutexSem(NULL, (PHMTX)mutex, 0, FALSE);
 
     return 0;
 }
 
-static av_always_inline int pthread_mutex_destroy(pthread_mutex_t *mutex)
+static bv_always_inline int pthread_mutex_destroy(pthread_mutex_t *mutex)
 {
     DosCloseMutexSem(*(PHMTX)mutex);
 
     return 0;
 }
 
-static av_always_inline int pthread_mutex_lock(pthread_mutex_t *mutex)
+static bv_always_inline int pthread_mutex_lock(pthread_mutex_t *mutex)
 {
     DosRequestMutexSem(*(PHMTX)mutex, SEM_INDEFINITE_WAIT);
 
     return 0;
 }
 
-static av_always_inline int pthread_mutex_unlock(pthread_mutex_t *mutex)
+static bv_always_inline int pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
     DosReleaseMutexSem(*(PHMTX)mutex);
 
     return 0;
 }
 
-static av_always_inline int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
+static bv_always_inline int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr)
 {
     DosCreateEventSem(NULL, &cond->event_sem, DCE_POSTONE, FALSE);
 
@@ -119,14 +119,14 @@ static av_always_inline int pthread_cond_init(pthread_cond_t *cond, const pthrea
     return 0;
 }
 
-static av_always_inline int pthread_cond_destroy(pthread_cond_t *cond)
+static bv_always_inline int pthread_cond_destroy(pthread_cond_t *cond)
 {
     DosCloseEventSem(cond->event_sem);
 
     return 0;
 }
 
-static av_always_inline int pthread_cond_signal(pthread_cond_t *cond)
+static bv_always_inline int pthread_cond_signal(pthread_cond_t *cond)
 {
     if (cond->wait_count > 0) {
         DosPostEventSem(cond->event_sem);
@@ -137,7 +137,7 @@ static av_always_inline int pthread_cond_signal(pthread_cond_t *cond)
     return 0;
 }
 
-static av_always_inline int pthread_cond_broadcast(pthread_cond_t *cond)
+static bv_always_inline int pthread_cond_broadcast(pthread_cond_t *cond)
 {
     while (cond->wait_count > 0) {
         DosPostEventSem(cond->event_sem);
@@ -148,7 +148,7 @@ static av_always_inline int pthread_cond_broadcast(pthread_cond_t *cond)
     return 0;
 }
 
-static av_always_inline int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
+static bv_always_inline int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
     cond->wait_count++;
 

@@ -34,7 +34,7 @@
 
 int main(int argc, const char *argv[])
 {
-    BVURLContext *s = NULL; 
+    BVIOContext *s = NULL; 
     BVDictionary *opn = NULL;
     char filename[128] = { 0 };
     time_t start_time = time(NULL);
@@ -42,25 +42,25 @@ int main(int argc, const char *argv[])
     int size;
     bv_log_set_level(BV_LOG_DEBUG);
     bv_protocol_register_all();
-#if 0
+#if 1
     bv_dict_set_int(&opn, "file_type", 1, 0);
     bv_dict_set_int(&opn, "storage_type", 2, 0);
     bv_dict_set_int(&opn, "channel_num", 2, 0);
     sprintf(filename, "%s", "bvfs://00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
-    if (bv_url_open(&s, filename, BV_IO_FLAG_WRITE, NULL, &opn)) {
+    if (bv_io_open(&s, filename, BV_IO_FLAG_WRITE, NULL, &opn)) {
         bv_dict_free(&opn);
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
     while (time(NULL) - start_time < 300) {
-        if (bv_url_write(s, (const uint8_t *)buf, 1024) != 1024) {
+        if (bv_io_write(s, (const uint8_t *)buf, 1024) != 1024) {
             bv_log(s, BV_LOG_ERROR, "write file error\n");
             goto closed;
         }
         usleep(100);
     }
-#endif 
+#else
     sprintf(filename, "%s", "bvfs:///02_00/pic/00_20150317_131125.jpg");
     if (bv_io_open(&s, filename, BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
@@ -84,6 +84,7 @@ int main(int argc, const char *argv[])
     if (fd >= 0) {
         close(fd);
     }
+#endif 
 closed:
     //bv_dict_free(&opn);
     bv_io_close(s);

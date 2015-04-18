@@ -101,8 +101,6 @@ int bv_url_get_multi_file_handle(BVURLContext *h, int **handles, int *numhandles
 
 int bv_url_shutdown(BVURLContext *h, int flags);
 
-int bv_check_interrupt(BVIOInterruptCB *cb);
-
 int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 #ifdef __cplusplus
 }

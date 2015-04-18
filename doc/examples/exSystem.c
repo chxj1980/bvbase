@@ -256,11 +256,21 @@ int main(int argc, const char *argv[])
     if (bv_input_media_open(&avictx1, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
+    pkt_in.data = &volume;
+    pkt_in.size = 1;
+    if (bv_media_context_control(avictx1, BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME, &pkt_in, NULL) < 0) {
+        bv_log(avictx, BV_LOG_ERROR, "set audio volume error\n");
+    }
 
     bv_dict_set(&opn, "vtoken", "0/2", 0); 
     bv_dict_set(&opn, "atoken", "0/2", 0);
     if (bv_input_media_open(&avictx2, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
+    }
+    pkt_in.data = &volume;
+    pkt_in.size = 1;
+    if (bv_media_context_control(avictx2, BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME, &pkt_in, NULL) < 0) {
+        bv_log(avictx, BV_LOG_ERROR, "set audio volume error\n");
     }
 
     bv_dict_set(&opn, "vtoken", "0/3", 0); 
