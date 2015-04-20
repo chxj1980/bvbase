@@ -33,6 +33,8 @@ extern "C"{
 #include <libbvutil/log.h>
 #include <libbvutil/dict.h>
 
+#include "version.h"
+
 typedef struct _BVIOContext {
     const BVClass *bv_class;
     void *opaque;

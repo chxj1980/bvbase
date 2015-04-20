@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvdevice
 
-HEADERS = bvdevice.h
+HEADERS = bvdevice.h version.h
 
 OBJS    = utils.o alldevices.o options.o
 

@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvmedia
 
-HEADERS = bvmedia.h
+HEADERS = bvmedia.h version.h
 
 OBJS    = utils.o allmedias.o media.o driver.o options.o mux.o drawutils.o
 

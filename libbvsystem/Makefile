@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvsystem
 
-HEADERS = bvsystem.h
+HEADERS = bvsystem.h version.h
 
 OBJS    = utils.o allsystems.o options.o system.o
 

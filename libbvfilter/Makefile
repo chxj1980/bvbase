@@ -2,8 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvfilter
 
-HEADERS = bvfilter.h                                                    \
-          version.h                                                     \
+HEADERS = bvfilter.h version.h
 
 OBJS    = bvfilter.o allfilters.o bus.o
 
