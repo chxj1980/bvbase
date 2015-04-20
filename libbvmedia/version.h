@@ -24,6 +24,8 @@
 #ifndef BV_MEDIA_VERSION_H
 #define BV_MEDIA_VERSION_H
 
+#include <libbvutil/version.h>
+
 #define LIBBVMEDIA_VERSION_MAJOR 0
 #define LIBBVMEDIA_VERSION_MINOR  0
 #define LIBBVMEDIA_VERSION_MICRO 3

@@ -137,7 +137,6 @@ typedef struct _BVVideoSourceDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t video_sources;
     char interface[BV_MAX_NAME_LEN];    //BT656 BT601 BT1120P BT1120I
     char work_mode[BV_MAX_NAME_LEN];     //for BT656 4D1 4HALFD1 2D1 
 } BVVideoSourceDevice;
@@ -146,7 +145,6 @@ typedef struct _BVVideoOutputDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t video_outputs;
     char interface[BV_MAX_NAME_LEN];    //CVBS HDMI
     char work_mode[BV_MAX_NAME_LEN];    //PAL NTSC AUTO
     BVIntRectange display;
@@ -158,8 +156,8 @@ typedef struct _BVAudioSourceDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
-    uint8_t audio_sources;
     uint8_t sample_format;
+    uint8_t reserved;
     int sample_rate;
     int sample_points;
 
@@ -172,8 +170,8 @@ typedef struct _BVAudioOutputDevice {
     char dev[BV_MAX_NAME_LEN];
     uint8_t channel_mode;
     uint8_t channel_counts;
-    uint8_t audio_outputs;
     uint8_t sample_format;
+    uint8_t reserved;
     int sample_rate;
     int sample_points;
     char work_mode[BV_MAX_NAME_LEN];     //I2S_SLAVE I2S_MASTER 
@@ -188,6 +186,8 @@ typedef struct _BVVideoCapture {
 typedef struct _BVVideoSource {
     char token[BV_MAX_NAME_LEN];
     uint8_t video_source_device;
+    uint8_t reserved;
+    uint16_t reserved2;
     float framerate;
     BVIntRectange bounds;
     BVVideoResolution resolution;
@@ -198,12 +198,18 @@ typedef struct _BVVideoSource {
 
 typedef struct _BVVideoOutput {
     char token[BV_MAX_NAME_LEN];
+    uint8_t video_output_device;
+    uint8_t reserved;
+    uint16_t reserved2;
     BVIntRectange display;
 } BVVideoOutput;
 
 typedef struct _BVAudioOutput {
     char token[BV_MAX_NAME_LEN];
-    int volume;
+    uint8_t audio_output_device;
+    uint8_t channels;
+    uint8_t volume;
+    uint8_t reserved;
 } BVAudioOutput;
 
 enum BVAudioInputType {
@@ -214,31 +220,20 @@ enum BVAudioInputType {
 typedef struct _BVAudioSource {
     char token[BV_MAX_NAME_LEN];
     uint8_t audio_source_device;
-    int channels;
-    int volume;
+    uint8_t channels;
+    uint8_t volume;
+    uint8_t reserved;
+    int sample_rate; 
     enum BVAudioInputType input_type;
     void *any_attr;
 } BVAudioSource;
 
-typedef struct _BVAudioSourceVolume {
-    char token[BV_MAX_NAME_LEN];
-    int volume;     //0 - 100
-} BVAudioSourceVolume;
-
-typedef struct _BVAudioOutputVolume {
-    char token[BV_MAX_NAME_LEN];
-    int volume;     //0 - 100
-} BVAudioOutputVolume;
-
-typedef struct _BVVideoSourceImaging {
-    char token[BV_MAX_NAME_LEN];
-    BVImagingSettings imaging;
-} BVVideoSourceImaging;
-
-enum BVMediaVideoFormat {
-    BV_MEDIA_VIDEO_FORMAT_NONE = 0,
-    BV_MEDIA_VIDEO_FORMAT_PAL,
-    BV_MEDIA_VIDEO_FORMAT_NTSC,
+enum BVVideoFormat {
+    BV_VIDEO_FORMAT_NONE = -1,
+    BV_VIDEO_FORMAT_AUTIO,
+    BV_VIDEO_FORMAT_NTSC,
+    BV_VIDEO_FORMAT_PAL,
+    BV_VIDEO_FORMAT_UNKNOWN,
 };
 
 enum BVMobileDeviceType {
@@ -276,14 +271,38 @@ enum BVMediaStreamType {
     BV_MEDIA_STREAM_TYPE_IPC_AUDIO = 8,
 };
 
+typedef struct _BVMediaDecoder {
+    int8_t video_output;
+    int8_t audio_output;
+    int8_t video_channel;
+    int8_t audio_channel;
+} BVMediaDecoder;
+
+typedef struct _BVMediaEncoder {
+    int8_t video_source;
+    int8_t audio_source;
+    int8_t video_channel;
+    int8_t audio_channel;
+    int8_t storage_index;
+    int8_t transfer_index;
+} BVMediaEncoder;
+
+typedef struct _BVTalkBack {
+    int8_t media_encoder_index;
+    int8_t media_decoder_index;
+    int16_t reserved;
+    BVMediaEncoder media_encoder;
+    BVMediaDecoder media_decoder;
+} BVTalkBack;
+
 typedef struct _BVMediaDevice {
     char name[BV_MAX_NAME_LEN];
-    enum BVMediaStreamType video_type;
-    enum BVMediaStreamType audio_type; 
-    uint8_t video_source;
-    uint8_t audio_source;
-    uint8_t video_channel;
-    uint8_t audio_channel;
+    enum BVMediaStreamType video_encode_type;
+    enum BVMediaStreamType audio_encode_type; 
+    enum BVMediaStreamType video_decode_type;
+    enum BVMediaStreamType audio_decode_type; 
+    BVMediaEncoder media_encoder;
+    BVMediaDecoder media_decoder;
     void *devinfo;
 } BVMediaDevice;
 
@@ -370,6 +389,14 @@ typedef struct _BVOutputChannelConfig {
     BVVideoOutput *video_output;
 } BVOutputChannelConfig;
 
+typedef struct _BVMediaLive {
+    int8_t video_source;
+    int8_t audio_source;
+    int8_t video_output;
+    int8_t audio_output;
+    BVSourceChannelConfig config;
+} BVMediaLive;
+
 enum BVMediaChannelType {
     BV_MEDIA_CHANNEL_TYPE_NONE,
     BV_MEDIA_CHANNEL_TYPE_SOURCE,   //audio video source
@@ -401,34 +428,39 @@ typedef struct _BVDeviceInfo {
     uint8_t wifi_count;
     uint8_t wireless_count;
     uint8_t channel_count;
-    uint8_t video_dev_count;
-    uint8_t audio_dev_count;
+    uint8_t video_source_devices;
+    uint8_t audio_source_devices;
+    uint8_t video_output_devices;
+    uint8_t audio_output_devices;
     uint8_t video_sources;
     uint8_t video_outputs;
     uint8_t audio_sources;
     uint8_t audio_outputs;
+    uint8_t media_devices;
+    uint8_t media_encoders;
+    uint8_t media_decoders;
+    uint8_t talkbacks;
     uint8_t relay_outputs;
     uint8_t serial_ports;
     uint8_t alert_in_count;
     uint8_t alert_out_count;
+    uint8_t storage_count;
     uint8_t ptz_count;
     uint8_t gps_count;
-    uint8_t storage_count;
     uint8_t support_sms;
     uint8_t support_call;
     uint16_t preset_count;
     uint16_t cruise_count;
-    
+    uint8_t temperature_count;
+    uint8_t voltage_count;
+    uint8_t speed_count;
     void *any_attr;
 } BVDeviceInfo;
 
-typedef struct _BVDeviceExtInfo {
+typedef struct _BVSystemInfo {
     uint8_t language;
-    uint8_t temprrature_count;
-    uint8_t voltage_count;
-    uint8_t spedd_count;
-    void *any_attr;
-} BVDeviceExtInfo;
+    //FIXME timezone
+} BVSystemInfo;
 
 enum BVOSDTimeFormat {
     BV_OSD_TIME_FORMAT_INVALID = 0,//不叠加时间

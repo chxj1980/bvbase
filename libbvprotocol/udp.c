@@ -34,8 +34,8 @@
 #include "libbvutil/opt.h"
 #include "libbvutil/log.h"
 #include "libbvutil/time.h"
-#include "network.h"
-#include "os_support.h"
+#include "libbvutil/network.h"
+#include "libbvutil/os_support.h"
 
 #if BV_HAVE_UDPLITE_H
 #include "udplite.h"
@@ -138,7 +138,7 @@ static const BVClass udplite_context_class = {
 static void log_net_error(void *ctx, int level, const char* prefix)
 {
     char errbuf[100];
-    bv_strerror(bb_neterrno(), errbuf, sizeof(errbuf));
+    bv_strerror(bv_neterrno(), errbuf, sizeof(errbuf));
     bv_log(ctx, level, "%s: %s\n", prefix, errbuf);
 }
 
@@ -283,7 +283,7 @@ static int udp_set_multicast_sources(int sockfd, struct sockaddr *addr,
                 log_net_error(NULL, BV_LOG_ERROR, "setsockopt(MCAST_JOIN_SOURCE_GROUP)");
             else
                 log_net_error(NULL, BV_LOG_ERROR, "setsockopt(MCAST_BLOCK_SOURCE)");
-            return bb_neterrno();
+            return bv_neterrno();
         }
     }
 #elif BV_HAVE_STRUCT_IP_MREQ_SOURCE && defined(IP_BLOCK_SOURCE)
@@ -319,7 +319,7 @@ static int udp_set_multicast_sources(int sockfd, struct sockaddr *addr,
                 log_net_error(NULL, BV_LOG_ERROR, "setsockopt(IP_ADD_SOURCE_MEMBERSHIP)");
             else
                 log_net_error(NULL, BV_LOG_ERROR, "setsockopt(IP_BLOCK_SOURCE)");
-            return bb_neterrno();
+            return bv_neterrno();
         }
     }
 #else
@@ -357,9 +357,9 @@ static int udp_socket_create(UDPContext *s, struct sockaddr_storage *addr,
         goto fail;
     for (res = res0; res; res=res->ai_next) {
         if (s->udplite_coverage)
-            udp_fd = bb_socket(res->ai_family, SOCK_DGRAM, IPPROTO_UDPLITE);
+            udp_fd = bv_socket(res->ai_family, SOCK_DGRAM, IPPROTO_UDPLITE);
         else
-            udp_fd = bb_socket(res->ai_family, SOCK_DGRAM, 0);
+            udp_fd = bv_socket(res->ai_family, SOCK_DGRAM, 0);
         if (udp_fd != -1) break;
         log_net_error(NULL, BV_LOG_ERROR, "socket");
     }
@@ -412,7 +412,7 @@ static int udp_port(struct sockaddr_storage *addr, int addr_len)
  * @param uri of the remote server
  * @return zero if no error.
  */
-static int bb_udp_set_remote_url(BVURLContext *h, const char *uri)
+static int bv_udp_set_remote_url(BVURLContext *h, const char *uri)
 {
     UDPContext *s = h->priv_data;
     char hostname[256], buf[10];
@@ -426,7 +426,7 @@ static int bb_udp_set_remote_url(BVURLContext *h, const char *uri)
     if (s->dest_addr_len < 0) {
         return BVERROR(EIO);
     }
-    s->is_multicast = bb_is_multicast_address((struct sockaddr*) &s->dest_addr);
+    s->is_multicast = bv_is_multicast_address((struct sockaddr*) &s->dest_addr);
     p = strchr(uri, '?');
     if (p) {
         if (bv_find_info_tag(buf, sizeof(buf), "connect", p)) {
@@ -451,7 +451,7 @@ static int bb_udp_set_remote_url(BVURLContext *h, const char *uri)
  * @param h media file context
  * @return the local port number
  */
-static int bb_udp_get_local_port(BVURLContext *h)
+static int bv_udp_get_local_port(BVURLContext *h)
 {
     UDPContext *s = h->priv_data;
     return s->local_port;
@@ -477,7 +477,7 @@ static void *circular_buffer_task( void *_BVURLContext)
 
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &old_cancelstate);
     pthread_mutex_lock(&s->mutex);
-    if (bb_socket_nonblock(s->udp_fd, 0) < 0) {
+    if (bv_socket_nonblock(s->udp_fd, 0) < 0) {
         bv_log(h, BV_LOG_ERROR, "Failed to set blocking mode");
         s->circular_buffer_error = BVERROR(EIO);
         goto end;
@@ -494,8 +494,8 @@ static void *circular_buffer_task( void *_BVURLContext)
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &old_cancelstate);
         pthread_mutex_lock(&s->mutex);
         if (len < 0) {
-            if (bb_neterrno() != BVERROR(EAGAIN) && bb_neterrno() != BVERROR(EINTR)) {
-                s->circular_buffer_error = bb_neterrno();
+            if (bv_neterrno() != BVERROR(EAGAIN) && bv_neterrno() != BVERROR(EINTR)) {
+                s->circular_buffer_error = bv_neterrno();
                 goto end;
             }
             continue;
@@ -655,7 +655,7 @@ static int udp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **
         if (!(flags & BV_IO_FLAG_READ))
             goto fail;
     } else {
-        if (bb_udp_set_remote_url(h, uri) < 0)
+        if (bv_udp_set_remote_url(h, uri) < 0)
             goto fail;
     }
 
@@ -769,7 +769,7 @@ static int udp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **
         }
 
         /* make the socket non-blocking */
-        bb_socket_nonblock(udp_fd, 1);
+        bv_socket_nonblock(udp_fd, 1);
     }
     if (s->is_connected) {
         if (connect(udp_fd, (struct sockaddr *) &s->dest_addr, s->dest_addr_len)) {
@@ -888,13 +888,13 @@ static int udp_read(BVURLContext *h, uint8_t *buf, size_t size)
 #endif
 
     if (!(h->flags & BV_IO_FLAG_NONBLOCK)) {
-        ret = bb_network_wait_fd(s->udp_fd, 0);
+        ret = bv_network_wait_fd(s->udp_fd, 0);
         if (ret < 0)
             return ret;
     }
     ret = recv(s->udp_fd, buf, size, 0);
 
-    return ret < 0 ? bb_neterrno() : ret;
+    return ret < 0 ? bv_neterrno() : ret;
 }
 
 static int udp_write(BVURLContext *h, const uint8_t *buf, size_t size)
@@ -903,7 +903,7 @@ static int udp_write(BVURLContext *h, const uint8_t *buf, size_t size)
     int ret;
 
     if (!(h->flags & BV_IO_FLAG_NONBLOCK)) {
-        ret = bb_network_wait_fd(s->udp_fd, 1);
+        ret = bv_network_wait_fd(s->udp_fd, 1);
         if (ret < 0)
             return ret;
     }
@@ -915,7 +915,7 @@ static int udp_write(BVURLContext *h, const uint8_t *buf, size_t size)
     } else
         ret = send(s->udp_fd, buf, size, 0);
 
-    return ret < 0 ? bb_neterrno() : ret;
+    return ret < 0 ? bv_neterrno() : ret;
 }
 
 static int udp_close(BVURLContext *h)

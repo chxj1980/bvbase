@@ -23,7 +23,7 @@
 
 #line 25 "tw2866.c"
 
-#include <libbvmedia/bvmedia.h>
+#include <libbvmedia/driver.h>
 
 #include "tw28xx.h"
 
@@ -159,6 +159,47 @@ static int video_source_set_imaging(BVMediaDriverContext *s, const BVControlPack
     return ret;
 }
 
+static int video_source_get_format(BVMediaDriverContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    Tw2866Driver *driver = s->priv_data;
+    BVVideoSourceFormat *video_source = pkt_in->data;
+    enum BVVideoFormat video_format;
+    tw28xxstr tw28xxctx = {0};
+    int videv, vichn;
+    int std = 0;
+
+    if (sscanf(video_source->token, "%d/%d", &videv, &vichn) !=2) {
+        bv_log(s, BV_LOG_ERROR, "video source token %s error\n", video_source->token);
+        return BVERROR(EINVAL);
+    }
+
+    tw28xxctx.ChipId    = videv;
+    tw28xxctx.ChipType  = 6;//tw2867
+    tw28xxctx.Register  = 0x0e + 0x10*vichn;//standard selection reg
+    tw28xxctx.Data      = 0x00;
+
+    if (ioctl(driver->fd, TW28XXCMD_READ_REG, &tw28xxctx) < 0) {
+        bv_log(NULL, BV_LOG_ERROR, "ioctl TW28XXCMD_READ_REG err !!!\n");
+        return -1;
+    }
+
+    std = (tw28xxctx.Data >> 4) & 7;
+    if (0 == std)
+        video_format = BV_VIDEO_FORMAT_NTSC;
+    else if (1 == std)
+        video_format = BV_VIDEO_FORMAT_PAL;
+    else
+        video_format = BV_VIDEO_FORMAT_UNKNOWN;
+    video_source->format = video_format;
+    if (pkt_out) {
+        pkt_out->data = bv_mallocz(sizeof(int));
+        if (pkt_out->data) {
+            *(int *)pkt_out->data = video_format;
+        }
+    }
+    return 0;
+}
+
 static int tw2866_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int i = 0;
@@ -170,6 +211,7 @@ static int tw2866_driver_control(BVMediaDriverContext *s, enum BVMediaDriverMess
         { BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_OUTPUT_SET_VOLUME, audio_output_set_volume},
         { BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_SOURCE_SET_SAMPLE, audio_source_set_sample},
         { BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_SET_IMAGING, video_source_set_imaging},
+        { BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_GET_FORMAT, video_source_get_format},
     };
     for (i = 0; i < BV_ARRAY_ELEMS(driver_control); i++) {
         if (driver_control[i].type == type)

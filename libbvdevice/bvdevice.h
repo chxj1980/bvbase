@@ -52,29 +52,50 @@ enum BVDeviceType {
     BV_DEVICE_TYPE_UNKNOWN
 };
 
+enum BVDeviceStatus {
+    BV_DEVICE_STATUS_NONE = -1,
+    BV_DEVICE_STATUS_DISK_INIT_OK = 0,
+    BV_DEVICE_STATUS_DISK_INIT_ERROR = 1,
+    BV_DEVICE_STATUS_DISK_FORMAT_ERROR = 2,
+
+    BV_DEVICE_STATUS_IPC_OFF_LINE = 0x100,
+    BV_DEVICE_STATUS_IPC_ON_LINE,
+};
+
 enum BVDeviceMessageType {
     BV_DEV_MESSAGE_TYPE_NONE = -1,
 
     //PTZ Message Type
-    BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE,
-    BV_DEV_MESSAGE_TYPE_PTZ_STOP,
-    BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET,
-    BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET,
-    BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET,
+    BV_DEV_MESSAGE_TYPE_PTZ_CONTINUOUS_MOVE, //移动PTZ            BVPTZContinuousMove  NULL
+    BV_DEV_MESSAGE_TYPE_PTZ_STOP,            //停止PTZ            BVPTZStop             NULL
+    BV_DEV_MESSAGE_TYPE_PTZ_SET_PRESET,     //                    BVPTZPreset
+    BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET,    //                    BVPTZGotoPreset
+    BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET,  //                    BVPTZPreset
 
-    BV_DEV_MESSAGE_TYPE_FORMAT_DISK,     //格式化磁盘
-    BV_DEV_MESSAGE_TYPE_SEARCH_FILE,
+    BV_DEV_MESSAGE_TYPE_FORMAT_DISK,        //格式化磁盘           BVDiskDevice NULL
+    BV_DEV_MESSAGE_TYPE_SEARCH_FILE,        //查询文件             BVSearchFileConditions BVFileInfo
+    BV_DEV_MESSAGE_TYPE_GET_DISK_COUNT,     //获取磁盘个数
+    BV_DEV_MESSAGE_TYPE_GET_DISK_STATUS,
+    BV_DEV_MESSAGE_TYPE_GET_DISK_INFO,      //获取磁盘信息         BVDiskDevice BVDiskDeviceInfo
     
-    BV_DEV_MESSAGE_TYPE_SEARCH_IPC,
-    BV_DEV_MESSAGE_TYPE_DETECT_IPC,     //检测IPC设备是否在线
+    BV_DEV_MESSAGE_TYPE_SEARCH_IPC,         //搜索OnvifIPC         NULL BVMobileDevice
+    BV_DEV_MESSAGE_TYPE_DETECT_IPC,         //检测IPC设备状态      BVMobileDevice NULL
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 
 typedef struct _BVDiskDevice {
     int index;
-    int type;
+    int type;               //磁盘类型 硬盘或SD卡
     char name[128];
 } BVDiskDevice;
+
+typedef struct _BVDiskDeviceInfo {
+    BVDiskDevice device;
+    int disk_size;          //MB
+    int free_size;          //MB
+    int overlay_size;       //覆盖MB
+    int disk_status;        //磁盘状态  1 bad disk 0 normal
+} BVDiskDeviceInfo;
 
 typedef struct _BVSearchFileConditions {
     time_t start_time;

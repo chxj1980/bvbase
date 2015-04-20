@@ -176,6 +176,15 @@ int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *con
     return s->config->get_video_source(s, index, config);
 }
 
+int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_output)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_output(s, index, config);
+}
+
 int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config)
 {
     if (!s || !config || !s->config)
@@ -183,6 +192,15 @@ int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *con
     if (!s->config->get_audio_source)
         return BVERROR(ENOSYS);
     return s->config->get_audio_source(s, index, config);
+}
+
+int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_output)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_output(s, index, config);
 }
 
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config)
@@ -201,6 +219,33 @@ int bv_config_set_media_device(BVConfigContext *s, int index, BVMediaDevice *con
     if (!s->config->set_media_device)
         return BVERROR(ENOSYS);
     return s->config->set_media_device(s, index, config);
+}
+
+int bv_config_get_media_encoder(BVConfigContext *s, int index, BVMediaEncoder *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_media_encoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_media_encoder(s, index, config);
+}
+
+int bv_config_get_media_decoder(BVConfigContext *s, int index, BVMediaDecoder *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_media_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_media_decoder(s, index, config);
+}
+
+int bv_config_get_talkback(BVConfigContext *s, int index, BVTalkBack *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_talkback)
+        return BVERROR(ENOSYS);
+    return s->config->get_talkback(s, index, config);
 }
 
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num)
@@ -264,6 +309,24 @@ int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int ind
     if (!s->config->get_audio_encoder_options)
         return BVERROR(ENOSYS);
     return s->config->get_audio_encoder_options(s, channel, index, config);
+}
+
+int bv_config_get_video_decoder(BVConfigContext *s, int channel, int index, BVVideoDecoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_video_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_video_decoder(s, channel, index, config);
+}
+
+int bv_config_get_audio_decoder(BVConfigContext *s, int channel, int index, BVAudioDecoder *config)
+{
+    if (!s || !config)
+        return BVERROR(EINVAL);
+    if (!s->config->get_audio_decoder)
+        return BVERROR(ENOSYS);
+    return s->config->get_audio_decoder(s, channel, index, config);
 }
 
 int bv_config_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)

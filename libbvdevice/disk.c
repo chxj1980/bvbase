@@ -30,16 +30,30 @@
 
 typedef struct DiskDeviceContext {
     const BVClass *bv_class;
+    int status;
+    int disk_count;
     int max_files;
 } DiskDeviceContext;
 
+/**
+ *  初始化没检测到硬盘返回出错。
+ *  检测到硬盘但硬盘文件系统损坏返回成功。
+ */
+
 static int disk_device_open(BVDeviceContext *h)
 {
+    DiskDeviceContext *diskctx = h->priv_data;
     if (bvfs_init(1, 0) < 0) {
         bv_log(h, BV_LOG_ERROR, "bvfs init error\n");
+        diskctx->status |= BV_DEVICE_STATUS_DISK_INIT_ERROR;
+    }
+    if (bvfs_get_disk_num(&diskctx->disk_count) < 0 || !diskctx->disk_count) {
+        bv_log(h, BV_LOG_ERROR, "bvfs get disk num error\n");
+        return BVERROR(EIO);
     }
     return 0;
 }
+
 static int disk_device_probe(BVDeviceContext *h, const char *args)
 {
     if (strcmp("disk_dev", args) == 0) {
@@ -56,9 +70,18 @@ static int disk_device_close(BVDeviceContext *h)
 
 static int disk_format(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
+    DiskDeviceContext *diskctx = h->priv_data;
     BVDiskDevice *disk = (BVDiskDevice *)pkt_in->data;
-
-    return bvfs_format_disk(disk->index,disk->type);
+    int ret = 0;
+    ret = bvfs_format_disk(disk->index,disk->type);
+    if (ret < 0) {
+        bv_log(h, BV_LOG_ERROR, "format disk error\n");
+        diskctx->status |= BV_DEVICE_STATUS_DISK_FORMAT_ERROR;
+    } else {
+        diskctx->status &= ~BV_DEVICE_STATUS_DISK_FORMAT_ERROR;
+        diskctx->status &= ~BV_DEVICE_STATUS_DISK_INIT_ERROR;
+    }
+    return ret;
 }
 
 static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -71,6 +94,13 @@ static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, B
     BVFileInfo *file_info = NULL;
     
     BVSearchFileConditions *cond = (BVSearchFileConditions *)pkt_in->data;
+    pkt_out->size = 0;
+    pkt_out->data = NULL;
+
+    if (diskctx->status) {
+        bv_log(h, BV_LOG_ERROR, "disk init error cant search files\n");
+        return BVERROR(ENOSYS);
+    } 
     
     file_info = (BVFileInfo *)bv_mallocz(diskctx->max_files * sizeof(BVFileInfo));
     if (!file_info) {
@@ -110,6 +140,110 @@ static int disk_search_file(BVDeviceContext *h, const BVControlPacket *pkt_in, B
     return ret;
 }
 
+static int disk_get_count(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    DiskDeviceContext *diskctx = h->priv_data;
+    if (!pkt_out) {
+        return BVERROR(EINVAL);
+    }
+    pkt_out->data = bv_mallocz(sizeof(int));
+    if (!pkt_out->data) {
+        return BVERROR(ENOMEM);
+    }
+    *(int *)pkt_out->data = diskctx->disk_count;
+    return 0;
+}
+
+static int disk_get_status(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    DiskDeviceContext *diskctx = h->priv_data;
+    pkt_out->data = bv_mallocz(sizeof(int));
+    if (!pkt_out->data) {
+        return BVERROR(ENOMEM);
+    }
+    *(int *)pkt_out->data = diskctx->status;
+    return 0;
+}
+
+static int save_disk_info(BVFS_DISK_INFO *disk_info, BVDiskDeviceInfo *bv_disk_info)
+{
+    bv_disk_info->device.index = disk_info->disk_id;
+    bv_disk_info->device.type  = disk_info->disk_type;
+    bv_strlcpy(bv_disk_info->device.name, disk_info->disk_name, sizeof(bv_disk_info->device.name));
+    bv_disk_info->disk_size = disk_info->disk_total_size;
+    bv_disk_info->free_size = disk_info->disk_free_size;
+    bv_disk_info->overlay_size = disk_info->disk_overlay_size;
+    bv_disk_info->disk_status = disk_info->bad_disk;
+    return 0;
+}
+
+static int disk_get_single_info(DiskDeviceContext *diskctx, int index, BVControlPacket *pkt_out)
+{
+    BVDiskDeviceInfo *bv_disk_info = NULL;
+    BVFS_DISK_INFO *disk_info = bv_mallocz(sizeof(BVFS_DISK_INFO));
+    if (!disk_info)
+        return BVERROR(ENOMEM);
+    if (bvfs_get_disk_info(disk_info, index) < 0) {
+        bv_log(diskctx, BV_LOG_ERROR, "get disk info error\n");
+        bv_free(disk_info);
+        return BVERROR(EIO);
+    }
+    bv_disk_info = bv_mallocz(sizeof(BVDiskDeviceInfo));
+    if (!bv_disk_info) {
+        bv_free(disk_info);
+        return BVERROR(ENOMEM);
+    }
+    save_disk_info(disk_info, bv_disk_info);
+    pkt_out->size = 1;
+    pkt_out->data = bv_disk_info;
+    bv_free(disk_info);
+    return 0;
+}
+
+static int disk_get_all_info(DiskDeviceContext *diskctx, BVControlPacket *pkt_out)
+{
+    int count = diskctx->disk_count;
+    BVDiskDeviceInfo *bv_disk_info = NULL;
+    BVFS_DISK_INFO *disk_info = bv_mallocz(sizeof(BVFS_DISK_INFO) * diskctx->disk_count);
+    int i = 0;
+    if (!disk_info) {
+        return BVERROR(ENOMEM);
+    }
+    if (bvfs_get_all_disk_info(disk_info, &count) < 0 || !count) {
+        bv_log(diskctx, BV_LOG_ERROR, "get all disk info error\n");
+        bv_free(disk_info);
+        return BVERROR(EIO);
+    }
+    if (count != diskctx->disk_count) {
+        bv_log(diskctx, BV_LOG_WARNING, "disk count changed\n");
+    }
+    bv_disk_info = bv_mallocz(sizeof(BVDiskDeviceInfo) * count);
+    if (!bv_disk_info) {
+        bv_free(disk_info);
+        return BVERROR(ENOMEM);
+    }
+    for (i = 0; i < count; i++) {
+        save_disk_info(disk_info + i, bv_disk_info + i);
+    }
+    bv_free(disk_info);
+    pkt_out->size = count;
+    pkt_out->data = bv_disk_info;
+    return 0;
+}
+
+static int disk_get_info(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    DiskDeviceContext *diskctx = h->priv_data;
+    BVDiskDevice *disk = (BVDiskDevice *)pkt_in->data;
+    if (!pkt_in || !pkt_out) {
+        return BVERROR(EINVAL);
+    }
+    if (disk->index != -1) {
+        return disk_get_single_info(diskctx, disk->index, pkt_out);
+    }
+    return disk_get_all_info(diskctx, pkt_out);
+}
+
 static int disk_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int i = 0;
@@ -119,6 +253,9 @@ static int disk_device_control(BVDeviceContext *h, enum BVDeviceMessageType type
     } disk_control[] = {
         { BV_DEV_MESSAGE_TYPE_FORMAT_DISK, disk_format},
         { BV_DEV_MESSAGE_TYPE_SEARCH_FILE, disk_search_file},
+        { BV_DEV_MESSAGE_TYPE_GET_DISK_COUNT, disk_get_count},
+        { BV_DEV_MESSAGE_TYPE_GET_DISK_STATUS, disk_get_status},
+        { BV_DEV_MESSAGE_TYPE_GET_DISK_INFO,  disk_get_info},
     };
     for (i = 0; i < BV_ARRAY_ELEMS(disk_control); i++) {
         if (disk_control[i].type == type)

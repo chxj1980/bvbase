@@ -23,7 +23,7 @@
 
 #line 25 "tlv320aic23.c"
 
-#include <libbvmedia/bvmedia.h>
+#include <libbvmedia/driver.h>
 
 #include "tlv320aic23.h"
 

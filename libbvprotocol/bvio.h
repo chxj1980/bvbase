@@ -33,6 +33,8 @@ extern "C"{
 #include <libbvutil/log.h>
 #include <libbvutil/dict.h>
 
+#include "version.h"
+
 typedef struct _BVIOContext {
     const BVClass *bv_class;
     void *opaque;
@@ -60,11 +62,6 @@ typedef struct _BVIOContext {
     uint32_t (*update_checksum)(uint32_t checksum, const uint8_t *buf, size_t size);
     int error;
 } BVIOContext;
-
-typedef struct BVIOInterruptCB {
-    int (*callback)(void*);
-    void *opaque;
-} BVIOInterruptCB;
 
 #define BV_IO_FLAG_READ     1
 #define BV_IO_FLAG_WRITE    2

@@ -91,6 +91,9 @@
 // to be forced to tokenize __VA_ARGS__
 #define E1(x) x
 
+#define BV_CONTAINER_OF(ptr_, type_, member_)  \
+    ((type_ *)((char *)ptr_ - offsetof(type_, member_)))
+
 /* Check if the hard coded offset of a struct member still matches reality.
  * Induce a compilation failure if not.
  */

@@ -70,9 +70,14 @@ typedef struct _BVConfig {
     int (*get_video_output_device)(BVConfigContext *s, int index, BVVideoOutputDevice *config);
     int (*get_audio_output_device)(BVConfigContext *s, int index, BVAudioOutputDevice *config);
     int (*get_video_source)(BVConfigContext *s, int index, BVVideoSource *config);
+    int (*get_video_output)(BVConfigContext *s, int index, BVVideoOutput *config);
     int (*get_audio_source)(BVConfigContext *s, int index, BVAudioSource *config);
+    int (*get_audio_output)(BVConfigContext *s, int index, BVAudioOutput *config);
     int (*get_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*set_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
+    int (*get_media_encoder)(BVConfigContext *s, int index, BVMediaEncoder *config);
+    int (*get_media_decoder)(BVConfigContext *s, int index, BVMediaDecoder *config);
+    int (*get_talkback)(BVConfigContext *s, int index, BVTalkBack *config);
     int (*get_profiles)(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
     int (*get_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
     int (*set_video_encoder)(BVConfigContext *s, int channel, int index, BVVideoEncoder *config);
@@ -80,6 +85,8 @@ typedef struct _BVConfig {
     int (*get_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
     int (*set_audio_encoder)(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
     int (*get_audio_encoder_options)(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
+    int (*get_video_decoder)(BVConfigContext *s, int channel, int index, BVVideoDecoder *config);
+    int (*get_audio_decoder)(BVConfigContext *s, int channel, int index, BVAudioDecoder *config);
     int (*get_ptz_device)(BVConfigContext *s, int channel, int index, BVPTZDevice *config);
     int (*save_ptz_preset)(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
     int (*dele_ptz_preset)(BVConfigContext *s, int channel, int index, BVPTZPreset *preset);
@@ -111,11 +118,21 @@ int bv_config_get_audio_output_device(BVConfigContext *s, int index, BVAudioOutp
 
 int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *config);
 
+int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config);
+
 int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config);
+
+int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config);
 
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
 
 int bv_config_set_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
+
+int bv_config_get_media_encoder(BVConfigContext *s, int index, BVMediaEncoder *config);
+
+int bv_config_get_media_decoder(BVConfigContext *s, int index, BVMediaDecoder *config);
+
+int bv_config_get_talkback(BVConfigContext *s, int index, BVTalkBack *config);
 
 int bv_config_get_media_profiles(BVConfigContext *s, BVMediaProfile *profiles, int *max_num);
 
@@ -130,6 +147,10 @@ int bv_config_get_audio_encoder(BVConfigContext *s, int channel, int index, BVAu
 int bv_config_set_audio_encoder(BVConfigContext *s, int channel, int index, BVAudioEncoder *config);
 
 int bv_config_get_audio_encoder_options(BVConfigContext *s, int channel, int index, BVAudioEncoderOption *config);
+
+int bv_config_get_video_decoder(BVConfigContext *s, int channel, int index, BVVideoDecoder *config);
+
+int bv_config_get_audio_decoder(BVConfigContext *s, int channel, int index, BVAudioDecoder *config);
 
 int bv_config_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config);
 
