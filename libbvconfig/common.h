@@ -223,6 +223,7 @@ typedef struct _BVAudioSource {
     uint8_t channels;
     uint8_t volume;
     uint8_t reserved;
+    int sample_rate; 
     enum BVAudioInputType input_type;
     void *any_attr;
 } BVAudioSource;

@@ -182,7 +182,7 @@
             }
         },
         {
-            "token": "0/1",
+            "token": "0/2",
             "framerate": 25,
             "video_source_device": 0,
             "day_to_night": "6:00",
@@ -195,7 +195,7 @@
             }
         },
         {
-            "token": "0/4",
+            "token": "0/3",
             "framerate": 25,
             "video_source_device": 0,
             "day_to_night": "6:00",
@@ -769,7 +769,7 @@
     "audio_encoders": [
         [
             {
-                "token": "0/2/10",
+                "token": "1/0/0",
                 "encoding": "G711A",
                 "bitrate": 32000,
                 "sample_rate": 8000

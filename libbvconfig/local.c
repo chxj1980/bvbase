@@ -1073,6 +1073,8 @@ static int local_get_audio_source(BVConfigContext *h, int index, BVAudioSource *
     GET_VALUE(elem, "token", config->token, tmp);
     GET_VALUE(elem, "audio_source_device", NULL, config->audio_source_device);
     GET_VALUE(elem, "channels", NULL, config->channels);
+    GET_VALUE(elem, "volume", NULL, config->volume);
+    GET_VALUE(elem, "sample_rate", NULL, config->sample_rate);
     GET_VALUE(elem, "input_type", localctx->value, tmp);
     if (bv_strcasecmp(localctx->value, "mic") == 0) {
         config->input_type = BV_AUDIO_INPUT_TYPE_MIC;
@@ -1139,6 +1141,7 @@ static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *
 
     GET_VALUE(elem, "token", config->token, tmp);
     GET_VALUE(elem, "volume", NULL, config->volume);
+    GET_VALUE(elem, "channels", NULL, config->channels);
     GET_VALUE(elem, "audio_output_device", NULL, config->audio_output_device);
 
 error:
