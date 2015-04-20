@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvconfig
 
-HEADERS = bvconfig.h common.h bvcfile.h
+HEADERS = bvconfig.h common.h bvcfile.h version.h
 
 OBJS    = utils.o allconfigs.o options.o config.o bvcfile.o
 

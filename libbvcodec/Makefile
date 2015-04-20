@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvcodec
 
-HEADERS = bvcodec.h
+HEADERS = bvcodec.h version.h
 
 OBJS    = allcodecs.o options.o utils.o
 

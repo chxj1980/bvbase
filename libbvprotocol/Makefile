@@ -2,7 +2,7 @@ include $(SUBDIR)../config.mak
 
 NAME    = bvprotocol
 
-HEADERS = bvio.h bvurl.h
+HEADERS = bvio.h bvurl.h version.h
 
 OBJS    = bvurl.o allprotocols.o bvio.o internal.o
 

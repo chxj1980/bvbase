@@ -207,8 +207,9 @@ typedef struct _BVVideoOutput {
 typedef struct _BVAudioOutput {
     char token[BV_MAX_NAME_LEN];
     uint8_t audio_output_device;
+    uint8_t channels;
     uint8_t volume;
-    uint16_t reserved;
+    uint8_t reserved;
 } BVAudioOutput;
 
 enum BVAudioInputType {
