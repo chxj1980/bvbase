@@ -1,0 +1,8 @@
+libbvfilter
+音视频过滤库 参考了gstreamer libavfilter
+
+BVFilterPad BVFilterLink BVFilter BVFilterGraph
+
+BVFilterBus 构想思路,总线应具备命令缓存机制 队列
+
+filter 向总线注册 filter向总线发命令

@@ -30,6 +30,7 @@
 #include "bvassert.h"
 #include "bvstring.h"
 #include "bprint.h"
+#include "network.h"
 
 int bv_strstart(const char *str, const char *pfx, const char **ptr)
 {
@@ -620,10 +621,7 @@ int bv_url_join(char *str, int size, const char *proto,
                 const char *authorization, const char *hostname,
                 int port, const char *fmt, ...)
 {
-#if 0
-#if BV_CONFIG_NETWORK
     struct addrinfo hints = { 0 }, *ai;
-#endif
 
     str[0] = '\0';
     if (proto)
@@ -659,9 +657,6 @@ int bv_url_join(char *str, int size, const char *proto,
         va_end(vl);
     }
     return strlen(str);
-#else
-    return 0;
-#endif
 }
 
 void bv_make_absolute_url(char *buf, int size, const char *base,

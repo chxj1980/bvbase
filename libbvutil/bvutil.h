@@ -289,6 +289,21 @@ typedef struct _BVProbeData {
 
 #define BV_PROBE_PADDING_SIZE 32             ///< extra allocated bytes at the end of the probe buffer
 
+typedef struct BVIOInterruptCB {
+    int (*callback)(void*);
+    void *opaque;
+} BVIOInterruptCB;
+
+int bv_check_interrupt(BVIOInterruptCB *cb);
+
+extern int bv_network_inited_globally;
+
+int bv_network_init(void);
+
+int bv_network_close(void);
+
+int bv_network_deinit(void);
+
 /**
  * Return a single letter to describe the given picture type
  * pict_type.

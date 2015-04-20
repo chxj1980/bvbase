@@ -429,6 +429,26 @@ int64_t bv_io_seek(BVIOContext *s, int64_t offset, int whence)
     return offset;
 }
 
+int64_t bv_io_size(BVIOContext *s)
+{
+    int64_t size ;
+    if (!s)
+        return BVERROR(EINVAL);
+
+    if (!s->io_seek)
+        return BVERROR(ENOSYS);
+
+    size = s->io_seek(s->opaque, 0, BV_SEEK_SIZE);
+    if (size < 0) {
+        if ((size = s->io_seek(s->opaque, -1, SEEK_END)) < 0)
+            return size;
+        size ++;
+        s->io_seek(s->opaque, s->pos, SEEK_SET);
+    }
+
+    return size;
+}
+
 int bv_io_control(BVIOContext *s, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     if (!s)

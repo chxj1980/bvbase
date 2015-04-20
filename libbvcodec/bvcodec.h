@@ -187,7 +187,7 @@ typedef struct _BVCodecParser {
     struct _BVCodecParser *next;
     int (*parser_init)(BVCodecParserContext *s);
     int (*parser_exit)(BVCodecParserContext *s);
-    int (*parser_parse)(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size);
+    int (*parser_parse)(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int *data_out_size);
 } BVCodecParser;
 
 
@@ -209,7 +209,7 @@ BVCodecParserContext *bv_codec_parser_init(enum BVCodecID codec_id);
 
 int bv_codec_parser_exit(BVCodecParserContext *s);
 
-int bv_codec_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int data_out_size);
+int bv_codec_parser_parse(BVCodecParserContext *s, BVCodecContext *codec, const uint8_t *data_in, int data_in_size, const uint8_t **data_out, int *data_out_size);
 
 #ifdef __cplusplus
 }

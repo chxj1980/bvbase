@@ -43,17 +43,13 @@ int main(int argc, const char *argv[])
     bv_protocol_register_all();
     bv_log_set_level(BV_LOG_INFO);
 //    av_log_set_level(BV_LOG_DEBUG);
-#if 1
     bv_dict_set(&opn, "user", "admin", 0);
     bv_dict_set(&opn, "passwd", "12345", 0);
     bv_dict_set(&opn, "token", "Profile_1", 0);
     bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
-    bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
+    //bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
-#else
-    bv_dict_set(&opn, "token", "Profile_1", 0);
-#endif
 
     //sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
     sprintf(filename, "%s", "bvfs://00_20120412_031132_");
@@ -121,7 +117,7 @@ int main(int argc, const char *argv[])
     }
     while (i < 2000) {
        bv_packet_init(&pkt); 
-       if (bv_input_media_read(mc, &pkt) < 0)
+       if (bv_input_media_read(mc, &pkt) <= 0)
            continue;
        st = mc->streams[pkt.stream_index];
        bv_log(mc, BV_LOG_DEBUG, "Before pkt size %d pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);

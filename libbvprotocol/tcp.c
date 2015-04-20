@@ -25,8 +25,8 @@
 #include "libbvutil/bvstring.h"
 
 //#include "internal.h"
-#include "network.h"
-#include "os_support.h"
+#include "libbvutil/network.h"
+#include "libbvutil/os_support.h"
 #if BV_HAVE_POLL_H
 #include <poll.h>
 #endif
@@ -44,9 +44,9 @@ typedef struct TCPContext {
 #define D BV_OPT_FLAG_DECODING_PARAM
 #define E BV_OPT_FLAG_ENCODING_PARAM
 static const BVOption options[] = {
-    { "listen",          "Listen for incoming connections",  OFFSET(listen),         BV_OPT_TYPE_INT, { .i64 = 0 },     0,       1,       .flags = D|E },
-    { "timeout",     "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout),     BV_OPT_TYPE_INT, { .i64 = -1 },         -1, INT_MAX, .flags = D|E },
-    { "listen_timeout",  "Connection awaiting timeout",      OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 },         -1, INT_MAX, .flags = D|E },
+    { "listen", "Listen for incoming connections",  OFFSET(listen), BV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, .flags = D|E },
+    { "timeout", "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
+    { "listen_timeout", "Connection awaiting timeout", OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
     { NULL }
 };
 
@@ -117,23 +117,23 @@ static int tcp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **
     cur_ai = ai;
 
  restart:
-    fd = bb_socket(cur_ai->ai_family,
+    fd = bv_socket(cur_ai->ai_family,
                    cur_ai->ai_socktype,
                    cur_ai->ai_protocol);
     if (fd < 0) {
-        ret = bb_neterrno();
+        ret = bv_neterrno();
         goto fail;
     }
 
     if (s->listen) {
-        if ((fd = bb_listen_bind(fd, cur_ai->ai_addr, cur_ai->ai_addrlen,
-                                 s->listen_timeout, h)) < 0) {
+        if ((fd = bv_listen_bind(fd, cur_ai->ai_addr, cur_ai->ai_addrlen,
+                                 s->listen_timeout, &h->interrupt_callback)) < 0) {
             ret = fd;
             goto fail1;
         }
     } else {
-        if ((ret = bb_listen_connect(fd, cur_ai->ai_addr, cur_ai->ai_addrlen,
-                                     s->open_timeout / 1000, h, !!cur_ai->ai_next)) < 0) {
+        if ((ret = bv_listen_connect(fd, cur_ai->ai_addr, cur_ai->ai_addrlen,
+                                     s->open_timeout / 1000, &h->interrupt_callback, !!cur_ai->ai_next)) < 0) {
 
             if (ret == BVERROR_EXIT)
                 goto fail1;
@@ -169,12 +169,12 @@ static int tcp_read(BVURLContext *h, uint8_t *buf, size_t size)
     int ret;
 
     if (!(h->flags & BV_IO_FLAG_NONBLOCK)) {
-        ret = bb_network_wait_fd_timeout(s->fd, 0, h->rw_timeout, &h->interrupt_callback);
+        ret = bv_network_wait_fd_timeout(s->fd, 0, h->rw_timeout, &h->interrupt_callback);
         if (ret)
             return ret;
     }
     ret = recv(s->fd, buf, size, 0);
-    return ret < 0 ? bb_neterrno() : ret;
+    return ret < 0 ? bv_neterrno() : ret;
 }
 
 static int tcp_write(BVURLContext *h, const uint8_t *buf, size_t size)
@@ -183,12 +183,12 @@ static int tcp_write(BVURLContext *h, const uint8_t *buf, size_t size)
     int ret;
 
     if (!(h->flags & BV_IO_FLAG_NONBLOCK)) {
-        ret = bb_network_wait_fd_timeout(s->fd, 1, h->rw_timeout, &h->interrupt_callback);
+        ret = bv_network_wait_fd_timeout(s->fd, 1, h->rw_timeout, &h->interrupt_callback);
         if (ret)
             return ret;
     }
     ret = send(s->fd, buf, size, MSG_NOSIGNAL);
-    return ret < 0 ? bb_neterrno() : ret;
+    return ret < 0 ? bv_neterrno() : ret;
 }
 
 static int tcp_shutdown(BVURLContext *h, int flags)

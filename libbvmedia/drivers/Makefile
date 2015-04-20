@@ -1,1 +1,2 @@
 OBJS-$(BV_CONFIG_TW2866_DRIVER)				+= drivers/tw2866.o
+OBJS-$(BV_CONFIG_TLV320AIC23_DRIVER)		+= drivers/tlv320aic23.o

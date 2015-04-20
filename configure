@@ -1219,6 +1219,7 @@ require_pkg_config(){
 require_libfreetype(){
     log require_libfreetype "$@"
     pkg="freetype2"
+	return
     check_cmd $pkg_config --exists --print-errors $pkg \
       || die "ERROR: $pkg not found"
     pkg_cflags=$($pkg_config --cflags $pkg_config_flags $pkg)
@@ -1314,6 +1315,7 @@ COMPONENT_LIST="
     bvconfigs
     bvcfiles
     bvservers
+    bvfilters
 "
 
 EXAMPLE_LIST="
@@ -1453,6 +1455,7 @@ LIBRARY_LIST="
     bvsystem
     bvserver
     bvprotocol
+    bvfilter
 "
 
 LICENSE_LIST="
@@ -2848,6 +2851,7 @@ BVCONFIG_LIST=$(find_things   config    CONFIG        libbvconfig/allconfigs.c)
 BVCFILE_LIST=$(find_things    cfile     CFILE         libbvconfig/allconfigs.c)
 BVSERVER_LIST=$(find_things   server    SERVER        libbvserver/allservers.c)
 BVSYSTEM_LIST=$(find_things   system    SYSTEM        libbvsystem/allsystems.c)
+BVFILTER_LIST=$(find_things   filter    FILTER        libbvfilter/allfilters.c)
 BVINDEV_LIST=$(find_things    indev     INDEV         libbvmedia/allmedias.c)
 BVOUTDEV_LIST=$(find_things   outdev    OUTDEV        libbvmedia/allmedias.c)
 BVMUXER_LIST=$(find_things    muxer     _MUX          libbvmedia/allmedias.c)
@@ -2874,6 +2878,7 @@ ALL_COMPONENTS="
     $BVCFILE_LIST
     $BVSERVER_LIST
     $BVSYSTEM_LIST
+    $BVFILTER_LIST
     $BVINDEV_LIST
     $BVOUTDEV_LIST
     $BVMUXER_LIST
@@ -5574,7 +5579,8 @@ echo "External libraries:"
 print_enabled '' $EXTERNAL_LIBRARY_LIST | print_3_columns
 echo
 
-for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvoutdev bvmuxer bvdemuxer bvdriver bvenc bvparser bvprotocol; do
+for type in bvdevice bvsystem bvconfig bvcfile bvserver bvindev bvoutdev bvmuxer bvdemuxer bvdriver bvenc bvparser bvprotocol bvfilter
+do
     echo "Enabled ${type}s:"
     eval list=\$$(toupper $type)_LIST
     print_enabled '_*' $list | print_3_columns
@@ -5879,4 +5885,5 @@ pkgconfig_generate libbvdevice   "BVBase device library"                "$LIBBVD
 pkgconfig_generate libbvconfig   "BVBase config library"                "$LIBBVCONFIG_VERSION"   "$extralibs"
 pkgconfig_generate libbvserver   "BVBase server library"                "$LIBBVSERVER_VERSION"   "$extralibs"
 pkgconfig_generate libbvsystem   "BVBase system library"                "$LIBBVSYSTEM_VERSION"   "$extralibs"
+pkgconfig_generate libbvfilter   "BVBase filter library"                "$LIBBVFILTER_VERSION"   "$extralibs"
 pkgconfig_generate libbvprotocol "BVBase protocol library"              "$LIBBVPROTOCOL_VERSION"   "$extralibs"

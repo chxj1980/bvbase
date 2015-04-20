@@ -28,6 +28,7 @@
 #include <libavformat/avformat.h>
 
 #include <libbvutil/bvstring.h>
+#include <libbvutil/time.h>
 #include <libbvutil/log.h>
 #include <libbvutil/opt.h>
 
@@ -40,20 +41,22 @@ typedef struct OnvifContext {
     char svrurl[1024];
     char *vtoken;
     char *atoken;
+    int vindex;
+    int aindex;
     char *user;
     char *passwd;
     enum BVCodecID vcodec_id;
     BVRational video_rate;
     int width, height;
+    int framerate;
     char onvif_url[128];
     char profile_name[32];
     char profile_token[32];
     char *media_url;
     int timeout;
-    int snpsht;
     struct soap *soap;
     AVFormatContext *onvif;
-    AVIOContext *snapshot;
+    BVIOContext *snapshot;
     struct SOAP_ENV__Header soap_header;
 } OnvifContext;
 
@@ -87,14 +90,13 @@ static enum BVCodecID avid_to_bvid(enum AVCodecID codec_id)
     return BV_CODEC_ID_NONE;
 }
 
-static void set_video_info(BVStream *bvst, AVStream *avst)
+static void set_video_info(OnvifContext *onvifctx, BVStream *bvst, AVStream *avst)
 {
-    bvst->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
-    bvst->codec->width = avst->codec->width;
-    bvst->codec->height = avst->codec->height;
-    bvst->codec->time_base = (BVRational){avst->codec->time_base.num, avst->codec->time_base.den};
     bvst->time_base = (BVRational){avst->time_base.num, avst->time_base.den};
-    bvst->codec->time_base = (BVRational){avst->avg_frame_rate.num, avst->avg_frame_rate.den};
+    bvst->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
+    bvst->codec->width = onvifctx->width;
+    bvst->codec->height = onvifctx->height;
+    bvst->codec->time_base = (BVRational){1, onvifctx->framerate};
     bvst->codec->bit_rate = avst->codec->bit_rate;
     bvst->codec->codec_id = avid_to_bvid(avst->codec->codec_id);
     bvst->codec->gop_size = avst->codec->gop_size;
@@ -107,7 +109,7 @@ static void set_video_info(BVStream *bvst, AVStream *avst)
     }
 }
 
-static void set_audio_info(BVStream *bvst, AVStream *avst)
+static void set_audio_info(OnvifContext *onvifctx, BVStream *bvst, AVStream *avst)
 {
     bvst->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     bvst->codec->sample_rate = avst->codec->sample_rate;
@@ -125,13 +127,16 @@ static int set_avcodec_info(BVMediaContext *s, OnvifContext *onvifctx)
     AVStream *avst = NULL;
     for (i = 0; i < onvif->nb_streams; i++) {
         avst = onvif->streams[i];
-        bvst = bv_stream_new(s, NULL);
-        if (avst->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-            set_video_info(bvst, avst);
-        } else if (avst->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            set_audio_info(bvst, avst);
+        if (avst->codec->codec_type == AVMEDIA_TYPE_VIDEO && onvifctx->vtoken) {
+            bvst = bv_stream_new(s, NULL);
+            set_video_info(onvifctx, bvst, avst);
+            onvifctx->vindex = bvst->index;
+        } else if (avst->codec->codec_type == AVMEDIA_TYPE_AUDIO && onvifctx->atoken) {
+            bvst = bv_stream_new(s, NULL);
+            set_audio_info(onvifctx, bvst, avst);
+            onvifctx->aindex = bvst->index;
         } else {
-            bv_log(s, BV_LOG_WARNING, "Unsupport CodecType\n");
+            bv_log(s, BV_LOG_WARNING, "Drop CodecType %d\n", avst->codec->codec_type);
         }
     }
     return 0;
@@ -166,7 +171,7 @@ static void bv_soap_free(struct soap *soap)
     soap_free(soap);
 }
 
-static int bv_onvif_stream_uri(OnvifContext *onvifctx)
+static int onvif_stream_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
     int ret = -1;
@@ -220,10 +225,12 @@ static int bv_onvif_stream_uri(OnvifContext *onvifctx)
     return ret;
 }
 
-static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
+static int onvif_snapshot_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
     int ret = -1;
+    char *p = NULL;
+    char *q = NULL;
     struct soap *soap = onvifctx->soap;
     struct _trt__GetSnapshotUri trt__GetSnapshotUri;
     struct _trt__GetSnapshotUriResponse trt__GetSnapshotUriResponse;
@@ -241,14 +248,23 @@ static int bv_onvif_snapshot_uri(OnvifContext *onvifctx)
         bv_log(NULL, BV_LOG_INFO, "get SnapshotUri error");
         bv_log(NULL, BV_LOG_INFO, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
     } else {
-        strncpy(onvifctx->onvif_url, trt__GetSnapshotUriResponse.MediaUri->Uri, sizeof(onvifctx->onvif_url));
+        q = trt__GetSnapshotUriResponse.MediaUri->Uri;
+        if (onvifctx->user && onvifctx->passwd) {
+            char tmp[128] = { 0 };
+            bv_sprintf(tmp, sizeof(tmp), "%s:%s@", onvifctx->user, onvifctx->passwd);
+            p = bv_sinsert(q, "://", tmp); 
+            bv_strlcpy(onvifctx->onvif_url, p, sizeof(onvifctx->onvif_url));
+            bv_free(p);
+         } else {
+            bv_strlcpy(onvifctx->onvif_url, q, sizeof(onvifctx->onvif_url));
+        }
         ret = 0;
+        bv_log(onvifctx, BV_LOG_INFO, "snapshot url %s\n", onvifctx->onvif_url);
     }
-    bv_log(onvifctx, BV_LOG_INFO, "snapshot url %s\n", onvifctx->onvif_url);
     return ret;
 }
 
-static int bv_onvif_service_uri(OnvifContext *onvifctx)
+static int onvif_service_uri(OnvifContext *onvifctx)
 {
     int retval = SOAP_OK;
     struct soap *soap = onvifctx->soap;
@@ -273,6 +289,65 @@ static int bv_onvif_service_uri(OnvifContext *onvifctx)
         onvifctx->media_url = bv_strdup(response.Capabilities->Media->XAddr);
     }
     bv_log(onvifctx, BV_LOG_INFO, "Get MediaService URI %s\n", onvifctx->media_url);
+    return 0;
+}
+
+static int onvif_stream_open(BVMediaContext *s)
+{
+    int ret = 0;
+    OnvifContext *onvifctx = s->priv_data;
+    ret = onvif_stream_uri(onvifctx);
+    if (ret < 0) {
+        bv_log(onvifctx, BV_LOG_ERROR, "onvif get stream uri error\n");
+        return ret;
+    }
+
+    /**
+     *  RTSP 流的处理协议的解析等等 现在使用FFmpeg中的，已有的功能。
+     *  抓拍流是HTTP的协议也是用FFmpeg中的
+     *  自己开发估计耗时太久。
+     *  FIXME
+     *      依赖 libavformat libavcodec libavutil
+     *  以后可能RTSP协议处理会添加在libbvprotocol中
+     */
+    if(avformat_open_input(&onvifctx->onvif, onvifctx->onvif_url, NULL, NULL) < 0) {
+        bv_log(onvifctx, BV_LOG_ERROR, "open onvif stream error\n");
+        return BVERROR(EIO);
+    }
+#if 0
+    if (avformat_find_stream_info(onvifctx->onvif, NULL) < 0) {
+        avformat_close_input(&onvifctx->onvif);
+        bv_log(onvifctx, BV_LOG_ERROR, "get onvif stream info error\n");
+        return -1;
+    }
+#endif
+    av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
+    set_avcodec_info(s, onvifctx);
+
+    return 0;
+}
+
+static int onvif_snapshot_open(BVMediaContext *s)
+{
+    int ret = 0;
+    OnvifContext *onvifctx = s->priv_data;
+    BVStream *bvst = NULL;
+    ret = onvif_snapshot_uri(onvifctx);
+    if (ret < 0) {
+        bv_log(onvifctx, BV_LOG_ERROR, "onvif get snapshot uri error\n");
+        return ret;
+    }
+
+    bvst = bv_stream_new(s, NULL);
+    if (!bvst) {
+        return BVERROR(ENOMEM);
+    }
+    onvifctx->vindex = 0;
+    bvst->time_base = (BVRational){1, 1000000};
+    bvst->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
+    bvst->codec->codec_id   = onvifctx->vcodec_id;
+    bvst->codec->width      = onvifctx->width;
+    bvst->codec->height     = onvifctx->height;
     return 0;
 }
 
@@ -315,16 +390,15 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
     if (!onvifctx->soap)
         return BVERROR(ENOMEM);
 
-    if (bv_onvif_service_uri(onvifctx)) {
+    if (onvif_service_uri(onvifctx)) {
         ret = BVERROR(EINVAL);
         goto fail;
     }
     bv_log(s, BV_LOG_DEBUG, "svr %s\n", onvifctx->svrurl);
     if (onvifctx->vcodec_id == BV_CODEC_ID_H264 || onvifctx->vcodec_id == BV_CODEC_ID_MPEG) {
-        ret = bv_onvif_stream_uri(onvifctx);
+        ret = onvif_stream_open(s);
     } else if (onvifctx->vcodec_id == BV_CODEC_ID_JPEG) {
-        ret = bv_onvif_snapshot_uri(onvifctx);
-        onvifctx->snpsht = 1;
+        ret = onvif_snapshot_open(s);
     } else {
         bv_log(onvifctx, BV_LOG_ERROR, "video codec id error\n");
         ret = BVERROR(EINVAL);
@@ -335,36 +409,13 @@ static bv_cold int onvif_read_header(BVMediaContext * s)
         bv_log(onvifctx, BV_LOG_ERROR, "onvif get stream uri error\n");
         goto fail;
     }
-    /**
-     *  RTSP 流的处理协议的解析等等 现在使用FFmpeg中的，已有的功能。
-     *  抓拍流是HTTP的协议也是用FFmpeg中的
-     *  自己开发估计耗时太久。
-     *  FIXME
-     *      依赖 libavformat libavcodec libavutil
-     *  以后可能RTSP协议处理会添加在libbvprotocol中
-     */
-    if(avformat_open_input(&onvifctx->onvif, onvifctx->onvif_url, NULL, NULL) < 0) {
-        bv_log(onvifctx, BV_LOG_ERROR, "open onvif stream error\n");
-        ret = BVERROR(ENOSYS);
-        goto fail;
-    }
-#if 0
-    if (avformat_find_stream_info(onvifctx->onvif, NULL) < 0) {
-        avformat_close_input(&onvifctx->onvif);
-        bv_soap_free(onvifctx->soap);
-        bv_log(onvifctx, BV_LOG_ERROR, "get onvif stream info error\n");
-        return -1;
-    }
-#endif
-    av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
-    set_avcodec_info(s, onvifctx);
     return 0;
 fail:
     bv_soap_free(onvifctx->soap);
     return ret;
 }
 
-static int copy_data(BVPacket *pkt, AVPacket *rpkt)
+static int copy_data(BVPacket *pkt, AVPacket *rpkt, int index)
 {
     if (bv_packet_new(pkt, rpkt->size) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "NoMem at %s %d\n", __FILE__, __LINE__);
@@ -376,13 +427,16 @@ static int copy_data(BVPacket *pkt, AVPacket *rpkt)
     pkt->dts = rpkt->dts;
     if (rpkt->flags & AV_PKT_FLAG_KEY)
         pkt->flags |= BV_PKT_FLAG_KEY;
-    pkt->stream_index = rpkt->stream_index;
+    pkt->stream_index = index;
     return 0;
 }
-static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
+
+static int onvif_read_stream(BVMediaContext *s, BVPacket *pkt) 
 {
-    AVPacket rpkt;
     OnvifContext *onvifctx = s->priv_data;
+    AVStream *avstream = NULL;
+    AVPacket rpkt;
+    int size = 0;
     if (onvifctx->onvif == NULL) {
         return BVERROR(EINVAL);
     }
@@ -390,15 +444,65 @@ static int onvif_read_packet(BVMediaContext * s, BVPacket * pkt)
     if(av_read_frame(onvifctx->onvif, &rpkt) < 0) {
         return BVERROR(EIO);
     }
-    copy_data(pkt, &rpkt);
+    size = rpkt.size;
+    avstream = onvifctx->onvif->streams[rpkt.stream_index];
+    if ((avstream->codec->codec_type == AVMEDIA_TYPE_VIDEO) && (onvifctx->vindex != -1)) {
+        copy_data(pkt, &rpkt, onvifctx->vindex);
+    } else if ((avstream->codec->codec_type == AVMEDIA_TYPE_AUDIO) && (onvifctx->aindex != -1)) {
+        copy_data(pkt, &rpkt, onvifctx->aindex);
+    } else {
+        size = BVERROR(EAGAIN);
+    }
     av_free_packet(&rpkt);
+    return size;
+}
+
+static int onvif_read_snapshot(BVMediaContext *s, BVPacket *pkt)
+{
+    BVIOContext *ioctx = NULL;
+    OnvifContext *onvifctx = s->priv_data;
+    int64_t size = 0LL;
+    if (bv_io_open(&ioctx, onvifctx->onvif_url, BV_IO_FLAG_READ, NULL, NULL) < 0) {
+        bv_log(s, BV_LOG_ERROR, "open snapshot url %s error\n", onvifctx->onvif_url);
+        return BVERROR(EIO);
+    }
+
+    if ((size = bv_io_size(ioctx)) < 0) {
+        bv_log(s, BV_LOG_ERROR, "get snapshot image size error\n");
+        return BVERROR(EIO);
+    }
+    if (bv_packet_new(pkt, size) < 0) {
+        return BVERROR(ENOMEM);
+    }
+    pkt->stream_index = onvifctx->vindex;
+    pkt->flags |= BV_PKT_FLAG_KEY;
+    pkt->pts = bv_gettime_relative();
+    if (bv_io_read(ioctx, pkt->data, size) != size) {
+        bv_log(s, BV_LOG_ERROR, "read snapshot image error\n");
+        bv_packet_free(pkt);
+    }
+    bv_io_close(ioctx);
     return pkt->size;
+}
+
+static int onvif_read_packet(BVMediaContext *s, BVPacket *pkt)
+{
+    OnvifContext *onvifctx = s->priv_data;
+
+    if (onvifctx->vcodec_id == BV_CODEC_ID_JPEG) {
+        //snapshot
+        return onvif_read_snapshot(s, pkt);
+    }
+
+    return onvif_read_stream(s, pkt);
 }
 
 static bv_cold int onvif_read_close(BVMediaContext * s)
 {
     OnvifContext *onvifctx = s->priv_data;
-    avformat_close_input(&onvifctx->onvif);
+    if (onvifctx->vcodec_id != BV_CODEC_ID_JPEG) {
+        avformat_close_input(&onvifctx->onvif);
+    }
     bv_soap_free(onvifctx->soap);
     return 0;
 }
@@ -412,12 +516,15 @@ static bv_cold int onvif_media_control(BVMediaContext *s, enum BVMediaMessageTyp
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     {"vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     {"atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
-    {"video_rate", "", OFFSET(video_rate), BV_OPT_TYPE_VIDEO_RATE, {.str = "25"}, 0, 0, DEC},
-    {"size", "set video size", OFFSET(width), BV_OPT_TYPE_IMAGE_SIZE, {.str = "hd720"}, 0, 0, DEC},
+    { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 25}, 0, 120, DEC},
+    { "width", "", OFFSET(width), BV_OPT_TYPE_INT, {.i64 = 1280}, 0, INT_MAX, DEC},
+    { "height", "", OFFSET(height), BV_OPT_TYPE_INT, {.i64 = 720}, 0, INT_MAX, DEC},
     {"media_url", "", OFFSET(media_url), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {"timeout", "", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = -5000}, INT_MIN, INT_MAX, DEC},
 

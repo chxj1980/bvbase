@@ -24,6 +24,7 @@
 #line 25 "hisavi.c"
 
 #include <libbvmedia/bvmedia.h>
+#include <libbvmedia/driver.h>
 #include <libbvutil/bvstring.h>
 
 //FIXME c99 not support asm
@@ -44,7 +45,7 @@
 #include "mpi_ai.h"
 #include "mpi_ao.h"
 
-#include "drv.h"
+//#include "drv.h"
 
 /**
  *  His3515 Audio Video Input Device Channel
@@ -60,7 +61,10 @@
 
 typedef struct HisAVIContext {
     const BVClass *bv_class;
+    BVMediaDriverContext *vdriver;
     char *vtoken;
+    char *vchip;
+    char *vdev;
     int videv;
     int vichn;
     int vindex;
@@ -68,7 +72,10 @@ typedef struct HisAVIContext {
     int height;
     int framerate;
     enum BVPixelFormat pix_fmt;
+    BVMediaDriverContext *adriver;
     char *atoken;
+    char *achip;
+    char *adev;
     int aidev;
     int aichn;
     int aindex;
@@ -111,17 +118,22 @@ static int destroy_video_input_channel(BVMediaContext *s)
 fail:
     return BVERROR(EIO);
 }
+static int audio_set_volume(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 
 static int create_audio_input_channel(BVMediaContext *s)
 {
     HisAVIContext *hisctx = s->priv_data;
     HI_S32 s32Ret = HI_FAILURE;
+    BVControlPacket pkt_in;
+    int volume = 70;
     if (sscanf(hisctx->atoken, "%d/%d", &hisctx->aidev, &hisctx->aichn) != 2) {
         bv_log(s, BV_LOG_ERROR, "atoken param error\n");
         return BVERROR(EINVAL);
     }
     //设置音量
-    AudioInVolumeSet(hisctx->aidev, hisctx->aichn, 70);
+    pkt_in.data = &volume;
+    pkt_in.size = 1;
+    audio_set_volume(s, &pkt_in, NULL);
 
     s32Ret = HI_MPI_AI_EnableChn(hisctx->aidev, hisctx->aichn);
     BREAK_WHEN_SDK_FAILED("enable aichn error", s32Ret);
@@ -150,14 +162,21 @@ static int create_video_input_channel(BVMediaContext *s)
 {
     HisAVIContext *hisctx = s->priv_data;
     VI_CHN_ATTR_S stChnAttr;
-    int mode = VIDEO_STD_PAL;
+    BVControlPacket pkt_in;
+    BVVideoSourceFormat source_format;
     HI_S32 s32Ret = HI_FAILURE;
     if (sscanf(hisctx->vtoken, "%d/%d", &hisctx->videv, &hisctx->vichn) != 2) {
         bv_log(s, BV_LOG_ERROR, "vtoken param error\n");
         return BVERROR(EINVAL);
     }
-    VideoInGetStd(hisctx->videv, hisctx->vichn, &mode);
-    if (mode == VIDEO_STD_NTSC) {
+    bv_strlcpy(source_format.token, hisctx->vtoken, sizeof(source_format.token));
+    source_format.format = BV_VIDEO_FORMAT_PAL;
+    pkt_in.data = &source_format;
+    pkt_in.size = 1;
+    if (bv_media_driver_control(hisctx->vdriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_GET_FORMAT, &pkt_in, NULL) < 0) {
+        bv_log(s, BV_LOG_ERROR, "get video source format error\n");
+    }
+    if (source_format.format == BV_VIDEO_FORMAT_NTSC) {
         hisctx->framerate = 30;
         hisctx->height = 240;
     }
@@ -222,12 +241,20 @@ static bv_cold int his_read_header(BVMediaContext *s)
     HisAVIContext *hisctx = s->priv_data;
 
     if (hisctx->atoken) {
+        if (bv_media_driver_open(&hisctx->adriver, hisctx->adev, hisctx->achip, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "open audio driver %s path %s error\n", hisctx->achip, hisctx->adev);
+            goto fail;
+        }
         if (create_audio_input_channel(s) < 0) {
             goto fail;
         }
         add_audio_input_stream(s);
     }
     if (hisctx->vtoken) {
+        if (bv_media_driver_open(&hisctx->vdriver, hisctx->vdev, hisctx->vchip, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "open video driver %s path %s error\n", hisctx->vchip, hisctx->vdev);
+            goto fail;
+        }
         if (create_video_input_channel(s) < 0) {
             goto fail;
         }
@@ -260,7 +287,20 @@ static int audio_set_volume(BVMediaContext *s, const BVControlPacket *pkt_in, BV
 {
     HisAVIContext *hisctx = s->priv_data;
     int volume = *((int *)pkt_in->data);
-    return AudioInVolumeSet(hisctx->aidev, hisctx->aichn, volume);
+    BVControlPacket pkt;
+    BVAudioSourceVolume source_volume;
+    int ret = 0;
+    //设置音量
+    bv_strlcpy(source_volume.token, hisctx->atoken, sizeof(source_volume.token));
+    source_volume.volume = volume;
+    pkt.data = &source_volume;
+    pkt.size = 1;
+    ret = bv_media_driver_control(hisctx->adriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_AUDIO_SOURCE_SET_VOLUME, &pkt, NULL);
+    if (ret < 0) {
+        bv_log(s, BV_LOG_ERROR, "set audio source volume error\n");
+    }
+
+    return ret;
 }
 
 static int audio_set_mute(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -275,7 +315,19 @@ static int video_set_imaging(BVMediaContext *s, const BVControlPacket *pkt_in, B
 {
     HisAVIContext *hisctx = s->priv_data;
     BVImagingSettings *imaging = pkt_in->data;
-    return BSCHSetConfig(hisctx->videv, hisctx->vichn, imaging->luminance, imaging->saturation, imaging->contrast, imaging->hue); 
+    BVVideoSourceImaging source_imaging;
+    BVControlPacket pkt;
+    int ret = 0;
+    bv_strlcpy(source_imaging.token, hisctx->vtoken, sizeof(source_imaging.token));
+    source_imaging.imaging = *imaging;
+    pkt.data = &source_imaging;
+    pkt.size = 1;
+
+    ret = bv_media_driver_control(hisctx->vdriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_SET_IMAGING, &pkt, NULL);
+    if (ret < 0) {
+        bv_log(s, BV_LOG_ERROR, "set video imaging error\n");
+    }
+    return ret; 
 }
 
 static bv_cold int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -302,12 +354,16 @@ static bv_cold int his_media_control(BVMediaContext *s, enum BVMediaMessageType 
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     { "vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "vchip", "", OFFSET(vchip), BV_OPT_TYPE_STRING, {.str = "tw2866"}, 0, 0, DEC},
+    { "vdev", "",  OFFSET(vdev), BV_OPT_TYPE_STRING, {.str = "/dev/tw2865dev"}, 0, 0, DEC},
     { "vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     { "width", "", OFFSET(width), BV_OPT_TYPE_INT, {.i64= 704}, -1, INT_MAX, DEC},
     { "height", "", OFFSET(height), BV_OPT_TYPE_INT, {.i64= 288}, -1, INT_MAX, DEC},
-    { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 25}, 2, 25, DEC},
+    { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 25}, 2, 30, DEC},
     { "pix_fmt", "", OFFSET(pix_fmt), BV_OPT_TYPE_INT, {.i64 = BV_PIX_FMT_YUV420P}, BV_PIX_FMT_YUV420P, BV_PIX_FMT_YUV422P, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "achip", "", OFFSET(achip), BV_OPT_TYPE_STRING, {.str = "tlv320aic23"}, 0, 0, DEC},
+    { "adev", "",  OFFSET(adev), BV_OPT_TYPE_STRING, {.str = "/dev/tlv320aic23"}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     { "sample_rate", "", OFFSET(sample_rate), BV_OPT_TYPE_INT, {.i64 = 8000}, -1, INT_MAX, DEC},
     { "channels", "", OFFSET(channels), BV_OPT_TYPE_INT, {.i64 = 1}, -1, INT_MAX, DEC},

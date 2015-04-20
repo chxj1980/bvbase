@@ -29,8 +29,10 @@
 #include <libbvutil/bvstring.h>
 #include <libbvutil/log.h>
 #include <libbvutil/opt.h>
+#include <libbvutil/time.h>
 
 #include <libbvmedia/bvmedia.h>
+#include <libbvmedia/driver.h>
 
 //FIXME c99 not support asm
 #define asm __asm__
@@ -45,7 +47,7 @@
 #include "mpi_aenc.h"
 #include "mpi_venc.h"
 
-#include "drv.h"
+//#include "drv.h"
 
 /**
  *  His3515 Audio Video Input Device Channel
@@ -63,7 +65,10 @@
 
 typedef struct HisAVEContext {
     BVClass *bv_class;
+    BVMediaDriverContext *vdriver;
     char *vtoken;   //videv/vichn/vechn
+    char *vchip;
+    char *vdev;
     int videv;
     int vichn;
     int vechn;
@@ -79,7 +84,10 @@ typedef struct HisAVEContext {
     VENC_PACK_S *pstPack;
     BVPacket *packet;
 
+    BVMediaDriverContext *adriver;
     char *atoken;
+    char *achip;
+    char *adev;
     int aidev;
     int aichn;
     int aechn;
@@ -213,17 +221,25 @@ static int create_h264_encode_channel(BVMediaContext *s)
     VENC_CHN_ATTR_S stChnAttr;
     VENC_ATTR_H264_S stH264Attr;
     VENC_ATTR_H264_RC_S stH264Rc;
+    BVControlPacket pkt_in;
+    BVVideoSourceFormat source_format;
     HI_S32 s32Ret = HI_FAILURE;
-    int mode = VIDEO_STD_PAL;
     int framerate = 25;
 
     BBCLEAR_STRUCT(stH264Attr);
     BBCLEAR_STRUCT(stH264Rc);
 
-    VideoInGetStd(hisctx->videv, hisctx->vichn, &mode);
-    if (mode == VIDEO_STD_NTSC) {
+    bv_sprintf(source_format.token, sizeof(source_format.token), "%d/%d", hisctx->videv, hisctx->vichn);
+    source_format.format = BV_VIDEO_FORMAT_PAL;
+    pkt_in.data = &source_format;
+    pkt_in.size = 1;
+    if (bv_media_driver_control(hisctx->vdriver, BV_MEDIA_DRIVER_MESSAGE_TYPE_VIDEO_SOURCE_GET_FORMAT, &pkt_in, NULL) < 0) {
+        bv_log(s, BV_LOG_ERROR, "get video source format error\n");
+    }
+    if (source_format.format == BV_VIDEO_FORMAT_NTSC) {
         framerate = 30;
     }
+
     stH264Attr.bByFrame = HI_TRUE;
     stH264Attr.bField = HI_FALSE;
     stH264Attr.bMainStream = HI_TRUE;
@@ -386,10 +402,48 @@ static int read_video_packet(BVMediaContext *s, BVPacket *pkt);
 static int get_video_extradata(BVMediaContext *s)
 {
     HisAVEContext *hisctx = s->priv_data;
+    BVCodecParserContext *parser = NULL;
+    BVCodecContext *codec = s->streams[hisctx->vindex]->codec;
+    BVPacket packet;
+    int ret = 0;
     if (hisctx->vcodec_id != BV_CODEC_ID_H264)
         return 0;
+    parser = bv_codec_parser_init(hisctx->vcodec_id);
+    if (!parser) {
+        return BVERROR(ENOSYS);
+    }
     //get extradata from packet
-    return BVERROR(ENOSYS);
+    while (1) {
+        bv_packet_init(&packet);
+        if(read_video_packet(s, &packet) < 0) {
+            continue;
+        }
+
+        if (!(packet.flags & BV_PKT_FLAG_KEY)) {
+            bv_packet_free(&packet);
+            continue;
+        }
+        if (bv_codec_parser_parse(parser, codec,packet.data, packet.size, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "parser H264 extradata error\n");
+            bv_packet_free(&packet);
+            ret = BVERROR(EIO);
+        }
+        break;
+     }
+    if (ret == 0) {
+        hisctx->packet = (BVPacket *)bv_mallocz(sizeof(BVPacket));
+        if (!hisctx->packet) {
+            bv_log(s, BV_LOG_ERROR, "alloc packet for extradata error\n");
+            bv_packet_free(&packet);
+            bv_codec_parser_exit(parser);
+            return BVERROR(ENOMEM);
+        }
+        bv_packet_copy(hisctx->packet, &packet);
+        bv_packet_free(&packet);
+        bv_log(s, BV_LOG_DEBUG, "extradata_size %d\n", codec->extradata_size);
+    }
+    bv_codec_parser_exit(parser);
+    return ret;
 }
 
 static bv_cold int his_read_close(BVMediaContext *s);
@@ -398,6 +452,11 @@ static bv_cold int his_read_header(BVMediaContext *s)
 {
     HisAVEContext *hisctx = s->priv_data;
     if (hisctx->atoken) {
+        if (bv_media_driver_open(&hisctx->adriver, hisctx->adev, hisctx->achip, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "open audio driver %s path %s error\n", hisctx->achip, hisctx->adev);
+            goto fail;
+        }
+
         if (create_audio_encode_channel(s) < 0) {
             goto fail;
         }
@@ -405,12 +464,19 @@ static bv_cold int his_read_header(BVMediaContext *s)
     }
 
     if (hisctx->vtoken) {
+        if (bv_media_driver_open(&hisctx->vdriver, hisctx->vdev, hisctx->vchip, NULL, NULL) < 0) {
+            bv_log(s, BV_LOG_ERROR, "open video driver %s path %s error\n", hisctx->vchip, hisctx->vdev);
+            goto fail;
+        }
         if (create_video_encode_channel(s) < 0) {
             goto fail;
         }
         add_video_encode_stream(s);
         if (hisctx->vcodec_id == BV_CODEC_ID_H264) {
-            get_video_extradata(s);
+            if (get_video_extradata(s) < 0) {
+                bv_log(s, BV_LOG_ERROR, "get video extradata error\n");
+                goto fail;
+            }
         }
     }
     return 0;
@@ -557,6 +623,13 @@ fail:
 static int read_video_packet(BVMediaContext *s, BVPacket *pkt)
 {
     HisAVEContext *hisctx = s->priv_data;
+    if (hisctx->packet) {
+        bv_packet_copy(pkt, hisctx->packet); 
+        bv_packet_free(hisctx->packet);
+        bv_freep(&hisctx->packet);
+        hisctx->packet = NULL;
+        return pkt->size;
+    }
     if (hisctx->vcodec_id == BV_CODEC_ID_H264) {
         return read_h264_video_packet(s, pkt);
     }
@@ -583,8 +656,8 @@ static bv_cold int his_read_packet(BVMediaContext *s, BVPacket *pkt)
     }
     BBCLEAR_STRUCT(tv);
     if (hisctx->blocked) {
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
+        tv.tv_sec = 0;
+        tv.tv_usec = 10000;
     }
     ret = select(BBMAX(hisctx->afd, hisctx->vfd) + 1, &fds, NULL, NULL, &tv);
     if (ret < 0) {
@@ -611,6 +684,10 @@ static bv_cold int his_read_close(BVMediaContext *s)
     HisAVEContext *hisctx = s->priv_data;
     if (hisctx->atoken) {
         destroy_audio_encode_channel(s);
+    }
+    if (hisctx->packet) {
+        bv_packet_free(hisctx->packet);
+        bv_freep(&hisctx->packet);
     }
     if (hisctx->vtoken) {
         destroy_video_encode_channel(s);
@@ -656,6 +733,8 @@ static bv_cold int his_media_control(BVMediaContext *s, enum BVMediaMessageType 
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
     { "vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "vchip", "", OFFSET(vchip), BV_OPT_TYPE_STRING, {.str = "tw2866"}, 0, 0, DEC},
+    { "vdev", "",  OFFSET(vdev), BV_OPT_TYPE_STRING, {.str = "/dev/tw2865dev"}, 0, 0, DEC},
     { "vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     { "vcodec_id", "", OFFSET(vcodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_H264}, 0, INT_MAX, DEC},
     { "mode_id", "", OFFSET(mode_id), BV_OPT_TYPE_INT, {.i64 = BV_RC_MODE_ID_CBR}, 0, 255, DEC},
@@ -666,12 +745,14 @@ static const BVOption options[] = {
     { "gop_size", "", OFFSET(gop_size), BV_OPT_TYPE_INT, {.i64 = 100}, 0, INT_MAX, DEC},
     { "framerate", "", OFFSET(framerate), BV_OPT_TYPE_INT, {.i64 = 25}, 0, 120, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    { "achip", "", OFFSET(achip), BV_OPT_TYPE_STRING, {.str = "tlv320aic23"}, 0, 0, DEC},
+    { "adev", "",  OFFSET(adev), BV_OPT_TYPE_STRING, {.str = "/dev/tlv320aic23"}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64= -1}, -1, 128, DEC},
     { "acodec_id", "", OFFSET(acodec_id), BV_OPT_TYPE_INT, {.i64 = BV_CODEC_ID_G711A}, 0, INT_MAX, DEC},
     { "abit_rate", "", OFFSET(abit_rate), BV_OPT_TYPE_INT, {.i64 = 32000}, 0, INT_MAX, DEC},
     { "sample_rate", "", OFFSET(sample_rate), BV_OPT_TYPE_INT, {.i64 = 8000}, 0, INT_MAX, DEC},
     { "channels", "", OFFSET(channels), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 2, DEC},
-    { "blocked", "", OFFSET(blocked), BV_OPT_TYPE_INT, {.i64 = 1}, 0, 2, DEC},
+    { "blocked", "", OFFSET(blocked), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 2, DEC},
     { NULL },
 };
 
