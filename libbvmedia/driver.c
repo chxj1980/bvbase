@@ -50,7 +50,7 @@ int bv_media_driver_open(BVMediaDriverContext **s, const char *url, const char *
 {
     BVDictionary *tmp = NULL;
     BVMediaDriverContext *driver_context = *s;
-    int ret = 0;
+    int ret = BVERROR(EINVAL);
     if (!driver_context && !(driver_context = bv_media_driver_context_alloc()))
         return BVERROR(ENOMEM);
     if (!driver_context->bv_class) {

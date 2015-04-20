@@ -247,8 +247,12 @@ static int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, co
 static const BVOption options[] = {
     { "vtoken", "", OFFSET(vtoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "vindex", "", OFFSET(vindex), BV_OPT_TYPE_INT, {.i64 = -1}, -1, 128, DEC},
+    { "vchip", "", OFFSET(vchip), BV_OPT_TYPE_STRING, {.str = "tw2866"}, 0, 0, DEC},
+    { "vdev", "",  OFFSET(vdev), BV_OPT_TYPE_STRING, {.str = "/dev/tw2865dev"}, 0, 0, DEC},
     { "atoken", "", OFFSET(atoken), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     { "aindex", "", OFFSET(aindex), BV_OPT_TYPE_INT, {.i64 = -1}, -1, 128, DEC},
+    { "achip", "", OFFSET(achip), BV_OPT_TYPE_STRING, {.str = "tlv320aic23"}, 0, 0, DEC},
+    { "adev", "",  OFFSET(adev), BV_OPT_TYPE_STRING, {.str = "/dev/tlv320aic23"}, 0, 0, DEC},
     {NULL}
 };
 
