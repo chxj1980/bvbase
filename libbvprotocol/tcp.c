@@ -40,23 +40,6 @@ typedef struct TCPContext {
     int listen_timeout;
 } TCPContext;
 
-#define OFFSET(x) offsetof(TCPContext, x)
-#define D BV_OPT_FLAG_DECODING_PARAM
-#define E BV_OPT_FLAG_ENCODING_PARAM
-static const BVOption options[] = {
-    { "listen", "Listen for incoming connections",  OFFSET(listen), BV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, .flags = D|E },
-    { "timeout", "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
-    { "listen_timeout", "Connection awaiting timeout", OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
-    { NULL }
-};
-
-static const BVClass tcp_class = {
-    .class_name = "tcp",
-    .item_name  = bv_default_item_name,
-    .option     = options,
-    .version    = LIBBVUTIL_VERSION_INT,
-};
-
 /* return non zero if error */
 static int tcp_open(BVURLContext *h, const char *uri, int flags, BVDictionary **options)
 {
@@ -220,15 +203,33 @@ static int tcp_get_file_handle(BVURLContext *h)
     return s->fd;
 }
 
+#define OFFSET(x) offsetof(TCPContext, x)
+#define D BV_OPT_FLAG_DECODING_PARAM
+#define E BV_OPT_FLAG_ENCODING_PARAM
+static const BVOption options[] = {
+    { "listen", "Listen for incoming connections",  OFFSET(listen), BV_OPT_TYPE_INT, { .i64 = 0 }, 0, 1, .flags = D|E },
+    { "timeout", "set timeout (in microseconds) of socket I/O operations", OFFSET(rw_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
+    { "listen_timeout", "Connection awaiting timeout", OFFSET(listen_timeout), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, INT_MAX, .flags = D|E },
+    { NULL }
+};
+
+static const BVClass tcp_class = {
+    .class_name             = "tcp",
+    .item_name              = bv_default_item_name,
+    .option                 = options,
+    .version                = LIBBVUTIL_VERSION_INT,
+};
+
+
 BVURLProtocol bv_tcp_protocol = {
-    .name                = "tcp",
-    .url_open            = tcp_open,
-    .url_read            = tcp_read,
-    .url_write           = tcp_write,
-    .url_close           = tcp_close,
-    .url_get_file_handle = tcp_get_file_handle,
-    .url_shutdown        = tcp_shutdown,
-    .priv_data_size      = sizeof(TCPContext),
-    .flags               = BV_URL_PROTOCOL_FLAG_NETWORK,
-    .priv_class          = &tcp_class,
+    .name                    = "tcp",
+    .url_open                = tcp_open,
+    .url_read                = tcp_read,
+    .url_write               = tcp_write,
+    .url_close               = tcp_close,
+    .url_get_file_handle     = tcp_get_file_handle,
+    .url_shutdown            = tcp_shutdown,
+    .priv_data_size          = sizeof(TCPContext),
+    .flags                   = BV_URL_PROTOCOL_FLAG_NETWORK,
+    .priv_class              = &tcp_class,
 };

@@ -104,7 +104,7 @@ typedef struct HTTPContext {
 #define OFFSET(x) offsetof(HTTPContext, x)
 #define D BV_OPT_FLAG_DECODING_PARAM
 #define E BV_OPT_FLAG_ENCODING_PARAM
-#define DEFAULT_USER_AGENT "Lbvp/" BV_STRINGIFY(LIBPROTOCOL_VERSION)
+#define DEFAULT_USER_AGENT "Lbvp/" BV_STRINGIFY(LIBBVPROTOCOL_VERSION)
 
 static const BVOption options[] = {
     { "seekable", "control seekability of connection", OFFSET(seekable), BV_OPT_TYPE_INT, { .i64 = -1 }, -1, 1, D },

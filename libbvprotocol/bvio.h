@@ -47,7 +47,7 @@ typedef struct _BVIOContext {
     int (*io_read)(void *opaque, uint8_t *buffer, size_t size);
     int (*io_write)(void *opaque, const uint8_t *buffer, size_t size);
     int64_t(*io_seek)(void *opaque, int64_t offset, int whence);
-    int (*io_control)(void *opaque, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*io_control)(void *opaque, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
     uint64_t pos;
     int eof_reached;
     int write_flag;
@@ -89,7 +89,7 @@ int64_t bv_io_seek(BVIOContext *s, int64_t offset, int whence);
 
 int64_t bv_io_size(BVIOContext *s);
 
-int bv_io_control(BVIOContext *s, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+int bv_io_control(BVIOContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 
 void bv_io_flush(BVIOContext *s);
 

@@ -449,7 +449,7 @@ int64_t bv_io_size(BVIOContext *s)
     return size;
 }
 
-int bv_io_control(BVIOContext *s, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+int bv_io_control(BVIOContext *s, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     if (!s)
         return BVERROR(EINVAL);
