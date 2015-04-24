@@ -36,11 +36,18 @@ extern "C"{
 #include <libbvconfig/common.h>
 #include <libbvprotocol/bvio.h>
 
-struct _BVMediaContext;
-
+typedef struct _BVMediaContext BVMediaContext;
+/**
+ *  BVInputMedia BVOutputMedia flags
+ */
 #define BV_MEDIA_FLAGS_NOFILE       0x0001
 
 #define BV_MEDIA_FLAGS_NOSTREAMS    0x1000
+
+/**
+ *  BVMediaContext flags
+ */
+#define BV_MEDIA_FLAGS_NONBLOCK     0x0001
 
 enum BVMediaMessageType {
     BV_MEDIA_MESSAGE_TYPE_NONE = -1,
@@ -72,11 +79,11 @@ typedef struct _BVInputMedia {
     int priv_data_size;
     struct _BVInputMedia *next;
     int flags;
-    int (*read_probe)(struct _BVMediaContext *h, BVProbeData *);
-    int (*read_header)(struct _BVMediaContext *h);
-    int (*read_packet)(struct _BVMediaContext *h, BVPacket *pkt);
-    int (*read_close)(struct _BVMediaContext *h);
-    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+    int (*read_probe)(BVMediaContext *h, BVProbeData *);
+    int (*read_header)(BVMediaContext *h);
+    int (*read_packet)(BVMediaContext *h, BVPacket *pkt);
+    int (*read_close)(BVMediaContext *h);
+    int (*media_control)(BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
 } BVInputMedia;
 
 typedef struct _BVOutputMedia {
@@ -87,10 +94,10 @@ typedef struct _BVOutputMedia {
     int priv_data_size;
     struct _BVOutputMedia *next;
     int flags;
-    int (*write_header)(struct _BVMediaContext *h);
-    int (*write_packet)(struct _BVMediaContext *h, BVPacket *pkt);
-    int (*write_trailer)(struct _BVMediaContext *h);
-    int (*media_control)(struct _BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *in, BVControlPacket *out);
+    int (*write_header)(BVMediaContext *h);
+    int (*write_packet)(BVMediaContext *h, BVPacket *pkt);
+    int (*write_trailer)(BVMediaContext *h);
+    int (*media_control)(BVMediaContext *h, enum BVMediaMessageType type, const BVControlPacket *in, BVControlPacket *out);
 } BVOutputMedia;
 
 typedef struct _BVStream {
@@ -100,16 +107,17 @@ typedef struct _BVStream {
     void *priv_data;
 } BVStream;
 
-typedef struct _BVMediaContext {
+struct _BVMediaContext {
     const BVClass *bv_class;
     BVInputMedia *imedia;
     BVOutputMedia *omedia;
     void *priv_data;
     BVIOContext *pb;
     char filename[1024];
+    int flags;
     int nb_streams;
     BVStream **streams;
-} BVMediaContext;
+};
 
 void bv_input_media_register(BVInputMedia *ifmt);
 

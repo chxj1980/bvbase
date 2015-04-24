@@ -77,7 +77,7 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "hardware_model %s\n", devinfo.hardware_model);
 #endif
 
-    if (bv_config_get_video_encoder(config_ctx, 3, 2, &video_encoder) < 0) {
+    if (bv_config_get_video_encoder(config_ctx, 3, 0, &video_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video encoder error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
@@ -85,7 +85,7 @@ int main(int argc, const char *argv[])
     video_encoder.codec_context.codec_id = BV_CODEC_ID_H264;
     video_encoder.codec_context.bit_rate = 512;
 
-    if (bv_config_set_video_encoder(config_ctx, 3, 2, &video_encoder) < 0) {
+    if (bv_config_set_video_encoder(config_ctx, 3, 0, &video_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "set video encoder error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);

@@ -30,8 +30,18 @@
  *  用来解析获取的SDP，或者封装SDP
  */
 
+typedef struct _SDPOrigin {
+    char *username;
+    char *session_id;
+    char *session_version;
+    char *nettype;
+    char *addrtype;
+    char *address;
+} SDPOrigin;
+
 typedef struct _BVSDP {
-    /* data */
+    int version;    //0
+    SDPOrigin origin;
 } BVSDP;
 
 #endif /* end of include guard: BVPROTOCOL_SDP_H */

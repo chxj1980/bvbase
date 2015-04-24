@@ -43,6 +43,7 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "open config error\n");
         return BVERROR(EINVAL);
     }
+#if 0
 #if 1
     obj = bv_config_file_lookup_from(fc, fc->root, "imaging_setting.[0].type");
     if (!obj) {
@@ -79,6 +80,7 @@ int main(int argc, const char *argv[])
     } else {
         bv_log(fc, BV_LOG_ERROR, "get member error\n");
     }
+#endif
     bv_config_file_close(&fc);
     return 0;
 }

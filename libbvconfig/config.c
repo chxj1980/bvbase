@@ -176,6 +176,15 @@ int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *con
     return s->config->get_video_source(s, index, config);
 }
 
+int bv_config_set_video_source(BVConfigContext *s, int index, BVVideoSource *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_video_source)
+        return BVERROR(ENOSYS);
+    return s->config->set_video_source(s, index, config);
+}
+
 int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config)
 {
     if (!s || !config || !s->config)
@@ -183,6 +192,15 @@ int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *con
     if (!s->config->get_video_output)
         return BVERROR(ENOSYS);
     return s->config->get_video_output(s, index, config);
+}
+
+int bv_config_set_video_output(BVConfigContext *s, int index, BVVideoOutput *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_video_output)
+        return BVERROR(ENOSYS);
+    return s->config->set_video_output(s, index, config);
 }
 
 int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config)
@@ -194,6 +212,15 @@ int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *con
     return s->config->get_audio_source(s, index, config);
 }
 
+int bv_config_set_audio_source(BVConfigContext *s, int index, BVAudioSource *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_audio_source)
+        return BVERROR(ENOSYS);
+    return s->config->set_audio_source(s, index, config);
+}
+
 int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config)
 {
     if (!s || !config || !s->config)
@@ -201,6 +228,15 @@ int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *con
     if (!s->config->get_audio_output)
         return BVERROR(ENOSYS);
     return s->config->get_audio_output(s, index, config);
+}
+
+int bv_config_set_audio_output(BVConfigContext *s, int index, BVAudioOutput *config)
+{
+    if (!s || !config || !s->config)
+        return BVERROR(EINVAL);
+    if (!s->config->set_audio_output)
+        return BVERROR(ENOSYS);
+    return s->config->set_audio_output(s, index, config);
 }
 
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config)

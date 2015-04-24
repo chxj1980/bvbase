@@ -27,6 +27,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <libbvutil/bvutil.h>
+#include <libbvutil/time.h>
 #include <libbvmedia/bvmedia.h>
 #include <libbvprotocol/bvio.h>
 #include <libbvprotocol/bvurl.h>
@@ -38,15 +39,17 @@ int main(int argc, const char *argv[])
     BVDictionary *opn = NULL;
     BVDictionary *iopn = NULL;
     BVStream *st = NULL;
+    BVPacket pkt;
     char filename[1024] = { 0 };
     bv_media_register_all(); 
     bv_protocol_register_all();
     bv_log_set_level(BV_LOG_INFO);
 //    av_log_set_level(BV_LOG_DEBUG);
     bv_dict_set(&opn, "user", "admin", 0);
-    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "passwd", "123456", 0);
     bv_dict_set(&opn, "token", "Profile_1", 0);
-    bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
+    //bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
+    bv_dict_set(&opn, "vtoken", "MainStream/MainStream/h264main/VideoMain", 0);
     //bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
@@ -54,16 +57,16 @@ int main(int argc, const char *argv[])
     //sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
     sprintf(filename, "%s", "bvfs://00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
-    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
+    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.154:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");
         return -1;
     }
+#if 0
     if (bv_output_media_open(&out, filename, "dav", NULL, NULL) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output file error\n");
         goto close1;
     }
     int i = 0;
-    BVPacket pkt;
 
     for (i = 0; i < mc->nb_streams; i++) {
         if (mc->streams[i]->codec->codec_type == BV_MEDIA_TYPE_VIDEO) {
@@ -115,12 +118,16 @@ int main(int argc, const char *argv[])
         bv_log(out, BV_LOG_ERROR, "write header error\n");
         goto close2;
     }
-    while (i < 2000) {
+#endif
+    while (1) {
        bv_packet_init(&pkt); 
-       if (bv_input_media_read(mc, &pkt) <= 0)
-           continue;
+       if (bv_input_media_read(mc, &pkt) <= 0) {
+            bv_usleep(1000); 
+            continue;
+       }
        st = mc->streams[pkt.stream_index];
        bv_log(mc, BV_LOG_DEBUG, "Before pkt size %d pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
+#if 0
        pkt.pts = bv_rescale_q(pkt.pts, mc->streams[pkt.stream_index]->time_base, out->streams[pkt.stream_index]->time_base);
        //pkt.pts = (pkt.pts * mc->streams[pkt.stream_index]->time_base.num * out->streams[pkt.stream_index]->time_base.den) / mc->streams[pkt.stream_index]->time_base.den;
        bv_log(mc, BV_LOG_DEBUG, "After pkt size %d  pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
@@ -128,15 +135,18 @@ int main(int argc, const char *argv[])
             bv_log(out, BV_LOG_ERROR, "write packet error\n");
        }
        i ++;
+#endif
        bv_packet_free(&pkt);
     }
 close2:
+#if 0
     bv_output_media_write_trailer(out);
     if (!(out->omedia->flags & BV_MEDIA_FLAGS_NOFILE)) {
         bv_dict_free(&iopn);
         bv_io_close(out->pb);
     }
     bv_output_media_close(&out);
+#endif
 close1:
     bv_dict_free(&opn);
     bv_input_media_close(&mc);

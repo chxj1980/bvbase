@@ -24,6 +24,7 @@
 #line 25 "json.c"
 
 #include <libbvutil/opt.h>
+#include <libbvutil/bvstring.h>
 
 #include "bvcfile.h"
 #include "jansson.h"
@@ -101,7 +102,7 @@ static int jansson_file_dump(BVConfigFileContext *s, const char *filename)
         return BVERROR(EINVAL);
     if (!filename)
         filename = s->filename;
-    if (json_dump_file(json->root, filename, JSON_INDENT(4) | JSON_PRESERVE_ORDER) < 0) {
+    if (json_dump_file(json->root, filename, JSON_INDENT(1) | JSON_PRESERVE_ORDER) < 0) {
         bv_log(s, BV_LOG_ERROR, "dump json file %s error\n", filename);
     }
     return 0;
@@ -149,6 +150,13 @@ static BVConfigObject *jansson_get_element(BVConfigFileContext *s, BVConfigObjec
     obj->type = json_type_objtype(json_typeof(elem));
     obj->priv_data = elem;
     obj->parent = parent;
+    obj->name = bv_mallocz(256);
+    if (obj->name) {
+        if (parent->name) {
+            bv_strlcpy(obj->name, parent->name, 256);
+        }
+        bv_sprintf(obj->name + strlen(obj->name), 256 - strlen(obj->name), ".[%d]", index);
+    }
     return obj;
 }
 
