@@ -122,7 +122,10 @@ int bv_config_file_dump(BVConfigFileContext *s, const char *filename)
 
 int bv_config_file_close(BVConfigFileContext **h)
 {
-    BVConfigFileContext *s = *h;
+    BVConfigFileContext *s = NULL;
+    if (!h || !*h)
+        return BVERROR(EINVAL);
+    s = *h;
     if (s->cfile && s->cfile->file_close)
         s->cfile->file_close(s);
     bv_config_file_context_free(s);
@@ -167,7 +170,7 @@ BVConfigObject *bv_config_get_element(BVConfigFileContext *s, BVConfigObject *pa
         return NULL;
     if ((parent->type != BV_CONFIG_OBJTYPE_GROUP) && (parent->type != BV_CONFIG_OBJTYPE_ARRAY))
         return NULL;
-    bv_log(s, BV_LOG_DEBUG, "parent name %s index %d\n", parent->name, index);
+    //bv_log(s, BV_LOG_DEBUG, "parent name %s index %d\n", parent->name, index);
     return s->cfile->get_element(s, parent, index);
 }
 
@@ -183,7 +186,7 @@ BVConfigObject *bv_config_get_member(BVConfigFileContext *s, BVConfigObject *par
     while (!strchr(PATH_TOKENS, *p))
         p ++;
     *p = '\0';
-    bv_log(s, BV_LOG_DEBUG, "get parent name %s member tmp key %s\n", parent->name, tmp);
+    //bv_log(s, BV_LOG_DEBUG, "get parent name %s member tmp key %s\n", parent->name, tmp);
     obj = s->cfile->get_member(s, parent, tmp);
     bv_free(tmp);
     return obj;

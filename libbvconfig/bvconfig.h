@@ -53,6 +53,13 @@ typedef struct _BVConfigContext {
 
 #define BV_CONFIG_FLAGS_NETWORK     0x1000
 
+enum BVConfigType {
+    BV_CONFIG_TYPE_NONE = -1,
+    BV_CONFIG_TYPE_LOCAL,
+    BV_CONFIG_TYPE_ONVIF,
+    BV_CONFIG_TYPE_UNKNOWN,
+};
+
 typedef struct _BVConfig {
     const char *name;
     enum BVConfigType type;
@@ -70,9 +77,13 @@ typedef struct _BVConfig {
     int (*get_video_output_device)(BVConfigContext *s, int index, BVVideoOutputDevice *config);
     int (*get_audio_output_device)(BVConfigContext *s, int index, BVAudioOutputDevice *config);
     int (*get_video_source)(BVConfigContext *s, int index, BVVideoSource *config);
+    int (*set_video_source)(BVConfigContext *s, int index, BVVideoSource *config);
     int (*get_video_output)(BVConfigContext *s, int index, BVVideoOutput *config);
+    int (*set_video_output)(BVConfigContext *s, int index, BVVideoOutput *config);
     int (*get_audio_source)(BVConfigContext *s, int index, BVAudioSource *config);
+    int (*set_audio_source)(BVConfigContext *s, int index, BVAudioSource *config);
     int (*get_audio_output)(BVConfigContext *s, int index, BVAudioOutput *config);
+    int (*set_audio_output)(BVConfigContext *s, int index, BVAudioOutput *config);
     int (*get_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*set_media_device)(BVConfigContext *s, int index, BVMediaDevice *config);
     int (*get_media_encoder)(BVConfigContext *s, int index, BVMediaEncoder *config);
@@ -118,11 +129,19 @@ int bv_config_get_audio_output_device(BVConfigContext *s, int index, BVAudioOutp
 
 int bv_config_get_video_source(BVConfigContext *s, int index, BVVideoSource *config);
 
+int bv_config_set_video_source(BVConfigContext *s, int index, BVVideoSource *config);
+
 int bv_config_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config);
+
+int bv_config_set_video_output(BVConfigContext *s, int index, BVVideoOutput *config);
 
 int bv_config_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config);
 
+int bv_config_set_audio_source(BVConfigContext *s, int index, BVAudioSource *config);
+
 int bv_config_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config);
+
+int bv_config_set_audio_output(BVConfigContext *s, int index, BVAudioOutput *config);
 
 int bv_config_get_media_device(BVConfigContext *s, int index, BVMediaDevice *config);
 

@@ -43,6 +43,7 @@ int main(int argc, const char *argv[])
 
     BVAudioSourceDevice aidev;
     BVAudioOutputDevice aodev;
+    BVStream *st = NULL;
     bv_media_register_all();
     bv_protocol_register_all();
 
@@ -63,6 +64,8 @@ int main(int argc, const char *argv[])
     strcpy(videv.token, "0");
     strcpy(videv.interface, "BT656");
     strcpy(videv.work_mode, "4D1");
+    strncpy(videv.chip, "tw2866", sizeof(aidev.chip));
+    strncpy(videv.dev, "/dev/tw2865dev", sizeof(aidev.chip));
     pkt_in.data = &videv;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_VIUDEV, &pkt_in, NULL) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "videv config error\n");
@@ -87,6 +90,9 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 16;
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
+    aidev.sample_points = 320;
+    strncpy(aidev.chip, "tw2866", sizeof(aidev.chip));
+    strncpy(aidev.dev, "/dev/tw2865dev", sizeof(aidev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
     pkt_in.data = &aidev;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AIMDEV, &pkt_in, NULL) < 0) {
@@ -98,6 +104,9 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 2; 
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
+    aidev.sample_points = 320;
+    strncpy(aidev.chip, "tlv320aic23", sizeof(aidev.chip));
+    strncpy(aidev.dev, "/dev/tlv320aic23", sizeof(aidev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
     pkt_in.data = &aidev;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AIMDEV, &pkt_in, NULL) < 0) {
@@ -110,6 +119,9 @@ int main(int argc, const char *argv[])
     aodev.channel_counts = 2;
     aodev.sample_format = 16;
     aodev.sample_rate = 8000;
+    aodev.sample_points = 320;
+    strncpy(aodev.chip, "tlv320aic23", sizeof(aodev.chip));
+    strncpy(aodev.dev, "/dev/tlv320aic23", sizeof(aodev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
     pkt_in.data = &aodev;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AOMDEV, &pkt_in, NULL) < 0) {
@@ -122,6 +134,8 @@ int main(int argc, const char *argv[])
     BVMediaContext *avictx3 = NULL; 
     BVMediaContext *avictx4 = NULL; 
     bv_dict_set(&opn, "atoken", "0/0", 0);
+    bv_dict_set(&opn, "achip", "tlv320aic23", 0);
+    bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
     if (bv_input_media_open(&avictx, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -135,6 +149,10 @@ int main(int argc, const char *argv[])
 
     bv_dict_set(&opn, "vtoken", "0/1", 0); 
     bv_dict_set(&opn, "atoken", "0/1", 0);
+    bv_dict_set(&opn, "achip", "tlv320aic23", 0);
+    bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
+    bv_dict_set(&opn, "vchip", "tw2866", 0);
+    bv_dict_set(&opn, "vdev", "/dev/tw2865dev", 0);
     if (bv_input_media_open(&avictx1, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -157,19 +175,28 @@ int main(int argc, const char *argv[])
     }
 
     bv_dict_set(&opn, "atoken", "0/0", 0);
+    bv_dict_set(&opn, "vtoken", "2/0", 0);
     BVMediaContext *avoctx = NULL; 
     if (bv_output_media_open(&avoctx, NULL, "hisavo", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
         bv_dict_free(&opn);
         return 0;
     }
-    BVStream *st = bv_stream_new(avoctx, NULL);
+#if 0
+    st = bv_stream_new(avoctx, NULL);
     st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     st->codec->sample_rate = 8000;
     st->time_base = (BVRational){1, 1000000};
     st->codec->codec_id = BV_CODEC_ID_G726;
     st->codec->channels = 1;
-
+#else
+    st = bv_stream_new(avoctx, NULL);
+    st->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
+    st->codec->codec_id   = BV_CODEC_ID_H264;
+    st->time_base = (BVRational) {1, 1000000};
+    st->codec->width = 704;
+    st->codec->height = 576;
+#endif
     if (bv_output_media_write_header(avoctx, NULL) < 0) {
         bv_log(avoctx, BV_LOG_ERROR, "write header error\n");
         goto close;
@@ -177,19 +204,21 @@ int main(int argc, const char *argv[])
 
     BVMediaContext *avdctx = NULL; 
     BVIOContext *ioctx = NULL;
-    if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
+    if (bv_io_open(&ioctx, argv[1], BV_IO_FLAG_READ, NULL, NULL) < 0 ) {
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
 
     bv_dict_free(&opn);
-    bv_dict_set(&opn, "atoken", "0/0/1", 0);
-    bv_dict_set_int(&opn, "apacked", 0, 0);
+    bv_dict_set(&opn, "vtoken", "2/0/1", 0);
+    bv_dict_set_int(&opn, "vpacked", 0, 0);
     if (bv_output_media_open(&avdctx, NULL, "hisavd", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
         bv_dict_free(&opn);
         return 0;
     }
+
+#if 0
     st = bv_stream_new(avdctx, NULL);
     st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     st->codec->sample_rate = 8000;
@@ -197,7 +226,15 @@ int main(int argc, const char *argv[])
     st->codec->time_base = (BVRational) {1, 25};
     st->codec->sample_fmt = BV_SAMPLE_FMT_S16;
     st->codec->channels = 1;
+#else
+    st = bv_stream_new(avdctx, NULL);
+    st->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
+    st->codec->codec_id   = BV_CODEC_ID_H264;
+    st->time_base = (BVRational) {1, 1000000};
+    st->codec->width = 704;
+    st->codec->height = 576;
 
+#endif
     if (bv_output_media_write_header(avdctx, &opn) < 0) {
         bv_log(avoctx, BV_LOG_ERROR, "write header error\n");
         goto close;

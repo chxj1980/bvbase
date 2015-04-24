@@ -459,7 +459,7 @@ int bv_url_shutdown(BVURLContext *h, int flags)
     return h->prot->url_shutdown(h, flags);
 }
 
-int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+int bv_url_control(BVURLContext *h, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     if (!h->prot->url_control) {
         return BVERROR(ENOSYS);

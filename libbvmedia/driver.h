@@ -31,6 +31,14 @@ extern "C"{
 #include <libbvconfig/common.h>
 #include <libbvutil/packet.h>
 
+enum BVVideoFormat {
+    BV_VIDEO_FORMAT_NONE = -1,
+    BV_VIDEO_FORMAT_AUTIO,
+    BV_VIDEO_FORMAT_NTSC,
+    BV_VIDEO_FORMAT_PAL,
+    BV_VIDEO_FORMAT_UNKNOWN,
+};
+
 typedef struct _BVAudioSourceVolume {
     char token[BV_MAX_NAME_LEN];
     int volume;     //0 - 100

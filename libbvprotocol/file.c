@@ -47,19 +47,6 @@ typedef struct FileContext {
     int blocksize;
 } FileContext;
 
-static const BVOption file_options[] = {
-    { "truncate", "truncate existing files on write", offsetof(FileContext, trunc), BV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, BV_OPT_FLAG_ENCODING_PARAM },
-    { "blocksize", "set I/O operation maximum block size", offsetof(FileContext, blocksize), BV_OPT_TYPE_INT, { .i64 = INT_MAX }, 1, INT_MAX, BV_OPT_FLAG_ENCODING_PARAM },
-    { NULL }
-};
-
-static const BVClass file_class = {
-    .class_name = "file",
-    .item_name  = bv_default_item_name,
-    .option     = file_options,
-    .version    = LIBBVUTIL_VERSION_INT,
-};
-
 static int file_read(BVURLContext *h, uint8_t *buf, size_t size)
 {
     FileContext *c = h->priv_data;
@@ -167,16 +154,29 @@ static int file_close(BVURLContext *h)
     return close(c->fd);
 }
 
+static const BVOption file_options[] = {
+    { "truncate", "truncate existing files on write", offsetof(FileContext, trunc), BV_OPT_TYPE_INT, { .i64 = 1 }, 0, 1, BV_OPT_FLAG_ENCODING_PARAM },
+    { "blocksize", "set I/O operation maximum block size", offsetof(FileContext, blocksize), BV_OPT_TYPE_INT, { .i64 = INT_MAX }, 1, INT_MAX, BV_OPT_FLAG_ENCODING_PARAM },
+    { NULL }
+};
+
+static const BVClass file_class = {
+    .class_name             = "file",
+    .item_name              = bv_default_item_name,
+    .option                 = file_options,
+    .version                = LIBBVUTIL_VERSION_INT,
+};
+
 BVURLProtocol bv_file_protocol = {
-    .name                = "file",
-    .url_open            = file_open,
-    .url_read            = file_read,
-    .url_write           = file_write,
-    .url_seek            = file_seek,
-    .url_close           = file_close,
-    .url_get_file_handle = file_get_handle,
-    .url_check           = file_check,
-    .priv_data_size      = sizeof(FileContext),
-    .priv_class          = &file_class,
+    .name                   = "file",
+    .url_open               = file_open,
+    .url_read               = file_read,
+    .url_write              = file_write,
+    .url_seek               = file_seek,
+    .url_close              = file_close,
+    .url_get_file_handle    = file_get_handle,
+    .url_check              = file_check,
+    .priv_data_size         = sizeof(FileContext),
+    .priv_class             = &file_class,
 };
 

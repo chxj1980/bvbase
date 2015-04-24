@@ -33,8 +33,6 @@ typedef struct _LocalContext {
     int64_t             lvalue;
 }LocalContext;
 
-
-
 #define DETERMINE_FIELD_IS_OR_NOT_EXIST(object, field, ret)  \
         do { \
             if (!object) { \
@@ -63,23 +61,23 @@ typedef struct _LocalContext {
     do { \
         BVConfigObject *memb = bv_config_get_member(h->pdb, PARENT, KEY); \
         if (!memb) {    \
-            bv_log(h, BV_LOG_ERROR, "get key %s error\n", KEY); \
+            bv_log(h, BV_LOG_ERROR, "get parent %s key %s error\n", PARENT->name, KEY); \
             break; \
         } \
         if (memb->type == BV_CONFIG_OBJTYPE_STRING) { \
             if (bv_config_object_get_value(h->pdb, memb, localctx->value) == 0) { \
                 bv_strlcpy(VALUE_STR, localctx->value, sizeof(VALUE_STR)); \
-                bv_log(h, BV_LOG_DEBUG, "get key %s value %s\n", KEY, localctx->value); \
+                bv_log(h, BV_LOG_DEBUG, "get parent %s key %s value %s\n", PARENT->name, KEY, localctx->value); \
             } \
             else { \
-                bv_log(h, BV_LOG_ERROR, "get key %s value error\n", KEY); \
+                bv_log(h, BV_LOG_ERROR, "get parent %s key %s value error\n", PARENT->name, KEY); \
             } \
         } else { \
             if (bv_config_object_get_value(h->pdb, memb, &localctx->lvalue) == 0) {  \
                 VALUE_INT = localctx->lvalue;  \
-                bv_log(h, BV_LOG_DEBUG, "get key %s value %lld\n", KEY, localctx->lvalue); \
+                bv_log(h, BV_LOG_DEBUG, "get parent %s key %s value %lld\n", PARENT->name, KEY, localctx->lvalue); \
             } else { \
-                bv_log(h, BV_LOG_ERROR, "get key %s value error\n", KEY); \
+                bv_log(h, BV_LOG_ERROR, "get parent %s key %s value error\n", PARENT->name, KEY); \
             } \
         }  \
         bv_config_object_decref(h->pdb, memb); \
@@ -90,22 +88,22 @@ typedef struct _LocalContext {
     do { \
         BVConfigObject *memb = bv_config_get_member(h->pdb, PARENT, KEY); \
         if (!memb) { \
-            bv_log(h, BV_LOG_ERROR, "get key %s error\n", KEY); \
+            bv_log(h, BV_LOG_ERROR, "get parent %s key %s error\n", PARENT->name, KEY); \
             break; \
         } \
         if (memb->type == BV_CONFIG_OBJTYPE_STRING) { \
             bv_strlcpy(localctx->value, VALUE_STR, sizeof(VALUE_STR)); \
             if (bv_config_object_set_value(h->pdb, memb, localctx->value) == 0) { \
-                bv_log(h, BV_LOG_DEBUG, "set key %s value %s\n", KEY, localctx->value); \
+                bv_log(h, BV_LOG_DEBUG, "set parent %s key %s value %s\n", PARENT->name, KEY, localctx->value); \
             } else { \
-                bv_log(h, BV_LOG_ERROR, "set key %s value error\n", KEY); \
+                bv_log(h, BV_LOG_ERROR, "set parent %s key %s value error\n", PARENT->name, KEY); \
             } \
         } else { \
             localctx->lvalue = VALUE_INT;  \
             if (bv_config_object_set_value(h->pdb, memb, &localctx->lvalue) == 0) { \
-                bv_log(h, BV_LOG_DEBUG, "set key %s value %lld\n", KEY, localctx->lvalue); \
+                bv_log(h, BV_LOG_DEBUG, "set parent %s key %s value %lld\n", PARENT->name, KEY, localctx->lvalue); \
             } else { \
-                bv_log(h, BV_LOG_ERROR, "set key %s value error\n", KEY); \
+                bv_log(h, BV_LOG_ERROR, "set parent %s key %s value error\n", PARENT->name, KEY); \
             } \
         } \
         bv_config_object_decref(h->pdb, memb); \
@@ -1265,7 +1263,7 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
         bv_log(h, BV_LOG_ERROR, "get member[media_decoders] in media device error, return [%d]\n", rett);
     }
 
-    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
+    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_ONVIF || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_ONVIF) {
         config->devinfo = bv_mallocz(sizeof(BVMobileDevice));
         if (!config->devinfo) {
             bv_log(h, BV_LOG_ERROR, "malloc failed\n");
@@ -1307,7 +1305,7 @@ static int local_set_media_device(BVConfigContext *h, int index, BVMediaDevice *
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
     
     SET_VALUE(elem, "name", config->name, tmp);
-    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_IPC_VIDEO || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_IPC_AUDIO) {
+    if (config->video_encode_type == BV_MEDIA_STREAM_TYPE_ONVIF || config->audio_encode_type == BV_MEDIA_STREAM_TYPE_ONVIF) {
         bv_strlcpy(localctx->value, ((BVMobileDevice *)(config->devinfo))->user, sizeof(((BVMobileDevice *)(config->devinfo))->user));
         SET_VALUE(elem, "user", localctx->value, tmp);
 

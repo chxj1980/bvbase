@@ -63,8 +63,10 @@ int main(int argc, const char *argv[])
     strcpy(videv.token, "0");
     strcpy(videv.interface, "BT656");
     strcpy(videv.work_mode, "4D1");
+    strcpy(videv.chip, "tw2866");
+    strcpy(videv.dev, "/dev/tw2865dev");
     pkt_in.data = &videv;
-    if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_VIUDEV, &pkt_in, NULL) < 0) {
+    if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_VIUDEV, &pkt_in, &pkt_out) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "videv config error\n");
     }
 
@@ -77,7 +79,7 @@ int main(int argc, const char *argv[])
     vodev.display.width = 704;
     vodev.display.height = 576;
     pkt_in.data = &vodev;
-    if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_VOUDEV, &pkt_in, NULL) < 0) {
+    if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_VOUDEV, &pkt_in, &pkt_out) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "vodev config error\n");
     }
 
@@ -87,7 +89,10 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 16;
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
+    aidev.sample_points = 320;
     strcpy(aodev.work_mode, "I2S_SLAVE");
+    strcpy(aidev.chip, "tw2866");
+    strcpy(aidev.dev, "/dev/tw2865dev");
     pkt_in.data = &aidev;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AIMDEV, &pkt_in, NULL) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "aidev config error\n");
@@ -98,7 +103,10 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 2; 
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
+    aidev.sample_points = 320;
     strcpy(aodev.work_mode, "I2S_SLAVE");
+    strcpy(aidev.chip, "tlv320aic23");
+    strcpy(aidev.dev, "/dev/tlv320aic23");
     pkt_in.data = &aidev;
     if (bv_system_control(sysctx, BV_SYS_MESSAGE_TYPE_AIMDEV, &pkt_in, NULL) < 0) {
         bv_log(sysctx, BV_LOG_ERROR, "aidev config error\n");
@@ -117,10 +125,10 @@ int main(int argc, const char *argv[])
     }
     BVMediaContext *avictx = NULL; 
     BVMediaContext *avictx1 = NULL; 
-    BVMediaContext *avictx2 = NULL; 
-    BVMediaContext *avictx3 = NULL; 
-    BVMediaContext *avictx4 = NULL; 
+
     bv_dict_set(&opn, "atoken", "0/0", 0);
+    bv_dict_set(&opn, "achip", "tw2866", 0);
+    bv_dict_set(&opn, "adev", "/dev/tw2865dev", 0);
     if (bv_input_media_open(&avictx, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -132,31 +140,17 @@ int main(int argc, const char *argv[])
         bv_log(avictx, BV_LOG_ERROR, "set audio volume error\n");
     }
 
-    bv_dict_set(&opn, "vtoken", "0/1", 0); 
-    bv_dict_set(&opn, "atoken", "0/1", 0);
-    if (bv_input_media_open(&avictx1, NULL, "hisavi://", NULL, &opn) < 0) {
-        bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
-    }
-
-    bv_dict_set(&opn, "vtoken", "0/2", 0); 
-    bv_dict_set(&opn, "atoken", "0/2", 0);
-    if (bv_input_media_open(&avictx2, NULL, "hisavi://", NULL, &opn) < 0) {
-        bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
-    }
-
-    bv_dict_set(&opn, "vtoken", "0/3", 0); 
-    bv_dict_set(&opn, "atoken", "0/3", 0);
-    if (bv_input_media_open(&avictx3, NULL, "hisavi://", NULL, &opn) < 0) {
-        bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
-    }
-    bv_dict_free(&opn);
     bv_dict_set(&opn, "atoken", "1/0", 0);
-    if (bv_input_media_open(&avictx4, NULL, "hisavi://", NULL, &opn) < 0) {
+    bv_dict_set(&opn, "achip", "tlv320aic23", 0);
+    bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
+    if (bv_input_media_open(&avictx1, NULL, "hisavi://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
 
     BVMediaContext *avectx1 = NULL; 
     bv_dict_set(&opn, "atoken", "1/0/0", 0);
+    bv_dict_set(&opn, "achip", "tlv320aic23", 0);
+    bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
     bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G711A, 0);
     if (bv_input_media_open(&avectx1, NULL, "hisave://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
@@ -169,16 +163,21 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
-     while ( i < 1000) {
-         bv_packet_init(&pkt);
+
+    while ( i < 200) {
+        bv_packet_init(&pkt);
         if (bv_input_media_read(avectx1, &pkt) > 0 ) {
-                    bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
-                    bv_io_write(ioctx, pkt.data, pkt.size);
-                bv_packet_free(&pkt);
-                i ++;
-            }
+            bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);
+            bv_io_write(ioctx, pkt.data, pkt.size);
+            bv_packet_free(&pkt);
+            i ++;
         }
+    }
 
     bv_io_close(ioctx);
+    bv_input_media_close(&avectx1);
+    bv_input_media_close(&avictx1);
+    bv_input_media_close(&avictx);
+    bv_system_exit(&sysctx);
     return 0;
 }

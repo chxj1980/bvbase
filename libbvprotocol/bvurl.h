@@ -47,6 +47,7 @@ typedef struct _BVURLContext {
     int is_connected;
     int max_packet_size;
 } BVURLContext;
+
 #define BV_URL_PROTOCOL_FLAG_NETWORK 0x01
 #define BV_URL_PROTOCOL_FLAG_NESTED_SCHEME  0x02
 #define BV_SEEK_SIZE    (INT_MIN)
@@ -61,7 +62,7 @@ typedef struct _BVURLProtocol {
     int (*url_read)(BVURLContext *h, uint8_t *buf, size_t size);
     int (*url_write)(BVURLContext *h, const uint8_t *buf, size_t size);
     int64_t (*url_seek)(BVURLContext *h, int64_t pos, int whence);
-    int (*url_control)(BVURLContext *h, int type, BVControlPacket *in, BVControlPacket *out);
+    int (*url_control)(BVURLContext *h, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
     int (*url_get_file_handle)(BVURLContext *h);
     int (*url_get_multi_file_handle)(BVURLContext *h, int **handles, int *numhandles);
     int (*url_check)(BVURLContext *h, int mask);
@@ -101,7 +102,8 @@ int bv_url_get_multi_file_handle(BVURLContext *h, int **handles, int *numhandles
 
 int bv_url_shutdown(BVURLContext *h, int flags);
 
-int bv_url_control(BVURLContext *h, int type, BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+int bv_url_control(BVURLContext *h, int type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out);
+
 #ifdef __cplusplus
 }
 #endif

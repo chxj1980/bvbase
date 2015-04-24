@@ -38,13 +38,6 @@ extern "C"{
 #define BV_MAX_URL_LEN    (512)
 #define BV_MAX_PRESET_NUM (256)
 
-/**
- *    json配置文件中为了减少数据的冗余，对于公共的数据采用引用的方式,引用的数据采用字符串表示
- *    具体数据在对应的数组中的位置
- *    例如    video_sources[0][0].certification = "00/00",表示为certifications[0][0]中的认证信息.
- *    当没有引用数据则应把video_sources[0][0].certification = "FF/FF". 用FF表示没有引用数据
- */
-
 enum BVFileType {
     BV_FILE_TYPE_NONE = 0,
     BV_FILE_TYPE_AUDIO = (1 << 0),
@@ -54,20 +47,6 @@ enum BVFileType {
     BV_FILE_TYPE_LOG = (1 << 3),
     BV_FILE_TYPE_FIRMWARE = (1 << 4),
 };
-
-enum BVConfigType {
-    BV_CONFIG_TYPE_NONE = -1,
-    BV_CONFIG_TYPE_LOCAL,
-    BV_CONFIG_TYPE_ONVIF,
-    BV_CONFIG_TYPE_UNKNOWN,
-};
-
-typedef struct _BVBasicInfo {
-    char name[BV_MAX_NAME_LEN];    //name和token放在一起用/分割采用三级命名localname/remotename/remotetoken/ localename LocalAudioS_00_00
-    char url[BV_MAX_URL_LEN];
-    enum BVConfigType type;
-    void *any_attr;
-} BVBasicInfo;
 
 enum BVEncryptionType {
     BV_ENCRYPTION_TYPE_NONE,
@@ -138,7 +117,7 @@ typedef struct _BVVideoSourceDevice {
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
     char interface[BV_MAX_NAME_LEN];    //BT656 BT601 BT1120P BT1120I
-    char work_mode[BV_MAX_NAME_LEN];     //for BT656 4D1 4HALFD1 2D1 
+    char work_mode[BV_MAX_NAME_LEN];    //for BT656 4D1 4HALFD1 2D1 
 } BVVideoSourceDevice;
 
 typedef struct _BVVideoOutputDevice {
@@ -147,50 +126,48 @@ typedef struct _BVVideoOutputDevice {
     char dev[BV_MAX_NAME_LEN];
     char interface[BV_MAX_NAME_LEN];    //CVBS HDMI
     char work_mode[BV_MAX_NAME_LEN];    //PAL NTSC AUTO
-    BVIntRectange display;
+    BVIntRectange display;              //根据work_mode填写display
 } BVVideoOutputDevice;
 
 typedef struct _BVAudioSourceDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t channel_mode;
-    uint8_t channel_counts;
-    uint8_t sample_format;
+    uint8_t channel_mode;               //单声道1，立体声 2
+    uint8_t channel_counts;             //AudioSource个数
+    uint8_t sample_format;              //采样格式
     uint8_t reserved;
-    int sample_rate;
-    int sample_points;
+    int sample_rate;                    //采样率
+    int sample_points;                  //每个包中的采样点数
 
-    char work_mode[BV_MAX_NAME_LEN];     //I2S_SALVE I2S_MASTER 
+    char work_mode[BV_MAX_NAME_LEN];    //I2S_SALVE I2S_MASTER 
 } BVAudioSourceDevice;
 
 typedef struct _BVAudioOutputDevice {
     char token[BV_MAX_NAME_LEN];
     char chip[BV_MAX_NAME_LEN];
     char dev[BV_MAX_NAME_LEN];
-    uint8_t channel_mode;
-    uint8_t channel_counts;
-    uint8_t sample_format;
+    uint8_t channel_mode;               
+    uint8_t channel_counts;             //AudioOutput 个数
+    uint8_t sample_format;              
     uint8_t reserved;
     int sample_rate;
     int sample_points;
-    char work_mode[BV_MAX_NAME_LEN];     //I2S_SLAVE I2S_MASTER 
+    char work_mode[BV_MAX_NAME_LEN];    //I2S_SLAVE I2S_MASTER 
 } BVAudioOutputDevice;
 
 typedef struct _BVVideoCapture {
-    BVImagingSettings imaging;
-    BVDateTime date_time;
+    BVImagingSettings imaging;          //图像参数
+    BVDateTime date_time;               //时间段
     void *any_attr;
 } BVVideoCapture;
 
 typedef struct _BVVideoSource {
     char token[BV_MAX_NAME_LEN];
-    uint8_t video_source_device;
-    uint8_t reserved;
+    uint8_t framerate;                  //视频源的帧率
+    uint8_t video_source_device;        //视频源接在前端芯片的索引从0开始
     uint16_t reserved2;
-    float framerate;
-    BVIntRectange bounds;
-    BVVideoResolution resolution;
+    BVIntRectange bounds;               //真正的大小让驱动检测
     BVVideoCapture day_capture;
     BVVideoCapture night_capture;
     void *any_attr;
@@ -228,14 +205,6 @@ typedef struct _BVAudioSource {
     void *any_attr;
 } BVAudioSource;
 
-enum BVVideoFormat {
-    BV_VIDEO_FORMAT_NONE = -1,
-    BV_VIDEO_FORMAT_AUTIO,
-    BV_VIDEO_FORMAT_NTSC,
-    BV_VIDEO_FORMAT_PAL,
-    BV_VIDEO_FORMAT_UNKNOWN,
-};
-
 enum BVMobileDeviceType {
     BV_MOBILE_DEVICE_TYPE_NONE = 0,
     BV_MOBILE_DEVICE_TYPE_NVS = (1 << 0),
@@ -265,12 +234,14 @@ enum BVMediaDeviceType {
 
 enum BVMediaStreamType {
     BV_MEDIA_STREAM_TYPE_NONE = 0,
-    BV_MEDIA_STREAM_TYPE_BRD_VIDEO = 1,
-    BV_MEDIA_STREAM_TYPE_BRD_AUDIO = 2,
-    BV_MEDIA_STREAM_TYPE_IPC_VIDEO = 4,
-    BV_MEDIA_STREAM_TYPE_IPC_AUDIO = 8,
+    BV_MEDIA_STREAM_TYPE_BOARD = 1,
+    BV_MEDIA_STREAM_TYPE_ONVIF = 2,
 };
 
+/**
+ *  媒体解码器 用于解码音视频数据
+ *  定义了音视频的输出源和解码通道
+ */
 typedef struct _BVMediaDecoder {
     int8_t video_output;
     int8_t audio_output;
@@ -278,6 +249,10 @@ typedef struct _BVMediaDecoder {
     int8_t audio_channel;
 } BVMediaDecoder;
 
+/**
+ *  媒体编码器 用于编码音视频数据
+ *  定义了音视频的输入源和编码通道
+ */
 typedef struct _BVMediaEncoder {
     int8_t video_source;
     int8_t audio_source;
@@ -287,6 +262,10 @@ typedef struct _BVMediaEncoder {
     int8_t transfer_index;
 } BVMediaEncoder;
 
+/**
+ *  音频对讲
+ *  定义了媒体编码器和媒体解码器的索引和信息，
+ */
 typedef struct _BVTalkBack {
     int8_t media_encoder_index;
     int8_t media_decoder_index;
@@ -313,6 +292,7 @@ typedef struct _BVVideoOption {
     BVIntRange framerate_range;
     BVIntRange gop_range;
     BVIntRange bitrate_range;
+    BVIntRange interval_range;
 } BVVideoOption;
 
 typedef struct _BVVideoEncoderOption {
@@ -354,10 +334,12 @@ typedef struct _BVAudioEncoder {
 
 typedef struct _BVVideoDecoder {
     char token[BV_MAX_NAME_LEN];
+    BVCodecContext codec_context;
 } BVVideoDecoder;
 
 typedef struct _BVAudioDecoder {
     char token[BV_MAX_NAME_LEN];
+    BVCodecContext codec_context;
 } BVAudioDecoder;
 
 enum BVEncodeChannelType {

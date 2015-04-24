@@ -291,7 +291,7 @@ int main(int argc, const char *argv[])
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
     bv_dict_set_int(&opn, "mode_id", BV_RC_MODE_ID_VBR, 0);
     bv_dict_set_int(&opn, "width", 704, 0);
-    bv_dict_set_int(&opn, "height", 576, 0);
+    bv_dict_set_int(&opn, "height", 480, 0);
     bv_dict_set_int(&opn, "gop_size", 100, 0);
     bv_dict_set_int(&opn, "framerate", 25, 0);
     bv_dict_set_int(&opn, "bit_rate", 4096, 0);

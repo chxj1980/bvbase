@@ -101,40 +101,6 @@ typedef struct {
     struct sockaddr_storage local_addr_storage;
 } UDPContext;
 
-#define OFFSET(x) offsetof(UDPContext, x)
-#define D BV_OPT_FLAG_DECODING_PARAM
-#define E BV_OPT_FLAG_ENCODING_PARAM
-static const BVOption options[] = {
-{"buffer_size", "set packet buffer size in bytes", OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
-{"localport", "set local port to bind to", OFFSET(local_port), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
-{"localaddr", "choose local IP address", OFFSET(local_addr), BV_OPT_TYPE_STRING, {.str = ""}, 0, 0, D|E },
-{"udplite_coverage", "choose UDPLite head size which should be validated by checksum", OFFSET(udplite_coverage), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
-{"pkt_size", "set size of UDP packets", OFFSET(packet_size), BV_OPT_TYPE_INT, {.i64 = 1472}, 0, INT_MAX, D|E },
-{"reuse", "explicitly allow or disallow reusing UDP sockets", OFFSET(reuse_socket), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D|E },
-{"broadcast", "explicitly allow or disallow broadcast destination", OFFSET(is_broadcast), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, E },
-{"ttl", "set the time to live value (for multicast only)", OFFSET(ttl), BV_OPT_TYPE_INT, {.i64 = 16}, 0, INT_MAX, E },
-{"connect", "set if connect() should be called on socket", OFFSET(is_connected), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D|E },
-/* TODO 'sources', 'block' option */
-{"fifo_size", "set the UDP receiving circular buffer size, expressed as a number of packets with size of 188 bytes", OFFSET(circular_buffer_size), BV_OPT_TYPE_INT, {.i64 = 7*4096}, 0, INT_MAX, D },
-{"overrun_nonfatal", "survive in case of UDP receiving circular buffer overrun", OFFSET(overrun_nonfatal), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D },
-{"timeout", "set raise error timeout (only in read mode)", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D },
-{NULL}
-};
-
-static const BVClass udp_context_class = {
-    .class_name     = "udp",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-};
-
-static const BVClass udplite_context_class = {
-    .class_name     = "udplite",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-};
-
 static void log_net_error(void *ctx, int level, const char* prefix)
 {
     char errbuf[100];
@@ -327,6 +293,7 @@ static int udp_set_multicast_sources(int sockfd, struct sockaddr *addr,
 #endif
     return 0;
 }
+
 static int udp_set_url(struct sockaddr_storage *addr,
                        const char *hostname, int port)
 {
@@ -940,26 +907,60 @@ static int udp_close(BVURLContext *h)
     return 0;
 }
 
+#define OFFSET(x) offsetof(UDPContext, x)
+#define D BV_OPT_FLAG_DECODING_PARAM
+#define E BV_OPT_FLAG_ENCODING_PARAM
+static const BVOption options[] = {
+{"buffer_size", "set packet buffer size in bytes", OFFSET(buffer_size), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
+{"localport", "set local port to bind to", OFFSET(local_port), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
+{"localaddr", "choose local IP address", OFFSET(local_addr), BV_OPT_TYPE_STRING, {.str = ""}, 0, 0, D|E },
+{"udplite_coverage", "choose UDPLite head size which should be validated by checksum", OFFSET(udplite_coverage), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D|E },
+{"pkt_size", "set size of UDP packets", OFFSET(packet_size), BV_OPT_TYPE_INT, {.i64 = 1472}, 0, INT_MAX, D|E },
+{"reuse", "explicitly allow or disallow reusing UDP sockets", OFFSET(reuse_socket), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D|E },
+{"broadcast", "explicitly allow or disallow broadcast destination", OFFSET(is_broadcast), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, E },
+{"ttl", "set the time to live value (for multicast only)", OFFSET(ttl), BV_OPT_TYPE_INT, {.i64 = 16}, 0, INT_MAX, E },
+{"connect", "set if connect() should be called on socket", OFFSET(is_connected), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D|E },
+/* TODO 'sources', 'block' option */
+{"fifo_size", "set the UDP receiving circular buffer size, expressed as a number of packets with size of 188 bytes", OFFSET(circular_buffer_size), BV_OPT_TYPE_INT, {.i64 = 7*4096}, 0, INT_MAX, D },
+{"overrun_nonfatal", "survive in case of UDP receiving circular buffer overrun", OFFSET(overrun_nonfatal), BV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, D },
+{"timeout", "set raise error timeout (only in read mode)", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 = 0}, 0, INT_MAX, D },
+{NULL}
+};
+
+static const BVClass udp_context_class = {
+    .class_name                 = "udp",
+    .item_name                  = bv_default_item_name,
+    .option                     = options,
+    .version                    = LIBBVUTIL_VERSION_INT,
+};
+
+static const BVClass udplite_context_class = {
+    .class_name                 = "udplite",
+    .item_name                  = bv_default_item_name,
+    .option                     = options,
+    .version                    = LIBBVUTIL_VERSION_INT,
+};
+
 BVURLProtocol bv_udp_protocol = {
-    .name                = "udp",
-    .url_open            = udp_open,
-    .url_read            = udp_read,
-    .url_write           = udp_write,
-    .url_close           = udp_close,
-    .url_get_file_handle = udp_get_file_handle,
-    .priv_data_size      = sizeof(UDPContext),
-    .priv_class          = &udp_context_class,
-    .flags               = BV_URL_PROTOCOL_FLAG_NETWORK,
+    .name                       = "udp",
+    .url_open                   = udp_open,
+    .url_read                   = udp_read,
+    .url_write                  = udp_write,
+    .url_close                  = udp_close,
+    .url_get_file_handle        = udp_get_file_handle,
+    .priv_data_size             = sizeof(UDPContext),
+    .priv_class                 = &udp_context_class,
+    .flags                      = BV_URL_PROTOCOL_FLAG_NETWORK,
 };
 
 BVURLProtocol bv_udplite_protocol = {
-    .name                = "udplite",
-    .url_open            = udplite_open,
-    .url_read            = udp_read,
-    .url_write           = udp_write,
-    .url_close           = udp_close,
-    .url_get_file_handle = udp_get_file_handle,
-    .priv_data_size      = sizeof(UDPContext),
-    .priv_class          = &udplite_context_class,
-    .flags               = BV_URL_PROTOCOL_FLAG_NETWORK,
+    .name                       = "udplite",
+    .url_open                   = udplite_open,
+    .url_read                   = udp_read,
+    .url_write                  = udp_write,
+    .url_close                  = udp_close,
+    .url_get_file_handle        = udp_get_file_handle,
+    .priv_data_size             = sizeof(UDPContext),
+    .priv_class                 = &udplite_context_class,
+    .flags                      = BV_URL_PROTOCOL_FLAG_NETWORK,
 };

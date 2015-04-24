@@ -163,6 +163,9 @@ typedef struct _BVCodecContext {
     int quality;
     int bit_rate;
     int gop_size;
+    int interval;               //间隔 单位毫秒
+    int period;                 //抓拍周期 单位毫秒
+    int count;                  //抓拍次数， 0 不限制
     enum BVPixelFormat pix_fmt;
 
     int sample_rate;

@@ -322,6 +322,7 @@ static int onvif_stream_open(BVMediaContext *s)
     }
 #endif
     av_dump_format(onvifctx->onvif, 0, onvifctx->onvif_url, 0);
+    onvifctx->onvif->flags |= AVFMT_FLAG_NONBLOCK;
     set_avcodec_info(s, onvifctx);
 
     return 0;

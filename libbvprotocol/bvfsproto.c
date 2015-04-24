@@ -108,19 +108,19 @@ static const BVOption bvfs_options[] = {
 };
 
 static const BVClass bvfs_class = {
-    .class_name = "bvfs proto",
-    .item_name  = bv_default_item_name,
-    .option     = bvfs_options,
-    .version    = LIBBVUTIL_VERSION_INT,
+    .class_name             = "bvfs proto",
+    .item_name              = bv_default_item_name,
+    .option                 = bvfs_options,
+    .version                = LIBBVUTIL_VERSION_INT,
 };
 
 BVURLProtocol bv_bvfs_protocol = {
-    .name               = "bvfs",
-    .url_open           = file_open,
-    .url_read           = file_read,
-    .url_write          = file_write,
-    .url_seek           = file_seek,
-    .url_close          = file_close,
-    .priv_data_size     = sizeof(BVFSContext),
-    .priv_class         = &bvfs_class,
+    .name                   = "bvfs",
+    .url_open               = file_open,
+    .url_read               = file_read,
+    .url_write              = file_write,
+    .url_seek               = file_seek,
+    .url_close              = file_close,
+    .priv_data_size         = sizeof(BVFSContext),
+    .priv_class             = &bvfs_class,
 };

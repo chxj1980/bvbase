@@ -42,6 +42,8 @@ typedef struct OnvifContext {
     char *user;
     char *passwd;
     struct soap *soap;
+    int nb_profiles;
+    BVMediaProfile *profiles;
 } OnvifContext;
 
 #define ONVIF_TMO (-5000)
@@ -133,6 +135,9 @@ static void dump_service_url(OnvifContext *onvifctx)
     bv_log(onvifctx, BV_LOG_DEBUG, "onvif imaging service url %s\n", onvifctx->imaging_url);
     bv_log(onvifctx, BV_LOG_DEBUG, "onvif deviceio service url %s\n", onvifctx->deviceio_url);
 }
+
+static int onvif_get_profiles(BVConfigContext *h, BVMediaProfile *profile, int *max_num);
+
 //url likes onvif_cfg://192.168.6.149:80/onvif/device_service
 static int onvif_open(BVConfigContext *h)
 {
@@ -159,17 +164,53 @@ static int onvif_open(BVConfigContext *h)
         goto fail;
     }
     dump_service_url(onvifctx);
+    onvifctx->nb_profiles = 5;
+    onvifctx->profiles = bv_malloc_array(onvifctx->nb_profiles, sizeof(BVMediaProfile));
+    if (!onvifctx->profiles) {
+        ret = BVERROR(ENOMEM);
+        goto fail;
+    }
+    if (onvif_get_profiles(h, onvifctx->profiles, &onvifctx->nb_profiles)) {
+        bv_log(h, BV_LOG_ERROR, "get profiles error\n");
+        ret = BVERROR(EIO);
+        goto fail;
+    }
     return 0;
 fail:
     bv_soap_free(onvifctx->soap);
     return ret;
 }
 
+static void free_profile(BVMediaProfile *profile)
+{
+    if (!profile)
+        return;
+    if (profile->video_source)
+       bv_free(profile->video_source);
+    if (profile->audio_source)
+        bv_free(profile->audio_source);
+    if (profile->video_encoder)
+        bv_free(profile->video_encoder);
+    if (profile->audio_encoder)
+        bv_free(profile->audio_encoder);
+    if (profile->ptz_device) {
+        if (profile->ptz_device->presets)
+            bv_free(profile->ptz_device->presets);
+        bv_free(profile->ptz_device);
+    }
+
+}
+
 static int onvif_close(BVConfigContext *s)
 {
     OnvifContext *onvifctx = s->priv_data;
+    int i = 0;
     if (onvifctx->soap)
         bv_soap_free(onvifctx->soap);
+    for (i = 0; i < onvifctx->nb_profiles; i++) {
+        free_profile(onvifctx->profiles + i);
+    }
+    bv_free(onvifctx->profiles);
     return 0;
 }
 
@@ -583,11 +624,17 @@ static int onvif_get_profiles(BVConfigContext *h, BVMediaProfile *profile, int *
         bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
         return retval;
     }
-    count = *max_num > ProfilesResponse.__sizeProfiles ? ProfilesResponse.__sizeProfiles : *max_num;
-    *max_num = count;
+//    count = *max_num > ProfilesResponse.__sizeProfiles ? ProfilesResponse.__sizeProfiles : *max_num;
+    count = BBMIN(*max_num, ProfilesResponse.__sizeProfiles);
     for (i = 0; i < count; i++) {
         save_profile(h, profile + i, ProfilesResponse.Profiles + i);
     }
+    if (count == 2 && *max_num > count) {
+        save_profile(h, profile + 2, ProfilesResponse.Profiles);
+        bv_log(h, BV_LOG_WARNING, "using master profile instead of snapshot profile\n");
+        count ++;
+    }
+    *max_num = count;
     return 0;
 }
 
@@ -634,7 +681,16 @@ static struct tt__VideoEncoderConfiguration * get_video_encoder(BVConfigContext 
 
 static int onvif_get_video_encoder(BVConfigContext *h, int channel, int index, BVVideoEncoder *config)
 {
-    struct tt__VideoEncoderConfiguration *configuration = get_video_encoder(h, config);
+    OnvifContext *onvifctx = h->priv_data;
+    struct tt__VideoEncoderConfiguration *configuration = NULL;
+
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
+    }
+    if (config->token[0] == '\0' && onvifctx->profiles[index].video_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].video_encoder->token, sizeof(config->token));
+    }
+    configuration = get_video_encoder(h, config);
     if (!configuration) {
         return BVERROR(EINVAL);
     }
@@ -656,10 +712,12 @@ static int onvif_set_video_encoder(BVConfigContext *h, int channel, int index, B
     struct _trt__SetVideoEncoderConfigurationResponse response;
     struct tt__H264Configuration h264_config;
     struct tt__Mpeg4Configuration mpeg_config;
-    if (!onvifctx->media_url) {
-        return BVERROR(ENOSYS);
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
     }
-
+    if (config->token[0] == '\0' && onvifctx->profiles[index].video_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].video_encoder->token, sizeof(config->token));
+    }
     p = bv_strsub(config->token, "/", 2);
     q = bv_strsub(config->token, "/", 3);
     if (!p || !q) {
@@ -736,6 +794,12 @@ static int onvif_get_video_encoder_options(BVConfigContext *h, int channel, int 
     struct _trt__GetVideoEncoderConfigurationOptionsResponse OptionsResponse;
     MEMSET_STRUCT(Options);
     MEMSET_STRUCT(OptionsResponse);
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
+    }
+    if (config->token[0] == '\0' && onvifctx->profiles[index].video_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].video_encoder->token, sizeof(config->token));
+    }
     //profile_token
     p = bv_strsub(config->token, "/", 1);
     q = bv_strsub(config->token, "/", 2);
@@ -879,7 +943,7 @@ static struct tt__AudioEncoderConfiguration * get_audio_encoder(BVConfigContext 
     retval = soap_call___trt__GetAudioEncoderConfiguration(soap, onvifctx->media_url, NULL, &request, &response);
 
     if(retval != SOAP_OK) {
-        bv_log(NULL, BV_LOG_ERROR, "get video encoder error");
+        bv_log(NULL, BV_LOG_ERROR, "get audio encoder error");
         bv_log(NULL, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
         return NULL;
     }
@@ -889,7 +953,15 @@ static struct tt__AudioEncoderConfiguration * get_audio_encoder(BVConfigContext 
 
 static int onvif_get_audio_encoder(BVConfigContext *h, int channel, int index, BVAudioEncoder *config)
 {
-    struct tt__AudioEncoderConfiguration *Configuration = get_audio_encoder(h, config);
+    OnvifContext *onvifctx = h->priv_data;
+    struct tt__AudioEncoderConfiguration *Configuration = NULL;
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
+    }
+    if (config->token[0] == '\0' && onvifctx->profiles[index].audio_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].audio_encoder->token, sizeof(config->token)); 
+    }
+    Configuration = get_audio_encoder(h, config);
     if (!Configuration) {
         return BVERROR(EINVAL);
     }
@@ -908,11 +980,14 @@ static int onvif_set_audio_encoder(BVConfigContext *h, int channel, int index, B
     struct soap *soap = onvifctx->soap;
     struct _trt__SetAudioEncoderConfiguration request;
     struct _trt__SetAudioEncoderConfigurationResponse response;
-    if (!onvifctx->media_url) {
-        return BVERROR(ENOSYS);
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
     }
     MEMSET_STRUCT(request);
     MEMSET_STRUCT(response);
+    if (config->token[0] == '\0' && onvifctx->profiles[index].audio_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].audio_encoder->token, sizeof(config->token));
+    }
     p = bv_strsub(config->token, "/", 2);
     q = bv_strsub(config->token, "/", 3);
     if (!p || !q) {
@@ -963,8 +1038,11 @@ static int onvif_get_audio_encoder_options(BVConfigContext *h, int channel, int 
     struct _trt__GetAudioEncoderConfigurationOptionsResponse response;
     MEMSET_STRUCT(request);
     MEMSET_STRUCT(response);
-    if (!onvifctx->media_url) {
-        return BVERROR(ENOSYS);
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
+    }
+    if (config->token[0] == '\0' && onvifctx->profiles[index].audio_encoder) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].audio_encoder->token, sizeof(config->token));
     }
     //profile_token
     p = bv_strsub(config->token, "/", 1);
@@ -1078,7 +1156,17 @@ static struct tt__PTZConfiguration * get_ptz_device(BVConfigContext *s, BVPTZDev
 
 static int onvif_get_ptz_device(BVConfigContext *s, int channel, int index, BVPTZDevice *config)
 {
+    OnvifContext *onvifctx = s->priv_data;
     struct tt__PTZConfiguration *PTZConfiguration = NULL; 
+
+    if (!onvifctx->media_url || index >= onvifctx->nb_profiles) {
+        return BVERROR(EINVAL);
+    }
+
+    if (config->token[0] == '\0' && onvifctx->profiles[index].ptz_device) {
+        bv_strlcpy(config->token, onvifctx->profiles[index].ptz_device->token, sizeof(config->token));
+    }
+
     PTZConfiguration = get_ptz_device(s, config);
     if (!PTZConfiguration) {
         return BVERROR(EINVAL);
@@ -1106,6 +1194,32 @@ static int onvif_dele_ptz_preset(BVConfigContext *s, int channel, int index, BVP
 {
     return 0;
 }
+
+static int onvif_get_video_source(BVConfigContext *s, int index, BVVideoSource *config)
+{
+    return BVERROR(ENOSYS);
+}
+
+static int onvif_set_video_source(BVConfigContext *s, int index, BVVideoSource *config)
+{
+    return BVERROR(ENOSYS);
+}
+
+static int onvif_get_audio_source(BVConfigContext *s, int index, BVAudioSource *config)
+{
+    return BVERROR(ENOSYS);
+}
+
+static int onvif_get_video_output(BVConfigContext *s, int index, BVVideoOutput *config)
+{
+    return BVERROR(ENOSYS);
+}
+
+static int onvif_get_audio_output(BVConfigContext *s, int index, BVAudioOutput *config)
+{
+    return BVERROR(ENOSYS);
+}
+
 #define OFFSET(x) offsetof(OnvifContext, x)
 #define DEC BV_OPT_FLAG_DECODING_PARAM
 static const BVOption options[] = {
@@ -1121,31 +1235,36 @@ static const BVOption options[] = {
 };
 
 static const BVClass onvif_class = {
-    .class_name     = "onvif config",
-    .item_name      = bv_default_item_name,
-    .option         = options,
-    .version        = LIBBVUTIL_VERSION_INT,
-    .category       = BV_CLASS_CATEGORY_CONFIG,
+    .class_name                 = "onvif config",
+    .item_name                  = bv_default_item_name,
+    .option                     = options,
+    .version                    = LIBBVUTIL_VERSION_INT,
+    .category                   = BV_CLASS_CATEGORY_CONFIG,
 };
 
 BVConfig bv_onvif_config = {
-    .name               = "onvif",
-    .type               = BV_CONFIG_TYPE_ONVIF,
-    .flags              = BV_CONFIG_FLAGS_NOFILE | BV_CONFIG_FLAGS_NETWORK,
-    .priv_data_size     = sizeof(OnvifContext),
-    .priv_class         = &onvif_class,
-    .config_probe       = onvif_probe,
-    .config_open        = onvif_open,
-    .config_close       = onvif_close,
-    .get_device_info    = onvif_get_device_info,
-    .get_profiles       = onvif_get_profiles,
-    .get_video_encoder  = onvif_get_video_encoder,
-    .set_video_encoder  = onvif_set_video_encoder,
-    .get_video_encoder_options = onvif_get_video_encoder_options,
-    .get_audio_encoder  = onvif_get_audio_encoder,
-    .set_audio_encoder  = onvif_set_audio_encoder,
-    .get_audio_encoder_options = onvif_get_audio_encoder_options,
-    .get_ptz_device     = onvif_get_ptz_device,
-    .save_ptz_preset    = onvif_save_ptz_preset,
-    .dele_ptz_preset    = onvif_dele_ptz_preset,
+    .name                       = "onvif",
+    .type                       = BV_CONFIG_TYPE_ONVIF,
+    .flags                      = BV_CONFIG_FLAGS_NOFILE | BV_CONFIG_FLAGS_NETWORK,
+    .priv_data_size             = sizeof(OnvifContext),
+    .priv_class                 = &onvif_class,
+    .config_probe               = onvif_probe,
+    .config_open                = onvif_open,
+    .config_close               = onvif_close,
+    .get_device_info            = onvif_get_device_info,
+    .get_profiles               = onvif_get_profiles,
+    .get_video_encoder          = onvif_get_video_encoder,
+    .set_video_encoder          = onvif_set_video_encoder,
+    .get_video_encoder_options  = onvif_get_video_encoder_options,
+    .get_audio_encoder          = onvif_get_audio_encoder,
+    .set_audio_encoder          = onvif_set_audio_encoder,
+    .get_audio_encoder_options  = onvif_get_audio_encoder_options,
+    .get_ptz_device             = onvif_get_ptz_device,
+    .save_ptz_preset            = onvif_save_ptz_preset,
+    .dele_ptz_preset            = onvif_dele_ptz_preset,
+    .get_video_source           = onvif_get_video_source,
+    .set_video_source           = onvif_set_video_source,
+    .get_audio_source           = onvif_get_audio_source,
+    .get_video_output           = onvif_get_video_output,
+    .get_audio_output           = onvif_get_audio_output,
 };

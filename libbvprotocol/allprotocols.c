@@ -25,10 +25,6 @@
 #include "internal.h"
 #include <config.h>
 
-#if BV_CONFIG_LIBBVFS
-#include <bvfs.h>
-#endif
-
 #define REGISTER_PROTOCOL(X, x)                                         \
     {                                                                   \
         extern BVURLProtocol bv_##x##_protocol;                           \
@@ -51,7 +47,7 @@ void bv_protocol_register_all(void)
     REGISTER_PROTOCOL(HTTP, http);
     REGISTER_PROTOCOL(HTTPS, https);
     REGISTER_PROTOCOL(HTTPPROXY, httpproxy);
-#if BV_CONFIG_LIBBVFS
-//    bvfs_init(1, 0);
-#endif
+    REGISTER_PROTOCOL(RTP, rtp);
+    REGISTER_PROTOCOL(RTSP, rtsp);
+    REGISTER_PROTOCOL(SDP, sdp);
 }
