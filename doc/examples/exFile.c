@@ -7,6 +7,7 @@
 int main(int argc, const char *argv[])
 {
     int i = 0;
+    int j = 0;
     int ret = 0;
     BVVideoEncoder video_encoder;
     BVAudioEncoder audio_encoder;
@@ -82,6 +83,7 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "bitrate %d\n", video_encoder.codec_context.bit_rate);
+#if 0
     video_encoder.codec_context.codec_id = BV_CODEC_ID_H264;
     video_encoder.codec_context.bit_rate = 512;
 
@@ -90,12 +92,14 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", video_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "bitrate %d\n", video_encoder.codec_context.bit_rate);
+#endif
 
     if (bv_config_get_audio_encoder(config_ctx, 2, 1, &audio_encoder) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio encoder error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", audio_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "sample %d\n", audio_encoder.codec_context.sample_rate);
+#if 0
     audio_encoder.codec_context.codec_id = BV_CODEC_ID_G711A;
     audio_encoder.codec_context.sample_rate = 8000;
 
@@ -104,6 +108,7 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "encoding %d\n", audio_encoder.codec_context.codec_id);
     bv_log(config_ctx, BV_LOG_INFO, "sample %d\n", audio_encoder.codec_context.sample_rate);
+#endif
     
     if (bv_config_get_ptz_device(config_ctx, 0, 0, &ptz_device) < 0) { 
         bv_log(config_ctx, BV_LOG_ERROR, "get ptz device error\n");
@@ -140,7 +145,7 @@ int main(int argc, const char *argv[])
         bv_log(config_ctx, BV_LOG_INFO, "user %s\n", ((BVMobileDevice *)(media_dev.devinfo))->user);
         bv_free(media_dev.devinfo);
     }
-
+#if 0
     media_dev.devinfo = bv_mallocz(sizeof(BVMobileDevice));
     if (!media_dev.devinfo) {
         bv_log(config_ctx, BV_LOG_ERROR, ">>>>>>>>>>malloc failed\n");
@@ -157,7 +162,7 @@ int main(int argc, const char *argv[])
     if (media_dev.devinfo) {
         bv_free(media_dev.devinfo);
     }
-
+#endif
     if (bv_config_get_video_source_device(config_ctx, 0, &vs_dev) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video source devices error\n");
     }
@@ -179,12 +184,12 @@ int main(int argc, const char *argv[])
     if (bv_config_get_video_source(config_ctx, 0, &vs) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video source error\n");
     }
-    bv_log(config_ctx, BV_LOG_INFO, "framerate %f\n", vs.framerate);
+    bv_log(config_ctx, BV_LOG_INFO, "framerate %d\n", vs.framerate);
     bv_log(config_ctx, BV_LOG_INFO, "width %d height %d\n", vs.bounds.width, vs.bounds.height);
     bv_log(config_ctx, BV_LOG_INFO, "day_capture hour %d minute %d second %d\n", vs.day_capture.date_time.hour, 
                                         vs.day_capture.date_time.minute, vs.day_capture.date_time.second);
-    bv_log(config_ctx, BV_LOG_INFO, "day_capture hour %d minute %d second %d\n", vs.day_capture.date_time.hour, 
-                                        vs.day_capture.date_time.minute, vs.day_capture.date_time.second);
+    bv_log(config_ctx, BV_LOG_INFO, "night_capture hour %d minute %d second %d\n", vs.night_capture.date_time.hour, 
+                                        vs.night_capture.date_time.minute, vs.night_capture.date_time.second);
 
     if (bv_config_get_audio_source(config_ctx, 0, &as) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio source error\n");
@@ -204,8 +209,19 @@ int main(int argc, const char *argv[])
                                             (video_encoder_option.h264->resolutions)[0].height);
         bv_log(config_ctx, BV_LOG_INFO, "resolutions %dx%d\n", (video_encoder_option.h264->resolutions)[1].width, 
                                             (video_encoder_option.h264->resolutions)[1].height);
-        bv_free(video_encoder_option.h264->resolutions);
+        if (video_encoder_option.h264->resolutions)
+            bv_free(video_encoder_option.h264->resolutions);
         bv_free(video_encoder_option.h264);
+    }
+    if (video_encoder_option.mpeg) {
+        if (video_encoder_option.mpeg->resolutions)
+            bv_free(video_encoder_option.mpeg->resolutions);
+        bv_free(video_encoder_option.mpeg);
+    }
+    if (video_encoder_option.jpeg) {
+        if (video_encoder_option.jpeg->resolutions)
+            bv_free(video_encoder_option.jpeg->resolutions);
+        bv_free(video_encoder_option.jpeg);
     }
 
     if (bv_config_get_audio_encoder_options(config_ctx, 0, 0, &audio_encoder_option) < 0) {
@@ -213,20 +229,22 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "nb_options %d\n", audio_encoder_option.nb_options);
     if (audio_encoder_option.options) {
-        bv_log(config_ctx, BV_LOG_INFO, "codec_id %d\n", audio_encoder_option.options->codec_id);
-        if (audio_encoder_option.options->bitrate_list.items) {
-            bv_log(config_ctx, BV_LOG_INFO, "nb_int %d\n", audio_encoder_option.options->bitrate_list.nb_int);
-            for (i = 0; i < audio_encoder_option.options->bitrate_list.nb_int; i++) {
-                bv_log(config_ctx, BV_LOG_INFO, "items[0] %lld\n", audio_encoder_option.options->bitrate_list.items[i]);
+        for (i = 0; i < audio_encoder_option.nb_options; i++) {
+            bv_log(config_ctx, BV_LOG_INFO, "codec_id %d\n", audio_encoder_option.options[i].codec_id);
+            if (audio_encoder_option.options[i].bitrate_list.items) {
+                bv_log(config_ctx, BV_LOG_INFO, "nb_int %d\n", audio_encoder_option.options[i].bitrate_list.nb_int);
+                for (j = 0; j < audio_encoder_option.options[i].bitrate_list.nb_int; j++) {
+                    bv_log(config_ctx, BV_LOG_INFO, "bitrate list %lld\n", audio_encoder_option.options[i].bitrate_list.items[j]);
+                }
+                bv_free(audio_encoder_option.options[i].bitrate_list.items);
             }
-            bv_free(audio_encoder_option.options->bitrate_list.items);
-        }
-        if (audio_encoder_option.options->sample_rate_list.items) {
-            bv_log(config_ctx, BV_LOG_INFO, "nb_int %d\n", audio_encoder_option.options->sample_rate_list.nb_int);
-            for (i = 0; i < audio_encoder_option.options->sample_rate_list.nb_int; i++) {
-                bv_log(config_ctx, BV_LOG_INFO, "items[0] %lld\n", audio_encoder_option.options->sample_rate_list.items[i]);
+            if (audio_encoder_option.options[i].sample_rate_list.items) {
+                bv_log(config_ctx, BV_LOG_INFO, "nb_int %d\n", audio_encoder_option.options[i].sample_rate_list.nb_int);
+                for (j = 0; j < audio_encoder_option.options[i].sample_rate_list.nb_int; j++) {
+                    bv_log(config_ctx, BV_LOG_INFO, "sample rate list %lld\n", audio_encoder_option.options[i].sample_rate_list.items[j]);
+                }
+                bv_free(audio_encoder_option.options[i].sample_rate_list.items);
             }
-            bv_free(audio_encoder_option.options->sample_rate_list.items);
         }
         bv_free(audio_encoder_option.options);
     }

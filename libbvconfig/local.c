@@ -111,6 +111,68 @@ typedef struct _LocalContext {
 
 static int tmp = 0;
 
+static int judge_to_encoding_enum(const char *encoding)
+{
+    if (bv_strcasecmp(encoding, "H264") == 0) {
+        return BV_CODEC_ID_H264;
+    } else if (bv_strcasecmp(encoding, "MPEG") == 0) {
+        return BV_CODEC_ID_MPEG;
+    } else if (bv_strcasecmp(encoding, "JPEG") == 0) {
+        return BV_CODEC_ID_JPEG;
+    } else if (bv_strcasecmp(encoding, "G711A") == 0) {
+        return BV_CODEC_ID_G711A;
+    } else if (bv_strcasecmp(encoding, "G711U") == 0) {
+        return BV_CODEC_ID_G711U;
+    } else if (bv_strcasecmp(encoding, "G726") == 0) {
+        return BV_CODEC_ID_G726;
+    } else if (bv_strcasecmp(encoding, "AAC") == 0) {
+        return BV_CODEC_ID_AAC;
+    } else 
+        return BVERROR(EINVAL);
+}
+
+static int judge_to_rate_control_enum(const char *rate)
+{
+    if (bv_strcasecmp(rate, "VBR") == 0) {
+        return BV_RC_MODE_ID_VBR;
+    } else if (bv_strcasecmp(rate, "CBR") == 0) {
+        return BV_RC_MODE_ID_CBR;
+    } else if (bv_strcasecmp(rate, "ABR") == 0) {
+        return BV_RC_MODE_ID_ABR;
+    } else if (bv_strcasecmp(rate, "FIXQP") == 0) {
+        return BV_RC_MODE_ID_FIXQP;
+    } else if (bv_strcasecmp(rate, "BUTT") == 0) {
+        return BV_RC_MODE_ID_BUTT;
+    } else
+        return BVERROR(EINVAL);
+}
+
+static int judge_to_encode_type_enum(const char *type)
+{
+    if (bv_strcasecmp(type, "onvif") == 0) {
+        return BV_MEDIA_STREAM_TYPE_ONVIF;
+    } else if (bv_strcasecmp(type, "board") == 0) {
+        return BV_MEDIA_STREAM_TYPE_BOARD;
+    } else
+        return BVERROR(EINVAL);
+}
+
+static int judge_to_protocol_enum(const char *protocol)
+{
+    if (bv_strcasecmp(protocol, "PELCO_P") == 0) {
+        return BV_PTZ_PROTO_PELCO_P;
+    } else if (bv_strcasecmp(protocol, "PELCO_D") == 0) {
+        return BV_PTZ_PROTO_PELCO_D;
+    } else if (bv_strcasecmp(protocol, "SAMSUNG") == 0) {
+        return BV_PTZ_PROTO_SAMSUNG;
+    } else if (bv_strcasecmp(protocol, "VISCA") == 0) {
+        return BV_PTZ_PROTO_VISCA;
+    } else if (bv_strcasecmp(protocol, "YAAN") == 0) {
+        return BV_PTZ_PROTO_YAAN;
+    } else
+        return BVERROR(EINVAL);
+}
+
 static int local_probe(BVConfigContext *h, BVProbeData *p)
 {
     if (bv_strstart(p->filename, "local:", NULL))
@@ -158,10 +220,14 @@ static int local_get_device_info(BVConfigContext *h, BVDeviceInfo *devinfo)
     GET_VALUE(obj, "video_output_devices", NULL, devinfo->video_output_devices);
     GET_VALUE(obj, "audio_source_devices", NULL, devinfo->audio_source_devices);
     GET_VALUE(obj, "audio_output_devices", NULL, devinfo->audio_output_devices);
-    GET_VALUE(obj, "video_source", NULL, devinfo->video_sources);
+    GET_VALUE(obj, "video_sources", NULL, devinfo->video_sources);
     GET_VALUE(obj, "video_outputs", NULL, devinfo->video_outputs);
     GET_VALUE(obj, "audio_sources", NULL, devinfo->audio_sources);
     GET_VALUE(obj, "audio_outputs", NULL, devinfo->audio_outputs);
+    GET_VALUE(obj, "media_devices", NULL, devinfo->media_devices);
+    GET_VALUE(obj, "media_encoders", NULL, devinfo->media_encoders);
+    GET_VALUE(obj, "media_decoders", NULL, devinfo->media_decoders);
+    GET_VALUE(obj, "talkbacks", NULL, devinfo->talkbacks);
     GET_VALUE(obj, "serial_ports", NULL, devinfo->serial_ports);
     GET_VALUE(obj, "alert_in_count", NULL, devinfo->alert_in_count);
     GET_VALUE(obj, "alert_out_count", NULL, devinfo->alert_out_count);
@@ -209,27 +275,14 @@ static int local_get_video_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, "framerate", NULL, config->codec_context.time_base.den);
     config->codec_context.time_base.num = 1;
 
+    GET_VALUE(elem2, "enable", NULL, tmp);
+    config->enable = tmp;
+
     GET_VALUE(elem2, "encoding", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "H264") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_H264;
-    } else if (bv_strcasecmp(localctx->value, "MPEG") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_MPEG;
-    } else if (bv_strcasecmp(localctx->value, "JPEG") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_JPEG;
-    }
+    config->codec_context.codec_id = judge_to_encoding_enum(localctx->value);
 
     GET_VALUE(elem2, "rate_control", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "VBR") == 0) {
-        config->codec_context.mode_id = BV_RC_MODE_ID_VBR;
-    } else if (bv_strcasecmp(localctx->value, "CBR") == 0) {
-        config->codec_context.mode_id = BV_RC_MODE_ID_CBR;
-    } else if (bv_strcasecmp(localctx->value, "ABR") == 0) {
-        config->codec_context.mode_id = BV_RC_MODE_ID_ABR;
-    } else if (bv_strcasecmp(localctx->value, "FIXQP") == 0) {
-        config->codec_context.mode_id = BV_RC_MODE_ID_FIXQP;
-    } else if (bv_strcasecmp(localctx->value, "BUTT") == 0) {
-        config->codec_context.mode_id = BV_RC_MODE_ID_BUTT;
-    }
+    config->codec_context.mode_id = judge_to_rate_control_enum(localctx->value);
 
 error:
     if (elem2)
@@ -276,6 +329,7 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
         }
     }
 
+    SET_VALUE(elem2, "enable", NULL, config->enable);
     SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "width", NULL, config->codec_context.width);
     SET_VALUE(elem2, "height", NULL, config->codec_context.height);
@@ -373,7 +427,7 @@ error:
     return ret;
 }
 
-static int get_value_video_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVVideoOption *options)
+static int get_value_video_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVVideoOption *options, int flag)
 {
     int i = 0;
     int rett = 0;
@@ -388,16 +442,26 @@ static int get_value_video_encoder_options(BVConfigContext *h, BVConfigObject *e
         bv_log(h, BV_LOG_ERROR, "get member[framerate] value is invalid\n");
     }
 
-    GET_VALUE(elem, "gop", localctx->value, tmp);
-    rett = sscanf(localctx->value, "[%lld..%lld]", &options->gop_range.min, &options->gop_range.max);
-    if (rett != 2) {
-        bv_log(h, BV_LOG_ERROR, "get member[gop] value is invalid\n");
-    }
+    if (flag == BV_CODEC_ID_H264) {
+        GET_VALUE(elem, "gop", localctx->value, tmp);
+        rett = sscanf(localctx->value, "[%lld..%lld]", &options->gop_range.min, &options->gop_range.max);
+        if (rett != 2) {
+            bv_log(h, BV_LOG_ERROR, "get member[gop] value is invalid\n");
+        }
 
-    GET_VALUE(elem, "bitrate", localctx->value, tmp);
-    rett = sscanf(localctx->value, "[%lld..%lld]", &options->bitrate_range.min, &options->bitrate_range.max);
-    if (rett != 2) {
-        bv_log(h, BV_LOG_ERROR, "get member[bitrate] value is invalid\n");
+        GET_VALUE(elem, "bitrate", localctx->value, tmp);
+        rett = sscanf(localctx->value, "[%lld..%lld]", &options->bitrate_range.min, &options->bitrate_range.max);
+        if (rett != 2) {
+            bv_log(h, BV_LOG_ERROR, "get member[bitrate] value is invalid\n");
+        }
+    }
+ 
+    if (flag == BV_CODEC_ID_JPEG) {
+        GET_VALUE(elem, "interval", localctx->value, tmp);
+        rett = sscanf(localctx->value, "[%lld..%lld]", &options->interval_range.min, &options->interval_range.max);
+        if (rett != 2) {
+            bv_log(h, BV_LOG_ERROR, "get member[interval] value is invalid\n");
+        }
     }
     
     GET_VALUE(elem, "nb_resolutions", NULL, options->nb_resolutions);
@@ -448,7 +512,7 @@ static int get_encoding_video_encoder_options(BVConfigContext *h, BVConfigObject
             return BVERROR(EINVAL);
         }
         config->h264->codec_id = BV_CODEC_ID_H264;
-        get_value_video_encoder_options(h, elem, config->h264);
+        get_value_video_encoder_options(h, elem, config->h264, BV_CODEC_ID_H264);
     } else if (bv_strcasecmp(localctx->value, "MPEG") == 0) {
         config->mpeg = bv_mallocz(sizeof(BVVideoOption));
         if (!config->mpeg) {
@@ -456,7 +520,7 @@ static int get_encoding_video_encoder_options(BVConfigContext *h, BVConfigObject
             return BVERROR(EINVAL);
         }
         config->mpeg->codec_id = BV_CODEC_ID_MPEG;
-        get_value_video_encoder_options(h, elem, config->mpeg);
+        get_value_video_encoder_options(h, elem, config->mpeg, BV_CODEC_ID_MPEG);
     } else if (bv_strcasecmp(localctx->value, "JPEG") == 0) {
         config->jpeg = bv_mallocz(sizeof(BVVideoOption));
         if (!config->jpeg) {
@@ -464,7 +528,7 @@ static int get_encoding_video_encoder_options(BVConfigContext *h, BVConfigObject
             return BVERROR(EINVAL);
         }
         config->jpeg->codec_id = BV_CODEC_ID_JPEG;
-        get_value_video_encoder_options(h, elem, config->jpeg);
+        get_value_video_encoder_options(h, elem, config->jpeg, BV_CODEC_ID_JPEG);
     }
     return 0;
 }
@@ -477,9 +541,8 @@ static int local_get_video_encoder_options(BVConfigContext *h, int channel, int 
     int rett = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *elem2 = NULL;
     BVConfigObject *options = NULL;
-    BVConfigObject *elem3 = NULL;
+    BVConfigObject *elem2 = NULL;
     LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "video_encoder_options");
@@ -488,33 +551,31 @@ static int local_get_video_encoder_options(BVConfigContext *h, int channel, int 
     elem = bv_config_get_element(h->pdb, obj, channel);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, channel, ret);
 
-    elem2 = bv_config_get_element(h->pdb, elem, index);
-    DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, index, ret);
-
-    GET_VALUE(elem2, "token", config->token, tmp);
-    GET_VALUE(elem2, "quality", localctx->value, tmp);
+    GET_VALUE(elem, "quality", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%lld..%lld]", &config->quality.min, &config->quality.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[quality] value is invalid\n");
     }
 
-    options = bv_config_get_member(h->pdb, elem2, "options");
+    options = bv_config_get_member(h->pdb, elem, "options");
     DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "options", ret);
 
     max = bv_config_get_elements(h->pdb, options);
+    if (max <= 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[options] elements is invalid\n");
+        goto error;
+    }
     for (i = 0; i < max; i++) {
-        elem3 = bv_config_get_element(h->pdb, options, i);
-        DETERMINE_INDEX_IS_OR_NOT_VALID(elem3, i, ret);
-        GET_VALUE(elem3, "encoding", localctx->value, tmp);
-        get_encoding_video_encoder_options(h, elem3, config);
-        bv_config_object_decref(h->pdb, elem3);
+        elem2 = bv_config_get_element(h->pdb, options, i);
+        DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, i, ret);
+        GET_VALUE(elem2, "encoding", localctx->value, tmp);
+        get_encoding_video_encoder_options(h, elem2, config);
+        bv_config_object_decref(h->pdb, elem2);
     }
     
 error:
     if (options)
         bv_config_object_decref(h->pdb, options);
-    if (elem2)
-        bv_config_object_decref(h->pdb, elem2);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -522,7 +583,7 @@ error:
     return ret;
 }
 
-static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVAudioEncoderOption *config)
+static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *elem, BVAudioOption *config)
 {
     int i = 0;
     int max = 0;
@@ -534,15 +595,7 @@ static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *e
     LocalContext *localctx = h->priv_data;
 
     GET_VALUE(elem, "encoding", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "G711A") == 0) {
-        config->options->codec_id = BV_CODEC_ID_G711A;
-    } else if (bv_strcasecmp(localctx->value, "G711U") == 0) {
-        config->options->codec_id = BV_CODEC_ID_G711U;
-    } else if (bv_strcasecmp(localctx->value, "G726") == 0) {
-        config->options->codec_id = BV_CODEC_ID_G726;
-    } else if (bv_strcasecmp(localctx->value, "AAC") == 0) {
-        config->options->codec_id = BV_CODEC_ID_AAC;
-    }
+    config->codec_id = judge_to_encoding_enum(localctx->value);
 
     GET_VALUE(elem, "bitrate", localctx->value, tmp);
     ret = sscanf(localctx->value, "(%[^)])", string);
@@ -562,14 +615,14 @@ static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *e
                 break;
         } while(1);
     }
-    config->options->bitrate_list.nb_int = max;
-    config->options->bitrate_list.items = bv_mallocz(sizeof(int64_t) * max);
+    config->bitrate_list.nb_int = max;
+    config->bitrate_list.items = bv_mallocz(sizeof(int64_t) * max);
     ptr = bv_strtok(string2, " ", &saveptr);
     if (!ptr) {
         bv_log(h, BV_LOG_ERROR, "bitrate copy string is wrong\n");
     } else {
-        for (i = 0; i < config->options->bitrate_list.nb_int; i++) {
-            ret = sscanf(ptr, "%lld", &config->options->bitrate_list.items[i]);
+        for (i = 0; i < config->bitrate_list.nb_int; i++) {
+            ret = sscanf(ptr, "%lld", &config->bitrate_list.items[i]);
             if (ret != 1) {
                 bv_log(h, BV_LOG_ERROR, "get member[bitrate] value is invalid\n");
             }
@@ -598,14 +651,14 @@ static int get_value_audio_encoder_options(BVConfigContext *h, BVConfigObject *e
                 break;
         } while(1);
     }
-    config->options->sample_rate_list.nb_int = max;
-    config->options->sample_rate_list.items = bv_mallocz(sizeof(int64_t) * max);
+    config->sample_rate_list.nb_int = max;
+    config->sample_rate_list.items = bv_mallocz(sizeof(int64_t) * max);
     ptr = bv_strtok(string2, " ", &saveptr);
     if (!ptr) {
         bv_log(h, BV_LOG_ERROR, "sample_rate copy string is wrong\n");
     } else {
-        for (i = 0; i < config->options->sample_rate_list.nb_int; i++) {
-            ret = sscanf(ptr, "%lld", &config->options->sample_rate_list.items[i]);
+        for (i = 0; i < config->sample_rate_list.nb_int; i++) {
+            ret = sscanf(ptr, "%lld", &config->sample_rate_list.items[i]);
             if (ret != 1) {
                 bv_log(h, BV_LOG_ERROR, "get member[sample_rate] value is invalid\n");
             }
@@ -625,10 +678,8 @@ static int local_get_audio_encoder_options(BVConfigContext *h, int channel, int 
     int ret = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *elem2 = NULL;
     BVConfigObject *options = NULL;
-    BVConfigObject *elem3 = NULL;
-    LocalContext *localctx = h->priv_data;
+    BVConfigObject *elem2 = NULL;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_encoder_options");
     DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "audio_encoder_options", ret);
@@ -636,31 +687,28 @@ static int local_get_audio_encoder_options(BVConfigContext *h, int channel, int 
     elem = bv_config_get_element(h->pdb, obj, channel);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, channel, ret);
 
-    elem2 = bv_config_get_element(h->pdb, elem, index);
-    DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, index, ret);
-
-    GET_VALUE(elem2, "token", config->token, tmp);
-
-    options = bv_config_get_member(h->pdb, elem2, "options");
+    options = bv_config_get_member(h->pdb, elem, "options");
     if (!options) {
         bv_log(h, BV_LOG_ERROR, "get member[options] error\n");
         goto error;
     }
     max = bv_config_get_elements(h->pdb, options);
     config->nb_options = max;
+    if (max <= 0) {
+        bv_log(h, BV_LOG_ERROR, "get member[options] elements is invalid\n");
+        goto error;
+    }
     config->options = bv_mallocz(sizeof(BVAudioOption) * config->nb_options);
     for (i = 0; i < max; i++) {
-        elem3 = bv_config_get_element(h->pdb, options, i);
-        DETERMINE_INDEX_IS_OR_NOT_VALID(elem3, i, ret);
-        get_value_audio_encoder_options(h, elem3, config);
-        bv_config_object_decref(h->pdb, elem3);
+        elem2 = bv_config_get_element(h->pdb, options, i);
+        DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, i, ret);
+        get_value_audio_encoder_options(h, elem2, &config->options[i]);
+        bv_config_object_decref(h->pdb, elem2);
     }
 
 error:
     if (options) 
         bv_config_object_decref(h->pdb, options);
-    if (elem2)
-        bv_config_object_decref(h->pdb, elem2);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -690,15 +738,7 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, "sample_rate", NULL, config->codec_context.sample_rate);
 
     GET_VALUE(elem2, "encoding", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "G711A") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_G711A;
-    } else if (bv_strcasecmp(localctx->value,"G711U") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_G711U;
-    } else if (bv_strcasecmp(localctx->value, "G726") == 0) {
-        config->codec_context.codec_id = BV_CODEC_ID_G726;
-    } else if (bv_strcasecmp(localctx->value, "AAC") == 0)  {
-        config->codec_context.codec_id = BV_CODEC_ID_AAC;
-    }
+    config->codec_context.codec_id = judge_to_encoding_enum(localctx->value);
 
 error:
     if (elem2)
@@ -770,7 +810,6 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     int rett = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *elem2 = NULL;
     BVConfigObject *rs232 = NULL;
     LocalContext *localctx = h->priv_data;
 
@@ -780,42 +819,29 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     elem = bv_config_get_element(h->pdb, obj, channel);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, channel, ret);
 
-    elem2 = bv_config_get_element(h->pdb, elem, index);
-    DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, index, ret);
-
-    GET_VALUE(elem2, "url", config->token, tmp);
-    GET_VALUE(elem2, "pan", localctx->value, tmp);
+    GET_VALUE(elem, "token", config->token, tmp);
+    GET_VALUE(elem, "pan", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%f..%f]", &config->pan_range.min, &config->pan_range.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[pan] value is invalid\n");
     }
 
-    GET_VALUE(elem2, "tilt", localctx->value, tmp);
+    GET_VALUE(elem, "tilt", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%f..%f]", &config->tilt_range.min, &config->tilt_range.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[tilt] value is invalid\n");
     }
 
-    GET_VALUE(elem2, "zoom", localctx->value, tmp);
+    GET_VALUE(elem, "zoom", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%f..%f]", &config->zoom_range.min, &config->zoom_range.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[zoom] value is invalid\n");
     }
 
-    GET_VALUE(elem2, "protocol", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "PELCO_P") == 0) {
-        config->protocol = BV_PTZ_PROTO_PELCO_P;
-    } else if (bv_strcasecmp(localctx->value, "PELCO_D") == 0) {
-        config->protocol = BV_PTZ_PROTO_PELCO_D;
-    } else if (bv_strcasecmp(localctx->value, "SAMSUNG") == 0) {
-        config->protocol = BV_PTZ_PROTO_SAMSUNG;
-    } else if (bv_strcasecmp(localctx->value, "VISCA") == 0) {
-        config->protocol = BV_PTZ_PROTO_VISCA;
-    } else if (bv_strcasecmp(localctx->value, "YAAN") == 0) {
-        config->protocol = BV_PTZ_PROTO_YAAN;
-    }
+    GET_VALUE(elem, "protocol", localctx->value, tmp);
+    config->protocol = judge_to_protocol_enum(localctx->value);
 
-    rs232 = bv_config_get_member(h->pdb, elem2, "rs232");
+    rs232 = bv_config_get_member(h->pdb, elem, "rs232");
     DETERMINE_FIELD_IS_OR_NOT_EXIST(rs232, "rs232", ret);
 
     GET_VALUE(rs232, "data_bits", NULL, config->rs485.data_bits);
@@ -827,8 +853,6 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
 error:
     if (rs232)
         bv_config_object_decref(h->pdb, rs232);
-    if (elem2)
-        bv_config_object_decref(h->pdb, elem2);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -899,7 +923,6 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     int ret = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *display = NULL;
     LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "video_output_devices");
@@ -914,17 +937,7 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     GET_VALUE(elem, "interface", config->interface, tmp);
     GET_VALUE(elem, "work_mode", config->work_mode, tmp);
 
-    display = bv_config_get_member(h->pdb, elem, "display");
-    DETERMINE_FIELD_IS_OR_NOT_EXIST(display, "display", ret);
-
-    GET_VALUE(display, "left", NULL, config->display.x);
-    GET_VALUE(display, "top", NULL, config->display.y);
-    GET_VALUE(display, "width", NULL, config->display.width);
-    GET_VALUE(display, "height", NULL, config->display.height);
-
 error:
-    if (display)
-        bv_config_object_decref(h->pdb, display);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -949,7 +962,7 @@ static int local_get_audio_output_device(BVConfigContext *h, int index, BVAudioO
     GET_VALUE(elem, "chip", config->chip, tmp);
     GET_VALUE(elem, "dev", config->dev, tmp);
     GET_VALUE(elem, "work_mode", config->work_mode, tmp);
-    GET_VALUE(elem, "channels_mode", NULL, config->channel_mode);
+    GET_VALUE(elem, "channel_mode", NULL, config->channel_mode);
     GET_VALUE(elem, "channels", NULL, config->channel_counts);
     GET_VALUE(elem, "sample_format", NULL, config->sample_format);
     GET_VALUE(elem, "sample_rate", NULL, config->sample_rate);
@@ -969,7 +982,6 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     int rett = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *capture = NULL;
     BVConfigObject *imaging = NULL;
     BVConfigObject *elem2 = NULL;
     BVConfigObject *vision = NULL;
@@ -986,27 +998,21 @@ static int local_get_video_source(BVConfigContext *h, int index, BVVideoSource *
     GET_VALUE(elem, "token", config->token, tmp);
     GET_VALUE(elem, "video_source_device", NULL, config->video_source_device);
     GET_VALUE(elem, "framerate", NULL, config->framerate);
-    GET_VALUE(elem, "day_to_night", localctx->value, tmp);
+    GET_VALUE(elem, "day_scope", localctx->value, tmp);
     config->day_capture.date_time.second = 0;
-    rett = sscanf(localctx->value, "%d:%d", &config->day_capture.date_time.hour, &config->day_capture.date_time.minute);
-    if (rett != 2) {
-        bv_log(h, BV_LOG_ERROR, "get member[day_to_night] value is invalid\n");
-    }
-
-    GET_VALUE(elem, "night_to_day", localctx->value, tmp);
     config->night_capture.date_time.second = 0;
-    rett = sscanf(localctx->value, "%d:%d", &config->night_capture.date_time.hour, &config->night_capture.date_time.minute);
-    if (rett != 2) {
-        bv_log(h, BV_LOG_ERROR, "get member[night_to_day] value is invalid\n");
+    rett = sscanf(localctx->value, "(%d:%d, %d:%d)", &config->day_capture.date_time.hour, &config->day_capture.date_time.minute,
+            &config->night_capture.date_time.hour, &config->night_capture.date_time.minute);
+    if (rett != 4) {
+        bv_log(h, BV_LOG_ERROR, "get member[day_scope] value is invalid\n");
     }
 
-    capture = bv_config_get_member(h->pdb, elem, "capture_rect");
-    DETERMINE_FIELD_IS_OR_NOT_EXIST(capture, "capture_rect", ret);
-
-    GET_VALUE(capture, "left", NULL, config->bounds.x);
-    GET_VALUE(capture, "top", NULL, config->bounds.y);
-    GET_VALUE(capture, "width", NULL, config->bounds.width);
-    GET_VALUE(capture, "height", NULL, config->bounds.height);
+    GET_VALUE(elem, "capture_rect", localctx->value, tmp);
+    rett = sscanf(localctx->value, "(%d, %d, %d, %d)", &config->bounds.x, &config->bounds.y, 
+            &config->bounds.width, &config->bounds.height);
+    if (rett != 4) {
+        bv_log(h, BV_LOG_ERROR, "get member[capture_rect] value is invalid\n");
+    }
 
     imaging = bv_config_get_member(h->pdb, h->pdb->root, "imaging_setting");
     DETERMINE_FIELD_IS_OR_NOT_EXIST(imaging, "imaging_setting", ret);
@@ -1046,8 +1052,6 @@ error:
         bv_config_object_decref(h->pdb, elem2);
     if (imaging)
         bv_config_object_decref(h->pdb, imaging);
-    if (capture)
-        bv_config_object_decref(h->pdb, capture);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -1091,9 +1095,9 @@ error:
 static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *config)
 {
     int ret = 0;
+    int rett = 0;
     BVConfigObject *obj = NULL;
     BVConfigObject *elem = NULL;
-    BVConfigObject *display = NULL;
     LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "video_outputs");
@@ -1104,19 +1108,14 @@ static int local_get_video_output(BVConfigContext *h, int index, BVVideoOutput *
 
     GET_VALUE(elem, "token", config->token, tmp);
     GET_VALUE(elem, "video_output_device", NULL, config->video_output_device);
-
-    display = bv_config_get_member(h->pdb, elem, "display");
-    DETERMINE_FIELD_IS_OR_NOT_EXIST(display, "display", ret);
-
-    GET_VALUE(display, "left", NULL, config->display.x);
-    GET_VALUE(display, "top", NULL, config->display.y);
-    GET_VALUE(display, "width", NULL, config->display.width);
-    GET_VALUE(display, "height", NULL, config->display.height);
-
+    GET_VALUE(elem, "display", localctx->value, tmp);
+    rett = sscanf(localctx->value, "(%d, %d, %d, %d)", &config->display.x, &config->display.y, 
+            &config->display.width, &config->display.height);
+    if (rett != 4) {
+        bv_log(h, BV_LOG_ERROR, "get member[display] value is invalid\n");
+    }
 
 error:
-    if (display)
-        bv_config_object_decref(h->pdb, display);
     if (elem)
         bv_config_object_decref(h->pdb, elem);
     if (obj)
@@ -1251,10 +1250,17 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
     GET_VALUE(elem, "name", config->name, tmp);
-    GET_VALUE(elem, "video_encode_type", NULL, config->video_encode_type);
-    GET_VALUE(elem, "audio_encode_type", NULL, config->audio_encode_type);
-    GET_VALUE(elem, "video_decode_type", NULL, config->video_decode_type);
-    GET_VALUE(elem, "audio_decode_type", NULL, config->audio_decode_type);
+    GET_VALUE(elem, "video_encode_type", localctx->value, tmp);
+    config->video_encode_type = judge_to_encode_type_enum(localctx->value);
+
+    GET_VALUE(elem, "audio_encode_type", localctx->value, tmp);
+    config->audio_encode_type = judge_to_encode_type_enum(localctx->value);
+
+    GET_VALUE(elem, "video_decode_type", localctx->value, tmp);
+    config->video_decode_type = judge_to_encode_type_enum(localctx->value);
+
+    GET_VALUE(elem, "audio_decode_type", localctx->value, tmp);
+    config->audio_decode_type = judge_to_encode_type_enum(localctx->value);
 
     if ((rett = local_get_media_encoder(h, index, &config->media_encoder)) < 0) {
         bv_log(h, BV_LOG_ERROR, "get member[media_encoders] in media device error, return [%d]\n", rett);
