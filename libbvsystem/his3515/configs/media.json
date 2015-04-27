@@ -376,7 +376,7 @@
     "rate_control": "VBR",
     "gop": 100,
     "profile_level": "baseline",
-    "framerate": 25,
+    "framerate": 10,
     "bitrate": 512
    },
    {
@@ -530,60 +530,95 @@
   {
    "options": [
     {
-     "encoding": "(G711A, G711U)",
-     "bitrate": "(64000)",
+     "encoding": "G711A",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
     },
     {
-     "encoding": "(G726)",
-     "bitrate": "(16000, 24000, 32000, 40000)",
+     "encoding": "G711U",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
+    },
+    {
+     "encoding": "G726",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(16000, 24000, 32000, 40000)"
     }
    ]
   },
   {
    "options": [
     {
-     "encoding": "(G711A, G711U)",
-     "bitrate": "(64000)",
+     "encoding": "G711A",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
     },
     {
-     "encoding": "(G726)",
-     "bitrate": "(16000, 24000, 32000, 40000)",
+     "encoding": "G711U",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
+    },
+    {
+     "encoding": "G726",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(16000, 24000, 32000, 40000)"
     }
    ]
   },
   {
    "options": [
     {
-     "encoding": "(G711A, G711U)",
-     "bitrate": "(64000)",
+     "encoding": "G711A",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
     },
     {
-     "encoding": "(G726)",
-     "bitrate": "(16000, 24000, 32000, 40000)",
+     "encoding": "G711U",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
+    },
+    {
+     "encoding": "G726",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(16000, 24000, 32000, 40000)"
     }
    ]
   },
   {
    "options": [
     {
-     "encoding": "(G711A, G711U)",
-     "bitrate": "(64000)",
+     "encoding": "G711A",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
     },
     {
-     "encoding": "(G726)",
-     "bitrate": "(16000, 24000, 32000, 40000)",
+     "encoding": "G711U",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
+    },
+    {
+     "encoding": "G726",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(16000, 24000, 32000, 40000)"
     }
    ]
   },
   {
    "options": [
     {
-     "encoding": "(G711A, G711U)",
-     "bitrate": "(64000)",
+     "encoding": "G711A",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
     },
     {
-     "encoding": "(G726)",
-     "bitrate": "(16000, 24000, 32000, 40000)",
+     "encoding": "G711U",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(64000)"
+    },
+    {
+     "encoding": "G726",
+   	 "sample_rate": "(8000)",
+     "bitrate": "(16000, 24000, 32000, 40000)"
     }
    ]
   }
@@ -594,13 +629,15 @@
     "token": "1/0/0",
     "enable": 1,
     "encoding": "G711A",
-    "bitrate": 64000,
+    "sample_rate": 8000,
+    "bitrate": 64000
    },
    {
     "token": "1/0/6",
     "enable": 1,
     "encoding": "G726",
-    "bitrate": 32000,
+    "sample_rate": 8000,
+    "bitrate": 32000
    }
   ],
   [
@@ -608,13 +645,15 @@
     "token": "0/1/1",
     "enable": 1,
     "encoding": "G711A",
-    "bitrate": 64000,
+    "sample_rate": 8000,
+    "bitrate": 64000
    },
    {
     "token": "0/1/8",
     "enable": 1,
     "encoding": "G726",
-    "bitrate": 32000,
+    "sample_rate": 8000,
+    "bitrate": 32000
    }
   ],
   [
@@ -622,13 +661,15 @@
     "token": "0/2/2",
     "enable": 1,
     "encoding": "G711A",
-    "bitrate": 64000,
+    "sample_rate": 8000,
+    "bitrate": 64000
    },
    {
     "token": "0/2/10",
     "enable": 1,
-    "encoding": "G726A",
-    "bitrate": 32000,
+    "encoding": "G726",
+    "sample_rate": 8000,
+    "bitrate": 32000
    }
   ],
   [
@@ -636,13 +677,15 @@
     "token": "0/3/3",
     "enable": 1,
     "encoding": "G711A",
-    "bitrate": 64000,
+    "sample_rate": 8000,
+    "bitrate": 64000
    },
    {
     "token": "0/3/12",
     "enable": 1,
     "encoding": "G726",
-    "bitrate": 32000,
+    "sample_rate": 8000,
+    "bitrate": 32000
    }
   ],
   [
@@ -650,7 +693,8 @@
     "token": "1/0/4",
     "enable": 1,
     "encoding": "G726",
-    "bitrate": 32000,
+    "sample_rate": 8000,
+    "bitrate": 32000
    }
   ]
  ],
