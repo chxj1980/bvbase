@@ -173,6 +173,34 @@ static int judge_to_protocol_enum(const char *protocol)
         return BVERROR(EINVAL);
 }
 
+static int judge_to_mic_or_line_in_enum(const char *input)
+{
+    if (bv_strcasecmp(input, "mic") == 0) {
+        return BV_AUDIO_INPUT_TYPE_MIC;
+    } else if (bv_strcasecmp(input, "line_in") == 0) {
+        return BV_AUDIO_INPUT_TYPE_LINE_IN;
+    } else
+        return BVERROR(EINVAL);
+}
+
+static BVIntRectange judge_to_display_struct(const char *work_mode)
+{
+    BVIntRectange rect;
+
+    if (bv_strcasecmp(work_mode, "PAL") == 0) {
+        rect.x = 0;
+        rect.y = 0;
+        rect.width = 704;
+        rect.height = 576;
+    } else if (bv_strcasecmp(work_mode, "NTSC") == 0) {
+        rect.x = 0;
+        rect.y = 0;
+        rect.width = 704;
+        rect.height = 480;
+    }
+    return rect;
+}
+
 static int local_probe(BVConfigContext *h, BVProbeData *p)
 {
     if (bv_strstart(p->filename, "local:", NULL))
@@ -370,6 +398,7 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
         config->codec_context.time_base.num = 25;
     }
     SET_VALUE(elem2, "framerate", NULL, config->codec_context.time_base.den / config->codec_context.time_base.num);
+    bv_config_file_dump(h->pdb, NULL);
 
 error:
     if (elem2)
@@ -736,7 +765,6 @@ static int local_get_audio_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, "token", config->token, tmp);
     GET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
     GET_VALUE(elem2, "sample_rate", NULL, config->codec_context.sample_rate);
-
     GET_VALUE(elem2, "encoding", localctx->value, tmp);
     config->codec_context.codec_id = judge_to_encoding_enum(localctx->value);
 
@@ -789,10 +817,11 @@ static int local_set_audio_encoder(BVConfigContext *h, int channel, int index, B
             break;
         }
     }
-
     SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
     SET_VALUE(elem2, "sample_rate", NULL, config->codec_context.sample_rate);
+    bv_config_file_dump(h->pdb, NULL);
+    
 
 error:
     if (elem2)
@@ -825,19 +854,16 @@ static int local_get_ptz_device(BVConfigContext *h, int channel, int index, BVPT
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[pan] value is invalid\n");
     }
-
     GET_VALUE(elem, "tilt", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%f..%f]", &config->tilt_range.min, &config->tilt_range.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[tilt] value is invalid\n");
     }
-
     GET_VALUE(elem, "zoom", localctx->value, tmp);
     rett = sscanf(localctx->value, "[%f..%f]", &config->zoom_range.min, &config->zoom_range.max);
     if (rett != 2) {
         bv_log(h, BV_LOG_ERROR, "get member[zoom] value is invalid\n");
     }
-
     GET_VALUE(elem, "protocol", localctx->value, tmp);
     config->protocol = judge_to_protocol_enum(localctx->value);
 
@@ -936,6 +962,7 @@ static int local_get_video_output_device(BVConfigContext *h, int index, BVVideoO
     GET_VALUE(elem, "dev", config->dev, tmp);
     GET_VALUE(elem, "interface", config->interface, tmp);
     GET_VALUE(elem, "work_mode", config->work_mode, tmp);
+    config->display = judge_to_display_struct(config->work_mode);
 
 error:
     if (elem)
@@ -1059,6 +1086,80 @@ error:
     return ret;
 }
 
+static int local_set_video_source(BVConfigContext *h, int index, BVVideoSource *config)
+{
+    int ret = 0;
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    BVConfigObject *imaging = NULL;
+    BVConfigObject *elem2 = NULL;
+    BVConfigObject *vision = NULL;
+    BVConfigObject *elem3 = NULL;
+    BVConfigObject *elem4 = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_sources");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "video_sources", ret);
+
+    elem = bv_config_get_element(h->pdb, obj, index);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
+
+    SET_VALUE(elem, "token", config->token, tmp);
+    SET_VALUE(elem, "video_source_device", NULL, config->video_source_device);
+    SET_VALUE(elem, "framerate", NULL, config->framerate);
+    sprintf(localctx->value, "(%d:%d, %d:%d)", config->day_capture.date_time.hour, config->day_capture.date_time.minute,
+            config->night_capture.date_time.hour, config->night_capture.date_time.minute);
+    SET_VALUE(elem, "day_scope", localctx->value, tmp);
+    sprintf(localctx->value, "(%d, %d, %d, %d)", config->bounds.x, config->bounds.y,
+            config->bounds.width, config->bounds.height);
+    SET_VALUE(elem, "capture_rect", localctx->value, tmp);
+
+    imaging = bv_config_get_member(h->pdb, h->pdb->root, "imaging_setting");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(imaging, "imaging_setting", ret);
+
+    elem2 = bv_config_get_element(h->pdb, imaging, index);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem2, index, ret);
+
+    vision = bv_config_get_member(h->pdb, elem2, "vision_control");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(vision, "vision_control", ret);
+
+    elem3 = bv_config_get_element(h->pdb, vision, 0);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem3, 0, ret);
+
+    SET_VALUE(elem3, "luminance", NULL, config->day_capture.imaging.luminance);
+    SET_VALUE(elem3, "contrast", NULL, config->day_capture.imaging.contrast);
+    SET_VALUE(elem3, "hue", NULL, config->day_capture.imaging.hue);
+    SET_VALUE(elem3, "saturation", NULL, config->day_capture.imaging.saturation);
+    SET_VALUE(elem3, "sharpness", NULL, config->day_capture.imaging.sharpness);
+
+    elem4 = bv_config_get_element(h->pdb, vision, 1);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem4, 1, ret);    
+
+    SET_VALUE(elem4, "luminance", NULL, config->night_capture.imaging.luminance);
+    SET_VALUE(elem4, "contrast", NULL, config->day_capture.imaging.contrast);
+    SET_VALUE(elem4, "hue", NULL, config->day_capture.imaging.hue);
+    SET_VALUE(elem4, "saturation", NULL, config->day_capture.imaging.saturation);
+    SET_VALUE(elem4, "sharpness", NULL, config->day_capture.imaging.sharpness);
+    bv_config_file_dump(h->pdb, NULL);
+
+error:
+    if (elem4)
+        bv_config_object_decref(h->pdb, elem4);
+    if (elem3)
+        bv_config_object_decref(h->pdb, elem3);
+    if (vision)
+        bv_config_object_decref(h->pdb, vision);
+    if (elem2)
+        bv_config_object_decref(h->pdb, elem2);
+    if (imaging)
+        bv_config_object_decref(h->pdb, imaging);
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return ret;
+}
+
 static int local_get_audio_source(BVConfigContext *h, int index, BVAudioSource *config)
 {
     int ret = 0;
@@ -1078,11 +1179,47 @@ static int local_get_audio_source(BVConfigContext *h, int index, BVAudioSource *
     GET_VALUE(elem, "volume", NULL, config->volume);
     GET_VALUE(elem, "sample_rate", NULL, config->sample_rate);
     GET_VALUE(elem, "input_type", localctx->value, tmp);
-    if (bv_strcasecmp(localctx->value, "mic") == 0) {
-        config->input_type = BV_AUDIO_INPUT_TYPE_MIC;
-    } else if (bv_strcasecmp(localctx->value, "line_in") == 0) {
-        config->input_type = BV_AUDIO_INPUT_TYPE_LINE_IN;
+    config->input_type = judge_to_mic_or_line_in_enum(localctx->value);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return ret;
+}
+
+static int local_set_audio_source(BVConfigContext *h, int index, BVAudioSource *config)
+{
+    int ret = 0;
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+    
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_sources");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "audio_sources", ret);
+
+    elem = bv_config_get_element(h->pdb, obj, index);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
+
+    SET_VALUE(elem, "token", config->token, tmp);
+    SET_VALUE(elem, "audio_source_device", NULL, config->audio_source_device);
+    SET_VALUE(elem, "channels", NULL, config->channels);
+    SET_VALUE(elem, "volume", NULL, config->volume);
+    SET_VALUE(elem, "sample_rate", NULL, config->sample_rate);
+    switch (config->input_type) {
+        case BV_AUDIO_INPUT_TYPE_MIC:
+        {
+            SET_VALUE(elem, "input_type", "MIC", tmp);
+            break;
+        }
+        case BV_AUDIO_INPUT_TYPE_LINE_IN:
+        {
+            SET_VALUE(elem, "input_type", "LINE_IN", tmp);
+            break;
+        }
     }
+    bv_config_file_dump(h->pdb, NULL);
 
 error:
     if (elem)
@@ -1123,6 +1260,34 @@ error:
     return ret;
 }
 
+static int local_set_video_output(BVConfigContext *h, int index, BVVideoOutput *config)
+{
+    int ret = 0;
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "video_outputs");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "video_outputs", ret);
+
+    elem = bv_config_get_element(h->pdb, obj, index);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
+
+    SET_VALUE(elem, "token", config->token, tmp);
+    SET_VALUE(elem, "video_output_device", NULL, config->video_output_device);
+    sprintf(localctx->value, "(%d, %d, %d, %d)", config->display.x, config->display.y,
+            config->display.width, config->display.height);
+    SET_VALUE(elem, "display", localctx->value, tmp);
+    bv_config_file_dump(h->pdb, NULL);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+    return ret;
+}
+
 static int local_get_audio_output(BVConfigContext *h, int index, BVAudioOutput *config)
 {
     int ret = 0;
@@ -1146,6 +1311,34 @@ error:
         bv_config_object_decref(h->pdb, elem);
     if (obj)
         bv_config_object_decref(h->pdb, obj);
+    return ret;
+}
+
+static int local_set_audio_output(BVConfigContext *h, int index, BVAudioOutput *config)
+{
+    int ret = 0;
+    BVConfigObject *obj = NULL;
+    BVConfigObject *elem = NULL;
+    LocalContext *localctx = h->priv_data;
+
+    obj = bv_config_get_member(h->pdb, h->pdb->root, "audio_outputs");
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "audio_outputs", ret);
+
+    elem = bv_config_get_element(h->pdb, obj, index);
+    DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
+
+    SET_VALUE(elem, "token", config->token, tmp);
+    SET_VALUE(elem, "volume", NULL, config->volume);
+    SET_VALUE(elem, "channels", NULL, config->channels);
+    SET_VALUE(elem, "audio_output_device", NULL, config->audio_output_device);
+    bv_config_file_dump(h->pdb, NULL);
+
+error:
+    if (elem)
+        bv_config_object_decref(h->pdb, elem);
+    if (obj)
+        bv_config_object_decref(h->pdb, obj);
+
     return ret;
 }
 
@@ -1252,13 +1445,10 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
     GET_VALUE(elem, "name", config->name, tmp);
     GET_VALUE(elem, "video_encode_type", localctx->value, tmp);
     config->video_encode_type = judge_to_encode_type_enum(localctx->value);
-
     GET_VALUE(elem, "audio_encode_type", localctx->value, tmp);
     config->audio_encode_type = judge_to_encode_type_enum(localctx->value);
-
     GET_VALUE(elem, "video_decode_type", localctx->value, tmp);
     config->video_decode_type = judge_to_encode_type_enum(localctx->value);
-
     GET_VALUE(elem, "audio_decode_type", localctx->value, tmp);
     config->audio_decode_type = judge_to_encode_type_enum(localctx->value);
 
@@ -1277,13 +1467,10 @@ static int local_get_media_device(BVConfigContext *h, int index, BVMediaDevice *
         }
         GET_VALUE(elem, "url", localctx->value, tmp);
         bv_strlcpy(((BVMobileDevice *)(config->devinfo))->url, localctx->value, sizeof(((BVMobileDevice *)(config->devinfo))->url));
-            
         GET_VALUE(elem, "user", localctx->value, tmp);
         bv_strlcpy(((BVMobileDevice *)(config->devinfo))->user, localctx->value, sizeof(((BVMobileDevice *)(config->devinfo))->user));
-
         GET_VALUE(elem, "passwd", localctx->value, tmp);
         bv_strlcpy(((BVMobileDevice *)(config->devinfo))->pswd, localctx->value, sizeof(((BVMobileDevice *)(config->devinfo))->pswd));
-    
         ((BVMobileDevice *)(config->devinfo))->timeout = 5;
     } else {
         config->devinfo = NULL;
@@ -1321,6 +1508,7 @@ static int local_set_media_device(BVConfigContext *h, int index, BVMediaDevice *
         bv_strlcpy(localctx->value, ((BVMobileDevice *)(config->devinfo))->url, sizeof(((BVMobileDevice *)(config->devinfo))->url));
         SET_VALUE(elem, "url", localctx->value, tmp);
     }
+    bv_config_file_dump(h->pdb, NULL);
 
 error:
     if (elem)
@@ -1373,7 +1561,11 @@ BVConfig bv_local_config = {
     .get_video_output_device    = local_get_video_output_device,
     .get_audio_output_device    = local_get_audio_output_device,
     .get_video_source           = local_get_video_source,
+    .set_video_source           = local_set_video_source,
     .get_audio_source           = local_get_audio_source,
+    .set_audio_source           = local_set_audio_source,
     .get_video_output           = local_get_video_output,
+    .set_video_output           = local_set_video_output,
     .get_audio_output           = local_get_audio_output,
+    .set_audio_output           = local_set_audio_output,
 };

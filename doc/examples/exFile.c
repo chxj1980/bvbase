@@ -180,6 +180,7 @@ int main(int argc, const char *argv[])
     }
     bv_log(config_ctx, BV_LOG_INFO, "interface %s\n", vo_dev.interface);
     bv_log(config_ctx, BV_LOG_INFO, "work_mode %s\n", vo_dev.work_mode);
+    bv_log(config_ctx, BV_LOG_INFO, "display %dx%d\n", vo_dev.display.width, vo_dev.display.height);
 
     if (bv_config_get_video_source(config_ctx, 0, &vs) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video source error\n");
@@ -191,12 +192,26 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "night_capture hour %d minute %d second %d\n", vs.night_capture.date_time.hour, 
                                         vs.night_capture.date_time.minute, vs.night_capture.date_time.second);
 
+    vs.day_capture.date_time.hour = 7;
+    vs.day_capture.date_time.minute = 30;
+    if (bv_config_set_video_source(config_ctx, 0, &vs) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "set video source error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "day_capture hour %d minute %d second %d\n", vs.day_capture.date_time.hour, 
+                                        vs.day_capture.date_time.minute, vs.day_capture.date_time.second);
+
     if (bv_config_get_audio_source(config_ctx, 0, &as) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio source error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "channels %d\n", as.channels);
     bv_log(config_ctx, BV_LOG_INFO, "input_type %d\n", as.input_type);
 
+    as.volume = 59;
+    if (bv_config_set_audio_source(config_ctx, 0, &as) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "set audio source error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "volume %d\n", as.volume);
+    
     if (bv_config_get_video_encoder_options(config_ctx, 0, 0, &video_encoder_option) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get video encoder option error\n");
     }
@@ -255,10 +270,23 @@ int main(int argc, const char *argv[])
     bv_log(config_ctx, BV_LOG_INFO, "token %s\n", vo.token);
     bv_log(config_ctx, BV_LOG_INFO, "display %dx%d\n", vo.display.width, vo.display.height);
 
+    vo.display.width = 704;
+    vo.display.height = 576;
+    if (bv_config_set_video_output(config_ctx, 0, &vo) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "set video output error\n");
+    }
+    bv_log(config_ctx, BV_LOG_INFO, "display %dx%d\n", vo.display.width, vo.display.height);
+    
     if (bv_config_get_audio_output(config_ctx, 0, &ao) < 0) {
         bv_log(config_ctx, BV_LOG_ERROR, "get audio output error\n");
     }
     bv_log(config_ctx, BV_LOG_INFO, "token %s\n", ao.token);
+    bv_log(config_ctx, BV_LOG_INFO, "volume %d\n", ao.volume);
+
+    ao.volume = 70;
+    if (bv_config_set_audio_output(config_ctx, 0, &ao) < 0) {
+        bv_log(config_ctx, BV_LOG_ERROR, "set audio output error\n");
+    }
     bv_log(config_ctx, BV_LOG_INFO, "volume %d\n", ao.volume);
 
     if (bv_config_get_video_decoder(config_ctx, 0, 0, &video_decoder) < 0) {

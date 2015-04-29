@@ -113,7 +113,7 @@ fail:
 
 int bv_config_file_dump(BVConfigFileContext *s, const char *filename)
 {
-    if (!s || !filename)
+    if (!s)
         return BVERROR(EINVAL);
     if (!s->cfile || !s->cfile->file_dump)
         return BVERROR(ENOSYS);
