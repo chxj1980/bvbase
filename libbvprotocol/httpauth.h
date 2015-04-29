@@ -77,9 +77,9 @@ typedef struct HTTPAuthState {
     int stale;
 } HTTPAuthState;
 
-void bv_http_auth_handle_header(HTTPAuthState *state, const char *key,
+void bb_http_auth_handle_header(HTTPAuthState *state, const char *key,
                                 const char *value);
-char *bv_http_auth_create_response(HTTPAuthState *state, const char *auth,
+char *bb_http_auth_create_response(HTTPAuthState *state, const char *auth,
                                    const char *path, const char *method);
 
 #ifdef __cplusplus

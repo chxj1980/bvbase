@@ -89,7 +89,7 @@ static void choose_qop(char *qop, int size)
     }
 }
 
-void bv_http_auth_handle_header(HTTPAuthState *state, const char *key,
+void bb_http_auth_handle_header(HTTPAuthState *state, const char *key,
                                 const char *value)
 {
     if (!strcmp(key, "WWW-Authenticate") || !strcmp(key, "Proxy-Authenticate")) {
@@ -244,7 +244,7 @@ static char *make_digest_auth(HTTPAuthState *state, const char *username,
     return authstr;
 }
 
-char *bv_http_auth_create_response(HTTPAuthState *state, const char *auth,
+char *bb_http_auth_create_response(HTTPAuthState *state, const char *auth,
                                    const char *path, const char *method)
 {
     char *authstr = NULL;

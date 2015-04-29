@@ -21,6 +21,7 @@ libbvcodec  参照FFmpeg AVCodec
 	done
 4. 添加的代码只能为c语言
 5. 函数应有相应的注释
+6. 内部使用的函数均已bb_xxx 开始。
 
 /**
 * @Synopsis  test_function 一个测试函数
