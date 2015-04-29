@@ -26,10 +26,9 @@
 
 /**
  *  TODO
- *  Session Desctiption Protocol
+ *  Session Description Protocol
  *  用来解析获取的SDP，或者封装SDP
  */
-
 typedef struct _SDPOrigin {
     char *username;
     char *session_id;
@@ -39,9 +38,17 @@ typedef struct _SDPOrigin {
     char *address;
 } SDPOrigin;
 
+typedef struct _SDPMedia {
+    char *media;
+    char *port;
+    char *num_of_port;
+    char *proto;
+} SDPMedia;
+
 typedef struct _BVSDP {
     int version;    //0
     SDPOrigin origin;
 } BVSDP;
 
+BVSDP *bb_sdp_protoc_packed()
 #endif /* end of include guard: BVPROTOCOL_SDP_H */
