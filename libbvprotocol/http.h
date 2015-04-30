@@ -88,7 +88,7 @@ enum HTTPStatusCode {
  * @param dest URL context whose authentication state gets updated
  * @param src URL context whose authentication state gets copied
  */
-void bv_http_init_auth_state(BVURLContext *dest, const BVURLContext *src);
+void bb_http_init_auth_state(BVURLContext *dest, const BVURLContext *src);
 
 /**
  * Send a new HTTP request, reusing the old connection.
@@ -98,9 +98,9 @@ void bv_http_init_auth_state(BVURLContext *dest, const BVURLContext *src);
  * @return a negative value if an error condition occurred, 0
  * otherwise
  */
-int bv_http_do_new_request(BVURLContext *h, const char *uri);
+int bb_http_do_new_request(BVURLContext *h, const char *uri);
 
-int bv_http_averror(int status_code, int default_averror);
+int bb_http_averror(int status_code, int default_averror);
 
 #ifdef __cplusplus
 }

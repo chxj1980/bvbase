@@ -139,7 +139,7 @@ static int http_connect(BVURLContext *h, const char *path, const char *local_pat
                         const char *proxyauth, int *new_location);
 static int http_read_header(BVURLContext *h, int *new_location);
 
-void bv_http_init_auth_state(BVURLContext *dest, const BVURLContext *src)
+void bb_http_init_auth_state(BVURLContext *dest, const BVURLContext *src)
 {
     memcpy(&((HTTPContext *)dest->priv_data)->auth_state,
            &((HTTPContext *)src->priv_data)->auth_state,
@@ -264,10 +264,10 @@ fail:
         bv_url_closep(&s->hd);
     if (location_changed < 0)
         return location_changed;
-    return bv_http_averror(s->http_code, BVERROR(EIO));
+    return bb_http_averror(s->http_code, BVERROR(EIO));
 }
 
-int bv_http_do_new_request(BVURLContext *h, const char *uri)
+int bb_http_do_new_request(BVURLContext *h, const char *uri)
 {
     HTTPContext *s = h->priv_data;
     BVDictionary *options = NULL;
@@ -285,7 +285,7 @@ int bv_http_do_new_request(BVURLContext *h, const char *uri)
     return ret;
 }
 
-int bv_http_averror(int status_code, int default_averror)
+int bb_http_averror(int status_code, int default_averror)
 {
     switch (status_code) {
         case HTTP_STATUS_BAD_REQUEST: return BVERROR_HTTP_BAD_REQUEST;
@@ -413,7 +413,7 @@ static int check_http_code(BVURLContext *h, int http_code, const char *end)
         (http_code != 407 || s->proxy_auth_state.auth_type != HTTP_AUTH_NONE)) {
         end += strspn(end, SPACE_CHARS);
         bv_log(h, BV_LOG_WARNING, "HTTP error %d %s\n", http_code, end);
-        return bv_http_averror(http_code, BVERROR(EIO));
+        return bb_http_averror(http_code, BVERROR(EIO));
     }
     return 0;
 }
@@ -593,11 +593,11 @@ static int process_line(BVURLContext *h, char *line, int line_count,
             s->filesize  = -1;
             s->chunksize = 0;
         } else if (!bv_strcasecmp(tag, "WWW-Authenticate")) {
-            bv_http_auth_handle_header(&s->auth_state, tag, p);
+            bb_http_auth_handle_header(&s->auth_state, tag, p);
         } else if (!bv_strcasecmp(tag, "Authentication-Info")) {
-            bv_http_auth_handle_header(&s->auth_state, tag, p);
+            bb_http_auth_handle_header(&s->auth_state, tag, p);
         } else if (!bv_strcasecmp(tag, "Proxy-Authenticate")) {
-            bv_http_auth_handle_header(&s->proxy_auth_state, tag, p);
+            bb_http_auth_handle_header(&s->proxy_auth_state, tag, p);
         } else if (!bv_strcasecmp(tag, "Connection")) {
             if (!strcmp(p, "close"))
                 s->willclose = 1;
@@ -798,9 +798,9 @@ static int http_connect(BVURLContext *h, const char *path, const char *local_pat
     else
         method = post ? "POST" : "GET";
 
-    authstr      = bv_http_auth_create_response(&s->auth_state, auth,
+    authstr      = bb_http_auth_create_response(&s->auth_state, auth,
                                                 local_path, method);
-    proxyauthstr = bv_http_auth_create_response(&s->proxy_auth_state, proxyauth,
+    proxyauthstr = bb_http_auth_create_response(&s->proxy_auth_state, proxyauth,
                                                 local_path, method);
     if (post && !s->post_data) {
         send_expect_100 = s->send_expect_100;
@@ -1341,7 +1341,7 @@ redo:
     if (ret < 0)
         return ret;
 
-    authstr = bv_http_auth_create_response(&s->proxy_auth_state, auth,
+    authstr = bb_http_auth_create_response(&s->proxy_auth_state, auth,
                                            path, "CONNECT");
     snprintf(s->buffer, sizeof(s->buffer),
              "CONNECT %s HTTP/1.1\r\n"
@@ -1386,7 +1386,7 @@ redo:
 
     if (s->http_code < 400)
         return 0;
-    ret = bv_http_averror(s->http_code, BVERROR(EIO));
+    ret = bb_http_averror(s->http_code, BVERROR(EIO));
 
 fail:
     http_proxy_close(h);
