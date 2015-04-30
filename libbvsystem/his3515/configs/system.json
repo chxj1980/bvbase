@@ -19,7 +19,7 @@
   "video_sources": 4,
   "video_outputs": 4,
   "audio_sources": 5,
-  "audio_outputs": 2,
+  "audio_outputs": 1,
   "media_devices": 5,
   "media_encoders": 5,
   "media_decoders": 5,
