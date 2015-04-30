@@ -48,20 +48,23 @@ typedef struct _BVSystemVODev {
 enum BVSystemMessageType {
     BV_SYS_MESSAGE_TYPE_NONE = -1,
     BV_SYS_MESSAGE_TYPE_REBOOT,
+    BV_SYS_MESSAGE_TYPE_CLSWDG,     //close watch dog
+    BV_SYS_MESSAGE_TYPE_STTIME,     //set time
+    BV_SYS_MESSAGE_TYPE_STZONE,     //set time zone
+    BV_SYS_MESSAGE_TYPE_VIDEO_START = 0x200,
     BV_SYS_MESSAGE_TYPE_SYNPTS,     //sync system pts
     BV_SYS_MESSAGE_TYPE_VIUDEV,     //video input unit device
     BV_SYS_MESSAGE_TYPE_VOUDEV,     //video output unit device
+    BV_SYS_MESSAGE_TYPE_AUDIO_START = 0x400,
     BV_SYS_MESSAGE_TYPE_AIMDEV,     //audio input mode
     BV_SYS_MESSAGE_TYPE_AOMDEV,     //audio output mode
     BV_SYS_MESSAGE_TYPE_SIODEV,     //sonic input ouput device
-    BV_SYS_MESSAGE_TYPE_CLSWDG,     //close watch dog
+    BV_SYS_MESSAGE_TYPE_CNFG_START = 0x600,
     BV_SYS_MESSAGE_TYPE_SYSUGD,     //system upgrade
     BV_SYS_MESSAGE_TYPE_DATUGD,     //data upgrade
     BV_SYS_MESSAGE_TYPE_CFGUGD,     //config upgrade
     BV_SYS_MESSAGE_TYPE_DATBKP,     //data backup
     BV_SYS_MESSAGE_TYPE_CFGBKP,     //config backup
-    BV_SYS_MESSAGE_TYPE_STTIME,     //set time
-    BV_SYS_MESSAGE_TYPE_STZONE,     //set time zone
 
     BV_SYS_MESSAGE_TYPE_UNKNOW
 };

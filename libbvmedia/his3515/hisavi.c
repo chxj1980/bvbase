@@ -311,6 +311,24 @@ static int audio_set_mute(BVMediaContext *s, const BVControlPacket *pkt_in, BVCo
     return audio_set_mute(s, &pkt, NULL);
 }
 
+static int audio_set_aec(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    HisAVIContext *hisctx = s->priv_data;
+    int aodev, aochn;
+    HI_S32 s32Ret = HI_FALSE;
+    BVAudioOutput *audio_output = (BVAudioOutput *) pkt_in->data;
+    if (sscanf(audio_output->token, "%d/%d", &aodev, &aochn) != 2) {
+        bv_log(s, BV_LOG_ERROR, "audio_output token error\n");
+        return BVERROR(EINVAL);
+    }
+
+    s32Ret = HI_MPI_AI_EnableAec(hisctx->aidev, hisctx->aichn, aodev, aochn);
+    BREAK_WHEN_SDK_FAILED("enable aec error", s32Ret);
+    return 0;
+fail:
+    return BVERROR(EINVAL);
+}
+
 static int video_set_imaging(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     HisAVIContext *hisctx = s->priv_data;
@@ -339,6 +357,7 @@ static bv_cold int his_media_control(BVMediaContext *s, enum BVMediaMessageType 
     } media_control[] = {
         { BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME, audio_set_volume},
         { BV_MEDIA_MESSAGE_TYPE_AUDIO_MUTE, audio_set_mute},
+        { BV_MEDIA_MESSAGE_TYPE_AUDIO_AEC, audio_set_aec},
         { BV_MEDIA_MESSAGE_TYPE_VIDEO_IMAGE, video_set_imaging},
     };
     for (i = 0; i < BV_ARRAY_ELEMS(media_control); i++) {

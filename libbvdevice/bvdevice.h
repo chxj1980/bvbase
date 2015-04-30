@@ -72,12 +72,13 @@ enum BVDeviceMessageType {
     BV_DEV_MESSAGE_TYPE_PTZ_GOTO_PRESET,    //                    BVPTZGotoPreset
     BV_DEV_MESSAGE_TYPE_PTZ_REMOVE_PRESET,  //                    BVPTZPreset
 
+    BV_DEV_MESSAGE_TYPE_DISK_START = 0x200, //磁盘属性开始
     BV_DEV_MESSAGE_TYPE_FORMAT_DISK,        //格式化磁盘           BVDiskDevice NULL
     BV_DEV_MESSAGE_TYPE_SEARCH_FILE,        //查询文件             BVSearchFileConditions BVFileInfo
     BV_DEV_MESSAGE_TYPE_GET_DISK_COUNT,     //获取磁盘个数
     BV_DEV_MESSAGE_TYPE_GET_DISK_STATUS,
     BV_DEV_MESSAGE_TYPE_GET_DISK_INFO,      //获取磁盘信息         BVDiskDevice BVDiskDeviceInfo
-    
+    BV_DEV_MESSAGE_TYPE_IPC_START = 0x400,  //IPC属性开始
     BV_DEV_MESSAGE_TYPE_SEARCH_IPC,         //搜索OnvifIPC         NULL BVMobileDevice
     BV_DEV_MESSAGE_TYPE_DETECT_IPC,         //检测IPC设备状态      BVMobileDevice NULL
     BV_DEV_MESSAGE_TYPE_UNKNOWN
