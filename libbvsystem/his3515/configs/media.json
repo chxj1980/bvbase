@@ -8,7 +8,7 @@
    "channels": 16,
    "sample_format": 16,
    "sample_rate": 8000,
-   "sample_points": 320,
+   "sample_points": 160,
    "work_mode": "I2S_SLAVE"
   },
   {
@@ -19,7 +19,7 @@
    "channels": 2,
    "sample_format": 16,
    "sample_rate": 8000,
-   "sample_points": 320,
+   "sample_points": 160,
    "work_mode": "I2S_SLAVE"
   }
  ],
@@ -41,7 +41,7 @@
    "channels": 2,
    "sample_format": 16,
    "sample_rate": 8000,
-   "sample_points": 320,
+   "sample_points": 160,
    "work_mode": "I2S_SLAVE"
   }
  ],
