@@ -962,7 +962,7 @@
  "talkbacks": [
   {
    "media_encoder": 4,
-   "media_decoder": 1
+   "media_decoder": 0
   }
  ]
 }
