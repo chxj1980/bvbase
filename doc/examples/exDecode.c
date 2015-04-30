@@ -48,7 +48,7 @@ int main(int argc, const char *argv[])
     bv_protocol_register_all();
 
 
-    bv_log_set_level(BV_LOG_INFO);
+    bv_log_set_level(BV_LOG_DEBUG);
     bv_system_register_all();
     sys = bv_system_find_system(BV_SYSTEM_TYPE_HIS3515);
     if (!sys) {
@@ -90,7 +90,7 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 16;
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
-    aidev.sample_points = 320;
+    aidev.sample_points = 160;
     strncpy(aidev.chip, "tw2866", sizeof(aidev.chip));
     strncpy(aidev.dev, "/dev/tw2865dev", sizeof(aidev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
@@ -104,7 +104,7 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 2; 
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
-    aidev.sample_points = 320;
+    aidev.sample_points = 160;
     strncpy(aidev.chip, "tlv320aic23", sizeof(aidev.chip));
     strncpy(aidev.dev, "/dev/tlv320aic23", sizeof(aidev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
@@ -119,7 +119,7 @@ int main(int argc, const char *argv[])
     aodev.channel_counts = 2;
     aodev.sample_format = 16;
     aodev.sample_rate = 8000;
-    aodev.sample_points = 320;
+    aodev.sample_points = 160;
     strncpy(aodev.chip, "tlv320aic23", sizeof(aodev.chip));
     strncpy(aodev.dev, "/dev/tlv320aic23", sizeof(aodev.chip));
     strcpy(aodev.work_mode, "I2S_SLAVE");
@@ -182,7 +182,7 @@ int main(int argc, const char *argv[])
         bv_dict_free(&opn);
         return 0;
     }
-#if 0
+#if 1
     st = bv_stream_new(avoctx, NULL);
     st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     st->codec->sample_rate = 8000;
@@ -210,20 +210,20 @@ int main(int argc, const char *argv[])
     }
 
     bv_dict_free(&opn);
-    bv_dict_set(&opn, "vtoken", "2/0/1", 0);
-    bv_dict_set_int(&opn, "vpacked", 0, 0);
+    bv_dict_set(&opn, "atoken", "0/0/1", 0);
+    bv_dict_set_int(&opn, "apacked", 0, 0);
     if (bv_output_media_open(&avdctx, NULL, "hisavd", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open output media error\n");
         bv_dict_free(&opn);
         return 0;
     }
 
-#if 0
+#if 1
     st = bv_stream_new(avdctx, NULL);
     st->codec->codec_type = BV_MEDIA_TYPE_AUDIO;
     st->codec->sample_rate = 8000;
     st->codec->codec_id = BV_CODEC_ID_G726;
-    st->codec->time_base = (BVRational) {1, 25};
+    st->codec->time_base = (BVRational) {1, 50};
     st->codec->sample_fmt = BV_SAMPLE_FMT_S16;
     st->codec->channels = 1;
 #else

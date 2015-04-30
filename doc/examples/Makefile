@@ -64,6 +64,6 @@ all: $(OBJS) $(EXAMPLES)
 clean: 
 	$(RM) $(EXAMPLES) $(OBJS)
 install:
-	cp $(EXAMPLES) /tftpboot/BVS-W8020-VF-A.filesys/usr/bin/
-	#cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys/usr/bin/
+	#cp $(EXAMPLES) /tftpboot/BVS-W8020-VF-A.filesys/usr/bin/
+	cp $(EXAMPLES) /tftpboot/BVS-W4M10-VC-I.filesys/usr/bin/
 	#cp $(EXAMPLES) /tftpboot/BVS-W4020-VC-E.filesys/usr/bin/

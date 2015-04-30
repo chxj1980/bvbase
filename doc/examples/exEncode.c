@@ -89,7 +89,7 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 16;
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
-    aidev.sample_points = 320;
+    aidev.sample_points = 160;
     strcpy(aodev.work_mode, "I2S_SLAVE");
     strcpy(aidev.chip, "tw2866");
     strcpy(aidev.dev, "/dev/tw2865dev");
@@ -103,7 +103,7 @@ int main(int argc, const char *argv[])
     aidev.channel_counts = 2; 
     aidev.sample_format = 16;
     aidev.sample_rate = 8000;
-    aidev.sample_points = 320;
+    aidev.sample_points = 160;
     strcpy(aodev.work_mode, "I2S_SLAVE");
     strcpy(aidev.chip, "tlv320aic23");
     strcpy(aidev.dev, "/dev/tlv320aic23");
@@ -151,7 +151,7 @@ int main(int argc, const char *argv[])
     bv_dict_set(&opn, "atoken", "1/0/0", 0);
     bv_dict_set(&opn, "achip", "tlv320aic23", 0);
     bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
-    bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G711A, 0);
+    bv_dict_set_int(&opn, "acodec_id", BV_CODEC_ID_G726, 0);
     if (bv_input_media_open(&avectx1, NULL, "hisave://", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
@@ -159,12 +159,12 @@ int main(int argc, const char *argv[])
     int i = 0;
     BVPacket pkt;
     BVIOContext *ioctx = NULL;
-    if (bv_io_open(&ioctx, "/tmp/xx.g711", BV_IO_FLAG_WRITE, NULL, NULL) < 0 ) {
+    if (bv_io_open(&ioctx, "/tmp/xx.g726", BV_IO_FLAG_WRITE, NULL, NULL) < 0 ) {
         bv_log(NULL, BV_LOG_ERROR, "open files error\n");
         return -1;
     }
 
-    while ( i < 200) {
+    while ( i < 2000) {
         bv_packet_init(&pkt);
         if (bv_input_media_read(avectx1, &pkt) > 0 ) {
             bv_log(avectx1, BV_LOG_ERROR, "audio pkt size %d\n", pkt.size);

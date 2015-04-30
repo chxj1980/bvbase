@@ -53,6 +53,8 @@ enum BVMediaMessageType {
     BV_MEDIA_MESSAGE_TYPE_NONE = -1,
     BV_MEDIA_MESSAGE_TYPE_AUDIO_MUTE,           //静音
     BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME,         //音量调节
+    BV_MEDIA_MESSAGE_TYPE_AUDIO_AEC,            //音频回声抑制 data BVAudioOutput
+    BV_MEDIA_MESSAGE_TYPE_VIDEO_START = 0x200,  //视频属性开始
     BV_MEDIA_MESSAGE_TYPE_VIDEO_HIDE,           //隐藏视频
     BV_MEDIA_MESSAGE_TYPE_VIDEO_SHOW,           //显示视频
     BV_MEDIA_MESSAGE_TYPE_VIDEO_STOP,           //停止视频
@@ -62,6 +64,7 @@ enum BVMediaMessageType {
     BV_MEDIA_MESSAGE_TYPE_VIDEO_UPCFG,          //更改视频编解码动态属性
     BV_MEDIA_MESSAGE_TYPE_VIDEO_IMAGE,          //视频图像设置
     BV_MEDIA_MESSAGE_TYPE_VIDEO_RSKFM,          //request key frame 请求关键帧
+    BV_MEDIA_MESSAGE_TYPE_OSD_START = 0x400,    //叠加属性开始
     BV_MEDIA_MESSAGE_TYPE_OSD_CREATE,           //创建OSD叠加
     BV_MEDIA_MESSAGE_TYPE_OSD_DESTROY,          //销毁OSD
     BV_MEDIA_MESSAGE_TYPE_OSD_HIDE,             //隐藏OSD
