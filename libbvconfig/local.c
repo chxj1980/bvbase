@@ -358,7 +358,7 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
     }
 
     SET_VALUE(elem2, "enable", NULL, config->enable);
-    SET_VALUE(elem2, "token", config->token, tmp);
+    //SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "width", NULL, config->codec_context.width);
     SET_VALUE(elem2, "height", NULL, config->codec_context.height);
     SET_VALUE(elem2, "quality", NULL, config->codec_context.quality);
@@ -817,7 +817,7 @@ static int local_set_audio_encoder(BVConfigContext *h, int channel, int index, B
             break;
         }
     }
-    SET_VALUE(elem2, "token", config->token, tmp);
+    //SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
     SET_VALUE(elem2, "sample_rate", NULL, config->codec_context.sample_rate);
     bv_config_file_dump(h->pdb, NULL);
@@ -1104,7 +1104,7 @@ static int local_set_video_source(BVConfigContext *h, int index, BVVideoSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "video_source_device", NULL, config->video_source_device);
     SET_VALUE(elem, "framerate", NULL, config->framerate);
     sprintf(localctx->value, "(%d:%d, %d:%d)", config->day_capture.date_time.hour, config->day_capture.date_time.minute,
@@ -1202,7 +1202,7 @@ static int local_set_audio_source(BVConfigContext *h, int index, BVAudioSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "audio_source_device", NULL, config->audio_source_device);
     SET_VALUE(elem, "channels", NULL, config->channels);
     SET_VALUE(elem, "volume", NULL, config->volume);
@@ -1273,7 +1273,7 @@ static int local_set_video_output(BVConfigContext *h, int index, BVVideoOutput *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "video_output_device", NULL, config->video_output_device);
     sprintf(localctx->value, "(%d, %d, %d, %d)", config->display.x, config->display.y,
             config->display.width, config->display.height);
@@ -1327,7 +1327,7 @@ static int local_set_audio_output(BVConfigContext *h, int index, BVAudioOutput *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "volume", NULL, config->volume);
     SET_VALUE(elem, "channels", NULL, config->channels);
     SET_VALUE(elem, "audio_output_device", NULL, config->audio_output_device);
