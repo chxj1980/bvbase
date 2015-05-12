@@ -71,7 +71,7 @@ int main(int argc, const char *argv[])
         t[i].age = i + 20;
         t[i].t = bv_mallocz(20);
         bv_sprintf(t[i].t, 20, "test_%d", i);
-#if 0
+#if 1
         node = bv_list_insert_after(list, node, &t[i]);
 #else
         node = bv_list_push(list, &t[i]);
@@ -99,7 +99,10 @@ int main(int argc, const char *argv[])
     bv_log(NULL, BV_LOG_ERROR, "===================================\n");
     size = bv_list_size(list);
     bv_log(NULL, BV_LOG_ERROR, "list size %d\n", size);
-
+    Test *tt = bv_list_get_position_data(list, 19);
+    if (tt) {
+        bv_log(NULL, BV_LOG_ERROR, "pos data name %s age %d\n", tt->name, tt->age);
+    }
     node = bv_list_find(list, &t[10], find_node);
     if (node == NULL) {
         bv_log(NULL, BV_LOG_ERROR, "append node error\n");

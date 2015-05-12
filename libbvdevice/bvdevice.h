@@ -81,6 +81,8 @@ enum BVDeviceMessageType {
     BV_DEV_MESSAGE_TYPE_IPC_START = 0x400,  //IPC属性开始
     BV_DEV_MESSAGE_TYPE_SEARCH_IPC,         //搜索OnvifIPC         NULL BVMobileDevice
     BV_DEV_MESSAGE_TYPE_DETECT_IPC,         //检测IPC设备状态      BVMobileDevice NULL
+    BV_DEV_MESSAGE_TYPE_SET_RMTDP,          //设置远程DP           BVEthernetInfo
+    BV_DEV_MESSAGE_TYPE_GET_RMTDP,          //设置远程DP           BVEthernetInfo
     BV_DEV_MESSAGE_TYPE_UNKNOWN
 };
 

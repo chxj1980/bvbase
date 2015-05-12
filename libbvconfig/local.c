@@ -298,8 +298,6 @@ static int local_get_video_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, "width", NULL, config->codec_context.width);
     GET_VALUE(elem2, "height", NULL, config->codec_context.height);
     GET_VALUE(elem2, "quality", NULL, config->codec_context.quality);
-    GET_VALUE(elem2, "gop", NULL, config->codec_context.gop_size);
-    GET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
     GET_VALUE(elem2, "framerate", NULL, config->codec_context.time_base.den);
     config->codec_context.time_base.num = 1;
 
@@ -309,8 +307,19 @@ static int local_get_video_encoder(BVConfigContext *h, int channel, int index, B
     GET_VALUE(elem2, "encoding", localctx->value, tmp);
     config->codec_context.codec_id = judge_to_encoding_enum(localctx->value);
 
-    GET_VALUE(elem2, "rate_control", localctx->value, tmp);
-    config->codec_context.mode_id = judge_to_rate_control_enum(localctx->value);
+    if (config->codec_context.codec_id == BV_CODEC_ID_H264 
+            || config->codec_context.codec_id == BV_CODEC_ID_MPEG) {
+        GET_VALUE(elem2, "gop", NULL, config->codec_context.gop_size);
+        GET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
+        GET_VALUE(elem2, "rate_control", localctx->value, tmp);
+        config->codec_context.mode_id = judge_to_rate_control_enum(localctx->value);
+    }
+
+    if (config->codec_context.codec_id == BV_CODEC_ID_JPEG) {
+        GET_VALUE(elem2, "interval", NULL, config->codec_context.interval);
+        GET_VALUE(elem2, "period", NULL, config->codec_context.period);
+        GET_VALUE(elem2, "count", NULL, config->codec_context.count);
+    }
 
 error:
     if (elem2)
@@ -358,41 +367,50 @@ static int local_set_video_encoder(BVConfigContext *h, int channel, int index, B
     }
 
     SET_VALUE(elem2, "enable", NULL, config->enable);
-    SET_VALUE(elem2, "token", config->token, tmp);
+    //SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "width", NULL, config->codec_context.width);
     SET_VALUE(elem2, "height", NULL, config->codec_context.height);
     SET_VALUE(elem2, "quality", NULL, config->codec_context.quality);
-    SET_VALUE(elem2, "gop", NULL, config->codec_context.gop_size);
-    SET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
 
-    switch (config->codec_context.mode_id) {
-        case BV_RC_MODE_ID_VBR:
-        {
-            SET_VALUE(elem2, "rate_control", "VBR", tmp);
-            break;
+    if (config->codec_context.codec_id == BV_CODEC_ID_H264
+            || config->codec_context.codec_id == BV_CODEC_ID_MPEG) {
+        SET_VALUE(elem2, "gop", NULL, config->codec_context.gop_size);
+        SET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
+        switch (config->codec_context.mode_id) {
+            case BV_RC_MODE_ID_VBR:
+            {
+                SET_VALUE(elem2, "rate_control", "VBR", tmp);
+                break;
+            }
+            case BV_RC_MODE_ID_CBR:
+            {
+                SET_VALUE(elem2, "rate_control", "CBR", tmp);
+                break;
+            }
+            case BV_RC_MODE_ID_ABR:
+            {
+                SET_VALUE(elem2, "rate_control", "ABR", tmp);
+                break;
+            }
+            case BV_RC_MODE_ID_FIXQP:
+            {
+                SET_VALUE(elem2, "rate_control", "FIXQP", tmp);
+                break;
+            }
+            case BV_RC_MODE_ID_BUTT:
+            {
+                SET_VALUE(elem2, "rate_control", "BUTT", tmp);
+                break;
+            }   
         }
-        case BV_RC_MODE_ID_CBR:
-        {
-            SET_VALUE(elem2, "rate_control", "CBR", tmp);
-            break;
-        }
-        case BV_RC_MODE_ID_ABR:
-        {
-            SET_VALUE(elem2, "rate_control", "ABR", tmp);
-            break;
-        }
-        case BV_RC_MODE_ID_FIXQP:
-        {
-            SET_VALUE(elem2, "rate_control", "FIXQP", tmp);
-            break;
-        }
-        case BV_RC_MODE_ID_BUTT:
-        {
-            SET_VALUE(elem2, "rate_control", "BUTT", tmp);
-            break;
-        }   
     }
-    
+
+    if (config->codec_context.codec_id == BV_CODEC_ID_JPEG) {
+        SET_VALUE(elem2, "interval", NULL, config->codec_context.interval);
+        SET_VALUE(elem2, "period", NULL, config->codec_context.period);
+        SET_VALUE(elem2, "count", NULL, config->codec_context.count);
+    }
+
     if (config->codec_context.time_base.num == 0) {
         config->codec_context.time_base.den = 1;
         config->codec_context.time_base.num = 25;
@@ -471,7 +489,7 @@ static int get_value_video_encoder_options(BVConfigContext *h, BVConfigObject *e
         bv_log(h, BV_LOG_ERROR, "get member[framerate] value is invalid\n");
     }
 
-    if (flag == BV_CODEC_ID_H264) {
+    if (flag == BV_CODEC_ID_H264 || flag == BV_CODEC_ID_MPEG) {
         GET_VALUE(elem, "gop", localctx->value, tmp);
         rett = sscanf(localctx->value, "[%lld..%lld]", &options->gop_range.min, &options->gop_range.max);
         if (rett != 2) {
@@ -575,7 +593,7 @@ static int local_get_video_encoder_options(BVConfigContext *h, int channel, int 
     LocalContext *localctx = h->priv_data;
 
     obj = bv_config_get_member(h->pdb, h->pdb->root, "video_encoder_options");
-    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "video_encoders_options", ret);
+    DETERMINE_FIELD_IS_OR_NOT_EXIST(obj, "video_encoder_options", ret);
 
     elem = bv_config_get_element(h->pdb, obj, channel);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, channel, ret);
@@ -817,7 +835,7 @@ static int local_set_audio_encoder(BVConfigContext *h, int channel, int index, B
             break;
         }
     }
-    SET_VALUE(elem2, "token", config->token, tmp);
+    //SET_VALUE(elem2, "token", config->token, tmp);
     SET_VALUE(elem2, "bitrate", NULL, config->codec_context.bit_rate);
     SET_VALUE(elem2, "sample_rate", NULL, config->codec_context.sample_rate);
     bv_config_file_dump(h->pdb, NULL);
@@ -1104,7 +1122,7 @@ static int local_set_video_source(BVConfigContext *h, int index, BVVideoSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "video_source_device", NULL, config->video_source_device);
     SET_VALUE(elem, "framerate", NULL, config->framerate);
     sprintf(localctx->value, "(%d:%d, %d:%d)", config->day_capture.date_time.hour, config->day_capture.date_time.minute,
@@ -1202,7 +1220,7 @@ static int local_set_audio_source(BVConfigContext *h, int index, BVAudioSource *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "audio_source_device", NULL, config->audio_source_device);
     SET_VALUE(elem, "channels", NULL, config->channels);
     SET_VALUE(elem, "volume", NULL, config->volume);
@@ -1273,7 +1291,7 @@ static int local_set_video_output(BVConfigContext *h, int index, BVVideoOutput *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "video_output_device", NULL, config->video_output_device);
     sprintf(localctx->value, "(%d, %d, %d, %d)", config->display.x, config->display.y,
             config->display.width, config->display.height);
@@ -1327,7 +1345,7 @@ static int local_set_audio_output(BVConfigContext *h, int index, BVAudioOutput *
     elem = bv_config_get_element(h->pdb, obj, index);
     DETERMINE_INDEX_IS_OR_NOT_VALID(elem, index, ret);
 
-    SET_VALUE(elem, "token", config->token, tmp);
+    //SET_VALUE(elem, "token", config->token, tmp);
     SET_VALUE(elem, "volume", NULL, config->volume);
     SET_VALUE(elem, "channels", NULL, config->channels);
     SET_VALUE(elem, "audio_output_device", NULL, config->audio_output_device);

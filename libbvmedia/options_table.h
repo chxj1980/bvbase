@@ -29,14 +29,16 @@
 
 #include "bvmedia.h"
 
-#define OFFSET(X) offsetof(BVDeviceContext, X)
-#define E   BV_OPT_FLAG_ENCODING_PARAM
-
+#define OFFSETM(X) offsetof(BVMediaContext, X)
+#define EM   BV_OPT_FLAG_ENCODING_PARAM
 static const BVOption media_options[] = {
-
+    {"abuffers", "", OFFSETM(abuffers), BV_OPT_TYPE_INT, {.i64 = 32}, 10, 50, EM},
+    {"vbuffers", "", OFFSETM(vbuffers), BV_OPT_TYPE_INT, {.i64 = 4}, 1, 10, EM},
     {NULL}
 };
 
+#define OFFSETD(X) offsetof(BVDeviceContext, X)
+#define ED   BV_OPT_FLAG_ENCODING_PARAM
 static const BVOption driver_options[] = {
 
     {NULL}

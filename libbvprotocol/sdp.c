@@ -23,10 +23,14 @@
 
 #line 25 "sdp.c"
 
+#include <libbvutil/bvutil.h>
+#include <libbvutil/log.h>
 #include "bvurl.h"
+#include "sdp.h"
 
 typedef struct _SDPContext {
     const BVClass *bv_class;
+    BVSDP sdp;
 } SDPContext;
 
 static int sdp_open(BVURLContext *h, const char *filename, int flags, BVDictionary **options)

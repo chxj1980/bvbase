@@ -43,13 +43,14 @@ int main(int argc, const char *argv[])
     char filename[1024] = { 0 };
     bv_media_register_all(); 
     bv_protocol_register_all();
-    bv_log_set_level(BV_LOG_INFO);
-//    av_log_set_level(BV_LOG_DEBUG);
+    bv_log_set_level(BV_LOG_DEBUG);
+    av_log_set_level(BV_LOG_DEBUG);
     bv_dict_set(&opn, "user", "admin", 0);
-    bv_dict_set(&opn, "passwd", "123456", 0);
+    bv_dict_set(&opn, "passwd", "12345", 0);
     bv_dict_set(&opn, "token", "Profile_1", 0);
-    //bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
-    bv_dict_set(&opn, "vtoken", "MainStream/MainStream/h264main/VideoMain", 0);
+    bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
+    //bv_dict_set(&opn, "vtoken", "Profile_000/000/VideoE_000/000", 0);
+    //bv_dict_set(&opn, "vtoken", "MainStream/MainStream/h264main/VideoMain", 0);
     //bv_dict_set(&opn, "atoken", "mainStream/Profile_1/AudioEncoder_1/AudioEncodeToken_1", 0);
     bv_dict_set(&opn, "timeout", "2", 0);
     bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
@@ -57,7 +58,7 @@ int main(int argc, const char *argv[])
     //sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
     sprintf(filename, "%s", "bvfs://00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
-    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.154:80/onvif/device_service", NULL, &opn) < 0) {
+    if (bv_input_media_open(&mc, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open media error\n");
         return -1;
     }
@@ -126,7 +127,7 @@ int main(int argc, const char *argv[])
             continue;
        }
        st = mc->streams[pkt.stream_index];
-       bv_log(mc, BV_LOG_DEBUG, "Before pkt size %d pts %llu strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
+       bv_log(mc, BV_LOG_DEBUG, "Before pkt size %d pts %lld strindex %d\n", pkt.size, pkt.pts, pkt.stream_index);
 #if 0
        pkt.pts = bv_rescale_q(pkt.pts, mc->streams[pkt.stream_index]->time_base, out->streams[pkt.stream_index]->time_base);
        //pkt.pts = (pkt.pts * mc->streams[pkt.stream_index]->time_base.num * out->streams[pkt.stream_index]->time_base.den) / mc->streams[pkt.stream_index]->time_base.den;

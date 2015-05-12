@@ -120,6 +120,8 @@ struct _BVMediaContext {
     int flags;
     int nb_streams;
     BVStream **streams;
+    int abuffers;         //音频缓冲的大小 单位包的个数
+    int vbuffers;         //视频缓冲的大小 单位帧的个数
 };
 
 void bv_input_media_register(BVInputMedia *ifmt);

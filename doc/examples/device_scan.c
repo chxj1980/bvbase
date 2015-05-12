@@ -22,6 +22,7 @@
  */
 #include <libbvdevice/bvdevice.h>
 #include <libbvutil/bvutil.h>
+#include <libbvutil/bvstring.h>
 #include <libbvutil/opt.h>
 #include <libbvutil/log.h>
 #include <libbvconfig/common.h>
@@ -36,11 +37,14 @@ int main(int argc, const char *argv[])
     BVControlPacket pkt_out;
     bv_device_register_all();
     bv_dict_set(&opn, "timeout", "1", 0);
-    if (bv_device_open(&devctx, "onvif_dev://", NULL, &opn) < 0) {
+    bv_dict_set(&opn, "user", "admin", 0);
+    bv_dict_set(&opn, "passwd", "12345", 0);
+    if (bv_device_open(&devctx, "onvif_dev://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
         bv_log(NULL, BV_LOG_ERROR, "open device error \n");
         bv_dict_free(&opn);
         return BVERROR(EIO);
     }
+#if 0
     if (bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_SEARCH_IPC, NULL, &pkt_out) < 0 ) {
         bv_log(devctx, BV_LOG_ERROR, "device control error\n");
     } else {
@@ -63,7 +67,21 @@ int main(int argc, const char *argv[])
     ipc.timeout = 1;
     pkt_in.data = (void *)&ipc;
     bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_DETECT_IPC, &pkt_in, NULL);
+#else
+    BVEthernetInfo info[2];
+    bv_strlcpy(info[0].address, "61.191.27.18", sizeof(info[0].address));
+    bv_strlcpy(info[1].address, "192.168.6.146", sizeof(info[0].address));
+    pkt_in.data = &info;
+    pkt_in.size = 2;
+    if (bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_SET_RMTDP, &pkt_in, &pkt_out) < 0 ) {
+        bv_log(devctx, BV_LOG_ERROR, "device control error\n");
+    }
 
+    if (bv_device_control(devctx, BV_DEV_MESSAGE_TYPE_GET_RMTDP, &pkt_in, &pkt_out) < 0 ) {
+        bv_log(devctx, BV_LOG_ERROR, "device control error\n");
+    }
+
+#endif
     bv_dict_free(&opn);
     bv_device_close(&devctx);
     return 0;

@@ -47,6 +47,8 @@ int main(int argc, const char *argv[])
     BVMediaContext *avictx = NULL; 
     BVMediaContext *avictx1 = NULL; 
     BVMediaContext *davctx = NULL; 
+    BVMediaContext *avectx1 = NULL; 
+    BVMediaContext *avectx2 = NULL; 
 
     char filename[1024] = { 0 };
 
@@ -160,9 +162,22 @@ int main(int argc, const char *argv[])
         bv_log(NULL, BV_LOG_ERROR, "open input media error\n");
     }
 
-    BVMediaContext *avectx1 = NULL; 
+    bv_dict_free(&opn);
+    bv_dict_set(&opn, "user", "admin", 0);
+    bv_dict_set(&opn, "passwd", "12345", 0);
+    bv_dict_set(&opn, "token", "Profile_1", 0);
+    bv_dict_set(&opn, "vtoken", "mainStream/Profile_1/VideoEncoder_1/VideoEncodeToken_1", 0);
+    bv_dict_set(&opn, "timeout", "2", 0);
+    bv_dict_set_int(&opn, "vcodec_id", BV_CODEC_ID_H264, 0);
+
+    if (bv_input_media_open(&avectx2, NULL, "onvifave://192.168.6.149:80/onvif/device_service", NULL, &opn) < 0) {
+        bv_log(NULL, BV_LOG_ERROR, "open media error\n");
+        return -1;
+    }
+
+    bv_dict_free(&opn);
     bv_dict_set(&opn, "atoken", "1/0/0", 0);
-    bv_dict_set(&opn, "vtoken", "0/0/0", 0);
+    //bv_dict_set(&opn, "vtoken", "0/0/0", 0);
     bv_dict_set(&opn, "achip", "tlv320aic23", 0);
     bv_dict_set(&opn, "adev", "/dev/tlv320aic23", 0);
     bv_dict_set(&opn, "vchip", "tw2866", 0);
@@ -182,7 +197,6 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-
     sprintf(filename, "%s", "file:///tmp/00_20120412_031132_");
     sprintf(filename + strlen(filename), "%ld.dav", time(NULL));
     if (bv_output_media_open(&davctx, filename, "dav", NULL, NULL) < 0) {
@@ -191,9 +205,9 @@ int main(int argc, const char *argv[])
     }
     st = bv_stream_new(davctx, NULL);
     st->time_base = (BVRational){1, 1000000};
-    st->codec->time_base = (BVRational){1, 25};
-    st->codec->width = 704;
-    st->codec->height = 576;
+    st->codec->time_base = (BVRational){1, 15};
+    st->codec->width = 1280;
+    st->codec->height = 720;
     st->codec->codec_type = BV_MEDIA_TYPE_VIDEO;
     st->codec->codec_id = BV_CODEC_ID_H264;
 
@@ -217,18 +231,34 @@ int main(int argc, const char *argv[])
     int i = 0;
     BVPacket pkt;
     while ( i < 6000) {
-        bv_packet_init(&pkt);
-        if (bv_input_media_read(avectx1, &pkt) > 0 ) {
-            if (avectx1->streams[pkt.stream_index]->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
+        while (1) {
+            bv_packet_init(&pkt);
+            if (bv_input_media_read(avectx1, &pkt) > 0 ) {
+#if 0
+                if (avectx1->streams[pkt.stream_index]->codec->codec_type == BV_MEDIA_TYPE_AUDIO) {
+                    pkt.stream_index = 1;
+                    bv_log(avectx1, BV_LOG_DEBUG, "audio pkt size %d\n", pkt.size);
+                } else {
+                    pkt.stream_index = 0;
+                    bv_log(avectx1, BV_LOG_DEBUG, "video pkt size %d\n", pkt.size);
+                }
+                bv_output_media_write(davctx, &pkt);
+#else
                 pkt.stream_index = 1;
-                bv_log(avectx1, BV_LOG_DEBUG, "audio pkt size %d\n", pkt.size);
+                bv_output_media_write(davctx, &pkt);
+#endif
+                bv_packet_free(&pkt);
+                i++;
             } else {
-                pkt.stream_index = 0;
-                bv_log(avectx1, BV_LOG_DEBUG, "video pkt size %d\n", pkt.size);
+                break;
             }
+        }
+        if (bv_input_media_read(avectx2, &pkt) > 0) {
+            pkt.pts = bv_rescale_q(pkt.pts, avectx2->streams[pkt.stream_index]->time_base, davctx->streams[0]->time_base);
+            pkt.stream_index = 0;
             bv_output_media_write(davctx, &pkt);
             bv_packet_free(&pkt);
-            i ++;
+            i++;
         }
     }
 

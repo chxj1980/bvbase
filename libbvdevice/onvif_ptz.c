@@ -42,7 +42,6 @@ typedef struct OnvifPTZContext {
 
 //Onvif default timeout    0.5s
 #define ONVIF_TMO    (-500000)
-#define MEMSET_STRUCT(X)    memset(&(X), 0, sizeof((X)));
 
 static struct soap *bv_soap_new(OnvifPTZContext *onvif_ptz)
 {
@@ -81,8 +80,8 @@ static int bv_onvif_service_uri(OnvifPTZContext *onvif_ptz)
     struct _tds__GetCapabilitiesResponse response;
     enum tt__CapabilityCategory Category = tt__CapabilityCategory__PTZ;
 
-    MEMSET_STRUCT(request);
-    MEMSET_STRUCT(response);
+    BBCLEAR_STRUCT(request);
+    BBCLEAR_STRUCT(response);
 
     if (onvif_ptz->user && onvif_ptz->passwd) {
         soap_wsse_add_UsernameTokenDigest(soap, "user", onvif_ptz->user, onvif_ptz->passwd);
@@ -172,11 +171,11 @@ static int onvif_ptz_continuous_move(BVDeviceContext *h, const BVControlPacket *
     struct soap *soap = onvif_ptz->soap;
 
     soap_default_SOAP_ENV__Header(soap, &header);
-    MEMSET_STRUCT(tptz__ContinuousMove);
-    MEMSET_STRUCT(tptz__ContinuousMoveResponse);
-    MEMSET_STRUCT(Velocity);
-    MEMSET_STRUCT(PanTilt);
-    MEMSET_STRUCT(Zoom);
+    BBCLEAR_STRUCT(tptz__ContinuousMove);
+    BBCLEAR_STRUCT(tptz__ContinuousMoveResponse);
+    BBCLEAR_STRUCT(Velocity);
+    BBCLEAR_STRUCT(PanTilt);
+    BBCLEAR_STRUCT(Zoom);
     tptz__ContinuousMove.ProfileToken = onvif_ptz->profile_token;
     tptz__ContinuousMove.Velocity = &Velocity;
     tptz__ContinuousMove.Timeout = &continuous_move->duration;
@@ -216,9 +215,9 @@ static int onvif_ptz_stop(BVDeviceContext *h, const BVControlPacket *pkt_in, BVC
     BVPTZStop *stop = (BVPTZStop *)pkt_in->data;
     struct soap *soap = onvif_ptz->soap;
 
-    MEMSET_STRUCT(header);
-    MEMSET_STRUCT(tptz__Stop);
-    MEMSET_STRUCT(tptz__StopResponse);
+    BBCLEAR_STRUCT(header);
+    BBCLEAR_STRUCT(tptz__Stop);
+    BBCLEAR_STRUCT(tptz__StopResponse);
     soap_default_SOAP_ENV__Header(soap, &header);
 
     if (!onvif_ptz->ptz_url) {
@@ -253,9 +252,9 @@ static int onvif_ptz_set_preset(BVDeviceContext *h, const BVControlPacket *pkt_i
     BVPTZPreset *preset = (BVPTZPreset *)pkt_in->data;
     struct soap *soap = onvif_ptz->soap;
 
-    MEMSET_STRUCT(header);
-    MEMSET_STRUCT(tptz__SetPreset);
-    MEMSET_STRUCT(tptz__SetPresetResponse);
+    BBCLEAR_STRUCT(header);
+    BBCLEAR_STRUCT(tptz__SetPreset);
+    BBCLEAR_STRUCT(tptz__SetPresetResponse);
 
     if (!onvif_ptz->ptz_url) {
         return BVERROR(ENOSYS);
@@ -292,13 +291,13 @@ static int onvif_ptz_goto_preset(BVDeviceContext *h, const BVControlPacket *pkt_
     BVPTZGotoPreset *goto_preset = (BVPTZGotoPreset*)pkt_in->data;
     struct soap *soap = onvif_ptz->soap;
 
-    MEMSET_STRUCT(header);
-    MEMSET_STRUCT(tptz__GotoPreset);
-    MEMSET_STRUCT(tptz__GotoPresetResponse);
+    BBCLEAR_STRUCT(header);
+    BBCLEAR_STRUCT(tptz__GotoPreset);
+    BBCLEAR_STRUCT(tptz__GotoPresetResponse);
 
-    MEMSET_STRUCT(Speed);
-    MEMSET_STRUCT(PanTilt);
-    MEMSET_STRUCT(Zoom);
+    BBCLEAR_STRUCT(Speed);
+    BBCLEAR_STRUCT(PanTilt);
+    BBCLEAR_STRUCT(Zoom);
 
     if (!onvif_ptz->ptz_url) {
         return BVERROR(ENOSYS);
@@ -339,9 +338,9 @@ static int onvif_ptz_remove_preset(BVDeviceContext *h, const BVControlPacket *pk
     struct soap *soap = onvif_ptz->soap;
     BVPTZPreset *preset = (BVPTZPreset *)pkt_in->data;
 
-    MEMSET_STRUCT(header);
-    MEMSET_STRUCT(tptz__RemovePreset);
-    MEMSET_STRUCT(tptz__RemovePresetResponse);
+    BBCLEAR_STRUCT(header);
+    BBCLEAR_STRUCT(tptz__RemovePreset);
+    BBCLEAR_STRUCT(tptz__RemovePresetResponse);
 
     if (!onvif_ptz->ptz_url) {
         return BVERROR(ENOSYS);
