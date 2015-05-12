@@ -55,6 +55,8 @@ BVList *bv_list_find(BVList *list, void *data, BVListCompareFunc func);
 
 void *bv_list_get_data(BVList *list, BVList *node);
 
+void *bv_list_get_position_data(BVList *list, int pos);
+
 BVList *bv_list_push(BVList *list, void *data);
 
 void *bv_list_pull(BVList *list);

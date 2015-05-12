@@ -120,6 +120,21 @@ void *bv_list_get_data(BVList *list, BVList *node)
     return list_to_buncket(node)->data;
 }
 
+void *bv_list_get_position_data(BVList *list, int pos)
+{
+    BVList *node = NULL;
+    int i = 0;
+    int size = bv_list_size(list);
+    if (size <= pos) {
+        return NULL;
+    }
+    node = list->next;
+    for (i = 0; i < pos; i++) {
+        node = node->next;
+    }
+    return bv_list_get_data(list, node);
+}
+
 BVList *bv_list_push(BVList *list, void *data)
 {
     if (!list || !data)
@@ -163,6 +178,8 @@ int bv_list_free(BVList *list, BVList *node, BVListFreeFunc func)
     buncket = list_to_buncket(node);
     if (func) {
         func(buncket->data);
+    } else {
+        free(buncket->data);
     }
     bv_freep(&buncket);
     return 0;

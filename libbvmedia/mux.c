@@ -202,7 +202,7 @@ static int check_packet(BVMediaContext *s, BVPacket *pkt)
 {
     if (!pkt)
         return 0;
-    if (pkt->stream_index < 0 || pkt->stream_index >= s->nb_streams) {
+    if (!pkt->data || pkt->size <= 0 || pkt->stream_index < 0 || pkt->stream_index >= s->nb_streams) {
         bv_log(s, BV_LOG_ERROR, "Invalid Packet index %d\n", pkt->stream_index);
         return BVERROR(EINVAL);
     }

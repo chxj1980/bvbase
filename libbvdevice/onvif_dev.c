@@ -39,6 +39,9 @@
 typedef struct OnvifDeviceContext {
     BVClass *bv_class;
     struct soap *soap;
+    char *user;
+    char *passwd;
+    char svrurl[1024];
     int timeout;
     int max_ipcs;
 } OnvifDeviceContext;
@@ -167,12 +170,20 @@ static int onvif_device_scan(BVDeviceContext *h, BVMobileDevice *device, int *ma
 static int onvif_device_open(BVDeviceContext *h)
 {
     OnvifDeviceContext *devctx = h->priv_data;
+    char *p = NULL;
+    p = bv_sreplace(h->url, "onvif_dev", "http");
+    if (!p) {
+        return BVERROR(ENOMEM);
+    }
+    bv_strlcpy(devctx->svrurl, p, sizeof(devctx->svrurl));
+    bv_free(p);
     devctx->soap = bv_soap_new(devctx->timeout);
     if (!devctx->soap) {
         return BVERROR(ENOMEM);
     }
     return 0;
 }
+
 static int onvif_device_probe(BVDeviceContext *h, const char *args)
 {
     if (strcmp("onvif_dev", args) == 0) {
@@ -260,6 +271,109 @@ static int onvif_detect_ipc(BVDeviceContext *h, const BVControlPacket *pkt_in, B
     return retval;
 }
 
+static int onvif_set_remote_dp(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    BVEthernetInfo *info = pkt_in->data;
+    struct soap *soap = devctx->soap;
+    int retval = SOAP_OK, i =0;
+    struct _tds__SetDPAddresses request;
+    struct _tds__SetDPAddressesResponse responses;
+    struct _tds__SetRemoteDiscoveryMode tds__SetRemoteDiscoveryMode;
+    struct _tds__SetRemoteDiscoveryModeResponse tds__SetRemoteDiscoveryModeResponse;
+
+    BBCLEAR_STRUCT(tds__SetRemoteDiscoveryMode);
+    BBCLEAR_STRUCT(tds__SetRemoteDiscoveryModeResponse);
+
+    BBCLEAR_STRUCT(request);
+    BBCLEAR_STRUCT(responses);
+
+    request.__sizeDPAddress = pkt_in->size;
+    request.DPAddress = soap_malloc(soap, sizeof(struct tt__NetworkHost) * request.__sizeDPAddress);
+    if (!request.DPAddress) {
+        return BVERROR(ENOMEM);;
+    }
+    for (i = 0; i < pkt_in->size; i++) {
+        request.DPAddress[i].Type = tt__NetworkHostType__IPv4;
+        request.DPAddress[i].IPv4Address = info[i].address;
+    }
+
+    if (devctx->user && devctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", devctx->user, devctx->passwd);
+    }
+
+    retval = soap_call___tds__SetDPAddresses(soap, devctx->svrurl, NULL, &request, &responses);
+    if (retval != SOAP_OK) {
+        bv_log(devctx, BV_LOG_ERROR, "set remote discover proxy error\n");
+        bv_log(devctx, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+    } else {
+        bv_log(devctx, BV_LOG_INFO, "set remote discover proxy ok\n");
+    }
+
+    tds__SetRemoteDiscoveryMode.RemoteDiscoveryMode = tt__DiscoveryMode__Discoverable;
+
+    if (devctx->user && devctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", devctx->user, devctx->passwd);
+    }
+    retval =soap_call___tds__SetRemoteDiscoveryMode(soap, devctx->svrurl, NULL, &tds__SetRemoteDiscoveryMode, &tds__SetRemoteDiscoveryModeResponse);
+    if (retval != SOAP_OK) {
+        bv_log(devctx, BV_LOG_ERROR, "set remote discover mode error\n");
+        bv_log(devctx, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+    } else {
+        bv_log(devctx, BV_LOG_INFO, "set remote discover mode ok\n");
+    }
+    return retval;
+}
+
+static int onvif_get_remote_dp(BVDeviceContext *h, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    OnvifDeviceContext *devctx = h->priv_data;
+    struct soap *soap = devctx->soap;
+    int retval = SOAP_OK;
+    struct _tds__GetDPAddresses request;
+    struct _tds__GetDPAddressesResponse responses;
+    struct _tds__GetRemoteDiscoveryMode tds__GetRemoteDiscoveryMode;
+    struct _tds__GetRemoteDiscoveryModeResponse tds__GetRemoteDiscoveryModeResponse;
+
+    BBCLEAR_STRUCT(tds__GetRemoteDiscoveryMode);
+    BBCLEAR_STRUCT(tds__GetRemoteDiscoveryModeResponse);
+
+    BBCLEAR_STRUCT(request);
+    BBCLEAR_STRUCT(responses);
+
+    if (devctx->user && devctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", devctx->user, devctx->passwd);
+    }
+
+    retval = soap_call___tds__GetDPAddresses(soap, devctx->svrurl, NULL, &request, &responses);
+    if (retval != SOAP_OK) {
+        bv_log(devctx, BV_LOG_ERROR, "set remote discover proxy error\n");
+        bv_log(devctx, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+    } else {
+        int i = 0;
+        bv_log(devctx, BV_LOG_INFO, "set remote discover proxy ok\n");
+        bv_log(devctx, BV_LOG_INFO, "remote dp size %d\n", responses.__sizeDPAddress);
+        for (i = 0; i < responses.__sizeDPAddress; i++) {
+            bv_log(devctx, BV_LOG_INFO, "remote dp addr %s\n", responses.DPAddress[i].IPv4Address);
+        }
+    }
+
+    if (devctx->user && devctx->passwd) {
+        soap_wsse_add_UsernameTokenDigest(soap, "user", devctx->user, devctx->passwd);
+    }
+    retval = SOAP_FMAC6 soap_call___tds__GetRemoteDiscoveryMode(soap, devctx->svrurl, NULL, &tds__GetRemoteDiscoveryMode, &tds__GetRemoteDiscoveryModeResponse);
+    if (retval != SOAP_OK) {
+        bv_log(devctx, BV_LOG_ERROR, "get remote discover mode error\n");
+        bv_log(devctx, BV_LOG_ERROR, "[%d]: recv soap error :%d, %s, %s\n", __LINE__, soap->error, *soap_faultcode(soap), *soap_faultstring(soap));
+    } else {
+        bv_log(devctx, BV_LOG_INFO, "get remote discover mode ok\n");
+        bv_log(devctx, BV_LOG_INFO, "get remote discover mode %d \n", tds__GetRemoteDiscoveryModeResponse.RemoteDiscoveryMode);
+    }
+
+    return retval;
+}
+
+
 static int onvif_device_control(BVDeviceContext *h, enum BVDeviceMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
     int i = 0;
@@ -269,6 +383,8 @@ static int onvif_device_control(BVDeviceContext *h, enum BVDeviceMessageType typ
     } onvif_control[] = {
         { BV_DEV_MESSAGE_TYPE_SEARCH_IPC, onvif_search_ipc},
         { BV_DEV_MESSAGE_TYPE_DETECT_IPC, onvif_detect_ipc},
+        { BV_DEV_MESSAGE_TYPE_SET_RMTDP,  onvif_set_remote_dp},
+        { BV_DEV_MESSAGE_TYPE_GET_RMTDP,  onvif_get_remote_dp},
     };
     for (i = 0; i < BV_ARRAY_ELEMS(onvif_control); i++) {
         if (onvif_control[i].type == type)
@@ -290,6 +406,8 @@ static int onvif_device_close(BVDeviceContext *h)
 static const BVOption options[] = {
     {"timeout", "read write time out", OFFSET(timeout), BV_OPT_TYPE_INT, {.i64 =  -500000}, INT_MIN, INT_MAX, DEC},
     {"max_ipcs", "", OFFSET(max_ipcs), BV_OPT_TYPE_INT, {.i64 =  128}, INT_MIN, INT_MAX, DEC},
+    {"user", "", OFFSET(user), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
+    {"passwd", "", OFFSET(passwd), BV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, DEC},
     {NULL}
 };
 

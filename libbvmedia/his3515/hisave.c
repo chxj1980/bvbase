@@ -185,7 +185,7 @@ static int create_audio_encode_channel(BVMediaContext *s)
             break;
         }
     }
-    stChnAttr.u32BufSize = 30;
+    stChnAttr.u32BufSize = s->abuffers;
     s32Ret = HI_MPI_AENC_CreateChn(hisctx->aechn, &stChnAttr);
     BREAK_WHEN_SDK_FAILED("create aenc channel error", s32Ret);
     s32Ret = HI_MPI_AENC_BindAi(hisctx->aechn, hisctx->aidev, hisctx->aichn);
@@ -247,7 +247,7 @@ static int create_h264_encode_channel(BVMediaContext *s)
     stH264Attr.enRcMode = get_video_rate_control_mode(hisctx->mode_id);
     stH264Attr.s32Minutes = 10;
     stH264Attr.u32Bitrate = hisctx->bit_rate;
-    stH264Attr.u32BufSize = 704 * 576 * 4;
+    stH264Attr.u32BufSize = hisctx->width * hisctx->height * s->vbuffers;
     stH264Attr.u32Gop = hisctx->gop_size;
     stH264Attr.u32PicHeight = hisctx->height;
     stH264Attr.u32PicWidth = hisctx->width;
@@ -297,7 +297,7 @@ static int create_jpeg_encode_channel(BVMediaContext *s)
 
     stJpegAttr.bByFrame = HI_TRUE;
     stJpegAttr.bVIField = HI_TRUE;
-    stJpegAttr.u32BufSize = hisctx->width * hisctx->height * 2;
+    stJpegAttr.u32BufSize = hisctx->width * hisctx->height * s->vbuffers;
     stJpegAttr.u32ImageQuality = hisctx->quality;
     stJpegAttr.u32MCUPerECS = 0;
     stJpegAttr.u32PicHeight = hisctx->height;

@@ -420,7 +420,7 @@ static int his3515_aodev_config(BVSystemContext *s, const BVControlPacket *pkt_i
     stAIOAttr.enSoundmode = get_audio_channel_mode(aodevice->channel_mode);
     stAIOAttr.enWorkmode = get_audio_work_mode(aodevice->work_mode);
     stAIOAttr.u32ChnCnt = aodevice->channel_counts;
-    stAIOAttr.u32FrmNum = 25;
+    stAIOAttr.u32FrmNum = 30;
     //stAIOAttr.u32PtNumPerFrm = 320;
     stAIOAttr.u32PtNumPerFrm = aodevice->sample_points;
 
