@@ -195,6 +195,7 @@ static int create_audio_encode_channel(BVMediaContext *s)
     bv_log(s, BV_LOG_DEBUG, "create audio encode channel %s success\n", hisctx->atoken);
     return 0;
 fail:
+    destroy_audio_encode_channel(s);
     return BVERROR(EIO);
 }
 
@@ -682,15 +683,20 @@ static bv_cold int his_read_packet(BVMediaContext *s, BVPacket *pkt)
 static bv_cold int his_read_close(BVMediaContext *s)
 {
     HisAVEContext *hisctx = s->priv_data;
-    if (hisctx->atoken) {
+
+    bv_media_driver_close(&hisctx->adriver);
+    if (hisctx->aindex != -1) {
         destroy_audio_encode_channel(s);
     }
+
+    bv_media_driver_close(&hisctx->vdriver);
+    if (hisctx->vindex != -1) {
+        destroy_video_encode_channel(s);
+    }
+
     if (hisctx->packet) {
         bv_packet_free(hisctx->packet);
         bv_freep(&hisctx->packet);
-    }
-    if (hisctx->vtoken) {
-        destroy_video_encode_channel(s);
     }
     return 0;
 }

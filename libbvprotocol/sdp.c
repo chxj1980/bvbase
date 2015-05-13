@@ -30,11 +30,18 @@
 
 typedef struct _SDPContext {
     const BVClass *bv_class;
-    BVSDP sdp;
+    BVSDP *sdp;
 } SDPContext;
+
+/**
+ * sdp:///tmp/a.sdp
+ * XXX 从文件中获取sdp信息并解析、或者从字符串中解析sdp信息
+ */
 
 static int sdp_open(BVURLContext *h, const char *filename, int flags, BVDictionary **options)
 {
+    SDPContext *sdpctx = h->priv_data;
+    char *p = NULL;
     return BVERROR(ENOSYS);
 }
 
