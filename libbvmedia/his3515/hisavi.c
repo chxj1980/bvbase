@@ -274,10 +274,14 @@ static bv_cold int his_read_packet(BVMediaContext *s, BVPacket *pkt)
 static bv_cold int his_read_close(BVMediaContext *s)
 {
     HisAVIContext *hisctx = s->priv_data;
-    if (hisctx->atoken && hisctx->aindex != -1) {
+
+    bv_media_driver_close(&hisctx->adriver);
+    if (hisctx->aindex != -1) {
         destroy_audio_input_channel(s);
     }
-    if (hisctx->vtoken && hisctx->vindex != -1) {
+    
+    bv_media_driver_close(&hisctx->vdriver);
+    if (hisctx->vindex != -1) {
         destroy_video_input_channel(s);
     }
     return 0;

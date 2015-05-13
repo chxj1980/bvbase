@@ -75,6 +75,20 @@ typedef struct HisAVOContext {
     int aindex;
 } HisAVOContext;
 
+static int destroy_video_output_channel(BVMediaContext *s)
+{
+    HisAVOContext *hisctx = s->priv_data;
+    HI_MPI_VO_DisableChn(hisctx->vodev, hisctx->vochn);
+    return 0;
+}
+
+static int destroy_audio_output_channel(BVMediaContext *s)
+{
+    HisAVOContext *hisctx = s->priv_data;
+    HI_MPI_AO_DisableChn(hisctx->aodev, hisctx->aochn);
+    return 0;
+}
+
 static int create_video_output_channel(BVMediaContext *s, BVStream *stream)
 {
     HisAVOContext *hisctx = s->priv_data;
@@ -110,6 +124,7 @@ static int create_video_output_channel(BVMediaContext *s, BVStream *stream)
     bv_log(s, BV_LOG_DEBUG, "create video output channel %s success\n", hisctx->vtoken);
     return 0;
 fail:
+    destroy_video_output_channel(s);
     return BVERROR(EINVAL);
 }
 
@@ -138,6 +153,7 @@ static int create_audio_output_channel(BVMediaContext *s, BVStream *stream)
     bv_log(s, BV_LOG_DEBUG, "create audio output channel %s success\n", hisctx->atoken);
     return 0;
 fail:
+    destroy_audio_output_channel(s);
     return BVERROR(EINVAL);
 }
 
@@ -186,7 +202,18 @@ static int his_write_packet(BVMediaContext *s, BVPacket *pkt)
 
 static int his_write_trailer(BVMediaContext *s)
 {
-    return BVERROR(ENOSYS);
+    HisAVOContext *hisctx = s->priv_data;
+
+    bv_media_driver_close(&hisctx->vdriver);
+    if (hisctx->vindex != -1) {
+        destroy_video_output_channel(s);
+    }
+
+    bv_media_driver_close(&hisctx->adriver);
+    if (hisctx->aindex != -1) {
+        destroy_audio_output_channel(s);
+    }
+    return 0;
 }
 
 static int audio_set_volume(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -214,7 +241,7 @@ static int audio_set_mute(BVMediaContext *s, const BVControlPacket *pkt_in, BVCo
     BVControlPacket pkt;
     int volume = 0;
     pkt.data = &volume;
-    return audio_set_mute(s, &pkt, NULL);
+    return audio_set_volume(s, &pkt, NULL);
 }
 
 static int video_set_imaging(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
@@ -222,6 +249,31 @@ static int video_set_imaging(BVMediaContext *s, const BVControlPacket *pkt_in, B
     return BVERROR(ENOSYS);
 }
 
+static int video_set_hide(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    HisAVOContext *hisctx = s->priv_data;
+    HI_S32 s32Ret = HI_FAILURE;
+
+    s32Ret = HI_MPI_VO_ChnHide(hisctx->vodev, hisctx->vochn);
+    BREAK_WHEN_SDK_FAILED("hide vochn error", s32Ret);
+
+    return 0;
+fail:
+    return BVERROR(EIO);
+}
+
+static int video_set_show(BVMediaContext *s, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
+{
+    HisAVOContext *hisctx = s->priv_data;
+    HI_S32 s32Ret = HI_FAILURE;
+
+    s32Ret = HI_MPI_VO_ChnShow(hisctx->vodev, hisctx->vochn);
+    BREAK_WHEN_SDK_FAILED("hide vochn error", s32Ret);
+
+    return 0;
+fail:
+    return BVERROR(EIO);
+}
 
 static int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, const BVControlPacket *pkt_in, BVControlPacket *pkt_out)
 {
@@ -233,6 +285,8 @@ static int his_media_control(BVMediaContext *s, enum BVMediaMessageType type, co
         { BV_MEDIA_MESSAGE_TYPE_AUDIO_VOLUME, audio_set_volume},
         { BV_MEDIA_MESSAGE_TYPE_AUDIO_MUTE, audio_set_mute},
         { BV_MEDIA_MESSAGE_TYPE_VIDEO_IMAGE, video_set_imaging},
+        { BV_MEDIA_MESSAGE_TYPE_VIDEO_HIDE,  video_set_hide},
+        { BV_MEDIA_MESSAGE_TYPE_VIDEO_SHOW,  video_set_show},
     };
     for (i = 0; i < BV_ARRAY_ELEMS(media_control); i++) {
         if (media_control[i].type == type)

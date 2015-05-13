@@ -125,6 +125,10 @@ typedef struct _BVFilter {
 typedef struct _BVFilterGraph {
     const char *name;
     BVFilterBus *bus;
+    int nb_sources;
+    BVFilterContext *sources;
+    int nb_renders;
+    BVFilterContext *renders;
 } BVFilterGraph;
 
 BVFilterBus *bv_filter_bus_new(BVFilterGraph *graph);
